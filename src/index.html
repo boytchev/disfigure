@@ -1,0 +1,372 @@
+﻿<!DOCTYPE html>
+
+
+<html>
+
+
+<head>
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+	<style>
+		body { margin: 0 }
+	</style>
+	
+	<script type="importmap">
+	  {
+		"imports": {
+			"three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.webgpu.min.js",
+			"three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.webgpu.min.js",
+			"three/tsl": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.tsl.min.js",
+			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/",
+			"disfigure": "./disfigure.js"
+		}
+	  }
+	</script>
+</head>
+
+
+<body>
+	<script type="module">
+import * as THREE from "three";
+import { time, normalGeometry, oneMinus, struct, smoothstep, sin,max, uniform, float, vec4, vec2, vec3, positionGeometry, Fn } from "three/tsl";
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import * as lil from "three/addons/libs/lil-gui.module.min.js";
+import { tslPositionNode, tslEmissiveNode} from "disfigure";
+
+
+console.clear( );
+
+var scene = new THREE.Scene();
+scene.background = new THREE.Color( 'gainsboro' );
+
+var camera = new THREE.PerspectiveCamera( 30, innerWidth/innerHeight );
+camera.position.set( -2, 1, 3.5 );
+camera.lookAt( scene.position );
+
+var renderer = new THREE.WebGPURenderer( { antialias: true } );
+renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+renderer.setSize( innerWidth, innerHeight );
+document.body.appendChild( renderer.domElement );
+
+window.addEventListener( "resize", ( /*event*/ ) => {
+
+	camera.aspect = innerWidth/innerHeight;
+	camera.updateProjectionMatrix( );
+	renderer.setSize( innerWidth, innerHeight );
+
+} );
+
+var controls = new OrbitControls( camera, renderer.domElement );
+controls.enableDamping = true;
+//controls.autoRotate = true;
+controls.autoRotateSpeed = 3;
+
+var ambientLight = new THREE.AmbientLight( 'white', 1 );
+scene.add( ambientLight );
+
+var light = new THREE.DirectionalLight( 'white', 2 );
+light.position.set( 0, 0, 1 );
+scene.add( light );
+
+			
+			
+
+var model = new THREE.Object3D();
+var overModel = new THREE.Object3D();
+scene.add( overModel );
+
+//new GLTFLoader().load( 'models/gwen_os.glb', processModel );
+new GLTFLoader().load( 'models/mc-powerful-deep-chestnut-bougainvillea-t-pose.glb', processModel );
+//new GLTFLoader().load( 'models/skeleton_t_pose.glb', processModel );
+
+var skinOptions = {scale:-4};
+
+function processModel( loadedModel )
+{
+	model = loadedModel.scene;
+
+	// center the model
+	{
+		let center = new THREE.Vector3();
+		new THREE.Box3().setFromObject( model, true ).getCenter( center );
+		model.position.sub( center );
+		
+	}
+	
+	// attach shape shaders
+	{
+		model.traverse( (child)=>{
+			if( child.isMesh )
+			{
+				var material = new THREE.MeshStandardNodeMaterial();
+				Object.assign( material, child.material );
+				material.color = new THREE.Color( 'lightgray' );
+				material.metalness = 0;
+				material.roughness = 1;
+				material.colorNode = tslColorNode( );
+
+				material.positionNode = tslPositionNode( posture );
+				material.emissiveNode = tslEmissiveNode( posture );
+
+				child.material = material;
+			}
+		});
+		
+	}
+	
+	overModel.add( model );
+
+}
+
+
+
+var posture = {
+
+	select: uniform( float(0) ),
+
+	chestPos: vec3(0,110,0),
+	chestSpan: vec2(90,120),
+	chestTurn: uniform( vec3(0,0,0) ),
+	
+	neckPos: vec3(0,136,0),
+	neckSpan: vec2(132,140),
+	neckTurn: uniform( vec3(0,0,0) ),
+
+	waistPos: vec3(0,80,0),
+	waistSpan: vec2(70,120),
+	waistTurn: uniform( vec3(0,0,0) ),
+
+	kneeLeftPos: vec3(0,45.5,0),
+	kneeLeftSpan: vec2(53,41),
+	kneeLeftTurn: uniform( vec3(0,0,0) ),
+
+	kneeRightPos: vec3(0,45.5,0),
+	kneeRightSpan: vec2(53,41),
+	kneeRightTurn: uniform( vec3(0,0,0) ),
+
+	ankleLeftPos: vec3(8.5,9,-5),
+	ankleLeftSpan: vec2(15,5),
+	ankleLeftTurn: uniform( vec3(0,0,0) ),
+	
+	ankleRightPos: vec3(-8.5,9,-5),
+	ankleRightSpan: vec2(15,5),
+	ankleRightTurn: uniform( vec3(0,0,0) ),
+
+	legLeftPos: vec3(7,90,-5),
+	legLeftSpan: vec2(100,45),
+	legLeftTurn: uniform( vec3(0,0,0) ),
+
+	legRightPos: vec3(-7,90,-5),
+	legRightSpan: vec2(100,45),
+	legRightTurn: uniform( vec3(0,0,0) ),
+
+	elbowLeftPos: vec3(42,125,-5),
+	elbowLeftSpan: vec2(39,46),
+	elbowLeftTurn: uniform( vec3(0,0,0) ),
+
+	elbowRightPos: vec3(-42,125,-5),
+	elbowRightSpan: vec2(-39,-46),
+	elbowRightTurn: uniform( vec3(0,0,0) ),
+
+	forearmLeftPos: vec3(42,125,-5),
+	forearmLeftSpan: vec2(40,70),
+	forearmLeftTurn: uniform( vec3(0,0,0) ),
+
+	forearmRightPos: vec3(-42,125,-5),
+	forearmRightSpan: vec2(-40,-70),
+	forearmRightTurn: uniform( vec3(0,0,0) ),
+
+	wristLeftPos: vec3(68,123,-6),
+	wristLeftSpan: vec2(67,74),
+	wristLeftTurn: uniform( vec3(0,0,0) ),
+
+	wristRightPos: vec3(-68,123,-6),
+	wristRightSpan: vec2(-67,-74),
+	wristRightTurn: uniform( vec3(0,0,0) ),
+
+	armLeftPos: ( vec3(12,124,-5) ),
+	armLeftSpan: ( vec4(8,16,144,1.4) ),
+	armLeftTurn: uniform( vec3(0,0,0) ),
+
+	armRightPos: ( vec3(-12,124,-5) ),
+	armRightSpan: ( vec4(-8,-16,144,-1.4) ),
+	armRightTurn: uniform( vec3(0,0,0) ),
+	
+};
+	
+
+
+
+var tslColorNode = Fn( ()=>{
+
+	var p = positionGeometry
+	;
+	var k = float(0)
+		.add(p.x.mul(0.72).cos().smoothstep(0.95,1))
+		.add(p.y.mul(0.74).cos().smoothstep(0.95,1))
+		.add(p.z.add(3).abs().smoothstep(0.45,0))
+		.oneMinus()
+		.pow(0.5)
+
+//	var k = positionGeometry.div(0.88).cos().length().mul(0.5*Math.PI).sin().pow(24*2).oneMinus();
+	
+	return vec3(k);
+} );
+
+
+
+
+
+function rigModel( time )
+{
+	posture.waistTurn.value.set(
+		Math.sin( time )/4+0.2,
+		Math.cos( time*1.2 )/2,
+		Math.sin( time*3 )/2.5
+	);
+	
+	posture.chestTurn.value.set(
+		Math.cos( time*3 )/3,
+		Math.sin( time*1.2*2 )/2,
+		Math.cos( time*3*1.5 )/3
+	);
+	
+	posture.neckTurn.value.set(
+		Math.cos( time*3 )/2,
+		Math.sin( time*1.2*2 )/2,
+		Math.cos( time*3*1.5 )/3
+	);
+	
+	posture.kneeLeftTurn.value.set(
+		-(Math.cos( time*3 )+1)/1.5,
+		0,
+		0,
+	);
+	
+	posture.kneeRightTurn.value.set(
+		-(Math.sin( time*2.4 )+1)/1.5,
+		0,
+		0,
+	);
+
+	posture.ankleLeftTurn.value.set(
+		Math.cos( time*3 )/2,
+		Math.cos( time*2.8 )/2,
+		Math.cos( time*2.2 )/4,
+	);
+
+	posture.ankleRightTurn.value.set(
+		Math.sin( time*3.2 )/2,
+		Math.cos( time*2.3 )/2,
+		Math.sin( time*2.1 )/4,
+	);
+
+
+	posture.legLeftTurn.value.set(
+		(Math.cos( time*3 )/1.5-0.25),
+		Math.cos( time*2.8 )/4,
+		-(Math.cos( time*2.2 )+1)/4,
+	);
+
+	posture.legRightTurn.value.set(
+		-(Math.sin( time*2.2 )/1.5-0.25),
+		Math.sin( time*3.2 )/4,
+		(Math.sin( time*2.6 )+1)/4,
+	);
+	
+	posture.elbowLeftTurn.value.set(
+		0,
+		(Math.cos( time*2-1 )+1),
+		0,
+	);
+	
+	posture.elbowRightTurn.value.set(
+		0,
+		-(Math.sin( time*1.8 )+1),
+		0,
+	);
+	
+	posture.forearmLeftTurn.value.set(
+		(Math.cos( time*3.6-1)*1.5+1 ),
+		0,
+		0,
+	);
+	
+	posture.forearmRightTurn.value.set(
+		(Math.sin( time*1.8*3+1 )*1.5+1),
+		0,
+		0,
+	);
+
+	posture.wristLeftTurn.value.set(
+		0,
+		(Math.cos( time*3.6-1)*0.5+0.1 ),
+		(Math.cos( time*2.6+1)*0.7 ),
+	);
+
+	posture.wristRightTurn.value.set(
+		0,
+		(Math.cos( time*3.6-1)*0.5+0.1 ),
+		-(Math.cos( time*2.6+1)*0.7 ),
+	);
+	
+	posture.armLeftTurn.value.set(
+		0.7*(Math.cos( time*3 )/1.5-0.15),
+		-0.7*(Math.cos( time*2.8 )*1-0.6),
+		0.7*(Math.cos( time*2.2 )),
+	);
+	
+	posture.armRightTurn.value.set(
+		0.7*(Math.sin( time*2.4 )/1.5-0.15),
+		-0.7*-(Math.cos( time*3.1 )*1-0.6),
+		0.7*(Math.sin( time*2.7 )),
+	);
+
+}
+
+
+
+var gui = new lil.GUI();
+gui.domElement.style.marginRight = 0;
+
+var mfolder = gui.addFolder('Debug');
+
+mfolder.add(posture.select, 'value', {Nothing:0,Waist:1,Chest:2,Neck:3}).name('Mark area');
+
+mfolder = gui.addFolder('Torso');
+
+var folder = mfolder.addFolder('&nbsp; &nbsp; Bend');
+folder.add(posture.neckTurn.value, 'x', -0.7, 0.5).name('head');
+folder.add(posture.chestTurn.value, 'x', -0.7, 0.4).name('chest');
+folder.add(posture.waistTurn.value, 'x', -0.5, 0.3).name('waist');
+
+folder = mfolder.addFolder('&nbsp; &nbsp; Twist');
+folder.add(posture.neckTurn.value, 'y', -1, 1).name('head');
+folder.add(posture.chestTurn.value, 'y', -0.7, 0.7).name('chest');
+folder.add(posture.waistTurn.value, 'y', -1, 1).name('waist');
+
+folder = mfolder.addFolder('&nbsp; &nbsp; Side bend');
+folder.add(posture.neckTurn.value, 'z', -0.5, 0.5).name('head');
+folder.add(posture.chestTurn.value, 'z', -0.4, 0.4).name('chest');
+folder.add(posture.waistTurn.value, 'z', -0.4, 0.4).name('waist');
+
+
+
+
+function animationLoop( t ) {
+
+	controls.update( );
+	light.position.copy( camera.position );
+
+	renderer.render( scene, camera );
+
+}
+
+
+renderer.setAnimationLoop( animationLoop );
+
+
+	</script>
+</body>
+</html>

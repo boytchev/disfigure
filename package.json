@@ -1,0 +1,25 @@
+{
+  "name": "disfigure",
+  "version": "0.0.1",
+  "description": "A library to rig non-rigged 3D models",
+  "main": "index.js",
+  "plugins": ["html"],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Pavel Boytchev",
+  "license": "MIT",
+  "files": [
+    "LICENSE",
+    "package.json",
+    "README.md",
+    "dist",
+    "src"
+  ],
+  "devDependencies": {
+    "@eslint/js": "^9.24.0",
+    "eslint": "^9.24.0",
+    "eslint-plugin-html": "^8.1.2",
+    "globals": "^16.0.0"
+  }
+}
