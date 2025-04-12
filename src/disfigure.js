@@ -299,32 +299,46 @@ var tslPositionNode = Fn( ( posture )=>{
 	} );
 
 
-	return p.debug();
+	return p;
 
 } );
 
 
 
+// dubug function used to mark areas on the 3D model
+
 var tslEmissiveNode = Fn( ( posture )=>{
 
 	var s = posture.select;
 	var k = float( 0 )
-	//			.add(selectArmRight( posture ))
-	//			.add(selectArmLeft( posture ))
-	//			.add(selectWristLeft( posture ))
-	//			.add(selectWristRight( posture ))
 		.add( selectWaist( posture ).mul( select( s.equal( 1 ), 1, 0 ) ) )
 		.add( selectChest( posture ).mul( select( s.equal( 2 ), 1, 0 ) ) )
-		.add( selectNeck( posture ).mul( select( s.equal( 3 ), 1, 0 ) ) );
-	//			.add(selectKneeLeft( posture ))
-	//			.add(selectKneeRight( posture ))
-	//.add(selectAnkleLeft( posture ))
-	//.add(selectAnkleRight( posture ))
-	//			.add(selectLegLeft( posture ))
-	//			.add(selectLegRight( posture ))
-
-
-	k = k.smoothstep( 0, 1 ).mul( 2*Math.PI ).sub( Math.PI ).cos().add( 1 ).div( 2 ).pow( 1/4 ).negate();
+		.add( selectNeck( posture ).mul( select( s.equal( 3 ), 1, 0 ) ) )
+		
+		.add( selectLegLeft( posture ).mul( select( s.equal( 4 ), 1, 0 ) ) )
+		.add( selectKneeLeft( posture ).mul( select( s.equal( 5 ), 1, 0 ) ) )
+		.add( selectAnkleLeft( posture ).mul( select( s.equal( 6 ), 1, 0 ) ) )
+		
+		.add( selectLegRight( posture ).mul( select( s.equal( 4 ), 1, 0 ) ) )
+		.add( selectKneeRight( posture ).mul( select( s.equal( 5 ), 1, 0 ) ) )
+		.add( selectAnkleRight( posture ).mul( select( s.equal( 6 ), 1, 0 ) ) )
+		
+		.add( selectArmLeft( posture ).mul( select( s.equal( 7 ), 1, 0 ) ) )
+		.add( selectElbowLeft( posture ).mul( select( s.equal( 8 ), 1, 0 ) ) )
+		.add( selectForearmLeft( posture ).mul( select( s.equal( 9 ), 1, 0 ) ) )
+		.add( selectWristLeft( posture ).mul( select( s.equal( 10 ), 1, 0 ) ) )
+		
+		.add( selectArmRight( posture ).mul( select( s.equal( 7 ), 1, 0 ) ) )
+		.add( selectElbowRight( posture ).mul( select( s.equal( 8 ), 1, 0 ) ) )
+		.add( selectForearmRight( posture ).mul( select( s.equal( 9 ), 1, 0 ) ) )
+		.add( selectWristRight( posture ).mul( select( s.equal( 10 ), 1, 0 ) ) )
+		.toVar( );
+		
+	k.assign( select( posture.isolated.equal( 0 ), 
+				k.smoothstep( 0, 1 ).mul( 2*Math.PI ).sub( Math.PI ).cos().add( 1 ).div( 2 ).pow( 1/4 ).mul(1.1).negate(), 
+				k.clamp(0,1).pow(0.75).negate()
+		) );
+	
 
 	return vec3( 0, k.div( 2 ), k.div( 1 ) );
 
