@@ -4,14 +4,14 @@
 // to do: simplify matrix operation when rotations are DOF<3
 // to do: optimize filtering upper/lower body part
 
-import { float, Fn, If, positionGeometry, select, vec3 } from "three/tsl";
+import { float, Fn, If, positionGeometry, select, vec3, cond } from "three/tsl";
 import { matRotYXZ, matRotYZX } from "./disfigure-matrices.js";
 
 
 
 function selectLeft( ) {
 
-	return positionGeometry.x.smoothstep( -2, 2 );
+	return positionGeometry.x.smoothstep( -0.02, 0.02 );
 
 }
 
@@ -19,23 +19,22 @@ function selectLeft( ) {
 
 function selectRight( ) {
 
-	return positionGeometry.x.smoothstep( 2, -2 );
+	return positionGeometry.x.smoothstep( 0.02, -0.02 );
 
 }
 
 
 
 function selectWaist( { waistSpan } ) {
-
 	return positionGeometry.y.smoothstep( waistSpan.x, waistSpan.y );
 
 } // inlined
 
 
 
-function selectNeck( { neckSpan } ) {
+function selectHead( { headSpan } ) {
 
-	return positionGeometry.y.smoothstep( neckSpan.x, neckSpan.y );
+	return positionGeometry.y.add(positionGeometry.z.div(3)).smoothstep( headSpan.x, headSpan.y );
 
 } // inlined
 
@@ -81,11 +80,14 @@ function selectAnkleRight( { ankleRightSpan } ) {
 
 
 
-function selectLegLeft( { legLeftSpan } ) {
+function selectLegLeft( { legLeftSpan, waistSpan } ) {
 
-	return positionGeometry.y.sub( positionGeometry.x.div( 0.35 ) )
+	var x = positionGeometry.x;
+	var y = positionGeometry.y;
+	
+	return y
 		.smoothstep( legLeftSpan.x, legLeftSpan.y )
-		.mul( positionGeometry.y.smoothstep( legLeftSpan.x, legLeftSpan.y ) );
+		.mul(x.sub(y.sub(2)).smoothstep( -0.1, 0.1 ).mul(x.smoothstep( -0.01, 0.01 )));
 
 } // inlined
 
@@ -93,9 +95,12 @@ function selectLegLeft( { legLeftSpan } ) {
 
 function selectLegRight( { legRightSpan } ) {
 
-	return positionGeometry.y.add( positionGeometry.x.div( 0.35 ) )
+	var x = positionGeometry.x;
+	var y = positionGeometry.y;
+	
+	return y
 		.smoothstep( legRightSpan.x, legRightSpan.y )
-		.mul( positionGeometry.y.smoothstep( legRightSpan.x, legRightSpan.y ) );
+		.mul(x.add(y.sub(2)).smoothstep( 0.1, -0.1 ).mul(x.smoothstep( 0.01, -0.01 )));
 
 } // inlined
 
@@ -255,8 +260,8 @@ var tslPositionNode = Fn( ( posture )=>{
 
 	// CENTRAL BODY AXIS
 
-	// neck
-	p.assign( jointRotate( p, posture.neckPos, posture.neckTurn, selectNeck( posture ) ) );
+	// head
+	p.assign( jointRotate( p, posture.headPos, posture.headTurn, selectHead( posture ) ) );
 
 	// chest
 	p.assign( jointRotate( p, posture.chestPos, posture.chestTurn, selectChest( posture ) ) );
@@ -268,7 +273,9 @@ var tslPositionNode = Fn( ( posture )=>{
 
 	// LEFT-LOWER BODY
 
-	If( left.greaterThan( 0 ), ()=>{
+	var legLeft = selectLegLeft( posture ).toVar();
+	
+	If( legLeft.greaterThan( 0 ), ()=>{
 
 		// left ankle
 		p.assign( jointRotate( p, posture.ankleLeftPos, posture.ankleLeftTurn, selectAnkleLeft( posture ) ) );
@@ -277,7 +284,7 @@ var tslPositionNode = Fn( ( posture )=>{
 		p.assign( jointRotate( p, posture.kneeLeftPos, posture.kneeLeftTurn, selectKneeLeft( posture ) ) );
 
 		// left leg
-		p.assign( jointRotate( p, posture.legLeftPos, posture.legLeftTurn, selectLegLeft( posture ).mul( left ) ) );
+		p.assign( jointRotate( p, posture.legLeftPos, posture.legLeftTurn, legLeft ) );
 
 	} );
 
@@ -285,7 +292,9 @@ var tslPositionNode = Fn( ( posture )=>{
 
 	// RIGHT-LOWER BODY
 
-	If( right.greaterThan( 0 ), ()=>{
+	var legRight = selectLegRight( posture ).toVar();
+	
+	If( legRight.greaterThan( 0 ), ()=>{
 
 		// right ankle
 		p.assign( jointRotate( p, posture.ankleRightPos, posture.ankleRightTurn, selectAnkleRight( posture ) ) );
@@ -294,10 +303,9 @@ var tslPositionNode = Fn( ( posture )=>{
 		p.assign( jointRotate( p, posture.kneeRightPos, posture.kneeRightTurn, selectKneeRight( posture ) ) );
 
 		// right leg
-		p.assign( jointRotate( p, posture.legRightPos, posture.legRightTurn, selectLegRight( posture ).mul( right ) ) );
+		p.assign( jointRotate( p, posture.legRightPos, posture.legRightTurn, legRight ) );
 
 	} );
-
 
 	return p;
 
@@ -311,38 +319,60 @@ var tslEmissiveNode = Fn( ( posture )=>{
 
 	var s = posture.select;
 	var k = float( 0 )
-		.add( selectWaist( posture ).mul( select( s.equal( 1 ), 1, 0 ) ) )
+		.add( selectHead( posture ).mul( select( s.equal( 1 ), 1, 0 ) ) )
 		.add( selectChest( posture ).mul( select( s.equal( 2 ), 1, 0 ) ) )
-		.add( selectNeck( posture ).mul( select( s.equal( 3 ), 1, 0 ) ) )
-		
-		.add( selectLegLeft( posture ).mul( select( s.equal( 4 ), 1, 0 ) ) )
-		.add( selectKneeLeft( posture ).mul( select( s.equal( 5 ), 1, 0 ) ) )
-		.add( selectAnkleLeft( posture ).mul( select( s.equal( 6 ), 1, 0 ) ) )
-		
-		.add( selectLegRight( posture ).mul( select( s.equal( 4 ), 1, 0 ) ) )
-		.add( selectKneeRight( posture ).mul( select( s.equal( 5 ), 1, 0 ) ) )
-		.add( selectAnkleRight( posture ).mul( select( s.equal( 6 ), 1, 0 ) ) )
-		
-		.add( selectArmLeft( posture ).mul( select( s.equal( 7 ), 1, 0 ) ) )
-		.add( selectElbowLeft( posture ).mul( select( s.equal( 8 ), 1, 0 ) ) )
-		.add( selectForearmLeft( posture ).mul( select( s.equal( 9 ), 1, 0 ) ) )
-		.add( selectWristLeft( posture ).mul( select( s.equal( 10 ), 1, 0 ) ) )
-		
-		.add( selectArmRight( posture ).mul( select( s.equal( 7 ), 1, 0 ) ) )
-		.add( selectElbowRight( posture ).mul( select( s.equal( 8 ), 1, 0 ) ) )
-		.add( selectForearmRight( posture ).mul( select( s.equal( 9 ), 1, 0 ) ) )
-		.add( selectWristRight( posture ).mul( select( s.equal( 10 ), 1, 0 ) ) )
+		.add( selectWaist( posture ).mul( select( s.equal( 3 ), 1, 0 ) ) )
+
+		.add( selectLegLeft( posture ).mul( select( s.equal( 11 ), 1, 0 ) ) )
+		.add( selectKneeLeft( posture ).mul( select( s.equal( 12 ), 1, 0 ) ) )
+		.add( selectAnkleLeft( posture ).mul( select( s.equal( 13 ), 1, 0 ) ) )
+
+		.add( selectLegRight( posture ).mul( select( s.equal( 11 ), 1, 0 ) ) )
+		.add( selectKneeRight( posture ).mul( select( s.equal( 12 ), 1, 0 ) ) )
+		.add( selectAnkleRight( posture ).mul( select( s.equal( 13 ), 1, 0 ) ) )
+
+		.add( selectArmLeft( posture ).mul( select( s.equal( 21 ), 1, 0 ) ) )
+		.add( selectElbowLeft( posture ).mul( select( s.equal( 22 ), 1, 0 ) ) )
+		.add( selectForearmLeft( posture ).mul( select( s.equal( 23 ), 1, 0 ) ) )
+		.add( selectWristLeft( posture ).mul( select( s.equal( 24 ), 1, 0 ) ) )
+
+		.add( selectArmRight( posture ).mul( select( s.equal( 21 ), 1, 0 ) ) )
+		.add( selectElbowRight( posture ).mul( select( s.equal( 22 ), 1, 0 ) ) )
+		.add( selectForearmRight( posture ).mul( select( s.equal( 23 ), 1, 0 ) ) )
+		.add( selectWristRight( posture ).mul( select( s.equal( 24 ), 1, 0 ) ) )
 		.toVar( );
-		
-	k.assign( select( posture.isolated.equal( 0 ), 
-				k.smoothstep( 0, 1 ).mul( 2*Math.PI ).sub( Math.PI ).cos().add( 1 ).div( 2 ).pow( 1/4 ).mul(1.1).negate(), 
-				k.clamp(0,1).pow(0.75).negate()
-		) );
-	
+
+	k.assign( select( posture.isolated.equal( 0 ),
+		k.smoothstep( 0, 1 ).mul( 2*Math.PI ).sub( Math.PI ).cos().add( 1 ).div( 2 ).pow( 1/4 ).mul( 1.1 ).negate(),
+		k.clamp( 0, 1 ).pow( 0.75 ).negate()
+	) );
+
 
 	return vec3( 0, k.div( 2 ), k.div( 1 ) );
 
 } );
 
 
-export { tslPositionNode, tslEmissiveNode };
+
+var tslColorNode = Fn( ()=>{
+
+	var p = positionGeometry;
+
+	var k = float( 0 )
+		.add( p.x.mul( 72 ).cos().smoothstep( 0.9, 1 ) )
+		.add( p.y.mul( 74 ).cos().smoothstep( 0.9, 1 ) )
+		.add( p.z.mul( 74 ).add(p.y.mul(4.5).add(0.5).cos().mul(1).add(2.5)).abs().smoothstep( 0.6, 0 ) )
+		.smoothstep(0.6,1)
+		.oneMinus()
+		.pow( 0.1 )
+		;
+
+	//var k = positionGeometry.div(1.88).cos().length().mul(0.75*Math.PI).sin().pow(24*3).oneMinus().add(0.2);
+
+	return vec3( k );
+
+} );
+
+
+
+export { tslPositionNode, tslEmissiveNode, tslColorNode };

@@ -1,5 +1,8 @@
 ﻿
 // disfigure
+//
+// module with TSL matrix construction
+
 
 
 import { Fn, mat3 } from 'three/tsl';
