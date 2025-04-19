@@ -182,7 +182,7 @@ function createGui( postureData, modelObject ) {
 function rigModel( time ) {
 
 	posture.waistTurn.value.set(
-		Math.sin( time )/4+0.2,
+		Math.sin( time )/4-0.2,
 		Math.cos( time*1.2 )/2,
 		Math.sin( time*3 )/2.5
 	);
