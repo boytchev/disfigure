@@ -80,14 +80,9 @@ function selectAnkleRight( { ankleRightSpan } ) {
 
 
 
-function selectLegLeft( { legLeftSpan, waistSpan } ) {
+function selectLegLeft( { legLeftSpan } ) {
 
-	var x = positionGeometry.x;
-	var y = positionGeometry.y;
-	
-	return y
-		.smoothstep( legLeftSpan.x, legLeftSpan.y )
-		.mul(x.sub(y.sub(2)).smoothstep( -0.1, 0.1 ).mul(x.smoothstep( -0.01, 0.01 )));
+	return positionGeometry.y.smoothstep( legLeftSpan.x, legLeftSpan.y );
 
 } // inlined
 
@@ -95,11 +90,32 @@ function selectLegLeft( { legLeftSpan, waistSpan } ) {
 
 function selectLegRight( { legRightSpan } ) {
 
+	return positionGeometry.y.smoothstep( legRightSpan.x, legRightSpan.y );
+
+} // inlined
+
+
+
+function selectHipLeft( { hipLeftSpan, waistSpan } ) {
+
 	var x = positionGeometry.x;
 	var y = positionGeometry.y;
 	
 	return y
-		.smoothstep( legRightSpan.x, legRightSpan.y )
+		.smoothstep( hipLeftSpan.x, hipLeftSpan.y )
+		.mul(x.sub(y.sub(2)).smoothstep( -0.1, 0.1 ).mul(x.smoothstep( -0.01, 0.01 )));
+
+} // inlined
+
+
+
+function selectHipRight( { hipRightSpan } ) {
+
+	var x = positionGeometry.x;
+	var y = positionGeometry.y;
+	
+	return y
+		.smoothstep( hipRightSpan.x, hipRightSpan.y )
 		.mul(x.add(y.sub(2)).smoothstep( 0.1, -0.1 ).mul(x.smoothstep( 0.01, -0.01 )));
 
 } // inlined
@@ -273,18 +289,21 @@ var tslPositionNode = Fn( ( posture )=>{
 
 	// LEFT-LOWER BODY
 
-	var legLeft = selectLegLeft( posture ).toVar();
+	var hipLeft = selectHipLeft( posture ).toVar();
 	
-	If( legLeft.greaterThan( 0 ), ()=>{
+	If( hipLeft.greaterThan( 0 ), ()=>{
 
 		// left ankle
 		p.assign( jointRotate( p, posture.ankleLeftPos, posture.ankleLeftTurn, selectAnkleLeft( posture ) ) );
 
+		// left leg
+		p.assign( jointRotate( p, posture.legLeftPos, posture.legLeftTurn, selectLegLeft( posture ) ) );
+
 		// left knee
 		p.assign( jointRotate( p, posture.kneeLeftPos, posture.kneeLeftTurn, selectKneeLeft( posture ) ) );
 
-		// left leg
-		p.assign( jointRotate( p, posture.legLeftPos, posture.legLeftTurn, legLeft ) );
+		// left hip
+		p.assign( jointRotate( p, posture.hipLeftPos, posture.hipLeftTurn, hipLeft ) );
 
 	} );
 
@@ -292,18 +311,21 @@ var tslPositionNode = Fn( ( posture )=>{
 
 	// RIGHT-LOWER BODY
 
-	var legRight = selectLegRight( posture ).toVar();
+	var hipRight = selectHipRight( posture ).toVar();
 	
-	If( legRight.greaterThan( 0 ), ()=>{
+	If( hipRight.greaterThan( 0 ), ()=>{
 
 		// right ankle
 		p.assign( jointRotate( p, posture.ankleRightPos, posture.ankleRightTurn, selectAnkleRight( posture ) ) );
 
+		// right leg
+		p.assign( jointRotate( p, posture.legRightPos, posture.legRightTurn, selectLegRight( posture ) ) );
+
 		// right knee
 		p.assign( jointRotate( p, posture.kneeRightPos, posture.kneeRightTurn, selectKneeRight( posture ) ) );
 
-		// right leg
-		p.assign( jointRotate( p, posture.legRightPos, posture.legRightTurn, legRight ) );
+		// right hip
+		p.assign( jointRotate( p, posture.hipRightPos, posture.hipRightTurn, hipRight ) );
 
 	} );
 
@@ -323,13 +345,15 @@ var tslEmissiveNode = Fn( ( posture )=>{
 		.add( selectChest( posture ).mul( select( s.equal( 2 ), 1, 0 ) ) )
 		.add( selectWaist( posture ).mul( select( s.equal( 3 ), 1, 0 ) ) )
 
-		.add( selectLegLeft( posture ).mul( select( s.equal( 11 ), 1, 0 ) ) )
-		.add( selectKneeLeft( posture ).mul( select( s.equal( 12 ), 1, 0 ) ) )
-		.add( selectAnkleLeft( posture ).mul( select( s.equal( 13 ), 1, 0 ) ) )
+		.add( selectHipLeft( posture ).mul( select( s.equal( 11 ), 1, 0 ) ) )
+		.add( selectLegLeft( posture ).mul( select( s.equal( 12 ), 1, 0 ) ) )
+		.add( selectKneeLeft( posture ).mul( select( s.equal( 13 ), 1, 0 ) ) )
+		.add( selectAnkleLeft( posture ).mul( select( s.equal( 14 ), 1, 0 ) ) )
 
-		.add( selectLegRight( posture ).mul( select( s.equal( 11 ), 1, 0 ) ) )
-		.add( selectKneeRight( posture ).mul( select( s.equal( 12 ), 1, 0 ) ) )
-		.add( selectAnkleRight( posture ).mul( select( s.equal( 13 ), 1, 0 ) ) )
+		.add( selectHipRight( posture ).mul( select( s.equal( 11 ), 1, 0 ) ) )
+		.add( selectLegRight( posture ).mul( select( s.equal( 12 ), 1, 0 ) ) )
+		.add( selectKneeRight( posture ).mul( select( s.equal( 13 ), 1, 0 ) ) )
+		.add( selectAnkleRight( posture ).mul( select( s.equal( 14 ), 1, 0 ) ) )
 
 		.add( selectArmLeft( posture ).mul( select( s.equal( 21 ), 1, 0 ) ) )
 		.add( selectElbowLeft( posture ).mul( select( s.equal( 22 ), 1, 0 ) ) )
