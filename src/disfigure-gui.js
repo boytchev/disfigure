@@ -110,7 +110,7 @@ function createGui( postureData, modelObject ) {
 	folder.add( posture.chestTurn.value, 'z', -0.5, 0.5 ).name( 'chest' );
 	folder.add( posture.waistTurn.value, 'z', -0.5, 0.5 ).name( 'waist' );
 
-	mfolder = gui.addFolder( 'LEFT LEG' )//.close();
+	mfolder = gui.addFolder( 'LEFT LEG' ).close();
 
 	var folder = mfolder.addFolder( '&nbsp; &nbsp; Bend' );
 	folder.add( posture.hipLeftTurn.value, 'x', -0.5, 1.5 ).name( 'hip' );
@@ -143,7 +143,7 @@ function createGui( postureData, modelObject ) {
 	folder.add( posture.ankleRightTurn.value, 'z', -0.5, 0.5 ).name( 'ankle' );
 
 
-	mfolder = gui.addFolder( 'LEFT ARM' ).close();
+	mfolder = gui.addFolder( 'LEFT ARM' )//.close();
 
 	folder = mfolder.addFolder( '&nbsp; &nbsp; Bend' );
 	folder.add( posture.armLeftTurn.value, 'y', -0.5, 2 ).name( 'arm' );
