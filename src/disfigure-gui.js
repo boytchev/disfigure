@@ -84,11 +84,11 @@ function createGui( postureData, modelObject ) {
 		Arm: 21, Elbow: 22, Forearm: 23, Wrist: 24,
 	} ).name( 'Mark area' ).onChange( showPivotPoint );
 
-	// mfolder.add( posture.ankleLeftPos.value, 'x', -0.2, 0.2 ).name( 'px' ).onChange( changePivotPoint );
-	// mfolder.add( posture.ankleLeftPos.value, 'y', 1.2, 1.4 ).name( 'py' ).onChange( changePivotPoint );
-	// mfolder.add( posture.ankleLeftPos.value, 'z', -0.5, 0.5 ).name( 'pz' ).onChange( changePivotPoint );
-	// mfolder.add( posture.ankleLeftSpan.value, 'x', 1, 1.5 ).name( 'sx' ).onChange( changePivotPoint );
-	// mfolder.add( posture.ankleLeftSpan.value, 'y', 1, 1.5 ).name( 'sy' ).onChange( changePivotPoint );
+	mfolder.add( posture.wristLeftPos.value, 'x', 0.4, 0.9 ).name( 'px' ).onChange( changePivotPoint );
+	mfolder.add( posture.wristLeftPos.value, 'y', 2.0, 2.7 ).name( 'py' ).onChange( changePivotPoint );
+	mfolder.add( posture.wristLeftPos.value, 'z', -0.5, 0.5 ).name( 'pz' ).onChange( changePivotPoint );
+	mfolder.add( posture.wristLeftSpan.value, 'x', 0.3, 1.5 ).name( 'sx' ).onChange( changePivotPoint );
+	mfolder.add( posture.wristLeftSpan.value, 'y', 0.3, 1.5 ).name( 'sy' ).onChange( changePivotPoint );
 
 	mfolder.add( posture.isolated, 'value', { Isolated: 0, Full: 1 } ).name( 'Mark stype' );
 	mfolder.add( options, 'animate', false ).name( 'Animate' );
@@ -153,7 +153,7 @@ function createGui( postureData, modelObject ) {
 	folder = mfolder.addFolder( '&nbsp; &nbsp; Twist' );
 	folder.add( posture.armLeftTurn.value, 'x', -0.5, 0.5 ).name( 'arm' );
 	folder.add( posture.forearmLeftTurn.value, 'x', -1.5, 3 ).name( 'forearm' );
-	folder.add( posture.wristLeftTurn.value, 'x', -0.3, 0.3 ).name( 'wrist' );
+	folder.add( posture.wristLeftTurn.value, 'x', -0.5, 0.5 ).name( 'wrist' );
 
 	folder = mfolder.addFolder( '&nbsp; &nbsp; Side bend' );
 	folder.add( posture.armLeftTurn.value, 'z', -1.5, 1.7 ).name( 'arm' );
@@ -170,7 +170,7 @@ function createGui( postureData, modelObject ) {
 	folder = mfolder.addFolder( '&nbsp; &nbsp; Twist' );
 	folder.add( posture.armRightTurn.value, 'x', -0.5, 0.5 ).name( 'arm' );
 	folder.add( posture.forearmRightTurn.value, 'x', -1.5, 3 ).name( 'forearm' );
-	folder.add( posture.wristRightTurn.value, 'x', -0.3, 0.3 ).name( 'wrist' );
+	folder.add( posture.wristRightTurn.value, 'x', -0.5, 0.5 ).name( 'wrist' );
 
 	folder = mfolder.addFolder( '&nbsp; &nbsp; Side bend' );
 	folder.add( posture.armRightTurn.value, 'z', -1.5, 1.7 ).name( 'arm' );
@@ -329,7 +329,7 @@ function showPivotPoint( index ) {
 
 function changePivotPoint( ) {
 
-	pivot.position.copy( posture.ankleLeftPos.value );
+	pivot.position.copy( posture.wristLeftPos.value );
 
 }
 
