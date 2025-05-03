@@ -75,25 +75,25 @@ function createGui( postureData, modelObject ) {
 	var gui = new lil.GUI();
 	gui.domElement.style.marginRight = 0;
 
-	var mfolder = gui.addFolder( 'DEBUG' );//.close();
+	var mfolder = gui.addFolder( 'DEBUG' ).close();
 
 	mfolder.add( posture.select, 'value', {
 		Nothing: 0,
-		Head: 1,Chest: 2, Waist: 3, 
+		Head: 1, Chest: 2, Waist: 3,
 		Hip: 11, Leg: 12, Knee: 13, Ankle: 14,
 		Arm: 21, Elbow: 22, Forearm: 23, Wrist: 24,
 	} ).name( 'Mark area' ).onChange( showPivotPoint );
-
-	mfolder.add( posture.wristLeftPos.value, 'x', 0.4, 0.9 ).name( 'px' ).onChange( changePivotPoint );
-	mfolder.add( posture.wristLeftPos.value, 'y', 2.0, 2.7 ).name( 'py' ).onChange( changePivotPoint );
-	mfolder.add( posture.wristLeftPos.value, 'z', -0.5, 0.5 ).name( 'pz' ).onChange( changePivotPoint );
-	mfolder.add( posture.wristLeftSpan.value, 'x', 0.3, 1.5 ).name( 'sx' ).onChange( changePivotPoint );
-	mfolder.add( posture.wristLeftSpan.value, 'y', 0.3, 1.5 ).name( 'sy' ).onChange( changePivotPoint );
-
+	/*
+	mfolder.add( posture.armLeftPos.value, 'x', 0., 0.9 ).name( 'px' ).onChange( changePivotPoint );
+	mfolder.add( posture.armLeftPos.value, 'y', 2.0, 2.7 ).name( 'py' ).onChange( changePivotPoint );
+	mfolder.add( posture.armLeftPos.value, 'z', -0.5, 0.5 ).name( 'pz' ).onChange( changePivotPoint );
+	mfolder.add( posture.armLeftSpan.value, 'x', 0, 0.5 ).name( 'sx' ).onChange( changePivotPoint );
+	mfolder.add( posture.armLeftSpan.value, 'y', 0, 0.5 ).name( 'sy' ).onChange( changePivotPoint );
+*/
 	mfolder.add( posture.isolated, 'value', { Isolated: 0, Full: 1 } ).name( 'Mark stype' );
 	mfolder.add( options, 'animate', false ).name( 'Animate' );
 
-	mfolder = gui.addFolder( 'TORSO' ).close();
+	mfolder = gui.addFolder( 'TORSO' );//.close();
 
 	var folder = mfolder.addFolder( '&nbsp; &nbsp; Bend' );
 	folder.add( posture.headTurn.value, 'x', -0.7, 0.5 ).name( 'head' );
@@ -118,7 +118,7 @@ function createGui( postureData, modelObject ) {
 	folder.add( posture.ankleLeftTurn.value, 'x', -1, 0.7 ).name( 'ankle' );
 
 	folder = mfolder.addFolder( '&nbsp; &nbsp; Twist' );
-	folder.add( posture.hipLeftTurn.value, 'y', -3, 3 ).name( 'hip' );
+	folder.add( posture.hipLeftTurn.value, 'y', -0.3, 0.3 ).name( 'hip' );
 	folder.add( posture.legLeftTurn.value, 'y', -3, 3 ).name( 'leg' );
 	folder.add( posture.ankleLeftTurn.value, 'y', -0.75, 0.75 ).name( 'ankle' );
 
@@ -134,7 +134,7 @@ function createGui( postureData, modelObject ) {
 	folder.add( posture.ankleRightTurn.value, 'x', -1, 0.7 ).name( 'ankle' );
 
 	folder = mfolder.addFolder( '&nbsp; &nbsp; Twist' );
-	folder.add( posture.hipRightTurn.value, 'y', -3, 3 ).name( 'hip' );
+	folder.add( posture.hipRightTurn.value, 'y', -0.3, 0.3 ).name( 'hip' );
 	folder.add( posture.legRightTurn.value, 'y', -3, 3 ).name( 'leg' );
 	folder.add( posture.ankleRightTurn.value, 'y', -0.75, 0.75 ).name( 'ankle' );
 
@@ -143,7 +143,7 @@ function createGui( postureData, modelObject ) {
 	folder.add( posture.ankleRightTurn.value, 'z', -0.5, 0.5 ).name( 'ankle' );
 
 
-	mfolder = gui.addFolder( 'LEFT ARM' )//.close();
+	mfolder = gui.addFolder( 'LEFT ARM' ).close();
 
 	folder = mfolder.addFolder( '&nbsp; &nbsp; Bend' );
 	folder.add( posture.armLeftTurn.value, 'y', -0.5, 2 ).name( 'arm' );
@@ -216,13 +216,13 @@ function rigModel( time ) {
 
 	posture.ankleLeftTurn.value.set(
 		Math.cos( time*3 )/2,
-	0*	Math.cos( time*2.8 )/2,
+		0*	Math.cos( time*2.8 )/2,
 		Math.cos( time*2.2 )/4,
 	);
 
 	posture.ankleRightTurn.value.set(
 		Math.sin( time*3.2 )/2,
-	0*	Math.cos( time*2.3 )/2,
+		0*	Math.cos( time*2.3 )/2,
 		Math.sin( time*2.1 )/4,
 	);
 
@@ -263,13 +263,13 @@ function rigModel( time ) {
 	);
 
 	posture.forearmLeftTurn.value.set(
-		( Math.cos( time*3.6-1 )*1.5+1 ),
+		0.5*( Math.cos( time*3.6-1 )*1.5+1 ),
 		0,
 		0,
 	);
 
 	posture.forearmRightTurn.value.set(
-		( Math.sin( time*1.8*3+1 )*1.5+1 ),
+		0.5*( Math.sin( time*1.8*3+1 )*1.5+1 ),
 		0,
 		0,
 	);
@@ -288,13 +288,13 @@ function rigModel( time ) {
 
 	posture.armLeftTurn.value.set(
 		0.7*( Math.cos( time*3 )/1.5-0.15 ),
-		-0.7*( Math.cos( time*2.8 )*1-0.6 ),
+		0, //-0.7*( Math.cos( time*2.8 )*1-0.6 ),
 		0.7*( Math.cos( time*2.2 ) ),
 	);
 
 	posture.armRightTurn.value.set(
 		0.7*( Math.sin( time*2.4 )/1.5-0.15 ),
-		-0.7*-( Math.cos( time*3.1 )*1-0.6 ),
+		0, //-0.7*-( Math.cos( time*3.1 )*1-0.6 ),
 		0.7*( Math.sin( time*2.7 ) ),
 	);
 
@@ -305,12 +305,12 @@ function rigModel( time ) {
 function showPivotPoint( index ) {
 
 	model.add( pivot );
-	switch( index )
-	{
+	switch ( index ) {
+
 		case 1: pivot.position.copy( posture.headPos.value ); break;
 		case 2: pivot.position.copy( posture.chestPos.value ); break;
 		case 3: pivot.position.copy( posture.waistPos.value ); break;
-		
+
 		case 11: pivot.position.copy( posture.hipLeftPos.value ); break;
 		case 12: pivot.position.copy( posture.legLeftPos.value ); break;
 		case 13: pivot.position.copy( posture.kneeLeftPos.value ); break;
@@ -322,16 +322,19 @@ function showPivotPoint( index ) {
 		case 24: pivot.position.copy( posture.wristLeftPos.value ); break;
 
 		default: model.remove( pivot );
+
 	}
-}
-
-
-
-function changePivotPoint( ) {
-
-	pivot.position.copy( posture.wristLeftPos.value );
 
 }
+
+
+
+
+// function changePivotPoint( ) {
+
+// pivot.position.copy( posture.armLeftPos.value );
+
+// }
 
 
 
@@ -351,7 +354,7 @@ renderer.setAnimationLoop( animationLoop );
 
 
 
-setTimeout( ()=>{showPivotPoint(11)}, 500 );
+//setTimeout( ()=>{showPivotPoint(11)}, 500 );
 
 
 

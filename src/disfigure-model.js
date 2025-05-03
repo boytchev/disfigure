@@ -5,7 +5,7 @@
 
 
 
-import { Mesh, Box3, MeshStandardNodeMaterial, Vector3 } from "three";
+import { Box3, Mesh, MeshStandardNodeMaterial, Vector3 } from "three";
 import { tslColorNode, tslEmissiveNode, tslPositionNode } from "./disfigure.js";
 
 
@@ -26,20 +26,20 @@ function centerModel( model ) {
 // (skeleton info, lights, cameras, ...)
 // keep only geometries and their parents
 
-function clearModel( model ) {
+// function clearModel( model ) {
 
-	for ( var i=model.children.length-1; i>=0; i-- ) {
+// for ( var i=model.children.length-1; i>=0; i-- ) {
 
-		var child = model.children[ i ];
+// var child = model.children[ i ];
 
-		clearModel( child );
+// clearModel( child );
 
-		if ( !child.isMesh && !child.children?.length )
-			model.remove( child );
+// if ( !child.isMesh && !child.children?.length )
+// model.remove( child );
 
-	}
+// }
 
-}
+// }
 
 
 
@@ -91,21 +91,22 @@ function flattenModel( model ) {
 			var mat = mesh.material.clone();
 
 			meshes.push( new Mesh( geo, mat ) );
+
 		}
 
 	} );
-	
+
 	// clear model
 	model.clear( );
 	model.position.set( 0, 0, 0 );
 	model.rotation.set( 0, 0, 0, 'XYZ' );
 	model.scale.set( 1, 1, 1 );
-	
+
 	// add meshes
 	model.add( ...meshes );
 
-	
-/*
+
+	/*
 	model.traverse( ( parent )=>{
 
 		if ( parent.children.length > 0 ) {
@@ -133,23 +134,23 @@ function flattenModel( model ) {
 
 function processModel( model, posture ) {
 
-//	clearModel( model );
+	//	clearModel( model );
 
 	flattenModel( model );
 	// console.log( '-------' );
 	// model.traverse( ( child )=>{
 
-		// if ( child.isObject3D ) {
+	// if ( child.isObject3D ) {
 
-			// console.log( child.matrix.elements );
+	// console.log( child.matrix.elements );
 
-		// }
+	// }
 
 	// } );
 	ennodeModel( model, posture );
 	centerModel( model );
-	
-console.log(model);
+
+	console.log( model );
 
 	return model;
 

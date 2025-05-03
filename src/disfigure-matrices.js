@@ -114,6 +114,82 @@ const matRotYZX = Fn( ([ angles ])=>{
 
 
 
+// generate XYZ rotation matrix
+const matRotXYZ = Fn( ([ angles ])=>{
+
+	var RX = matRotX( angles.x ),
+		RY = matRotY( angles.y ),
+		RZ = matRotZ( angles.z );
+
+	return RX.mul( RY ).mul( RZ );
+
+} ).setLayout( {
+	name: 'matRotXYZ',
+	type: 'mat3',
+	inputs: [
+		{ name: 'angles', type: 'vec3' },
+	]
+} );
+
+
+
+// generate XZY rotation matrix
+const matRotXZY = Fn( ([ angles ])=>{
+
+	var RX = matRotX( angles.x ),
+		RY = matRotY( angles.y ),
+		RZ = matRotZ( angles.z );
+
+	return RX.mul( RZ ).mul( RY );
+
+} ).setLayout( {
+	name: 'matRotXZY',
+	type: 'mat3',
+	inputs: [
+		{ name: 'angles', type: 'vec3' },
+	]
+} );
+
+
+
+// generate ZXY rotation matrix
+const matRotZXY = Fn( ([ angles ])=>{
+
+	var RX = matRotX( angles.x ),
+		RY = matRotY( angles.y ),
+		RZ = matRotZ( angles.z );
+
+	return RZ.mul( RX ).mul( RY );
+
+} ).setLayout( {
+	name: 'matRotZXY',
+	type: 'mat3',
+	inputs: [
+		{ name: 'angles', type: 'vec3' },
+	]
+} );
+
+
+
+// generate ZYX rotation matrix
+const matRotZYX = Fn( ([ angles ])=>{
+
+	var RX = matRotX( angles.x ),
+		RY = matRotY( angles.y ),
+		RZ = matRotZ( angles.z );
+
+	return RZ.mul( RY ).mul( RX );
+
+} ).setLayout( {
+	name: 'matRotZYX',
+	type: 'mat3',
+	inputs: [
+		{ name: 'angles', type: 'vec3' },
+	]
+} );
+
+
+
 // generate scaling matrix
 const matScale = Fn( ([ scales ])=>{
 
@@ -141,5 +217,9 @@ export
 	matRotZ,
 	matRotYXZ,
 	matRotYZX,
+	matRotZYX,
+	matRotZXY,
+	matRotXYZ,
+	matRotXZY,
 	matScale,
 };
