@@ -1,7 +1,18 @@
 ﻿
 // disfigure
 //
-// module with TSL matrix construction
+// module to create various matrices
+//
+// 		matRotX( angle:float ) : mat3
+// 		matRotY( angle:float ) : mat3
+// 		matRotZ( angle:float ) : mat3
+// 		matRotYXZ( angles:vec3 ) : mat3
+// 		matRotYZX( angles:vec3 ) : mat3
+// 		matRotZYX( angles:vec3 ) : mat3
+// 		matRotZXY( angles:vec3 ) : mat3
+// 		matRotXYZ( angles:vec3 ) : mat3
+// 		matRotXZY( angles:vec3 ) : mat3
+// 		matScale( scales:vec3 ) : mat3
 
 
 
