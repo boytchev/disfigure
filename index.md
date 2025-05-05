@@ -1,4 +1,3 @@
-<img class="logo" src="assets/logo/logo.png">
 
 # Disfigure
 
