@@ -285,13 +285,13 @@ function ennodeModel( model, posture, nodes ) {
 			material.metalness = 0;
 			material.roughness = 1;
 
-			if( nodes.colorNode )
+			if ( nodes.colorNode )
 				material.colorNode = nodes.colorNode( );
-			
-			if( nodes.positionNode )
+
+			if ( nodes.positionNode )
 				material.positionNode = nodes.positionNode( posture );
-			
-			if( nodes.emissiveNode )
+
+			if ( nodes.emissiveNode )
 				material.emissiveNode = nodes.emissiveNode( posture );
 
 			child.material = material;
@@ -321,6 +321,6 @@ export
 {
 	matRotYXZ,
 	matRotXZY,
-	
+
 	processModel,
 };

@@ -1,11 +1,151 @@
-﻿
-// disfigure
-// to do: simplify matrix operation when rotations are DOF<3
+// disfigure v0.0.1
 
-import { float, Fn, If, mix, positionGeometry, select, vec3 } from "three/tsl";
-import { matRotXZY, matRotYXZ } from "./utils.js";
+import { Fn, mat3, mix, float, positionGeometry, If, select, vec3 } from 'three/tsl';
+import 'three';
+
+// generate X-rotation matrix
+const matRotX = Fn( ([ angle ])=>{
+
+	var	cos = angle.cos().toVar(),
+		sin = angle.sin().toVar();
+
+	return mat3(
+		1, 0, 0,
+		0, cos, sin,
+		0, sin.negate(), cos,
+	);
+
+} ).setLayout( {
+	name: 'matRotX',
+	type: 'mat3',
+	inputs: [
+		{ name: 'angle', type: 'float' },
+	]
+} );
 
 
+
+// generate Y-rotation matrix
+const matRotY = Fn( ([ angle ])=>{
+
+	var	cos = angle.cos().toVar(),
+		sin = angle.sin().toVar();
+
+	return mat3(
+		cos, 0, sin.negate(),
+		0, 1, 0,
+		sin, 0, cos,
+	);
+
+} ).setLayout( {
+	name: 'matRotY',
+	type: 'mat3',
+	inputs: [
+		{ name: 'angle', type: 'float' },
+	]
+} );
+
+
+
+// generate Z-rotation matrix
+const matRotZ = Fn( ([ angle ])=>{
+
+	var	cos = angle.cos().toVar(),
+		sin = angle.sin().toVar();
+
+	return mat3(
+		cos, sin, 0,
+		sin.negate(), cos, 0,
+		0, 0, 1,
+	);
+
+} ).setLayout( {
+	name: 'matRotZ',
+	type: 'mat3',
+	inputs: [
+		{ name: 'angle', type: 'float' },
+	]
+} );
+
+
+
+// generate YXZ rotation matrix
+const matRotYXZ = Fn( ([ angles ])=>{
+
+	var RX = matRotX( angles.x ),
+		RY = matRotY( angles.y ),
+		RZ = matRotZ( angles.z );
+
+	return RY.mul( RX ).mul( RZ );
+
+} ).setLayout( {
+	name: 'matRotYXZ',
+	type: 'mat3',
+	inputs: [
+		{ name: 'angles', type: 'vec3' },
+	]
+} );
+
+
+
+/*
+// generate YZX rotation matrix
+const matRotYZX = Fn( ([ angles ])=>{
+
+	var RX = matRotX( angles.x ),
+		RY = matRotY( angles.y ),
+		RZ = matRotZ( angles.z );
+
+	return RY.mul( RZ ).mul( RX );
+
+} ).setLayout( {
+	name: 'matRotYZX',
+	type: 'mat3',
+	inputs: [
+		{ name: 'angles', type: 'vec3' },
+	]
+} );
+*/
+
+
+
+/*
+// generate XYZ rotation matrix
+const matRotXYZ = Fn( ([ angles ])=>{
+
+	var RX = matRotX( angles.x ),
+		RY = matRotY( angles.y ),
+		RZ = matRotZ( angles.z );
+
+	return RX.mul( RY ).mul( RZ );
+
+} ).setLayout( {
+	name: 'matRotXYZ',
+	type: 'mat3',
+	inputs: [
+		{ name: 'angles', type: 'vec3' },
+	]
+} );
+*/
+
+
+
+// generate XZY rotation matrix
+const matRotXZY = Fn( ([ angles ])=>{
+
+	var RX = matRotX( angles.x ),
+		RY = matRotY( angles.y ),
+		RZ = matRotZ( angles.z );
+
+	return RX.mul( RZ ).mul( RY );
+
+} ).setLayout( {
+	name: 'matRotXZY',
+	type: 'mat3',
+	inputs: [
+		{ name: 'angles', type: 'vec3' },
+	]
+} );
 
 /*
 function selectLeft( ) {
@@ -371,6 +511,4 @@ var tslColorNode = Fn( ()=>{
 
 } );
 
-
-
-export { tslPositionNode, tslEmissiveNode, tslColorNode };
+export { tslColorNode, tslEmissiveNode, tslPositionNode };

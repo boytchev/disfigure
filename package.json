@@ -2,13 +2,33 @@
   "name": "disfigure",
   "version": "0.0.1",
   "description": "A library to rig non-rigged 3D models",
-  "main": "index.js",
-  "plugins": ["html"],
+  "main": "./src/disfigure.js",
+  "module": "./src/disfigure.js",
+  "exports": {
+    "./disfigure.js": {
+      "require": "./dist/cjs/disfigure.js",
+      "import": "./dist/esm/disfigure.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boytchev/disfigure.git"
+  },
   "scripts": {
+    "build": "rollup -c",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [
+    "disfigure",
+    "rigging",
+    "tsl",
+    "three.js"
+  ],
+  "homepage": "https://boytchev.github.io/disfigure/",
+  "plugins": [
+    "html"
+  ],
   "author": "Pavel Boytchev",
-  "license": "MIT",
   "files": [
     "LICENSE",
     "package.json",
@@ -16,10 +36,15 @@
     "dist",
     "src"
   ],
+  "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^9.24.0",
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-terser": "^0.4.4",
     "eslint": "^9.24.0",
     "eslint-plugin-html": "^8.1.2",
-    "globals": "^16.0.0"
+    "globals": "^16.0.0",
+    "rollup": "^4.37.0"
   }
 }
