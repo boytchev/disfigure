@@ -3,7 +3,7 @@
 // to do: simplify matrix operation when rotations are DOF<3
 
 import { float, Fn, If, mix, positionGeometry, select, vec3 } from "three/tsl";
-import { matRotXZY, matRotYXZ } from "./disfigure-matrices.js";
+import { matRotXZY, matRotYXZ } from "./utils.js";
 
 
 
@@ -363,8 +363,6 @@ var tslColorNode = Fn( ()=>{
 		.oneMinus()
 		.pow( 0.1 )
 		;
-
-	//var k = positionGeometry.div(1.88).cos().length().mul(0.75*Math.PI).sin().pow(24*3).oneMinus().add(0.2);
 
 	return vec3( k );
 

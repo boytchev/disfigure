@@ -1,1 +1,3 @@
 ﻿"Mc-powerful-deep-chestnut-bougainvillea-T-pose" (https://skfb.ly/oIqQD) by hearthackers787 is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+
+Modification: removed skeleton, UVs and so on.

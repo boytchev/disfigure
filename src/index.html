@@ -31,13 +31,14 @@ import * as THREE from "three";
 import { float, uniform, vec2, vec3, vec4 } from "three/tsl";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { createGui, scene } from "./disfigure-gui.js";
-import { processModel } from "./disfigure-model.js";
+import { tslColorNode, tslPositionNode, tslEmissiveNode } from "./disfigure.js";
+import { processModel } from "./utils.js";
 
 
 console.clear( );
 
 
-const MODEL_URL = 'models/mc-powerful-deep-chestnut-bougainvillea-t-pose.glb';
+const MODEL_URL = '../assets/models/mc-powerful-deep-chestnut-bougainvillea-t-pose.glb';
 
 
 var overModel = new THREE.Object3D();
@@ -46,7 +47,14 @@ scene.add( overModel );
 
 new GLTFLoader().load( MODEL_URL, ( gltf ) => {
 
-	var model = processModel( gltf.scene, posture );
+	var model = processModel(
+		gltf.scene,
+		posture,
+		{
+			positionNode: tslPositionNode, // rigging
+			colorNode: tslColorNode, // optional debug texture
+			emissiveNode: tslEmissiveNode, // optional debug marking
+		} );
 
 	createGui( posture, model );
 

@@ -1,23 +1,15 @@
 ﻿
-// disfigure
+// disfigure utils
 //
-// module to create various matrices
+// module with various utility functions:
 //
-// 		matRotX( angle:float ) : mat3
-// 		matRotY( angle:float ) : mat3
-// 		matRotZ( angle:float ) : mat3
-// 		matRotYXZ( angles:vec3 ) : mat3
-// 		matRotYZX( angles:vec3 ) : mat3
-// 		matRotZYX( angles:vec3 ) : mat3
-// 		matRotZXY( angles:vec3 ) : mat3
-// 		matRotXYZ( angles:vec3 ) : mat3
-// 		matRotXZY( angles:vec3 ) : mat3
-// 		matScale( scales:vec3 ) : mat3
+// * processing models
+// * generating matrices
 
 
 
+import { Box3, Mesh, MeshStandardNodeMaterial, Vector3 } from 'three';
 import { Fn, mat3 } from 'three/tsl';
-
 
 
 
@@ -106,6 +98,7 @@ const matRotYXZ = Fn( ([ angles ])=>{
 
 
 
+/*
 // generate YZX rotation matrix
 const matRotYZX = Fn( ([ angles ])=>{
 
@@ -122,9 +115,11 @@ const matRotYZX = Fn( ([ angles ])=>{
 		{ name: 'angles', type: 'vec3' },
 	]
 } );
+*/
 
 
 
+/*
 // generate XYZ rotation matrix
 const matRotXYZ = Fn( ([ angles ])=>{
 
@@ -141,6 +136,7 @@ const matRotXYZ = Fn( ([ angles ])=>{
 		{ name: 'angles', type: 'vec3' },
 	]
 } );
+*/
 
 
 
@@ -163,6 +159,7 @@ const matRotXZY = Fn( ([ angles ])=>{
 
 
 
+/*
 // generate ZXY rotation matrix
 const matRotZXY = Fn( ([ angles ])=>{
 
@@ -179,9 +176,11 @@ const matRotZXY = Fn( ([ angles ])=>{
 		{ name: 'angles', type: 'vec3' },
 	]
 } );
+*/
 
 
 
+/*
 // generate ZYX rotation matrix
 const matRotZYX = Fn( ([ angles ])=>{
 
@@ -198,9 +197,11 @@ const matRotZYX = Fn( ([ angles ])=>{
 		{ name: 'angles', type: 'vec3' },
 	]
 } );
+*/
 
 
 
+/*
 // generate scaling matrix
 const matScale = Fn( ([ scales ])=>{
 
@@ -217,20 +218,109 @@ const matScale = Fn( ([ scales ])=>{
 		{ name: 'scales', type: 'vec3' },
 	]
 } );
+*/
 
+
+
+// center model
+function centerModel( model ) {
+
+	var center = new Vector3();
+
+	new Box3().setFromObject( model, true ).getCenter( center );
+	model.position.sub( center );
+
+}
+
+
+
+// merge a mesh into its parent, taking into consideration
+// positions, orientations and scale. flattening occurs only
+// for elements with a single child mesh
+function flattenModel( model ) {
+
+	var meshes = [];
+
+	// extract meshes
+	model.traverse( ( mesh )=>{
+
+		if ( mesh.isMesh ) {
+
+			var geo = mesh.geometry.clone().applyMatrix4( mesh.matrixWorld );
+			var mat = mesh.material.clone();
+
+			meshes.push( new Mesh( geo, mat ) );
+
+		}
+
+	} );
+
+	// clear model
+	model.clear( );
+	model.position.set( 0, 0, 0 );
+	model.rotation.set( 0, 0, 0, 'XYZ' );
+	model.scale.set( 1, 1, 1 );
+
+	// add meshes
+	model.add( ...meshes );
+
+}
+
+
+
+// convert all model materials to Node materials
+// attach TSL functions for vertices, colors and emission
+function ennodeModel( model, posture, nodes ) {
+
+	model.traverse( ( child )=>{
+
+		if ( child.isMesh ) {
+
+			// convert the material into Node material
+			var material = new MeshStandardNodeMaterial();
+
+			// copy all properties from the original material
+			Object.assign( material, child.material );
+
+			material.metalness = 0;
+			material.roughness = 1;
+
+			if( nodes.colorNode )
+				material.colorNode = nodes.colorNode( );
+			
+			if( nodes.positionNode )
+				material.positionNode = nodes.positionNode( posture );
+			
+			if( nodes.emissiveNode )
+				material.emissiveNode = nodes.emissiveNode( posture );
+
+			child.material = material;
+
+		}
+
+	} );
+
+}
+
+
+
+// prepared a model for TSL rigging
+function processModel( model, posture, nodes ) {
+
+	flattenModel( model );
+	ennodeModel( model, posture, nodes );
+	centerModel( model );
+
+	return model;
+
+}
 
 
 
 export
 {
-	matRotX,
-	matRotY,
-	matRotZ,
 	matRotYXZ,
-	matRotYZX,
-	matRotZYX,
-	matRotZXY,
-	matRotXYZ,
 	matRotXZY,
-	matScale,
+	
+	processModel,
 };
