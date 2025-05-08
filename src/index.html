@@ -32,7 +32,7 @@ import { float, uniform, vec2, vec3, vec4 } from "three/tsl";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { createGui, scene } from "./disfigure-gui.js";
 import { tslColorNode, tslEmissiveNode, tslPositionNode } from "./disfigure.js";
-import { processModel } from "./utils.js";
+import { allPivotPoints, processModel } from "./utils.js";
 
 
 console.clear( );
@@ -64,6 +64,10 @@ new GLTFLoader().load( MODEL_URL, ( gltf ) => {
 
 	createGui( posture, model );
 
+	//	var pivots = allPivotPoints( posture );
+	//	model.add( pivots );
+
+
 	overModel.add( model );
 
 } );
@@ -90,7 +94,7 @@ var posture = {
 	chestTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	waistPos: vec3( 0, 2.1, 0 ),
-	waistSpan: vec2( 1.9, 2.4 ),
+	waistSpan: vec2( 1.9, 2.5 ),
 	waistTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	// LEGS
@@ -150,8 +154,8 @@ var posture = {
 	wristRightSpan: vec2( -0.67, -0.69 ),
 	wristRightTurn: uniform( vec3( 0, 0, 0 ) ),
 
-	armLeftPos: uniform( vec3( 0.17, 2.44, -0.06 ) ),
-	armLeftSpan: uniform( vec4( 0.115, 0.215, 2.315, 2.37 ) ),
+	armLeftPos: vec3( 0.17, 2.44, -0.06 ),
+	armLeftSpan: vec4( 0.115, 0.215, 2.315, 2.37 ),
 	armLeftTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	armRightPos: ( vec3( -0.17, 2.44, -0.06 ) ),
@@ -159,7 +163,6 @@ var posture = {
 	armRightTurn: uniform( vec3( 0, 0, 0 ) ),
 
 };
-
 
 	</script>
 </body>

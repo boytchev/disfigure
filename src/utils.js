@@ -8,7 +8,7 @@
 
 
 
-import { Box3, Mesh, MeshStandardNodeMaterial, Vector3 } from 'three';
+import { Box3, CanvasTexture, Group, Mesh, MeshStandardNodeMaterial, Sprite, SpriteMaterial, Vector3 } from 'three';
 import { Fn, mat3 } from 'three/tsl';
 
 
@@ -317,10 +317,78 @@ function processModel( model, posture, nodes ) {
 
 
 
+function markerMaterial( DOF ) {
+
+	var canvas = document.createElement( 'CANVAS' );
+	canvas.width = 64;
+	canvas.height = 64;
+
+	var context = canvas.getContext( '2d' );
+	context.lineWidth = 4;
+	context.strokeStyle = 'crimson';
+
+	for ( var i=DOF; i>0; i-- ) {
+
+		context.beginPath();
+		context.arc( 32, 32, 42-12*i, 0, 2*Math.PI );
+		context.stroke( );
+
+	}
+
+	return new SpriteMaterial( {
+		transparent: true,
+		opacity: 1,
+		depthTest: false,
+		map: new CanvasTexture( canvas ),
+	} );
+
+}
+
+
+
+function allPivotPoints( posture ) {
+
+	var pivots = new Group();
+	pivots.renderOrder = 10;
+
+
+	var positions = [
+		posture.headPos, posture.chestPos, posture.waistPos,
+		posture.kneeLeftPos, posture.kneeRightPos, posture.ankleLeftPos, posture.ankleRightPos,
+		posture.hipLeftPos, posture.hipRightPos, posture.legLeftPos, posture.legRightPos,
+		posture.elbowLeftPos, posture.elbowRightPos, posture.forearmLeftPos, posture.forearmRightPos,
+		posture.wristLeftPos, posture.wristRightPos, posture.armLeftPos, posture.armRightPos ];
+	var DOFs = [
+		3, 2, 3,
+		1, 1, 2, 2,
+		2, 2, 1, 1,
+		1, 1, 1, 1,
+		3, 3, 3, 3,
+	];
+
+	var pivot;
+	for ( var i in positions ) {
+
+		pivot = new Sprite( markerMaterial( DOFs[ i ]) );
+		pivot.position.copy( positions[ i ].value );
+		pivot.scale.setScalar( 0.05 );
+		pivots.add( pivot );
+
+	}
+
+	console.log( 'DOF =', DOFs.reduce( ( a, b )=>a+b ) );
+
+	return pivots;
+
+}
+
+
+
 export
 {
 	matRotYXZ,
 	matRotXZY,
 
 	processModel,
+	allPivotPoints,
 };

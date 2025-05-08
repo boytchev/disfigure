@@ -110,7 +110,7 @@ function createGui( postureData, modelObject ) {
 
 	folder = mfolder.addFolder( '&nbsp; &nbsp; Twist' );
 	folder.add( posture.headTurn.value, 'y', -1, 1 ).name( 'head' );
-	folder.add( posture.chestTurn.value, 'y', -0.7, 0.7 ).name( 'chest' );
+	//08.05.25 folder.add( posture.chestTurn.value, 'y', -0.7, 0.7 ).name( 'chest' );
 	folder.add( posture.waistTurn.value, 'y', -1, 1 ).name( 'waist' );
 
 	folder = mfolder.addFolder( '&nbsp; &nbsp; Side bend' );
@@ -126,9 +126,9 @@ function createGui( postureData, modelObject ) {
 	folder.add( posture.ankleLeftTurn.value, 'x', -1, 0.7 ).name( 'ankle' );
 
 	folder = mfolder.addFolder( '&nbsp; &nbsp; Twist' );
-	folder.add( posture.hipLeftTurn.value, 'y', -0.3, 0.3 ).name( 'hip' );
+	//08.05.25 folder.add( posture.hipLeftTurn.value, 'y', -0.3, 0.3 ).name( 'hip' );
 	folder.add( posture.legLeftTurn.value, 'y', -3, 3 ).name( 'leg' );
-	folder.add( posture.ankleLeftTurn.value, 'y', -0.75, 0.75 ).name( 'ankle' );
+	//08.05.25 folder.add( posture.ankleLeftTurn.value, 'y', -0.75, 0.75 ).name( 'ankle' );
 
 	folder = mfolder.addFolder( '&nbsp; &nbsp; Side bend' );
 	folder.add( posture.hipLeftTurn.value, 'z', -1.4, 0.2 ).name( 'hip' );
@@ -142,9 +142,9 @@ function createGui( postureData, modelObject ) {
 	folder.add( posture.ankleRightTurn.value, 'x', -1, 0.7 ).name( 'ankle' );
 
 	folder = mfolder.addFolder( '&nbsp; &nbsp; Twist' );
-	folder.add( posture.hipRightTurn.value, 'y', -0.3, 0.3 ).name( 'hip' );
+	//08.05.25 folder.add( posture.hipRightTurn.value, 'y', -0.3, 0.3 ).name( 'hip' );
 	folder.add( posture.legRightTurn.value, 'y', -3, 3 ).name( 'leg' );
-	folder.add( posture.ankleRightTurn.value, 'y', -0.75, 0.75 ).name( 'ankle' );
+	//08.05.25 folder.add( posture.ankleRightTurn.value, 'y', -0.75, 0.75 ).name( 'ankle' );
 
 	folder = mfolder.addFolder( '&nbsp; &nbsp; Side bend' );
 	folder.add( posture.hipRightTurn.value, 'z', -0.2, 1.4 ).name( 'hip' ); // swapped
@@ -200,7 +200,7 @@ function rigModel( time ) {
 
 	posture.chestTurn.value.set(
 		Math.cos( time*3 )/3,
-		Math.sin( time*1.2*2 )/2,
+		0, //08.05.25 Math.sin( time*1.2*2 )/2,
 		Math.cos( time*3*1.5 )/3
 	);
 
@@ -236,25 +236,25 @@ function rigModel( time ) {
 
 	posture.legLeftTurn.value.set(
 		0,
-		2*Math.cos( time*2.8 )-0.5,
+		Math.cos( time*2.8 )-0.25,
 		0,
 	);
 
 	posture.legRightTurn.value.set(
 		0,
-		2*Math.cos( time*2.3 )+0.5,
+		Math.cos( time*2.3 )+0.25,
 		0,
 	);
 
 	posture.hipLeftTurn.value.set(
 		( Math.cos( time*3 )/1.5+0.25 ),
-		0*Math.cos( time*2.8 )/4,
+		0, //08.05.25 Math.cos( time*2.8 ),///4,
 		-( Math.cos( time*2.2 )+1 )/4,
 	);
 
 	posture.hipRightTurn.value.set(
 		( Math.sin( time*2.2 )/1.5+0.25 ),
-		0*Math.sin( time*3.2 )/4,
+		0, //08.05.25 Math.sin( time*3.2 )/4,
 		( Math.sin( time*2.6 )+1 )/4,
 	);
 
