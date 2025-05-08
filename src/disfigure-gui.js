@@ -11,6 +11,9 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 
 
+const DEBUG = false;
+
+
 var scene = new THREE.Scene();
 scene.background = new THREE.Color( 'gainsboro' );
 
@@ -39,8 +42,6 @@ window.addEventListener( "resize", ( /*event*/ ) => {
 
 var controls = new OrbitControls( camera, renderer.domElement );
 controls.enableDamping = true;
-//controls.autoRotate = true;
-controls.autoRotateSpeed = 3;
 
 
 
@@ -75,26 +76,32 @@ function createGui( postureData, modelObject ) {
 	var gui = new lil.GUI();
 	gui.domElement.style.marginRight = 0;
 
-	var mfolder = gui.addFolder( 'DEBUG' ).close();
+	var mfolder = gui.addFolder( 'DEBUG' );
+	
+	if( !DEBUG ) mfolder.close();
 
 	mfolder.add( posture.select, 'value', {
 		Nothing: 0,
 		Head: 1, Chest: 2, Waist: 3,
 		Hip: 11, Leg: 12, Knee: 13, Ankle: 14,
 		Arm: 21, Elbow: 22, Forearm: 23, Wrist: 24,
-	} ).name( 'Mark area' ).onChange( showPivotPoint );
-	/*
-	mfolder.add( posture.armLeftPos.value, 'x', 0., 0.9 ).name( 'px' ).onChange( changePivotPoint );
-	mfolder.add( posture.armLeftPos.value, 'y', 2.0, 2.7 ).name( 'py' ).onChange( changePivotPoint );
-	mfolder.add( posture.armLeftPos.value, 'z', -0.5, 0.5 ).name( 'pz' ).onChange( changePivotPoint );
-	mfolder.add( posture.armLeftSpan.value, 'x', 0, 0.5 ).name( 'sx' ).onChange( changePivotPoint );
-	mfolder.add( posture.armLeftSpan.value, 'y', 0, 0.5 ).name( 'sy' ).onChange( changePivotPoint );
-*/
-	mfolder.add( posture.isolated, 'value', { Isolated: 0, Full: 1 } ).name( 'Mark stype' );
+	} ).name( 'Show' ).onChange( showPivotPoint );
+	
+	if( DEBUG )
+	{
+		mfolder.add( posture.hipLeftPos.value, 'x', 0., 1 ).name( 'px' ).onChange( changePivotPoint );
+		mfolder.add( posture.hipLeftPos.value, 'y', 1.0, 1.7 ).name( 'py' ).onChange( changePivotPoint );
+		mfolder.add( posture.hipLeftPos.value, 'z', -0.5, 0.5 ).name( 'pz' ).onChange( changePivotPoint );
+		mfolder.add( posture.hipLeftSpan.value, 'x', 1, 2 ).name( 'sx' ).onChange( changePivotPoint );
+		mfolder.add( posture.hipLeftSpan.value, 'y', 1, 2 ).name( 'sy' ).onChange( changePivotPoint );
+	}
+	
+	mfolder.add( posture.isolated, 'value', { Isolated: 0, Full: 1 } ).name( 'Isolated' );
 	mfolder.add( options, 'animate', false ).name( 'Animate' );
 
-	mfolder = gui.addFolder( 'TORSO' );//.close();
-
+	mfolder = gui.addFolder( 'TORSO' );
+	if( DEBUG ) mfolder.close();
+		
 	var folder = mfolder.addFolder( '&nbsp; &nbsp; Bend' );
 	folder.add( posture.headTurn.value, 'x', -0.7, 0.5 ).name( 'head' );
 	folder.add( posture.chestTurn.value, 'x', -0.7, 0.4 ).name( 'chest' );
@@ -330,11 +337,11 @@ function showPivotPoint( index ) {
 
 
 
-// function changePivotPoint( ) {
+function changePivotPoint( ) {
 
-// pivot.position.copy( posture.armLeftPos.value );
+	pivot.position.copy( posture.hipLeftPos.value );
 
-// }
+}
 
 
 
@@ -353,9 +360,10 @@ function animationLoop( t ) {
 renderer.setAnimationLoop( animationLoop );
 
 
-
-//setTimeout( ()=>{showPivotPoint(11)}, 500 );
-
+if( DEBUG )
+{
+	setTimeout( ()=>{showPivotPoint(11); changePivotPoint();}, 500 );
+}
 
 
 export { createGui, scene };

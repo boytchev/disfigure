@@ -282,8 +282,8 @@ function ennodeModel( model, posture, nodes ) {
 			// copy all properties from the original material
 			Object.assign( material, child.material );
 
-			material.metalness = 0;
-			material.roughness = 1;
+			material.metalness = 0.1;
+			material.roughness = 0;
 
 			if ( nodes.colorNode )
 				material.colorNode = nodes.colorNode( );

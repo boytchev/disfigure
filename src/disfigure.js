@@ -7,26 +7,6 @@ import { matRotXZY, matRotYXZ } from "./utils.js";
 
 
 
-/*
-function selectLeft( ) {
-
-	return positionGeometry.x.smoothstep( -0.02, 0.02 );
-
-}
-*/
-
-
-
-/*
-function selectRight( ) {
-
-	return positionGeometry.x.smoothstep( 0.02, -0.02 );
-
-}
-*/
-
-
-
 function selectWaist( { waistSpan } ) {
 
 	return positionGeometry.y.smoothstep( waistSpan.x, waistSpan.y );
@@ -104,9 +84,10 @@ function selectHipLeft( { hipLeftSpan } ) {
 	var x = positionGeometry.x;
 	var y = positionGeometry.y;
 
-	return y
-		.smoothstep( hipLeftSpan.x, hipLeftSpan.y )
-		.mul( x.sub( y.sub( 2 ) ).smoothstep( -0.1, 0.1 ).mul( x.smoothstep( -0.01, 0.01 ) ) );
+	return y.sub(x.mul(2))
+		.smoothstep( hipLeftSpan.z, hipLeftSpan.w.sub(x.mul(1.6)) )
+		.mul(y.smoothstep( hipLeftSpan.x, hipLeftSpan.y ))
+		.mul(x.smoothstep( -0.01, 0.01 ));
 
 } // inlined
 
@@ -117,9 +98,10 @@ function selectHipRight( { hipRightSpan } ) {
 	var x = positionGeometry.x;
 	var y = positionGeometry.y;
 
-	return y
-		.smoothstep( hipRightSpan.x, hipRightSpan.y )
-		.mul( x.add( y.sub( 2 ) ).smoothstep( 0.1, -0.1 ).mul( x.smoothstep( 0.01, -0.01 ) ) );
+	return y.add(x.mul(2))
+		.smoothstep( hipRightSpan.z, hipRightSpan.w.add(x.mul(1.6)) )
+		.mul(y.smoothstep( hipRightSpan.x, hipRightSpan.y ))
+		.mul(x.smoothstep( 0.01, -0.01 ));
 
 } // inlined
 
@@ -326,20 +308,20 @@ var tslEmissiveNode = Fn( ( posture )=>{
 		.add( selectKneeLeft( posture ).mul( select( s.equal( 13 ), 1, 0 ) ) )
 		.add( selectAnkleLeft( posture ).mul( select( s.equal( 14 ), 1, 0 ) ) )
 
-		.add( selectHipRight( posture ).mul( select( s.equal( 11 ), 1, 0 ) ) )
-		.add( selectLegRight( posture ).mul( select( s.equal( 12 ), 1, 0 ) ) )
-		.add( selectKneeRight( posture ).mul( select( s.equal( 13 ), 1, 0 ) ) )
-		.add( selectAnkleRight( posture ).mul( select( s.equal( 14 ), 1, 0 ) ) )
+		// .add( selectHipRight( posture ).mul( select( s.equal( 11 ), 1, 0 ) ) )
+		// .add( selectLegRight( posture ).mul( select( s.equal( 12 ), 1, 0 ) ) )
+		// .add( selectKneeRight( posture ).mul( select( s.equal( 13 ), 1, 0 ) ) )
+		// .add( selectAnkleRight( posture ).mul( select( s.equal( 14 ), 1, 0 ) ) )
 
 		.add( selectArmLeft( posture ).mul( select( s.equal( 21 ), 1, 0 ) ) )
 		.add( selectElbowLeft( posture ).mul( select( s.equal( 22 ), 1, 0 ) ) )
 		.add( selectForearmLeft( posture ).mul( select( s.equal( 23 ), 1, 0 ) ) )
 		.add( selectWristLeft( posture ).mul( select( s.equal( 24 ), 1, 0 ) ) )
 
-		.add( selectArmRight( posture ).mul( select( s.equal( 21 ), 1, 0 ) ) )
-		.add( selectElbowRight( posture ).mul( select( s.equal( 22 ), 1, 0 ) ) )
-		.add( selectForearmRight( posture ).mul( select( s.equal( 23 ), 1, 0 ) ) )
-		.add( selectWristRight( posture ).mul( select( s.equal( 24 ), 1, 0 ) ) )
+		// .add( selectArmRight( posture ).mul( select( s.equal( 21 ), 1, 0 ) ) )
+		// .add( selectElbowRight( posture ).mul( select( s.equal( 22 ), 1, 0 ) ) )
+		// .add( selectForearmRight( posture ).mul( select( s.equal( 23 ), 1, 0 ) ) )
+		// .add( selectWristRight( posture ).mul( select( s.equal( 24 ), 1, 0 ) ) )
 		.toVar( );
 
 	k.assign( select( posture.isolated.equal( 0 ),

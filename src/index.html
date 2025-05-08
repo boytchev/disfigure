@@ -39,6 +39,12 @@ console.clear( );
 
 
 const MODEL_URL = '../assets/models/mc-powerful-deep-chestnut-bougainvillea-t-pose.glb';
+//const MODEL_URL = '../assets/models/gwen_os.glb';
+//const MODEL_URL = '../assets/models/boy_zepeto.glb'; // broken?
+//const MODEL_URL = '../assets/models/casual_lowpoly_female_rig_t-pose.glb'; // orientation?
+//const MODEL_URL = '../assets/models/casual_lowpoly_male_rig_t-pose.glb'; // orientation?
+//const MODEL_URL = '../assets/models/skeleton_t_pose.glb'; // orientation?
+
 
 
 var overModel = new THREE.Object3D();
@@ -88,8 +94,8 @@ var posture = {
 	waistTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	// LEGS
-	kneeLeftPos: vec3( 0.08, 1.655, -0.01 ),
-	kneeLeftSpan: vec2( 1.7, 1.6 ),
+	kneeLeftPos: uniform( vec3( 0.08, 1.655, -0.01 ) ),
+	kneeLeftSpan: uniform( vec2( 1.7, 1.6 ) ),
 	kneeLeftTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	kneeRightPos: vec3( -0.08, 1.655, -0.01 ),
@@ -105,11 +111,11 @@ var posture = {
 	ankleRightTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	hipLeftPos: vec3( 0.052, 2, -0.04 ),
-	hipLeftSpan: vec2( 2.1, 1.9 ),
+	hipLeftSpan: vec4( 2.3, 1.9, 1.98, 1.85 ),
 	hipLeftTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	hipRightPos: vec3( -0.052, 2, -0.04 ),
-	hipRightSpan: vec2( 2.1, 1.9 ),
+	hipRightSpan: vec4( 2.3, 1.9, 1.98, 1.85 ),
 	hipRightTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	legLeftPos: vec3( 0.1, 2, -0.04 ),
