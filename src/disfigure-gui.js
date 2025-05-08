@@ -77,8 +77,8 @@ function createGui( postureData, modelObject ) {
 	gui.domElement.style.marginRight = 0;
 
 	var mfolder = gui.addFolder( 'DEBUG' );
-	
-	if( !DEBUG ) mfolder.close();
+
+	if ( !DEBUG ) mfolder.close();
 
 	mfolder.add( posture.select, 'value', {
 		Nothing: 0,
@@ -86,22 +86,23 @@ function createGui( postureData, modelObject ) {
 		Hip: 11, Leg: 12, Knee: 13, Ankle: 14,
 		Arm: 21, Elbow: 22, Forearm: 23, Wrist: 24,
 	} ).name( 'Show' ).onChange( showPivotPoint );
-	
-	if( DEBUG )
-	{
+
+	if ( DEBUG ) {
+
 		mfolder.add( posture.hipLeftPos.value, 'x', 0., 1 ).name( 'px' ).onChange( changePivotPoint );
 		mfolder.add( posture.hipLeftPos.value, 'y', 1.0, 1.7 ).name( 'py' ).onChange( changePivotPoint );
 		mfolder.add( posture.hipLeftPos.value, 'z', -0.5, 0.5 ).name( 'pz' ).onChange( changePivotPoint );
 		mfolder.add( posture.hipLeftSpan.value, 'x', 1, 2 ).name( 'sx' ).onChange( changePivotPoint );
 		mfolder.add( posture.hipLeftSpan.value, 'y', 1, 2 ).name( 'sy' ).onChange( changePivotPoint );
+
 	}
-	
+
 	mfolder.add( posture.isolated, 'value', { Isolated: 0, Full: 1 } ).name( 'Isolated' );
 	mfolder.add( options, 'animate', false ).name( 'Animate' );
 
 	mfolder = gui.addFolder( 'TORSO' );
-	if( DEBUG ) mfolder.close();
-		
+	if ( DEBUG ) mfolder.close();
+
 	var folder = mfolder.addFolder( '&nbsp; &nbsp; Bend' );
 	folder.add( posture.headTurn.value, 'x', -0.7, 0.5 ).name( 'head' );
 	folder.add( posture.chestTurn.value, 'x', -0.7, 0.4 ).name( 'chest' );
@@ -360,9 +361,14 @@ function animationLoop( t ) {
 renderer.setAnimationLoop( animationLoop );
 
 
-if( DEBUG )
-{
-	setTimeout( ()=>{showPivotPoint(11); changePivotPoint();}, 500 );
+if ( DEBUG ) {
+
+	setTimeout( ()=>{
+
+		showPivotPoint( 11 ); changePivotPoint();
+
+	}, 500 );
+
 }
 
 
