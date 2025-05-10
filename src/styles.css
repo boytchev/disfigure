@@ -1,0 +1,59 @@
+﻿body {
+	margin: 0;
+	font-family:Roboto;
+}
+
+.padded {
+	text-align: right;
+	padding-right: 0.5em;
+	color: gray;
+}
+
+.border {
+	border-top: dotted #404040 1px;
+}
+
+.icon {
+	display: inline-block;
+	min-width: 1em;
+	text-align: center;
+	color: orange;
+	font-size: 1.7em;
+}
+
+header {
+	position: absolute;
+	z-index: 10;
+	margin-top: 0;
+	margin-left: 1em;
+	text-shadow: 0 0 2px gainsboro;
+}
+
+header h1 {
+	font-size: 1.25em;
+	margin-bottom: 0.15em;
+	font-weight: normal;
+}
+
+header h2 {
+	font-size: 1em;
+	margin: 0;
+	font-weight: 500;
+}
+
+header h3 {
+	color: dimgray;
+	font-size: 0.85em;
+	margin: 0;
+	font-weight: 300;
+	text-shadow: none;
+}
+
+header h3 a {
+	color: dimgray;
+	text-decoration: none;
+}
+
+header h3 a:hover {
+	color: navy;
+}

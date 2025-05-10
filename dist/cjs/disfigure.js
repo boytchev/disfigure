@@ -1,4 +1,4 @@
-// disfigure v0.0.2
+// disfigure v0.0.3
 
 'use strict';
 
@@ -424,7 +424,7 @@ var jointRotate2= tsl.Fn( ([ pos, center, angle, amount ])=>{
 
 
 
-var tslPositionNode = tsl.Fn( ( posture )=>{
+var tslPositionNode = tsl.Fn( ( { skeleton, posture } )=>{
 
 	var p = tsl.positionGeometry.toVar();
 
@@ -432,14 +432,14 @@ var tslPositionNode = tsl.Fn( ( posture )=>{
 
 	// LEFT-UPPER BODY
 
-	var armLeft = selectArmLeft( posture ).toVar();
+	var armLeft = selectArmLeft( skeleton ).toVar();
 
 	tsl.If( armLeft.greaterThan( 0 ), ()=>{
 
-		p.assign( jointRotate( p, posture.wristLeftPos, posture.wristLeftTurn, selectWristLeft( posture ) ) );
-		p.assign( jointRotate( p, posture.forearmLeftPos, posture.forearmLeftTurn, selectForearmLeft( posture ) ) );
-		p.assign( jointRotate( p, posture.elbowLeftPos, posture.elbowLeftTurn, selectElbowLeft( posture ) ) );
-		p.assign( jointRotate2( p, posture.armLeftPos, posture.armLeftTurn, armLeft ) );
+		p.assign( jointRotate( p, skeleton.wristLeftPos, posture.wristLeftTurn, selectWristLeft( skeleton ) ) );
+		p.assign( jointRotate( p, skeleton.forearmLeftPos, posture.forearmLeftTurn, selectForearmLeft( skeleton ) ) );
+		p.assign( jointRotate( p, skeleton.elbowLeftPos, posture.elbowLeftTurn, selectElbowLeft( skeleton ) ) );
+		p.assign( jointRotate2( p, skeleton.armLeftPos, posture.armLeftTurn, armLeft ) );
 
 	} );
 
@@ -447,14 +447,14 @@ var tslPositionNode = tsl.Fn( ( posture )=>{
 
 	// RIGHT-UPPER BODY
 
-	var armRight = selectArmRight( posture ).toVar();
+	var armRight = selectArmRight( skeleton ).toVar();
 
 	tsl.If( armRight.greaterThan( 0 ), ()=>{
 
-		p.assign( jointRotate( p, posture.wristRightPos, posture.wristRightTurn, selectWristRight( posture ) ) );
-		p.assign( jointRotate( p, posture.forearmRightPos, posture.forearmRightTurn, selectForearmRight( posture ) ) );
-		p.assign( jointRotate( p, posture.elbowRightPos, posture.elbowRightTurn, selectElbowRight( posture ) ) );
-		p.assign( jointRotate2( p, posture.armRightPos, posture.armRightTurn, armRight ) );
+		p.assign( jointRotate( p, skeleton.wristRightPos, posture.wristRightTurn, selectWristRight( skeleton ) ) );
+		p.assign( jointRotate( p, skeleton.forearmRightPos, posture.forearmRightTurn, selectForearmRight( skeleton ) ) );
+		p.assign( jointRotate( p, skeleton.elbowRightPos, posture.elbowRightTurn, selectElbowRight( skeleton ) ) );
+		p.assign( jointRotate2( p, skeleton.armRightPos, posture.armRightTurn, armRight ) );
 
 	} );
 
@@ -462,23 +462,23 @@ var tslPositionNode = tsl.Fn( ( posture )=>{
 
 	// CENTRAL BODY AXIS
 
-	p.assign( jointRotate( p, posture.headPos, posture.headTurn, selectHead( posture ) ) );
-	p.assign( jointRotate( p, posture.chestPos, posture.chestTurn, selectChest( posture ) ) );
-	p.assign( jointRotate( p, posture.waistPos, posture.waistTurn, selectWaist( posture ) ) );
+	p.assign( jointRotate( p, skeleton.headPos, posture.headTurn, selectHead( skeleton ) ) );
+	p.assign( jointRotate( p, skeleton.chestPos, posture.chestTurn, selectChest( skeleton ) ) );
+	p.assign( jointRotate( p, skeleton.waistPos, posture.waistTurn, selectWaist( skeleton ) ) );
 
 
 
 	// LEFT-LOWER BODY
 
-	var hipLeft = selectHipLeft( posture ).toVar();
+	var hipLeft = selectHipLeft( skeleton ).toVar();
 
 	tsl.If( hipLeft.greaterThan( 0 ), ()=>{
 
-		p.assign( jointRotate( p, posture.ankleLeftPos, posture.ankleLeftTurn, selectAnkleLeft( posture ) ) );
-		p.assign( jointRotate( p, posture.legLeftPos, posture.legLeftTurn, selectLegLeft( posture ) ) );
-		p.assign( jointRotate( p, posture.kneeLeftPos, posture.kneeLeftTurn, selectKneeLeft( posture ) ) );
-		p.assign( jointRotateLeg( p, posture.hip2LeftPos, posture.hip2LeftTurn, selectHip2Left( posture ) ) );
-		p.assign( jointRotateLeg( p, posture.hipLeftPos, posture.hipLeftTurn, hipLeft ) );
+		p.assign( jointRotate( p, skeleton.ankleLeftPos, posture.ankleLeftTurn, selectAnkleLeft( skeleton ) ) );
+		p.assign( jointRotate( p, skeleton.legLeftPos, posture.legLeftTurn, selectLegLeft( skeleton ) ) );
+		p.assign( jointRotate( p, skeleton.kneeLeftPos, posture.kneeLeftTurn, selectKneeLeft( skeleton ) ) );
+		p.assign( jointRotateLeg( p, skeleton.hip2LeftPos, posture.hip2LeftTurn, selectHip2Left( skeleton ) ) );
+		p.assign( jointRotateLeg( p, skeleton.hipLeftPos, posture.hipLeftTurn, hipLeft ) );
 
 	} );
 
@@ -486,15 +486,15 @@ var tslPositionNode = tsl.Fn( ( posture )=>{
 
 	// RIGHT-LOWER BODY
 
-	var hipRight = selectHipRight( posture ).toVar();
+	var hipRight = selectHipRight( skeleton ).toVar();
 
 	tsl.If( hipRight.greaterThan( 0 ), ()=>{
 
-		p.assign( jointRotate( p, posture.ankleRightPos, posture.ankleRightTurn, selectAnkleRight( posture ) ) );
-		p.assign( jointRotate( p, posture.legRightPos, posture.legRightTurn, selectLegRight( posture ) ) );
-		p.assign( jointRotate( p, posture.kneeRightPos, posture.kneeRightTurn, selectKneeRight( posture ) ) );
-		p.assign( jointRotateLeg( p, posture.hip2RightPos, posture.hip2RightTurn, selectHip2Right( posture ) ) );
-		p.assign( jointRotateLeg( p, posture.hipRightPos, posture.hipRightTurn, hipRight ) );
+		p.assign( jointRotate( p, skeleton.ankleRightPos, posture.ankleRightTurn, selectAnkleRight( skeleton ) ) );
+		p.assign( jointRotate( p, skeleton.legRightPos, posture.legRightTurn, selectLegRight( skeleton ) ) );
+		p.assign( jointRotate( p, skeleton.kneeRightPos, posture.kneeRightTurn, selectKneeRight( skeleton ) ) );
+		p.assign( jointRotateLeg( p, skeleton.hip2RightPos, posture.hip2RightTurn, selectHip2Right( skeleton ) ) );
+		p.assign( jointRotateLeg( p, skeleton.hipRightPos, posture.hipRightTurn, hipRight ) );
 
 	} );
 
@@ -506,33 +506,33 @@ var tslPositionNode = tsl.Fn( ( posture )=>{
 
 // dubug function used to mark areas on the 3D model
 
-var tslEmissiveNode = tsl.Fn( ( posture )=>{
+var tslEmissiveNode = tsl.Fn( ( { skeleton, posture } )=>{
 
 	var s = posture.select;
 	var k = tsl.float( 0 )
-		.add( selectHead( posture ).mul( tsl.select( s.equal( 1 ), 1, 0 ) ) )
-		.add( selectChest( posture ).mul( tsl.select( s.equal( 2 ), 1, 0 ) ) )
-		.add( selectWaist( posture ).mul( tsl.select( s.equal( 3 ), 1, 0 ) ) )
+		.add( selectHead( skeleton ).mul( tsl.select( s.equal( 1 ), 1, 0 ) ) )
+		.add( selectChest( skeleton ).mul( tsl.select( s.equal( 2 ), 1, 0 ) ) )
+		.add( selectWaist( skeleton ).mul( tsl.select( s.equal( 3 ), 1, 0 ) ) )
 
-		.add( selectHipLeft( posture ).mul( tsl.select( s.equal( 11 ), 1, 0 ) ) )
-		.add( selectLegLeft( posture ).mul( tsl.select( s.equal( 12 ), 1, 0 ) ) )
-		.add( selectKneeLeft( posture ).mul( tsl.select( s.equal( 13 ), 1, 0 ) ) )
-		.add( selectAnkleLeft( posture ).mul( tsl.select( s.equal( 14 ), 1, 0 ) ) )
+		.add( selectHipLeft( skeleton ).mul( tsl.select( s.equal( 11 ), 1, 0 ) ) )
+		.add( selectLegLeft( skeleton ).mul( tsl.select( s.equal( 12 ), 1, 0 ) ) )
+		.add( selectKneeLeft( skeleton ).mul( tsl.select( s.equal( 13 ), 1, 0 ) ) )
+		.add( selectAnkleLeft( skeleton ).mul( tsl.select( s.equal( 14 ), 1, 0 ) ) )
 
-	// .add( selectHipRight( posture ).mul( select( s.equal( 11 ), 1, 0 ) ) )
-	// .add( selectLegRight( posture ).mul( select( s.equal( 12 ), 1, 0 ) ) )
-	// .add( selectKneeRight( posture ).mul( select( s.equal( 13 ), 1, 0 ) ) )
-	// .add( selectAnkleRight( posture ).mul( select( s.equal( 14 ), 1, 0 ) ) )
+	// .add( selectHipRight( skeleton ).mul( select( s.equal( 11 ), 1, 0 ) ) )
+	// .add( selectLegRight( skeleton ).mul( select( s.equal( 12 ), 1, 0 ) ) )
+	// .add( selectKneeRight( skeleton ).mul( select( s.equal( 13 ), 1, 0 ) ) )
+	// .add( selectAnkleRight( skeleton ).mul( select( s.equal( 14 ), 1, 0 ) ) )
 
-		.add( selectArmLeft( posture ).mul( tsl.select( s.equal( 21 ), 1, 0 ) ) )
-		.add( selectElbowLeft( posture ).mul( tsl.select( s.equal( 22 ), 1, 0 ) ) )
-		.add( selectForearmLeft( posture ).mul( tsl.select( s.equal( 23 ), 1, 0 ) ) )
-		.add( selectWristLeft( posture ).mul( tsl.select( s.equal( 24 ), 1, 0 ) ) )
+		.add( selectArmLeft( skeleton ).mul( tsl.select( s.equal( 21 ), 1, 0 ) ) )
+		.add( selectElbowLeft( skeleton ).mul( tsl.select( s.equal( 22 ), 1, 0 ) ) )
+		.add( selectForearmLeft( skeleton ).mul( tsl.select( s.equal( 23 ), 1, 0 ) ) )
+		.add( selectWristLeft( skeleton ).mul( tsl.select( s.equal( 24 ), 1, 0 ) ) )
 
-		// .add( selectArmRight( posture ).mul( select( s.equal( 21 ), 1, 0 ) ) )
-		// .add( selectElbowRight( posture ).mul( select( s.equal( 22 ), 1, 0 ) ) )
-		// .add( selectForearmRight( posture ).mul( select( s.equal( 23 ), 1, 0 ) ) )
-		// .add( selectWristRight( posture ).mul( select( s.equal( 24 ), 1, 0 ) ) )
+		// .add( selectArmRight( skeleton ).mul( select( s.equal( 21 ), 1, 0 ) ) )
+		// .add( selectElbowRight( skeleton ).mul( select( s.equal( 22 ), 1, 0 ) ) )
+		// .add( selectForearmRight( skeleton ).mul( select( s.equal( 23 ), 1, 0 ) ) )
+		// .add( selectWristRight( skeleton ).mul( select( s.equal( 24 ), 1, 0 ) ) )
 		.toVar( );
 
 	k.assign( tsl.select( posture.isolated.equal( 0 ),
@@ -564,6 +564,43 @@ var tslColorNode = tsl.Fn( ()=>{
 
 } );
 
+
+
+function tslPosture( ) {
+
+	return {
+
+		// TORSO
+		headTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		chestTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		waistTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+
+		// LEGS
+		kneeLeftTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		kneeRightTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		ankleLeftTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		ankleRightTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		hipLeftTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		hip2LeftTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		hipRightTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		hip2RightTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		legLeftTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		legRightTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+
+		// ARMS
+		elbowLeftTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		elbowRightTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		forearmLeftTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		forearmRightTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		wristLeftTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		wristRightTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		armLeftTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+		armRightTurn: tsl.uniform( tsl.vec3( 0, 0, 0 ) ),
+	};
+
+}
+
 exports.tslColorNode = tslColorNode;
 exports.tslEmissiveNode = tslEmissiveNode;
 exports.tslPositionNode = tslPositionNode;
+exports.tslPosture = tslPosture;

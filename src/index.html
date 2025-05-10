@@ -7,12 +7,14 @@
 <head>
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 
-	<style>
-		body { margin: 0 }
-		.padded { text-align: right; padding-right: 0.5em; color: gray;}
-		.border { border-top: dotted #404040 1px;}
-		.icon { display:inline-block; min-width:1em; text-align: center; color: orange; font-size: 1.7em; }
-	</style>
+	<link rel="shortcut icon" href="../assets/logo/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
+	
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+	<link rel="stylesheet" href="styles.css">
 	
 	<script type="importmap">
 	  {
@@ -28,10 +30,16 @@
 
 
 <body>
+	<header>
+		<h1><b>Disfigure</b> Posture Editor</h1>
+		<!--h3><a href="https://boytchev.github.io/disfigure/">Disfigure</a></h3-->
+	</header>
+
+	
 	<script type="module">
 
 import * as THREE from "three";
-import { float, uniform, vec2, vec3, vec4 } from "three/tsl";
+import { uniform, vec2, vec3, vec4 } from "three/tsl";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { createGui, scene } from "./disfigure-gui.js";
 import { tslColorNode, tslEmissiveNode, tslPositionNode, tslPosture } from "./disfigure.js";
