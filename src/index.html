@@ -34,7 +34,7 @@ import * as THREE from "three";
 import { float, uniform, vec2, vec3, vec4 } from "three/tsl";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { createGui, scene } from "./disfigure-gui.js";
-import { tslColorNode, tslEmissiveNode, tslPositionNode } from "./disfigure.js";
+import { tslColorNode, tslEmissiveNode, tslPositionNode, tslPosture } from "./disfigure.js";
 import { processModel } from "./utils.js";
 
 
@@ -56,8 +56,11 @@ scene.add( overModel );
 
 new GLTFLoader().load( MODEL_URL, ( gltf ) => {
 
+	var posture = tslPosture( );
+
 	var model = processModel(
 		gltf.scene,
+		skeleton,
 		posture,
 		{
 			positionNode: tslPositionNode, // rigging
@@ -65,7 +68,7 @@ new GLTFLoader().load( MODEL_URL, ( gltf ) => {
 			emissiveNode: tslEmissiveNode, // optional debug marking
 		} );
 
-	createGui( posture, model );
+	createGui( skeleton, posture, model );
 
 	overModel.add( model );
 
@@ -75,99 +78,74 @@ new GLTFLoader().load( MODEL_URL, ( gltf ) => {
 
 
 
-var posture = {
-
-	// debug section
-	select: uniform( float( 0 ) ),
-	isolated: uniform( float( 1 ) ), // 0 or 1
-
-	// normal section
+var skeleton = {
 
 	// TORSO
 	headPos: vec3( 0, 2.56, -0.02 ),
 	headSpan: vec2( 2.51, 2.64 ),
-	headTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	chestPos: vec3( 0, 2.3, 0 ),
 	chestSpan: vec2( 2.1, 2.4 ),
-	chestTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	waistPos: vec3( 0, 2.1, 0 ),
 	waistSpan: vec2( 1.9, 2.5 ),
-	waistTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	// LEGS
 	kneeLeftPos: uniform( vec3( 0.08, 1.655, -0.01 ) ),
 	kneeLeftSpan: uniform( vec2( 1.7, 1.6 ) ),
-	kneeLeftTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	kneeRightPos: vec3( -0.08, 1.655, -0.01 ),
 	kneeRightSpan: vec2( 1.7, 1.6 ),
-	kneeRightTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	ankleLeftPos: vec3( 0.085, 1.3, -0.04 ),
 	ankleLeftSpan: vec2( 1.325, 1.265 ),
-	ankleLeftTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	ankleRightPos: vec3( -0.085, 1.3, -0.04 ),
 	ankleRightSpan: vec2( 1.325, 1.265 ),
-	ankleRightTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	hipLeftPos: vec3( 0.052, 2, -0.04 ),
 	hipLeftSpan: vec4( 2.3, 1.9, 1.98, 1.85 ),
-	hipLeftTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	hip2LeftPos: uniform( vec3( 0.011, 2, 0.01 ) ),
 	hip2LeftSpan: uniform( vec4( 2, 1.5 ) ),
-	hip2LeftTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	hipRightPos: vec3( -0.052, 2, -0.04 ),
 	hipRightSpan: vec4( 2.3, 1.9, 1.98, 1.85 ),
-	hipRightTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	hip2RightPos: uniform( vec3( -0.011, 2, 0.01 ) ),
 	hip2RightSpan: uniform( vec4( 2, 1.5 ) ),
-	hip2RightTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	legLeftPos: vec3( 0.1, 2, -0.04 ),
 	legLeftSpan: vec2( 1.9, 0.4 ),
-	legLeftTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	legRightPos: vec3( -0.1, 2, -0.04 ),
 	legRightSpan: vec2( 2.1, 0.4 ),
-	legRightTurn: uniform( vec3( 0, 0, 0 ) ),
+
+	// ARMS
 
 	elbowLeftPos: vec3( 0.42, 2.46, -0.05 ),
 	elbowLeftSpan: vec2( 0.39, 0.46 ),
-	elbowLeftTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	elbowRightPos: vec3( -0.42, 2.46, -0.05 ),
 	elbowRightSpan: vec2( -0.39, -0.46 ),
-	elbowRightTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	forearmLeftPos: vec3( 0.42, 2.46, -0.05 ),
 	forearmLeftSpan: vec2( 0.30, 0.70 ),
-	forearmLeftTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	forearmRightPos: vec3( -0.42, 2.46, -0.05 ),
 	forearmRightSpan: vec2( -0.30, -0.70 ),
-	forearmRightTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	wristLeftPos: vec3( 0.68, 2.45, -0.06 ),
 	wristLeftSpan: vec2( 0.67, 0.69 ),
-	wristLeftTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	wristRightPos: vec3( -0.68, 2.45, -0.06 ),
 	wristRightSpan: vec2( -0.67, -0.69 ),
-	wristRightTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	armLeftPos: vec3( 0.17, 2.44, -0.06 ),
 	armLeftSpan: vec4( 0.115, 0.215, 2.315, 2.37 ),
-	armLeftTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	armRightPos: ( vec3( -0.17, 2.44, -0.06 ) ),
 	armRightSpan: ( vec4( -0.115, -0.215, 2.315, 2.37 ) ),
-	armRightTurn: uniform( vec3( 0, 0, 0 ) ),
 
 };
 

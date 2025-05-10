@@ -263,7 +263,7 @@ function flattenModel( model ) {
 
 // convert all model materials to Node materials
 // attach TSL functions for vertices, colors and emission
-function ennodeModel( model, posture, nodes ) {
+function ennodeModel( model, skeleton, posture, nodes ) {
 
 	model.traverse( ( child )=>{
 
@@ -282,10 +282,10 @@ function ennodeModel( model, posture, nodes ) {
 				material.colorNode = nodes.colorNode( );
 
 			if ( nodes.positionNode )
-				material.positionNode = nodes.positionNode( posture );
+				material.positionNode = nodes.positionNode( { skeleton: skeleton, posture: posture } );
 
 			if ( nodes.emissiveNode )
-				material.emissiveNode = nodes.emissiveNode( posture );
+				material.emissiveNode = nodes.emissiveNode( { skeleton: skeleton, posture: posture } );
 
 			child.material = material;
 
@@ -298,10 +298,10 @@ function ennodeModel( model, posture, nodes ) {
 
 
 // prepared a model for TSL rigging
-function processModel( model, posture, nodes ) {
+function processModel( model, skeleton, posture, nodes ) {
 
 	flattenModel( model );
-	ennodeModel( model, posture, nodes );
+	ennodeModel( model, skeleton, posture, nodes );
 	centerModel( model );
 
 	return model;

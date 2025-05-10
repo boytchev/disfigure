@@ -1,7 +1,11 @@
-v0.0.2
-  - fixed legs disfiguring
+v0.0.4
+  - posture split into skeleton and posture
 
 v0.0.3
   - added banner
   - improved (slightly) leg motion
   - simplified GUI
+
+v0.0.2
+  - fixed legs disfiguring
+

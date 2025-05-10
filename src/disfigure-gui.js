@@ -8,6 +8,7 @@
 import * as THREE from "three";
 import * as lil from "three/addons/libs/lil-gui.module.min.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { float, uniform } from "three/tsl";
 
 
 
@@ -66,11 +67,16 @@ var options = {
 
 
 var posture = {};
+var skeleton = {};
 var model = new THREE.Group();
 
-function createGui( postureData, modelObject ) {
+function createGui( skeletonData, postureData, modelObject ) {
+
+	skeleton = skeletonData;
 
 	posture = postureData;
+	posture.select = uniform( float( 0 ) );
+	posture.isolated = uniform( float( 1 ) ); // 0 or 1
 	model = modelObject;
 
 
@@ -327,20 +333,20 @@ function showPivotPoint( index ) {
 	model.add( pivot );
 	switch ( index ) {
 
-		case 1: pivot.position.copy( posture.headPos.value ); break;
-		case 2: pivot.position.copy( posture.chestPos.value ); break;
-		case 3: pivot.position.copy( posture.waistPos.value ); break;
+		case 1: pivot.position.copy( skeleton.headPos.value ); break;
+		case 2: pivot.position.copy( skeleton.chestPos.value ); break;
+		case 3: pivot.position.copy( skeleton.waistPos.value ); break;
 
-		case 11: pivot.position.copy( posture.hipLeftPos.value ); break;
-		case 15: pivot.position.copy( posture.hip2LeftPos.value ); break;
-		case 12: pivot.position.copy( posture.legLeftPos.value ); break;
-		case 13: pivot.position.copy( posture.kneeLeftPos.value ); break;
-		case 14: pivot.position.copy( posture.ankleLeftPos.value ); break;
+		case 11: pivot.position.copy( skeleton.hipLeftPos.value ); break;
+		case 15: pivot.position.copy( skeleton.hip2LeftPos.value ); break;
+		case 12: pivot.position.copy( skeleton.legLeftPos.value ); break;
+		case 13: pivot.position.copy( skeleton.kneeLeftPos.value ); break;
+		case 14: pivot.position.copy( skeleton.ankleLeftPos.value ); break;
 
-		case 21: pivot.position.copy( posture.armLeftPos.value ); break;
-		case 22: pivot.position.copy( posture.elbowLeftPos.value ); break;
-		case 23: pivot.position.copy( posture.forearmLeftPos.value ); break;
-		case 24: pivot.position.copy( posture.wristLeftPos.value ); break;
+		case 21: pivot.position.copy( skeleton.armLeftPos.value ); break;
+		case 22: pivot.position.copy( skeleton.elbowLeftPos.value ); break;
+		case 23: pivot.position.copy( skeleton.forearmLeftPos.value ); break;
+		case 24: pivot.position.copy( skeleton.wristLeftPos.value ); break;
 
 		default: model.remove( pivot );
 
