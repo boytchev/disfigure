@@ -73,6 +73,7 @@ function createGui( postureData, modelObject ) {
 	posture = postureData;
 	model = modelObject;
 
+
 	var gui = new lil.GUI();
 	gui.domElement.style.marginRight = 0;
 
@@ -83,7 +84,7 @@ function createGui( postureData, modelObject ) {
 	mfolder.add( posture.select, 'value', {
 		Nothing: 0,
 		Head: 1, Chest: 2, Waist: 3,
-		Hip: 11, Leg: 12, Knee: 13, Ankle: 14,
+		Hip: 11, Hip2: 15, Leg: 12, Knee: 13, Ankle: 14,
 		Arm: 21, Elbow: 22, Forearm: 23, Wrist: 24,
 	} ).name( 'Show' ).onChange( showPivotPoint );
 
@@ -100,89 +101,88 @@ function createGui( postureData, modelObject ) {
 	mfolder.add( posture.isolated, 'value', { Isolated: 0, Full: 1 } ).name( 'Isolated' );
 	mfolder.add( options, 'animate', false ).name( 'Animate' );
 
-	mfolder = gui.addFolder( 'TORSO' );
-	if ( DEBUG ) mfolder.close();
+	function html( name, icon, classes='' ) {
 
-	var folder = mfolder.addFolder( '&nbsp; &nbsp; Bend' );
-	folder.add( posture.headTurn.value, 'x', -0.7, 0.5 ).name( 'head' );
-	folder.add( posture.chestTurn.value, 'x', -0.7, 0.4 ).name( 'chest' );
-	folder.add( posture.waistTurn.value, 'x', -1.0, 0.6 ).name( 'waist' );
+		return `<div class="padded ${classes}">${name} &nbsp; <span class="icon">${icon}</span></div>`;
 
-	folder = mfolder.addFolder( '&nbsp; &nbsp; Twist' );
-	folder.add( posture.headTurn.value, 'y', -1, 1 ).name( 'head' );
-	//08.05.25 folder.add( posture.chestTurn.value, 'y', -0.7, 0.7 ).name( 'chest' );
-	folder.add( posture.waistTurn.value, 'y', -1, 1 ).name( 'waist' );
+	}
 
-	folder = mfolder.addFolder( '&nbsp; &nbsp; Side bend' );
-	folder.add( posture.headTurn.value, 'z', -0.5, 0.5 ).name( 'head' );
-	folder.add( posture.chestTurn.value, 'z', -0.5, 0.5 ).name( 'chest' );
-	folder.add( posture.waistTurn.value, 'z', -0.5, 0.5 ).name( 'waist' );
+
+	mfolder = gui.addFolder( 'TORSO' );//.close();
+	{
+
+		mfolder.add( posture.headTurn.value, 'x', -0.7, 0.5 ).name( html( 'Head', '&#x2195;' ) );
+		mfolder.add( posture.headTurn.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21B6;' ) );
+		mfolder.add( posture.headTurn.value, 'y', -1, 1 ).name( html( '', '&#x2194;' ) );
+
+		mfolder.add( posture.chestTurn.value, 'x', -0.7, 0.4 ).name( html( 'Chest', '&#x2195;', 'border' ) );
+		mfolder.add( posture.chestTurn.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21B6;' ) );
+
+		mfolder.add( posture.waistTurn.value, 'x', -1.0, 0.6 ).name( html( 'Waist', '&#x2195;', 'border' ) );
+		mfolder.add( posture.waistTurn.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21B6;' ) );
+		mfolder.add( posture.waistTurn.value, 'y', -1, 1 ).name( html( '', '&#x2194;' ) );
+
+	}
 
 	mfolder = gui.addFolder( 'LEFT LEG' ).close();
+	{
 
-	var folder = mfolder.addFolder( '&nbsp; &nbsp; Bend' );
-	folder.add( posture.hipLeftTurn.value, 'x', -0.5, 1.5 ).name( 'hip' );
-	folder.add( posture.kneeLeftTurn.value, 'x', -2.6, 0 ).name( 'knee' );
-	folder.add( posture.ankleLeftTurn.value, 'x', -1, 0.7 ).name( 'ankle' );
+		mfolder.add( posture.hipLeftTurn.value, 'x', -0.6, 2.7 ).name( html( 'Leg', '&#x2195;' ) );
+		mfolder.add( posture.hipLeftTurn.value, 'z', -2.4, 0.2 ).name( html( '', '&#x21BA;' ) );
+		mfolder.add( posture.hip2LeftTurn.value, 'y', -1.4, 1.4 ).name( html( '', '&#x2194;' ) );
 
-	folder = mfolder.addFolder( '&nbsp; &nbsp; Twist' );
-	//08.05.25 folder.add( posture.hipLeftTurn.value, 'y', -0.3, 0.3 ).name( 'hip' );
-	folder.add( posture.legLeftTurn.value, 'y', -3, 3 ).name( 'leg' );
-	//08.05.25 folder.add( posture.ankleLeftTurn.value, 'y', -0.75, 0.75 ).name( 'ankle' );
+		mfolder.add( posture.kneeLeftTurn.value, 'x', -2.6, 0 ).name( html( 'Knee', '&#x2195;', 'border' ) );
 
-	folder = mfolder.addFolder( '&nbsp; &nbsp; Side bend' );
-	folder.add( posture.hipLeftTurn.value, 'z', -1.4, 0.2 ).name( 'hip' );
-	folder.add( posture.ankleLeftTurn.value, 'z', -0.5, 0.5 ).name( 'ankle' );
+		mfolder.add( posture.ankleLeftTurn.value, 'x', -1, 0.7 ).name( html( 'Ankle', '&#x2195;', 'border' ) );
+		mfolder.add( posture.legLeftTurn.value, 'y', -3, 3 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.ankleLeftTurn.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21BA;' ) );
+
+	}
 
 	mfolder = gui.addFolder( 'RIGHT LEG' ).close();
+	{
 
-	var folder = mfolder.addFolder( '&nbsp; &nbsp; Bend' );
-	folder.add( posture.hipRightTurn.value, 'x', -0.5, 1.5 ).name( 'hip' );
-	folder.add( posture.kneeRightTurn.value, 'x', -2.6, 0 ).name( 'knee' );
-	folder.add( posture.ankleRightTurn.value, 'x', -1, 0.7 ).name( 'ankle' );
+		mfolder.add( posture.hipRightTurn.value, 'x', -0.6, 2.7 ).name( html( 'Leg', '&#x2195;' ) );
+		mfolder.add( posture.hipRightTurn.value, 'z', -0.2, 2.4 ).name( html( '', '&#x21BB;' ) ); // swapped
+		mfolder.add( posture.hip2RightTurn.value, 'y', -1.4, 1.4 ).name( html( '', '&#x2194;' ) );
 
-	folder = mfolder.addFolder( '&nbsp; &nbsp; Twist' );
-	//08.05.25 folder.add( posture.hipRightTurn.value, 'y', -0.3, 0.3 ).name( 'hip' );
-	folder.add( posture.legRightTurn.value, 'y', -3, 3 ).name( 'leg' );
-	//08.05.25 folder.add( posture.ankleRightTurn.value, 'y', -0.75, 0.75 ).name( 'ankle' );
+		mfolder.add( posture.kneeRightTurn.value, 'x', -2.6, 0 ).name( html( 'Knee', '&#x2195;', 'border' ) );
 
-	folder = mfolder.addFolder( '&nbsp; &nbsp; Side bend' );
-	folder.add( posture.hipRightTurn.value, 'z', -0.2, 1.4 ).name( 'hip' ); // swapped
-	folder.add( posture.ankleRightTurn.value, 'z', -0.5, 0.5 ).name( 'ankle' );
+		mfolder.add( posture.ankleRightTurn.value, 'x', -1, 0.7 ).name( html( 'Ankle', '&#x2195;', 'border' ) );
+		mfolder.add( posture.legRightTurn.value, 'y', -3, 3 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.ankleRightTurn.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21BB;' ) );
 
+	}
 
 	mfolder = gui.addFolder( 'LEFT ARM' ).close();
+	{
 
-	folder = mfolder.addFolder( '&nbsp; &nbsp; Bend' );
-	folder.add( posture.armLeftTurn.value, 'y', -0.5, 2 ).name( 'arm' );
-	folder.add( posture.elbowLeftTurn.value, 'y', 0, 2.7 ).name( 'elbow' );
-	folder.add( posture.wristLeftTurn.value, 'z', -1.4, 1.4 ).name( 'wrist' ); // axis
+		mfolder.add( posture.armLeftTurn.value, 'z', -1.5, 1.7 ).name( html( 'Arm', '&#x2195;' ) );
+		mfolder.add( posture.armLeftTurn.value, 'y', -0.5, 2 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.armLeftTurn.value, 'x', -0.5, 0.5 ).name( html( '', '&#x21BB;' ) );
 
-	folder = mfolder.addFolder( '&nbsp; &nbsp; Twist' );
-	folder.add( posture.armLeftTurn.value, 'x', -0.5, 0.5 ).name( 'arm' );
-	folder.add( posture.forearmLeftTurn.value, 'x', -1.5, 3 ).name( 'forearm' );
-	folder.add( posture.wristLeftTurn.value, 'x', -0.5, 0.5 ).name( 'wrist' );
+		mfolder.add( posture.elbowLeftTurn.value, 'y', 0, 2.7 ).name( html( 'Elbow', '&#x2195;', 'border' ) );
 
-	folder = mfolder.addFolder( '&nbsp; &nbsp; Side bend' );
-	folder.add( posture.armLeftTurn.value, 'z', -1.5, 1.7 ).name( 'arm' );
-	folder.add( posture.wristLeftTurn.value, 'y', -0.6, 0.4 ).name( 'wrist' ); // axis
+		mfolder.add( posture.wristLeftTurn.value, 'z', -1.4, 1.4 ).name( html( 'Wrist', '&#x2195;', 'border' ) );
+		mfolder.add( posture.wristLeftTurn.value, 'y', -0.6, 0.4 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.forearmLeftTurn.value, 'x', -1.5, 3 ).name( html( '', '&#x21BB;' ) );
 
+	}
 
 	mfolder = gui.addFolder( 'RIGHT ARM' ).close();
+	{
 
-	folder = mfolder.addFolder( '&nbsp; &nbsp; Bend' );
-	folder.add( posture.armRightTurn.value, 'y', -2, 0.5 ).name( 'arm' ); // swapped
-	folder.add( posture.elbowRightTurn.value, 'y', -2.7, 0 ).name( 'elbow' ); // swapped
-	folder.add( posture.wristRightTurn.value, 'z', -1.4, 1.4 ).name( 'wrist' ); // axis swapped
+		mfolder.add( posture.armRightTurn.value, 'z', -1.5, 1.7 ).name( html( 'Arm', '&#x2195;' ) );
+		mfolder.add( posture.armRightTurn.value, 'y', -2, 0.5 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.armRightTurn.value, 'x', -0.5, 0.5 ).name( html( '', '&#x21BB;' ) );
 
-	folder = mfolder.addFolder( '&nbsp; &nbsp; Twist' );
-	folder.add( posture.armRightTurn.value, 'x', -0.5, 0.5 ).name( 'arm' );
-	folder.add( posture.forearmRightTurn.value, 'x', -1.5, 3 ).name( 'forearm' );
-	folder.add( posture.wristRightTurn.value, 'x', -0.5, 0.5 ).name( 'wrist' );
+		mfolder.add( posture.elbowRightTurn.value, 'y', -2.7, 0 ).name( html( 'Elbow', '&#x2195;', 'border' ) );
 
-	folder = mfolder.addFolder( '&nbsp; &nbsp; Side bend' );
-	folder.add( posture.armRightTurn.value, 'z', -1.5, 1.7 ).name( 'arm' );
-	folder.add( posture.wristRightTurn.value, 'y', -0.4, 0.6 ).name( 'wrist' ); // axis swapped
+		mfolder.add( posture.wristRightTurn.value, 'z', -1.4, 1.4 ).name( html( 'Wrist', '&#x2195;', 'border' ) );
+		mfolder.add( posture.wristRightTurn.value, 'y', -0.4, 0.6 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.forearmRightTurn.value, 'x', -1.5, 3 ).name( html( '', '&#x21BB;' ) );
+
+	}
 
 	return gui;
 
@@ -247,15 +247,27 @@ function rigModel( time ) {
 	);
 
 	posture.hipLeftTurn.value.set(
-		( Math.cos( time*3 )/1.5+0.25 ),
+		( Math.cos( time*3 )/1+0.25 ),
 		0, //08.05.25 Math.cos( time*2.8 ),///4,
 		-( Math.cos( time*2.2 )+1 )/4,
 	);
 
+	posture.hip2LeftTurn.value.set(
+		0,
+		Math.cos( time*2.8 ),
+		0,
+	);
+
 	posture.hipRightTurn.value.set(
-		( Math.sin( time*2.2 )/1.5+0.25 ),
+		( Math.sin( time*2.2 )/1+0.25 ),
 		0, //08.05.25 Math.sin( time*3.2 )/4,
 		( Math.sin( time*2.6 )+1 )/4,
+	);
+
+	posture.hip2RightTurn.value.set(
+		0,
+		Math.sin( time*3.2 ),
+		0,
 	);
 
 	posture.elbowLeftTurn.value.set(
@@ -320,6 +332,7 @@ function showPivotPoint( index ) {
 		case 3: pivot.position.copy( posture.waistPos.value ); break;
 
 		case 11: pivot.position.copy( posture.hipLeftPos.value ); break;
+		case 15: pivot.position.copy( posture.hip2LeftPos.value ); break;
 		case 12: pivot.position.copy( posture.legLeftPos.value ); break;
 		case 13: pivot.position.copy( posture.kneeLeftPos.value ); break;
 		case 14: pivot.position.copy( posture.ankleLeftPos.value ); break;

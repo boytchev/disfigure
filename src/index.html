@@ -9,6 +9,9 @@
 
 	<style>
 		body { margin: 0 }
+		.padded { text-align: right; padding-right: 0.5em; color: gray;}
+		.border { border-top: dotted #404040 1px;}
+		.icon { display:inline-block; min-width:1em; text-align: center; color: orange; font-size: 1.7em; }
 	</style>
 	
 	<script type="importmap">
@@ -32,7 +35,7 @@ import { float, uniform, vec2, vec3, vec4 } from "three/tsl";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { createGui, scene } from "./disfigure-gui.js";
 import { tslColorNode, tslEmissiveNode, tslPositionNode } from "./disfigure.js";
-import { allPivotPoints, processModel } from "./utils.js";
+import { processModel } from "./utils.js";
 
 
 console.clear( );
@@ -63,10 +66,6 @@ new GLTFLoader().load( MODEL_URL, ( gltf ) => {
 		} );
 
 	createGui( posture, model );
-
-	//	var pivots = allPivotPoints( posture );
-	//	model.add( pivots );
-
 
 	overModel.add( model );
 
@@ -118,12 +117,20 @@ var posture = {
 	hipLeftSpan: vec4( 2.3, 1.9, 1.98, 1.85 ),
 	hipLeftTurn: uniform( vec3( 0, 0, 0 ) ),
 
+	hip2LeftPos: uniform( vec3( 0.011, 2, 0.01 ) ),
+	hip2LeftSpan: uniform( vec4( 2, 1.5 ) ),
+	hip2LeftTurn: uniform( vec3( 0, 0, 0 ) ),
+
 	hipRightPos: vec3( -0.052, 2, -0.04 ),
 	hipRightSpan: vec4( 2.3, 1.9, 1.98, 1.85 ),
 	hipRightTurn: uniform( vec3( 0, 0, 0 ) ),
 
+	hip2RightPos: uniform( vec3( -0.011, 2, 0.01 ) ),
+	hip2RightSpan: uniform( vec4( 2, 1.5 ) ),
+	hip2RightTurn: uniform( vec3( 0, 0, 0 ) ),
+
 	legLeftPos: vec3( 0.1, 2, -0.04 ),
-	legLeftSpan: vec2( 2.1, 0.4 ),
+	legLeftSpan: vec2( 1.9, 0.4 ),
 	legLeftTurn: uniform( vec3( 0, 0, 0 ) ),
 
 	legRightPos: vec3( -0.1, 2, -0.04 ),

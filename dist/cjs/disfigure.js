@@ -1,4 +1,4 @@
-// disfigure v0.0.1
+// disfigure v0.0.2
 
 'use strict';
 
@@ -90,9 +90,8 @@ const matRotYXZ = tsl.Fn( ([ angles ])=>{
 
 
 
-/*
 // generate YZX rotation matrix
-const matRotYZX = Fn( ([ angles ])=>{
+const matRotYZX = tsl.Fn( ([ angles ])=>{
 
 	var RX = matRotX( angles.x ),
 		RY = matRotY( angles.y ),
@@ -107,13 +106,11 @@ const matRotYZX = Fn( ([ angles ])=>{
 		{ name: 'angles', type: 'vec3' },
 	]
 } );
-*/
 
 
 
-/*
 // generate XYZ rotation matrix
-const matRotXYZ = Fn( ([ angles ])=>{
+tsl.Fn( ([ angles ])=>{
 
 	var RX = matRotX( angles.x ),
 		RY = matRotY( angles.y ),
@@ -128,7 +125,6 @@ const matRotXYZ = Fn( ([ angles ])=>{
 		{ name: 'angles', type: 'vec3' },
 	]
 } );
-*/
 
 
 
@@ -143,6 +139,44 @@ const matRotXZY = tsl.Fn( ([ angles ])=>{
 
 } ).setLayout( {
 	name: 'matRotXZY',
+	type: 'mat3',
+	inputs: [
+		{ name: 'angles', type: 'vec3' },
+	]
+} );
+
+
+
+// generate ZXY rotation matrix
+tsl.Fn( ([ angles ])=>{
+
+	var RX = matRotX( angles.x ),
+		RY = matRotY( angles.y ),
+		RZ = matRotZ( angles.z );
+
+	return RZ.mul( RX ).mul( RY );
+
+} ).setLayout( {
+	name: 'matRotZXY',
+	type: 'mat3',
+	inputs: [
+		{ name: 'angles', type: 'vec3' },
+	]
+} );
+
+
+
+// generate ZYX rotation matrix
+tsl.Fn( ([ angles ])=>{
+
+	var RX = matRotX( angles.x ),
+		RY = matRotY( angles.y ),
+		RZ = matRotZ( angles.z );
+
+	return RZ.mul( RY ).mul( RX );
+
+} ).setLayout( {
+	name: 'matRotZYX',
 	type: 'mat3',
 	inputs: [
 		{ name: 'angles', type: 'vec3' },
@@ -207,7 +241,7 @@ function selectAnkleRight( { ankleRightSpan } ) {
 
 function selectLegLeft( { legLeftSpan } ) {
 
-	return tsl.positionGeometry.y.smoothstep( legLeftSpan.x, legLeftSpan.y );
+	return tsl.positionGeometry.y.smoothstep( legLeftSpan.x, legLeftSpan.y ).pow( 1 );
 
 } // inlined
 
@@ -235,6 +269,14 @@ function selectHipLeft( { hipLeftSpan } ) {
 
 
 
+function selectHip2Left( { hip2LeftSpan } ) {
+
+	return tsl.positionGeometry.y.smoothstep( hip2LeftSpan.x, hip2LeftSpan.y );
+
+} // inlined
+
+
+
 function selectHipRight( { hipRightSpan } ) {
 
 	var x = tsl.positionGeometry.x;
@@ -244,6 +286,14 @@ function selectHipRight( { hipRightSpan } ) {
 		.smoothstep( hipRightSpan.z, hipRightSpan.w.add( x.mul( 1.6 ) ) )
 		.mul( y.smoothstep( hipRightSpan.x, hipRightSpan.y ) )
 		.mul( x.smoothstep( 0.01, -0.01 ) );
+
+} // inlined
+
+
+
+function selectHip2Right( { hip2RightSpan } ) {
+
+	return tsl.positionGeometry.y.smoothstep( hip2RightSpan.x, hip2RightSpan.y );
 
 } // inlined
 
@@ -340,6 +390,23 @@ var jointRotate= tsl.Fn( ([ pos, center, angle, amount ])=>{
 
 
 
+var jointRotateLeg= tsl.Fn( ([ pos, center, angle, amount ])=>{
+
+	return pos.sub( center ).mul( matRotYZX( angle.mul( amount ) ) ).add( center );
+
+} ).setLayout( {
+	name: 'jointRotateLeg',
+	type: 'vec3',
+	inputs: [
+		{ name: 'pos', type: 'vec3' },
+		{ name: 'center', type: 'vec3' },
+		{ name: 'angle', type: 'vec3' },
+		{ name: 'amount', type: 'float' },
+	]
+} );
+
+
+
 var jointRotate2= tsl.Fn( ([ pos, center, angle, amount ])=>{
 
 	return tsl.mix( pos, pos.sub( center ).mul( matRotXZY( angle.mul( amount ) ) ).mul( tsl.float( 1 ).sub( amount.mul( 2*Math.PI ).sub( Math.PI ).cos().add( 1 ).div( 2 ).div( 4 ).mul( angle.z.cos().oneMinus() ) ) ).add( center ), amount.pow( 0.25 ) );
@@ -410,7 +477,8 @@ var tslPositionNode = tsl.Fn( ( posture )=>{
 		p.assign( jointRotate( p, posture.ankleLeftPos, posture.ankleLeftTurn, selectAnkleLeft( posture ) ) );
 		p.assign( jointRotate( p, posture.legLeftPos, posture.legLeftTurn, selectLegLeft( posture ) ) );
 		p.assign( jointRotate( p, posture.kneeLeftPos, posture.kneeLeftTurn, selectKneeLeft( posture ) ) );
-		p.assign( jointRotate( p, posture.hipLeftPos, posture.hipLeftTurn, hipLeft ) );
+		p.assign( jointRotateLeg( p, posture.hip2LeftPos, posture.hip2LeftTurn, selectHip2Left( posture ) ) );
+		p.assign( jointRotateLeg( p, posture.hipLeftPos, posture.hipLeftTurn, hipLeft ) );
 
 	} );
 
@@ -425,7 +493,8 @@ var tslPositionNode = tsl.Fn( ( posture )=>{
 		p.assign( jointRotate( p, posture.ankleRightPos, posture.ankleRightTurn, selectAnkleRight( posture ) ) );
 		p.assign( jointRotate( p, posture.legRightPos, posture.legRightTurn, selectLegRight( posture ) ) );
 		p.assign( jointRotate( p, posture.kneeRightPos, posture.kneeRightTurn, selectKneeRight( posture ) ) );
-		p.assign( jointRotate( p, posture.hipRightPos, posture.hipRightTurn, hipRight ) );
+		p.assign( jointRotateLeg( p, posture.hip2RightPos, posture.hip2RightTurn, selectHip2Right( posture ) ) );
+		p.assign( jointRotateLeg( p, posture.hipRightPos, posture.hipRightTurn, hipRight ) );
 
 	} );
 
