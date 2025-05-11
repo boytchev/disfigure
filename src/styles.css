@@ -52,8 +52,17 @@ header h3 {
 header h3 a {
 	color: dimgray;
 	text-decoration: none;
+	border-bottom: dotted 1px dimgray;
 }
 
 header h3 a:hover {
 	color: navy;
 }
+
+header img {
+	height: 1em;
+	position: relative;
+	top: 0.15em;
+	opacity: 0.75;
+}
+

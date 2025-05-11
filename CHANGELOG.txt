@@ -1,3 +1,6 @@
+v0.0.5
+  - added feet
+  
 v0.0.4
   - posture split into skeleton and posture
 

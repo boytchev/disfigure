@@ -69,6 +69,7 @@ var options = {
 var posture = {};
 var skeleton = {};
 var model = new THREE.Group();
+var gui;
 
 function createGui( skeletonData, postureData, modelObject ) {
 
@@ -80,7 +81,7 @@ function createGui( skeletonData, postureData, modelObject ) {
 	model = modelObject;
 
 
-	var gui = new lil.GUI();
+	gui = new lil.GUI(); // global gui
 	gui.domElement.style.marginRight = 0;
 
 	var mfolder = gui.addFolder( 'DEBUG' );
@@ -90,7 +91,7 @@ function createGui( skeletonData, postureData, modelObject ) {
 	mfolder.add( posture.select, 'value', {
 		Nothing: 0,
 		Head: 1, Chest: 2, Waist: 3,
-		Hip: 11, Hip2: 15, Leg: 12, Knee: 13, Ankle: 14,
+		Hip: 11, Hip2: 15, Leg: 12, Knee: 13, Ankle: 14, Foot: 16,
 		Arm: 21, Elbow: 22, Forearm: 23, Wrist: 24,
 	} ).name( 'Show' ).onChange( showPivotPoint );
 
@@ -117,76 +118,79 @@ function createGui( skeletonData, postureData, modelObject ) {
 	mfolder = gui.addFolder( 'TORSO' );//.close();
 	{
 
-		mfolder.add( posture.headTurn.value, 'x', -0.7, 0.5 ).name( html( 'Head', '&#x2195;' ) );
-		mfolder.add( posture.headTurn.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21B6;' ) );
-		mfolder.add( posture.headTurn.value, 'y', -1, 1 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.head.value, 'x', -0.7, 0.5 ).name( html( 'Head', '&#x2195;' ) );
+		mfolder.add( posture.head.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21B6;' ) );
+		mfolder.add( posture.head.value, 'y', -1, 1 ).name( html( '', '&#x2194;' ) );
 
-		mfolder.add( posture.chestTurn.value, 'x', -0.7, 0.4 ).name( html( 'Chest', '&#x2195;', 'border' ) );
-		mfolder.add( posture.chestTurn.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21B6;' ) );
+		mfolder.add( posture.chest.value, 'x', -0.7, 0.4 ).name( html( 'Chest', '&#x2195;', 'border' ) );
+		mfolder.add( posture.chest.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21B6;' ) );
 
-		mfolder.add( posture.waistTurn.value, 'x', -1.0, 0.6 ).name( html( 'Waist', '&#x2195;', 'border' ) );
-		mfolder.add( posture.waistTurn.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21B6;' ) );
-		mfolder.add( posture.waistTurn.value, 'y', -1, 1 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.waist.value, 'x', -1.0, 0.6 ).name( html( 'Waist', '&#x2195;', 'border' ) );
+		mfolder.add( posture.waist.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21B6;' ) );
+		mfolder.add( posture.waist.value, 'y', -1, 1 ).name( html( '', '&#x2194;' ) );
 
 	}
 
 	mfolder = gui.addFolder( 'LEFT LEG' ).close();
 	{
+		mfolder.add( posture.hipLeft.value, 'x', -0.6, 2.7 ).name( html( 'Leg', '&#x2195;' ) );
+		mfolder.add( posture.hipLeft.value, 'z', -2.4, 0.2 ).name( html( '', '&#x21BA;' ) );
+		mfolder.add( posture.hip2Left.value, 'y', -1.4, 1.4 ).name( html( '', '&#x2194;' ) );
 
-		mfolder.add( posture.hipLeftTurn.value, 'x', -0.6, 2.7 ).name( html( 'Leg', '&#x2195;' ) );
-		mfolder.add( posture.hipLeftTurn.value, 'z', -2.4, 0.2 ).name( html( '', '&#x21BA;' ) );
-		mfolder.add( posture.hip2LeftTurn.value, 'y', -1.4, 1.4 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.kneeLeft.value, 'x', -2.6, 0 ).name( html( 'Knee', '&#x2195;', 'border' ) );
 
-		mfolder.add( posture.kneeLeftTurn.value, 'x', -2.6, 0 ).name( html( 'Knee', '&#x2195;', 'border' ) );
+		mfolder.add( posture.ankleLeft.value, 'x', -1, 0.7 ).name( html( 'Ankle', '&#x2195;', 'border' ) );
+		mfolder.add( posture.legLeft.value, 'y', -3, 3 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.ankleLeft.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21BA;' ) );
 
-		mfolder.add( posture.ankleLeftTurn.value, 'x', -1, 0.7 ).name( html( 'Ankle', '&#x2195;', 'border' ) );
-		mfolder.add( posture.legLeftTurn.value, 'y', -3, 3 ).name( html( '', '&#x2194;' ) );
-		mfolder.add( posture.ankleLeftTurn.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21BA;' ) );
+		mfolder.add( posture.footLeft.value, 'x', -0.2, 0.5 ).name( html( 'Foot', '&#x2195;', 'border' ) );
 
 	}
 
 	mfolder = gui.addFolder( 'RIGHT LEG' ).close();
 	{
 
-		mfolder.add( posture.hipRightTurn.value, 'x', -0.6, 2.7 ).name( html( 'Leg', '&#x2195;' ) );
-		mfolder.add( posture.hipRightTurn.value, 'z', -0.2, 2.4 ).name( html( '', '&#x21BB;' ) ); // swapped
-		mfolder.add( posture.hip2RightTurn.value, 'y', -1.4, 1.4 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.hipRight.value, 'x', -0.6, 2.7 ).name( html( 'Leg', '&#x2195;' ) );
+		mfolder.add( posture.hipRight.value, 'z', -0.2, 2.4 ).name( html( '', '&#x21BB;' ) ); // swapped
+		mfolder.add( posture.hip2Right.value, 'y', -1.4, 1.4 ).name( html( '', '&#x2194;' ) );
 
-		mfolder.add( posture.kneeRightTurn.value, 'x', -2.6, 0 ).name( html( 'Knee', '&#x2195;', 'border' ) );
+		mfolder.add( posture.kneeRight.value, 'x', -2.6, 0 ).name( html( 'Knee', '&#x2195;', 'border' ) );
 
-		mfolder.add( posture.ankleRightTurn.value, 'x', -1, 0.7 ).name( html( 'Ankle', '&#x2195;', 'border' ) );
-		mfolder.add( posture.legRightTurn.value, 'y', -3, 3 ).name( html( '', '&#x2194;' ) );
-		mfolder.add( posture.ankleRightTurn.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21BB;' ) );
+		mfolder.add( posture.ankleRight.value, 'x', -1, 0.7 ).name( html( 'Ankle', '&#x2195;', 'border' ) );
+		mfolder.add( posture.legRight.value, 'y', -3, 3 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.ankleRight.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21BB;' ) );
+
+		mfolder.add( posture.footRight.value, 'x', -0.2, 0.5 ).name( html( 'Foot', '&#x2195;', 'border' ) );
 
 	}
 
 	mfolder = gui.addFolder( 'LEFT ARM' ).close();
 	{
 
-		mfolder.add( posture.armLeftTurn.value, 'z', -1.5, 1.7 ).name( html( 'Arm', '&#x2195;' ) );
-		mfolder.add( posture.armLeftTurn.value, 'y', -0.5, 2 ).name( html( '', '&#x2194;' ) );
-		mfolder.add( posture.armLeftTurn.value, 'x', -0.5, 0.5 ).name( html( '', '&#x21BB;' ) );
+		mfolder.add( posture.armLeft.value, 'z', -1.5, 1.7 ).name( html( 'Arm', '&#x2195;' ) );
+		mfolder.add( posture.armLeft.value, 'y', -0.5, 2 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.armLeft.value, 'x', -0.5, 0.5 ).name( html( '', '&#x21BB;' ) );
 
-		mfolder.add( posture.elbowLeftTurn.value, 'y', 0, 2.7 ).name( html( 'Elbow', '&#x2195;', 'border' ) );
+		mfolder.add( posture.elbowLeft.value, 'y', 0, 2.7 ).name( html( 'Elbow', '&#x2195;', 'border' ) );
 
-		mfolder.add( posture.wristLeftTurn.value, 'z', -1.4, 1.4 ).name( html( 'Wrist', '&#x2195;', 'border' ) );
-		mfolder.add( posture.wristLeftTurn.value, 'y', -0.6, 0.4 ).name( html( '', '&#x2194;' ) );
-		mfolder.add( posture.forearmLeftTurn.value, 'x', -1.5, 3 ).name( html( '', '&#x21BB;' ) );
+		mfolder.add( posture.wristLeft.value, 'z', -1.4, 1.4 ).name( html( 'Wrist', '&#x2195;', 'border' ) );
+		mfolder.add( posture.wristLeft.value, 'y', -0.6, 0.4 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.forearmLeft.value, 'x', -1.5, 3 ).name( html( '', '&#x21BB;' ) );
 
 	}
 
 	mfolder = gui.addFolder( 'RIGHT ARM' ).close();
 	{
 
-		mfolder.add( posture.armRightTurn.value, 'z', -1.5, 1.7 ).name( html( 'Arm', '&#x2195;' ) );
-		mfolder.add( posture.armRightTurn.value, 'y', -2, 0.5 ).name( html( '', '&#x2194;' ) );
-		mfolder.add( posture.armRightTurn.value, 'x', -0.5, 0.5 ).name( html( '', '&#x21BB;' ) );
+		mfolder.add( posture.armRight.value, 'z', -1.5, 1.7 ).name( html( 'Arm', '&#x2195;' ) );
+		mfolder.add( posture.armRight.value, 'y', -2, 0.5 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.armRight.value, 'x', -0.5, 0.5 ).name( html( '', '&#x21BB;' ) );
 
-		mfolder.add( posture.elbowRightTurn.value, 'y', -2.7, 0 ).name( html( 'Elbow', '&#x2195;', 'border' ) );
+		mfolder.add( posture.elbowRight.value, 'y', -2.7, 0 ).name( html( 'Elbow', '&#x2195;', 'border' ) );
 
-		mfolder.add( posture.wristRightTurn.value, 'z', -1.4, 1.4 ).name( html( 'Wrist', '&#x2195;', 'border' ) );
-		mfolder.add( posture.wristRightTurn.value, 'y', -0.4, 0.6 ).name( html( '', '&#x2194;' ) );
-		mfolder.add( posture.forearmRightTurn.value, 'x', -1.5, 3 ).name( html( '', '&#x21BB;' ) );
+		mfolder.add( posture.wristRight.value, 'z', -1.4, 1.4 ).name( html( 'Wrist', '&#x2195;', 'border' ) );
+		mfolder.add( posture.wristRight.value, 'y', -0.4, 0.6 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.forearmRight.value, 'x', -1.5, 3 ).name( html( '', '&#x21BB;' ) );
 
 	}
 
@@ -198,127 +202,139 @@ function createGui( skeletonData, postureData, modelObject ) {
 
 function rigModel( time ) {
 
-	posture.waistTurn.value.set(
+	posture.waist.value.set(
 		Math.sin( time )/4-0.2,
 		Math.cos( time*1.2 )/2,
 		Math.sin( time*3 )/2.5
 	);
 
-	posture.chestTurn.value.set(
+	posture.chest.value.set(
 		Math.cos( time*3 )/3,
 		0, //08.05.25 Math.sin( time*1.2*2 )/2,
 		Math.cos( time*3*1.5 )/3
 	);
 
-	posture.headTurn.value.set(
+	posture.head.value.set(
 		Math.cos( time*3 )/2,
 		Math.sin( time*1.2*2 )/2,
 		Math.cos( time*3*1.5 )/3
 	);
 
-	posture.kneeLeftTurn.value.set(
+	posture.kneeLeft.value.set(
 		-( Math.cos( time*3 )+1 )/1.5,
 		0,
 		0,
 	);
 
-	posture.kneeRightTurn.value.set(
+	posture.kneeRight.value.set(
 		-( Math.sin( time*2.4 )+1 )/1.5,
 		0,
 		0,
 	);
 
-	posture.ankleLeftTurn.value.set(
+	posture.footLeft.value.set(
+		( Math.cos( time*1.7 ) )*0.35+0.15,
+		0,
+		0,
+	);
+
+	posture.footRight.value.set(
+		( Math.sin( time*1.9 ) )*0.35+0.15,
+		0,
+		0,
+	);
+
+	posture.ankleLeft.value.set(
 		Math.cos( time*3 )/2,
 		0*	Math.cos( time*2.8 )/2,
 		Math.cos( time*2.2 )/4,
 	);
 
-	posture.ankleRightTurn.value.set(
+	posture.ankleRight.value.set(
 		Math.sin( time*3.2 )/2,
 		0*	Math.cos( time*2.3 )/2,
 		Math.sin( time*2.1 )/4,
 	);
 
-	posture.legLeftTurn.value.set(
+	posture.legLeft.value.set(
 		0,
 		Math.cos( time*2.8 )-0.25,
 		0,
 	);
 
-	posture.legRightTurn.value.set(
+	posture.legRight.value.set(
 		0,
 		Math.cos( time*2.3 )+0.25,
 		0,
 	);
 
-	posture.hipLeftTurn.value.set(
+	posture.hipLeft.value.set(
 		( Math.cos( time*3 )/1+0.25 ),
 		0, //08.05.25 Math.cos( time*2.8 ),///4,
 		-( Math.cos( time*2.2 )+1 )/4,
 	);
 
-	posture.hip2LeftTurn.value.set(
+	posture.hip2Left.value.set(
 		0,
 		Math.cos( time*2.8 ),
 		0,
 	);
 
-	posture.hipRightTurn.value.set(
+	posture.hipRight.value.set(
 		( Math.sin( time*2.2 )/1+0.25 ),
 		0, //08.05.25 Math.sin( time*3.2 )/4,
 		( Math.sin( time*2.6 )+1 )/4,
 	);
 
-	posture.hip2RightTurn.value.set(
+	posture.hip2Right.value.set(
 		0,
 		Math.sin( time*3.2 ),
 		0,
 	);
 
-	posture.elbowLeftTurn.value.set(
+	posture.elbowLeft.value.set(
 		0,
 		( Math.cos( time*2-1 )+1 ),
 		0,
 	);
 
-	posture.elbowRightTurn.value.set(
+	posture.elbowRight.value.set(
 		0,
 		-( Math.sin( time*1.8 )+1 ),
 		0,
 	);
 
-	posture.forearmLeftTurn.value.set(
+	posture.forearmLeft.value.set(
 		0.5*( Math.cos( time*3.6-1 )*1.5+1 ),
 		0,
 		0,
 	);
 
-	posture.forearmRightTurn.value.set(
+	posture.forearmRight.value.set(
 		0.5*( Math.sin( time*1.8*3+1 )*1.5+1 ),
 		0,
 		0,
 	);
 
-	posture.wristLeftTurn.value.set(
+	posture.wristLeft.value.set(
 		0,
 		( Math.cos( time*3.6-1 )*0.5+0.1 ),
 		( Math.cos( time*2.6+1 )*0.7 ),
 	);
 
-	posture.wristRightTurn.value.set(
+	posture.wristRight.value.set(
 		0,
 		( Math.cos( time*3.6-1 )*0.5+0.1 ),
 		-( Math.cos( time*2.6+1 )*0.7 ),
 	);
 
-	posture.armLeftTurn.value.set(
+	posture.armLeft.value.set(
 		0.7*( Math.cos( time*3 )/1.5-0.15 ),
 		0, //-0.7*( Math.cos( time*2.8 )*1-0.6 ),
 		0.7*( Math.cos( time*2.2 ) ),
 	);
 
-	posture.armRightTurn.value.set(
+	posture.armRight.value.set(
 		0.7*( Math.sin( time*2.4 )/1.5-0.15 ),
 		0, //-0.7*-( Math.cos( time*3.1 )*1-0.6 ),
 		0.7*( Math.sin( time*2.7 ) ),
@@ -333,20 +349,21 @@ function showPivotPoint( index ) {
 	model.add( pivot );
 	switch ( index ) {
 
-		case 1: pivot.position.copy( skeleton.headPos.value ); break;
-		case 2: pivot.position.copy( skeleton.chestPos.value ); break;
-		case 3: pivot.position.copy( skeleton.waistPos.value ); break;
+		case 1: pivot.position.copy( skeleton.headPos ); break;
+		case 2: pivot.position.copy( skeleton.chestPos ); break;
+		case 3: pivot.position.copy( skeleton.waistPos ); break;
 
-		case 11: pivot.position.copy( skeleton.hipLeftPos.value ); break;
-		case 15: pivot.position.copy( skeleton.hip2LeftPos.value ); break;
-		case 12: pivot.position.copy( skeleton.legLeftPos.value ); break;
-		case 13: pivot.position.copy( skeleton.kneeLeftPos.value ); break;
-		case 14: pivot.position.copy( skeleton.ankleLeftPos.value ); break;
+		case 11: pivot.position.copy( skeleton.hipLeftPos ); break;
+		case 15: pivot.position.copy( skeleton.hip2LeftPos ); break;
+		case 12: pivot.position.copy( skeleton.legLeftPos ); break;
+		case 13: pivot.position.copy( skeleton.kneeLeftPos ); break;
+		case 14: pivot.position.copy( skeleton.ankleLeftPos ); break;
+		case 16: pivot.position.copy( skeleton.footLeftPos ); break;
 
-		case 21: pivot.position.copy( skeleton.armLeftPos.value ); break;
-		case 22: pivot.position.copy( skeleton.elbowLeftPos.value ); break;
-		case 23: pivot.position.copy( skeleton.forearmLeftPos.value ); break;
-		case 24: pivot.position.copy( skeleton.wristLeftPos.value ); break;
+		case 21: pivot.position.copy( skeleton.armLeftPos ); break;
+		case 22: pivot.position.copy( skeleton.elbowLeftPos ); break;
+		case 23: pivot.position.copy( skeleton.forearmLeftPos ); break;
+		case 24: pivot.position.copy( skeleton.wristLeftPos ); break;
 
 		default: model.remove( pivot );
 
@@ -367,8 +384,12 @@ function changePivotPoint( ) {
 
 function animationLoop( t ) {
 
-	if ( options.animate ) rigModel( t/1000 );
-
+	if ( options.animate )
+	{
+		rigModel( t/1000 );
+		for( var ctrl of gui.controllersRecursive() ) ctrl.updateDisplay( );
+	}
+	
 	controls.update( );
 	light.position.copy( camera.position );
 
