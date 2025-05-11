@@ -8,7 +8,7 @@
 
 
 
-import { Color, Box3, Mesh, MeshPhysicalNodeMaterial, MeshStandardNodeMaterial, Vector3 } from 'three';
+import { Box3, Mesh, MeshPhysicalNodeMaterial, Vector3 } from 'three';
 import { Fn, mat3 } from 'three/tsl';
 
 
@@ -276,8 +276,8 @@ function ennodeModel( model, skeleton, posture, nodes ) {
 			// copy all properties from the original material
 			Object.assign( material, child.material );
 
-			material.metalness = 0;
-			material.roughness = 0;
+			material.metalness = 0.1;
+			material.roughness = 0.6;
 
 			if ( nodes.colorNode )
 				material.colorNode = nodes.colorNode( );
@@ -314,6 +314,38 @@ function processModel( model, skeleton, posture, nodes ) {
 
 
 
+// extract credits and place them in DOM element
+// replaces the resource url extension with "txt"
+// e.g. my-model.glb -> my-model.txt
+function credits( url, id ) {
+
+	var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function () {
+
+		if ( this.readyState == 4 ) {
+
+			if ( this.status == 200 ) {
+
+				document.getElementById( id ).innerHTML = this.responseText.split( '||' )[ 0 ];
+
+			}
+
+		}
+
+	};
+
+	url = url.split( '.' );
+	url.pop();
+	url.push( 'txt' );
+	url = url.join( '.' );
+
+	xhttp.open( "GET", url, true );
+	xhttp.send();
+
+}
+
+
+
 export
 {
 	matRotXZY,
@@ -324,4 +356,5 @@ export
 	matRotZYX,
 
 	processModel,
+	credits,
 };

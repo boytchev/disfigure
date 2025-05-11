@@ -8,7 +8,7 @@
 import * as THREE from "three";
 import * as lil from "three/addons/libs/lil-gui.module.min.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { float, uniform } from "three/tsl";
+import { uniform } from "three/tsl";
 
 
 
@@ -16,7 +16,7 @@ const DEBUG = false;
 
 
 var scene = new THREE.Scene();
-scene.background = new THREE.Color( 'gainsboro' );
+scene.background = new THREE.Color( 'whitesmoke' );
 
 
 
@@ -43,6 +43,9 @@ window.addEventListener( "resize", ( /*event*/ ) => {
 
 var controls = new OrbitControls( camera, renderer.domElement );
 controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+//controls.autoRotate = true;
+//controls.autoRotateSpeed = 0.5;
 
 
 
@@ -57,6 +60,8 @@ scene.add( light );
 
 
 
+
+
 var pivot = new THREE.AxesHelper();
 
 
@@ -66,6 +71,10 @@ var options = {
 
 
 
+var debug = {
+	isolated: false,
+	randomize: rigRandomModel,
+};
 var posture = {};
 var skeleton = {};
 var model = new THREE.Group();
@@ -76,8 +85,8 @@ function createGui( skeletonData, postureData, modelObject ) {
 	skeleton = skeletonData;
 
 	posture = postureData;
-	posture.select = uniform( float( 0 ) );
-	posture.isolated = uniform( float( 1 ) ); // 0 or 1
+	posture.select = uniform( 0, 'int' ); // 0..24
+	posture.isolated = uniform( 0, 'int' ); // 0 or 1
 	model = modelObject;
 
 
@@ -105,8 +114,13 @@ function createGui( skeletonData, postureData, modelObject ) {
 
 	}
 
-	mfolder.add( posture.isolated, 'value', { Isolated: 0, Full: 1 } ).name( 'Isolated' );
+	mfolder.add( debug, 'isolated', false ).name( 'Isolated' ).onChange( ()=>{
+
+		posture.isolated.value = debug.isolated?1:0;
+
+	} );
 	mfolder.add( options, 'animate', false ).name( 'Animate' );
+	mfolder.add( debug, 'randomize' ).name( 'Randomize' );
 
 	function html( name, icon, classes='' ) {
 
@@ -133,6 +147,7 @@ function createGui( skeletonData, postureData, modelObject ) {
 
 	mfolder = gui.addFolder( 'LEFT LEG' ).close();
 	{
+
 		mfolder.add( posture.hipLeft.value, 'x', -0.6, 2.7 ).name( html( 'Leg', '&#x2195;' ) );
 		mfolder.add( posture.hipLeft.value, 'z', -2.4, 0.2 ).name( html( '', '&#x21BA;' ) );
 		mfolder.add( posture.hip2Left.value, 'y', -1.4, 1.4 ).name( html( '', '&#x2194;' ) );
@@ -344,6 +359,162 @@ function rigModel( time ) {
 
 
 
+function rigRandomModel( seed = THREE.MathUtils.randInt( Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER ) ) {
+
+	THREE.MathUtils.seededRandom( seed );
+
+	function rand( from=-1, to=1 ) {
+
+		return THREE.MathUtils.seededRandom() * ( to-from ) + from;
+
+	}
+
+	model.rotation.y += rand( )-0.2;
+
+	posture.waist.value.set(
+		rand()/4-0.2,
+		rand()/2,
+		rand()/2.5
+	);
+
+	posture.chest.value.set(
+		rand()/3,
+		0,
+		rand( )/3
+	);
+
+	posture.head.value.set(
+		rand( )/2,
+		rand( )/2,
+		rand( )/3
+	);
+
+	posture.kneeLeft.value.set(
+		-( rand( )+1 )/1.5,
+		0,
+		0,
+	);
+
+	posture.kneeRight.value.set(
+		-( rand( )+1 )/1.5,
+		0,
+		0,
+	);
+
+	posture.footLeft.value.set(
+		( rand( ) )*0.5+0.15,
+		0,
+		0,
+	);
+
+	posture.footRight.value.set(
+		( rand( ) )*0.5+0.15,
+		0,
+		0,
+	);
+
+	posture.ankleLeft.value.set(
+		rand( )/2,
+		0,
+		rand( )/4,
+	);
+
+	posture.ankleRight.value.set(
+		rand( )/2,
+		0,
+		rand( )/4,
+	);
+
+	posture.legLeft.value.set(
+		0,
+		rand( )-0.25,
+		0,
+	);
+
+	posture.legRight.value.set(
+		0,
+		rand( )+0.25,
+		0,
+	);
+
+	posture.hipLeft.value.set(
+		( rand( )/1+0.25 ),
+		0,
+		-( rand( )+1 )/4,
+	);
+
+	posture.hip2Left.value.set(
+		0,
+		rand( ),
+		0,
+	);
+
+	posture.hipRight.value.set(
+		( rand( )/1+0.25 ),
+		0,
+		( rand( )+1 )/4,
+	);
+
+	posture.hip2Right.value.set(
+		0,
+		rand( ),
+		0,
+	);
+
+	posture.elbowLeft.value.set(
+		0,
+		( rand( )+1 ),
+		0,
+	);
+
+	posture.elbowRight.value.set(
+		0,
+		-( rand( )+1 ),
+		0,
+	);
+
+	posture.forearmLeft.value.set(
+		0.5*( rand( )*1.5+1 ),
+		0,
+		0,
+	);
+
+	posture.forearmRight.value.set(
+		0.5*( rand( )*1.5+1 ),
+		0,
+		0,
+	);
+
+	posture.wristLeft.value.set(
+		0,
+		( rand( )*0.5+0.1 ),
+		( rand( )*0.7 ),
+	);
+
+	posture.wristRight.value.set(
+		0,
+		( rand( )*0.5+0.1 ),
+		-( rand( )*0.7 ),
+	);
+
+	posture.armLeft.value.set(
+		0.7*( rand( )/1.5-0.15 ),
+		0,
+		0.7*( rand( ) ),
+	);
+
+	posture.armRight.value.set(
+		0.7*( rand( )/1.5-0.15 ),
+		0,
+		0.7*( rand( ) ),
+	);
+
+	updateGUI( );
+
+}
+
+
+
 function showPivotPoint( index ) {
 
 	model.add( pivot );
@@ -382,14 +553,23 @@ function changePivotPoint( ) {
 
 
 
+function updateGUI( ) {
+
+	for ( var ctrl of gui.controllersRecursive() ) ctrl.updateDisplay( );
+
+}
+
+
+
 function animationLoop( t ) {
 
-	if ( options.animate )
-	{
+	if ( options.animate ) {
+
 		rigModel( t/1000 );
-		for( var ctrl of gui.controllersRecursive() ) ctrl.updateDisplay( );
+		updateGUI( );
+
 	}
-	
+
 	controls.update( );
 	light.position.copy( camera.position );
 

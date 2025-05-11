@@ -2,7 +2,7 @@
 // disfigure
 // to do: simplify matrix operation when rotations are DOF<3
 
-import { transformNormalToView, float, Fn, If, mix, positionGeometry, normalGeometry, select, uniform, vec3 } from "three/tsl";
+import { float, Fn, If, mix, normalGeometry, positionGeometry, select, transformNormalToView, uniform, vec3 } from "three/tsl";
 import { /*matRotXYZ,*/ matRotXZY, matRotYXZ, matRotYZX, /*matRotZXY, matRotZYX*/ } from "./utils.js";
 
 
@@ -65,7 +65,7 @@ function selectAnkleRight( { ankleRightSpan } ) {
 
 function selectFootLeft( { footLeftSpan, ankleLeftSpan } ) {
 
-	return positionGeometry.z.smoothstep( footLeftSpan.x, footLeftSpan.y ).mul( positionGeometry.y.step(ankleLeftSpan.y) );
+	return positionGeometry.z.smoothstep( footLeftSpan.x, footLeftSpan.y ).mul( positionGeometry.y.step( ankleLeftSpan.y ) );
 
 } // inlined
 
@@ -73,7 +73,7 @@ function selectFootLeft( { footLeftSpan, ankleLeftSpan } ) {
 
 function selectFootRight( { footRightSpan, ankleRightSpan } ) {
 
-	return positionGeometry.z.smoothstep( footRightSpan.x, footRightSpan.y ).mul( positionGeometry.y.step(ankleRightSpan.y) );
+	return positionGeometry.z.smoothstep( footRightSpan.x, footRightSpan.y ).mul( positionGeometry.y.step( ankleRightSpan.y ) );
 
 } // inlined
 
@@ -101,7 +101,7 @@ function selectHipLeft( { hipLeftSpan } ) {
 	var y = positionGeometry.y;
 
 	return y.sub( x.mul( 2 ) )
-		.smoothstep( hipLeftSpan.z, float(hipLeftSpan.w).sub( x.mul( 1.6 ) ) )
+		.smoothstep( hipLeftSpan.z, float( hipLeftSpan.w ).sub( x.mul( 1.6 ) ) )
 		.mul( y.smoothstep( hipLeftSpan.x, hipLeftSpan.y ) )
 		.mul( x.smoothstep( -0.01, 0.01 ) );
 
@@ -123,7 +123,7 @@ function selectHipRight( { hipRightSpan } ) {
 	var y = positionGeometry.y;
 
 	return y.add( x.mul( 2 ) )
-		.smoothstep( hipRightSpan.z, float(hipRightSpan.w).add( x.mul( 1.6 ) ) )
+		.smoothstep( hipRightSpan.z, float( hipRightSpan.w ).add( x.mul( 1.6 ) ) )
 		.mul( y.smoothstep( hipRightSpan.x, hipRightSpan.y ) )
 		.mul( x.smoothstep( 0.01, -0.01 ) );
 
@@ -498,7 +498,7 @@ var tslEmissiveNode = Fn( ( { skeleton, posture } )=>{
 
 		.toVar( );
 
-	k.assign( select( posture.isolated.equal( 0 ),
+	k.assign( select( posture.isolated,
 		k.smoothstep( 0, 1 ).mul( 2*Math.PI ).sub( Math.PI ).cos().add( 1 ).div( 2 ).pow( 1/4 ).mul( 1.1 ).negate(),
 		k.clamp( 0, 1 ).pow( 0.75 ).negate()
 	) );
@@ -568,3 +568,5 @@ function tslPosture( ) {
 
 
 export { tslPositionNode, tslEmissiveNode, tslColorNode, tslNormalNode, tslPosture };
+export * from "./utils.js";
+export * from "./disfigure-gui.js";
