@@ -2,7 +2,7 @@
 // disfigure
 // to do: simplify matrix operation when rotations are DOF<3
 
-import { float, Fn, If, mix, positionGeometry, select, uniform, vec3 } from "three/tsl";
+import { transformNormalToView, float, Fn, If, mix, positionGeometry, normalGeometry, select, uniform, vec3 } from "three/tsl";
 import { /*matRotXYZ,*/ matRotXZY, matRotYXZ, matRotYZX, /*matRotZXY, matRotZYX*/ } from "./utils.js";
 
 
@@ -228,6 +228,20 @@ var jointRotate= Fn( ([ pos, center, angle, amount ])=>{
 	]
 } );
 
+var jointRotateNormal= Fn( ([ nor, angle, amount ])=>{
+
+	return nor.mul( matRotYXZ( angle.mul( amount ) ) );
+
+} ).setLayout( {
+	name: 'jointRotateNormal',
+	type: 'vec3',
+	inputs: [
+		{ name: 'nor', type: 'vec3' },
+		{ name: 'angle', type: 'vec3' },
+		{ name: 'amount', type: 'float' },
+	]
+} );
+
 
 
 var jointRotateLeg= Fn( ([ pos, center, angle, amount ])=>{
@@ -247,6 +261,22 @@ var jointRotateLeg= Fn( ([ pos, center, angle, amount ])=>{
 
 
 
+var jointRotateNormalLeg= Fn( ([ nor, angle, amount ])=>{
+
+	return nor.mul( matRotYZX( angle.mul( amount ) ) );
+
+} ).setLayout( {
+	name: 'jointRotateNormalLeg',
+	type: 'vec3',
+	inputs: [
+		{ name: 'nor', type: 'vec3' },
+		{ name: 'angle', type: 'vec3' },
+		{ name: 'amount', type: 'float' },
+	]
+} );
+
+
+
 var jointRotate2= Fn( ([ pos, center, angle, amount ])=>{
 
 	return mix( pos, pos.sub( center ).mul( matRotXZY( angle.mul( amount ) ) ).mul( float( 1 ).sub( amount.mul( 2*Math.PI ).sub( Math.PI ).cos().add( 1 ).div( 2 ).div( 4 ).mul( angle.z.cos().oneMinus() ) ) ).add( center ), amount.pow( 0.25 ) );
@@ -257,6 +287,22 @@ var jointRotate2= Fn( ([ pos, center, angle, amount ])=>{
 	inputs: [
 		{ name: 'pos', type: 'vec3' },
 		{ name: 'center', type: 'vec3' },
+		{ name: 'angle', type: 'vec3' },
+		{ name: 'amount', type: 'float' },
+	]
+} );
+
+
+
+var jointRotateNormal2= Fn( ([ nor, angle, amount ])=>{
+
+	return mix( nor, nor.mul( matRotXZY( angle.mul( amount ) ) ).mul( float( 1 ).sub( amount.mul( 2*Math.PI ).sub( Math.PI ).cos().add( 1 ).div( 2 ).div( 4 ).mul( angle.z.cos().oneMinus() ) ) ), amount.pow( 0.25 ) );
+
+} ).setLayout( {
+	name: 'jointRotateNormal2',
+	type: 'vec3',
+	inputs: [
+		{ name: 'nor', type: 'vec3' },
 		{ name: 'angle', type: 'vec3' },
 		{ name: 'amount', type: 'float' },
 	]
@@ -341,6 +387,88 @@ var tslPositionNode = Fn( ( { skeleton, posture } )=>{
 	} );
 
 	return p;
+
+} );
+
+
+
+var tslNormalNode = Fn( ( { skeleton, posture } )=>{
+
+	var p = normalGeometry.toVar();
+
+
+
+	// LEFT-UPPER BODY
+
+	var armLeft = selectArmLeft( skeleton ).toVar();
+
+	If( armLeft.greaterThan( 0 ), ()=>{
+
+		p.assign( jointRotateNormal( p, posture.wristLeft, selectWristLeft( skeleton ) ) );
+		p.assign( jointRotateNormal( p, posture.forearmLeft, selectForearmLeft( skeleton ) ) );
+		p.assign( jointRotateNormal( p, posture.elbowLeft, selectElbowLeft( skeleton ) ) );
+		p.assign( jointRotateNormal2( p, posture.armLeft, armLeft ) );
+
+	} );
+
+
+
+	// RIGHT-UPPER BODY
+
+	var armRight = selectArmRight( skeleton ).toVar();
+
+	If( armRight.greaterThan( 0 ), ()=>{
+
+		p.assign( jointRotateNormal( p, posture.wristRight, selectWristRight( skeleton ) ) );
+		p.assign( jointRotateNormal( p, posture.forearmRight, selectForearmRight( skeleton ) ) );
+		p.assign( jointRotateNormal( p, posture.elbowRight, selectElbowRight( skeleton ) ) );
+		p.assign( jointRotateNormal2( p, posture.armRight, armRight ) );
+
+	} );
+
+
+
+	// CENTRAL BODY AXIS
+
+	p.assign( jointRotateNormal( p, posture.head, selectHead( skeleton ) ) );
+	p.assign( jointRotateNormal( p, posture.chest, selectChest( skeleton ) ) );
+	p.assign( jointRotateNormal( p, posture.waist, selectWaist( skeleton ) ) );
+
+
+
+	// LEFT-LOWER BODY
+
+	var hipLeft = selectHipLeft( skeleton ).toVar();
+
+	If( hipLeft.greaterThan( 0 ), ()=>{
+
+		p.assign( jointRotateNormal( p, posture.footLeft, selectFootLeft( skeleton ) ) );
+		p.assign( jointRotateNormal( p, posture.ankleLeft, selectAnkleLeft( skeleton ) ) );
+		p.assign( jointRotateNormal( p, posture.legLeft, selectLegLeft( skeleton ) ) );
+		p.assign( jointRotateNormal( p, posture.kneeLeft, selectKneeLeft( skeleton ) ) );
+		p.assign( jointRotateNormalLeg( p, posture.hip2Left, selectHip2Left( skeleton ) ) );
+		p.assign( jointRotateNormalLeg( p, posture.hipLeft, hipLeft ) );
+
+	} );
+
+
+
+	// RIGHT-LOWER BODY
+
+	var hipRight = selectHipRight( skeleton ).toVar();
+
+	If( hipRight.greaterThan( 0 ), ()=>{
+
+		p.assign( jointRotateNormal( p, posture.footRight, selectFootRight( skeleton ) ) );
+		p.assign( jointRotateNormal( p, posture.ankleRight, selectAnkleRight( skeleton ) ) );
+		p.assign( jointRotateNormal( p, posture.legRight, selectLegRight( skeleton ) ) );
+		p.assign( jointRotateNormal( p, posture.kneeRight, selectKneeRight( skeleton ) ) );
+		p.assign( jointRotateNormalLeg( p, posture.hip2Right, selectHip2Right( skeleton ) ) );
+		p.assign( jointRotateNormalLeg( p, posture.hipRight, hipRight ) );
+
+	} );
+
+	return transformNormalToView( p ).normalize( );
 
 } );
 
@@ -439,4 +567,4 @@ function tslPosture( ) {
 
 
 
-export { tslPositionNode, tslEmissiveNode, tslColorNode, tslPosture };
+export { tslPositionNode, tslEmissiveNode, tslColorNode, tslNormalNode, tslPosture };

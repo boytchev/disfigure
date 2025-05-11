@@ -143,7 +143,7 @@ function createGui( skeletonData, postureData, modelObject ) {
 		mfolder.add( posture.legLeft.value, 'y', -3, 3 ).name( html( '', '&#x2194;' ) );
 		mfolder.add( posture.ankleLeft.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21BA;' ) );
 
-		mfolder.add( posture.footLeft.value, 'x', -0.2, 0.5 ).name( html( 'Foot', '&#x2195;', 'border' ) );
+		mfolder.add( posture.footLeft.value, 'x', -0.3, 0.6 ).name( html( 'Foot', '&#x2195;', 'border' ) );
 
 	}
 
@@ -160,7 +160,7 @@ function createGui( skeletonData, postureData, modelObject ) {
 		mfolder.add( posture.legRight.value, 'y', -3, 3 ).name( html( '', '&#x2194;' ) );
 		mfolder.add( posture.ankleRight.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21BB;' ) );
 
-		mfolder.add( posture.footRight.value, 'x', -0.2, 0.5 ).name( html( 'Foot', '&#x2195;', 'border' ) );
+		mfolder.add( posture.footRight.value, 'x', -0.3, 0.6 ).name( html( 'Foot', '&#x2195;', 'border' ) );
 
 	}
 
@@ -233,13 +233,13 @@ function rigModel( time ) {
 	);
 
 	posture.footLeft.value.set(
-		( Math.cos( time*1.7 ) )*0.35+0.15,
+		( Math.cos( time*1.7 ) )*0.5+0.15,
 		0,
 		0,
 	);
 
 	posture.footRight.value.set(
-		( Math.sin( time*1.9 ) )*0.35+0.15,
+		( Math.sin( time*1.9 ) )*0.5+0.15,
 		0,
 		0,
 	);

@@ -8,7 +8,7 @@
 
 
 
-import { Box3, Mesh, MeshStandardNodeMaterial, Vector3 } from 'three';
+import { Color, Box3, Mesh, MeshPhysicalNodeMaterial, MeshStandardNodeMaterial, Vector3 } from 'three';
 import { Fn, mat3 } from 'three/tsl';
 
 
@@ -270,12 +270,13 @@ function ennodeModel( model, skeleton, posture, nodes ) {
 		if ( child.isMesh ) {
 
 			// convert the material into Node material
-			var material = new MeshStandardNodeMaterial();
+			//var material = new MeshStandardNodeMaterial();
+			var material = new MeshPhysicalNodeMaterial();
 
 			// copy all properties from the original material
 			Object.assign( material, child.material );
 
-			material.metalness = 0.1;
+			material.metalness = 0;
 			material.roughness = 0;
 
 			if ( nodes.colorNode )
@@ -283,6 +284,9 @@ function ennodeModel( model, skeleton, posture, nodes ) {
 
 			if ( nodes.positionNode )
 				material.positionNode = nodes.positionNode( { skeleton: skeleton, posture: posture } );
+
+			if ( nodes.normalNode )
+				material.normalNode = nodes.normalNode( { skeleton: skeleton, posture: posture } );
 
 			if ( nodes.emissiveNode )
 				material.emissiveNode = nodes.emissiveNode( { skeleton: skeleton, posture: posture } );

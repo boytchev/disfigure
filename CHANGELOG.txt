@@ -1,3 +1,6 @@
+v0.0.6
+  - fixed normal vectors
+  
 v0.0.5
   - added feet
   
