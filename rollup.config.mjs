@@ -13,7 +13,7 @@ export default [
 			format: 'es',
 			banner: `// disfigure v${pkg.version}\n`,
 		},
-		external: ['three', 'three/tsl'],
+		external: ['three', 'three/tsl', 'three/addons/libs/lil-gui.module.min.js', 'three/addons/controls/OrbitControls.js'],
 	},
 	{
 		input: './src/disfigure.js',
@@ -22,7 +22,7 @@ export default [
 			format: 'es',
 			banner: `/*! disfigure v${pkg.version} */\n`,
 		},
-		external: ['three', 'three/tsl'],
+		external: ['three', 'three/tsl', 'three/addons/libs/lil-gui.module.min.js', 'three/addons/controls/OrbitControls.js'],
 		plugins: [
 			terser({
 				format: {
@@ -39,7 +39,7 @@ export default [
 			banner: `// disfigure v${pkg.version}\n`,
 			sourcemap: false
 		},
-		external: ['three', 'three/tsl'],
+		external: ['three', 'three/tsl', 'three/addons/libs/lil-gui.module.min.js', 'three/addons/controls/OrbitControls.js'],
 		plugins: [
 			resolve(),
 			commonjs()
@@ -53,7 +53,7 @@ export default [
 			banner: `/*! disfigure v${pkg.version} */\n`,
 			sourcemap: false
 		},
-		external: ['three', 'three/tsl'],
+		external: ['three', 'three/tsl', 'three/addons/libs/lil-gui.module.min.js', 'three/addons/controls/OrbitControls.js'],
 		plugins: [
 			resolve(),
 			commonjs(),
