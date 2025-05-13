@@ -6,6 +6,7 @@ import path from 'path';
 import pkg from './package.json' with { type: 'json' };
 
 export default [
+
 	{
 		input: './src/disfigure.js',
 		output: {
@@ -15,6 +16,7 @@ export default [
 		},
 		external: ['three', 'three/tsl', 'three/addons/libs/lil-gui.module.min.js', 'three/addons/controls/OrbitControls.js'],
 	},
+
 	{
 		input: './src/disfigure.js',
 		output: {
@@ -31,6 +33,7 @@ export default [
 			})
 		]
 	},
+	
 	{
 		input: './src/disfigure.js',
 		output: {
@@ -45,6 +48,7 @@ export default [
 			commonjs()
 		]
 	},
+	
 	{
 		input: './src/disfigure.js',
 		output: {

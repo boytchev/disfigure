@@ -1,4 +1,4 @@
-// disfigure v0.0.5
+// disfigure v0.0.6
 
 import { Fn, mat3, uniform, mix, float, positionGeometry, If, normalGeometry, transformNormalToView, select, vec3 } from 'three/tsl';
 import * as THREE from 'three';

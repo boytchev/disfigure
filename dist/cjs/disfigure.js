@@ -1,4 +1,4 @@
-// disfigure v0.0.5
+// disfigure v0.0.6
 
 'use strict';
 
