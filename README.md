@@ -4,6 +4,13 @@ A library to rig non-rigged 3D models. **WIP.**
 
 [<img src="https://boytchev.github.io/disfigure/docs/snapshots/poser-prototype.jpg">](https://boytchev.github.io/disfigure/src)
 
+### Demos
+
+Videos of work-in-progress states of the TSL rigging. Click on a snapshot to go to an X post with a video and a link to live demo.
+
+[<img style="width:31%; border:solid 1px black;" src="https://boytchev.github.io/disfigure/docs/snapshots/example-liquid-metal.jpg">](https://x.com/PavelBoytchev/status/1921696049770447185)
+
+
 ### Proof of concept
 
 Videos of earlier attempts for TSL rigging.
