@@ -42,7 +42,7 @@
 
 import * as THREE from "three";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { createGui, credits, processModel, scene, tslColorNode, tslEmissiveNode, tslNormalNode, tslPositionNode, tslPosture } from "./disfigure.js";
+import { createGui, credits, HorizontalLocus, processModel, scene, tslColorNode, tslEmissiveNode, tslNormalNode, tslPositionNode, tslPosture } from "./disfigure.js";
 
 
 console.clear( );
@@ -95,27 +95,14 @@ new GLTFLoader().load( MODEL_URL, ( gltf ) => {
 var skeleton = {
 
 	// TORSO
-	headPos: new THREE.Vector3( 0, 2.56, -0.02 ),
-	headSpan: new THREE.Vector2( 2.51, 2.64 ),
-
-	chestPos: new THREE.Vector3( 0, 2.3, 0 ),
-	chestSpan: new THREE.Vector2( 2.1, 2.4 ),
-
-	waistPos: new THREE.Vector3( 0, 2.1, 0 ),
-	waistSpan: new THREE.Vector2( 1.9, 2.5 ),
+	head: new HorizontalLocus( 0, 2.56, -0.02, 2.51, 2.64, 20 ),
+	chest: new HorizontalLocus( 0, 2.3, 0, 2.1, 2.4 ),
+	waist: new HorizontalLocus( 0, 2.1, 0, 1.9, 2.5 ),
 
 	// LEGS
-	kneeLeftPos: new THREE.Vector3( 0.08, 1.655, -0.01 ),
-	kneeLeftSpan: new THREE.Vector2( 1.7, 1.6 ),
-
-	kneeRightPos: new THREE.Vector3( -0.08, 1.655, -0.01 ),
-	kneeRightSpan: new THREE.Vector2( 1.7, 1.6 ),
-
-	ankleLeftPos: new THREE.Vector3( 0.085, 1.3, -0.04 ),
-	ankleLeftSpan: new THREE.Vector2( 1.325, 1.265 ),
-
-	ankleRightPos: new THREE.Vector3( -0.085, 1.3, -0.04 ),
-	ankleRightSpan: new THREE.Vector2( 1.325, 1.265 ),
+	knee: new HorizontalLocus( 0.08, 1.655, -0.01, 1.7, 1.6 ),
+	ankle: new HorizontalLocus( 0.085, 1.3, -0.04, 1.325, 1.265 ),
+	leg: new HorizontalLocus( 0.1, 2, -0.04, 1.9, 0.4 ),
 
 	footLeftPos: new THREE.Vector3( 0, 1.23, 0.05 ),
 	footLeftSpan: new THREE.Vector2( 0.07, 0.11 ),
@@ -134,12 +121,6 @@ var skeleton = {
 
 	hip2RightPos: new THREE.Vector3( -0.011, 2, 0.01 ),
 	hip2RightSpan: new THREE.Vector4( 2, 1.5 ),
-
-	legLeftPos: new THREE.Vector3( 0.1, 2, -0.04 ),
-	legLeftSpan: new THREE.Vector2( 1.9, 0.4 ),
-
-	legRightPos: new THREE.Vector3( -0.1, 2, -0.04 ),
-	legRightSpan: new THREE.Vector2( 2.1, 0.4 ),
 
 	// ARMS
 
@@ -168,6 +149,8 @@ var skeleton = {
 	armRightSpan: new THREE.Vector4( -0.115, -0.215, 2.315, 2.37 ),
 
 };
+
+console.log( skeleton );
 
 	</script>
 </body>

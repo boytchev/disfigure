@@ -520,15 +520,15 @@ function showPivotPoint( index ) {
 	model.add( pivot );
 	switch ( index ) {
 
-		case 1: pivot.position.copy( skeleton.headPos ); break;
-		case 2: pivot.position.copy( skeleton.chestPos ); break;
-		case 3: pivot.position.copy( skeleton.waistPos ); break;
+		case 1: pivot.position.copy( skeleton.head.pivot ); break;
+		case 2: pivot.position.copy( skeleton.chest.pivot ); break;
+		case 3: pivot.position.copy( skeleton.waist.pivot ); break;
 
 		case 11: pivot.position.copy( skeleton.hipLeftPos ); break;
-		case 15: pivot.position.copy( skeleton.hip2LeftPos ); break;
-		case 12: pivot.position.copy( skeleton.legLeftPos ); break;
-		case 13: pivot.position.copy( skeleton.kneeLeftPos ); break;
-		case 14: pivot.position.copy( skeleton.ankleLeftPos ); break;
+		case 15: pivot.position.copy( skeleton.hip2.pivot ); break;
+		case 12: pivot.position.copy( skeleton.leg.pivot ); break;
+		case 13: pivot.position.copy( skeleton.knee.pivot ); break;
+		case 14: pivot.position.copy( skeleton.ankle.pivot ); break;
 		case 16: pivot.position.copy( skeleton.footLeftPos ); break;
 
 		case 21: pivot.position.copy( skeleton.armLeftPos ); break;

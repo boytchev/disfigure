@@ -1,9 +1,9 @@
-// disfigure v0.0.6
+// disfigure v0.0.7
 
 'use strict';
 
-var tsl = require('three/tsl');
 var THREE = require('three');
+var tsl = require('three/tsl');
 var lil = require('three/addons/libs/lil-gui.module.min.js');
 var OrbitControls_js = require('three/addons/controls/OrbitControls.js');
 
@@ -853,15 +853,15 @@ function showPivotPoint( index ) {
 	model.add( pivot );
 	switch ( index ) {
 
-		case 1: pivot.position.copy( skeleton.headPos ); break;
-		case 2: pivot.position.copy( skeleton.chestPos ); break;
-		case 3: pivot.position.copy( skeleton.waistPos ); break;
+		case 1: pivot.position.copy( skeleton.head.pivot ); break;
+		case 2: pivot.position.copy( skeleton.chest.pivot ); break;
+		case 3: pivot.position.copy( skeleton.waist.pivot ); break;
 
 		case 11: pivot.position.copy( skeleton.hipLeftPos ); break;
-		case 15: pivot.position.copy( skeleton.hip2LeftPos ); break;
-		case 12: pivot.position.copy( skeleton.legLeftPos ); break;
-		case 13: pivot.position.copy( skeleton.kneeLeftPos ); break;
-		case 14: pivot.position.copy( skeleton.ankleLeftPos ); break;
+		case 15: pivot.position.copy( skeleton.hip2.pivot ); break;
+		case 12: pivot.position.copy( skeleton.leg.pivot ); break;
+		case 13: pivot.position.copy( skeleton.knee.pivot ); break;
+		case 14: pivot.position.copy( skeleton.ankle.pivot ); break;
 		case 16: pivot.position.copy( skeleton.footLeftPos ); break;
 
 		case 21: pivot.position.copy( skeleton.armLeftPos ); break;
@@ -904,89 +904,54 @@ function animationLoop( t ) {
 
 renderer.setAnimationLoop( animationLoop );
 
-function selectWaist( { waistSpan } ) {
+// a class defining a locus in 3D space with fuzzy boundaries and orientation
+class Locus {
 
-	return tsl.positionGeometry.y.smoothstep( waistSpan.x, waistSpan.y );
+	constructor( x, y, z ) {
 
-} // inlined
+		this.pivot = new THREE.Vector3( x, y, z );
+		this.mirrorPivot = new THREE.Vector3( -x, y, z );
 
+	}
 
+}
 
-function selectHead( { headSpan } ) {
+// a horizontal flat locus at angle degrees, horizontally infinite, vertically from min to max
+class HorizontalLocus extends Locus {
 
-	return tsl.positionGeometry.y.add( tsl.positionGeometry.z.div( 3 ) ).smoothstep( headSpan.x, headSpan.y );
+	constructor( x, y, z, min, max, angle=0 ) {
 
-} // inlined
+		super( x, y, z );
+		this.min = min;
+		this.max = max;
+		this.slope = Math.tan( ( 90-angle ) * Math.PI/180 );
 
+	}
 
+	fuzzy( ) {
 
-function selectChest( { chestSpan } ) {
+		if ( this.slope==0 )
+			return tsl.positionGeometry.y.smoothstep( this.min, this.max );
+		else
+			return tsl.positionGeometry.y.add( tsl.positionGeometry.z.div( this.slope ) ).smoothstep( this.min, this.max );
 
-	return tsl.positionGeometry.y.smoothstep( chestSpan.x, chestSpan.y );
+	}
 
-} // inlined
-
-
-
-function selectKneeLeft( { kneeLeftSpan } ) {
-
-	return tsl.positionGeometry.y.smoothstep( kneeLeftSpan.x, kneeLeftSpan.y );
-
-} // inlined
-
-
-
-function selectKneeRight( { kneeRightSpan } ) {
-
-	return tsl.positionGeometry.y.smoothstep( kneeRightSpan.x, kneeRightSpan.y );
-
-} // inlined
+}
 
 
 
-function selectAnkleLeft( { ankleLeftSpan } ) {
+function selectFootLeft( { footLeftSpan, ankle } ) {
 
-	return tsl.positionGeometry.y.smoothstep( ankleLeftSpan.x, ankleLeftSpan.y );
+	return tsl.positionGeometry.z.smoothstep( footLeftSpan.x, footLeftSpan.y ).mul( tsl.positionGeometry.y.step( ankle.max ) );
 
 } // inlined
 
 
 
-function selectAnkleRight( { ankleRightSpan } ) {
+function selectFootRight( { footRightSpan, ankle } ) {
 
-	return tsl.positionGeometry.y.smoothstep( ankleRightSpan.x, ankleRightSpan.y );
-
-} // inlined
-
-
-
-function selectFootLeft( { footLeftSpan, ankleLeftSpan } ) {
-
-	return tsl.positionGeometry.z.smoothstep( footLeftSpan.x, footLeftSpan.y ).mul( tsl.positionGeometry.y.step( ankleLeftSpan.y ) );
-
-} // inlined
-
-
-
-function selectFootRight( { footRightSpan, ankleRightSpan } ) {
-
-	return tsl.positionGeometry.z.smoothstep( footRightSpan.x, footRightSpan.y ).mul( tsl.positionGeometry.y.step( ankleRightSpan.y ) );
-
-} // inlined
-
-
-
-function selectLegLeft( { legLeftSpan } ) {
-
-	return tsl.positionGeometry.y.smoothstep( legLeftSpan.x, legLeftSpan.y ).pow( 1 );
-
-} // inlined
-
-
-
-function selectLegRight( { legRightSpan } ) {
-
-	return tsl.positionGeometry.y.smoothstep( legRightSpan.x, legRightSpan.y );
+	return tsl.positionGeometry.z.smoothstep( footRightSpan.x, footRightSpan.y ).mul( tsl.positionGeometry.y.step( ankle.max ) );
 
 } // inlined
 
@@ -1006,14 +971,6 @@ function selectHipLeft( { hipLeftSpan } ) {
 
 
 
-function selectHip2Left( { hip2LeftSpan } ) {
-
-	return tsl.positionGeometry.y.smoothstep( hip2LeftSpan.x, hip2LeftSpan.y );
-
-} // inlined
-
-
-
 function selectHipRight( { hipRightSpan } ) {
 
 	var x = tsl.positionGeometry.x;
@@ -1023,14 +980,6 @@ function selectHipRight( { hipRightSpan } ) {
 		.smoothstep( hipRightSpan.z, tsl.float( hipRightSpan.w ).add( x.mul( 1.6 ) ) )
 		.mul( y.smoothstep( hipRightSpan.x, hipRightSpan.y ) )
 		.mul( x.smoothstep( 0.01, -0.01 ) );
-
-} // inlined
-
-
-
-function selectHip2Right( { hip2RightSpan } ) {
-
-	return tsl.positionGeometry.y.smoothstep( hip2RightSpan.x, hip2RightSpan.y );
 
 } // inlined
 
@@ -1245,9 +1194,9 @@ var tslPositionNode = tsl.Fn( ( { skeleton, posture } )=>{
 
 	// CENTRAL BODY AXIS
 
-	p.assign( jointRotate( p, skeleton.headPos, posture.head, selectHead( skeleton ) ) );
-	p.assign( jointRotate( p, skeleton.chestPos, posture.chest, selectChest( skeleton ) ) );
-	p.assign( jointRotate( p, skeleton.waistPos, posture.waist, selectWaist( skeleton ) ) );
+	p.assign( jointRotate( p, skeleton.head.pivot, posture.head, skeleton.head.fuzzy( ) ) );
+	p.assign( jointRotate( p, skeleton.chest.pivot, posture.chest, skeleton.chest.fuzzy() ) );
+	p.assign( jointRotate( p, skeleton.waist.pivot, posture.waist, skeleton.waist.fuzzy() ) );
 
 
 
@@ -1258,10 +1207,10 @@ var tslPositionNode = tsl.Fn( ( { skeleton, posture } )=>{
 	tsl.If( hipLeft.greaterThan( 0 ), ()=>{
 
 		p.assign( jointRotate( p, skeleton.footLeftPos, posture.footLeft, selectFootLeft( skeleton ) ) );
-		p.assign( jointRotate( p, skeleton.ankleLeftPos, posture.ankleLeft, selectAnkleLeft( skeleton ) ) );
-		p.assign( jointRotate( p, skeleton.legLeftPos, posture.legLeft, selectLegLeft( skeleton ) ) );
-		p.assign( jointRotate( p, skeleton.kneeLeftPos, posture.kneeLeft, selectKneeLeft( skeleton ) ) );
-		p.assign( jointRotateLeg( p, skeleton.hip2LeftPos, posture.hip2Left, selectHip2Left( skeleton ) ) );
+		p.assign( jointRotate( p, skeleton.ankle.pivot, posture.ankleLeft, skeleton.ankle.fuzzy( ) ) );
+		p.assign( jointRotate( p, skeleton.leg.pivot, posture.legLeft, skeleton.leg.fuzzy( ) ) );
+		p.assign( jointRotate( p, skeleton.knee.pivot, posture.kneeLeft, skeleton.knee.fuzzy( ) ) );
+		p.assign( jointRotateLeg( p, skeleton.hip2.pivot, posture.hip2Left, skeleton.hip2.fuzzy( ) ) );
 		p.assign( jointRotateLeg( p, skeleton.hipLeftPos, posture.hipLeft, hipLeft ) );
 
 	} );
@@ -1275,10 +1224,10 @@ var tslPositionNode = tsl.Fn( ( { skeleton, posture } )=>{
 	tsl.If( hipRight.greaterThan( 0 ), ()=>{
 
 		p.assign( jointRotate( p, skeleton.footRightPos, posture.footRight, selectFootRight( skeleton ) ) );
-		p.assign( jointRotate( p, skeleton.ankleRightPos, posture.ankleRight, selectAnkleRight( skeleton ) ) );
-		p.assign( jointRotate( p, skeleton.legRightPos, posture.legRight, selectLegRight( skeleton ) ) );
-		p.assign( jointRotate( p, skeleton.kneeRightPos, posture.kneeRight, selectKneeRight( skeleton ) ) );
-		p.assign( jointRotateLeg( p, skeleton.hip2RightPos, posture.hip2Right, selectHip2Right( skeleton ) ) );
+		p.assign( jointRotate( p, skeleton.ankle.mirrorPivot, posture.ankleRight, skeleton.ankle.fuzzy( ) ) );
+		p.assign( jointRotate( p, skeleton.leg.mirrorPivot, posture.legRight, skeleton.leg.fuzzy( ) ) );
+		p.assign( jointRotate( p, skeleton.knee.mirrorPivot, posture.kneeRight, skeleton.knee.fuzzy( ) ) );
+		p.assign( jointRotateLeg( p, skeleton.hip2.mirrorPivot, posture.hip2Right, skeleton.hip2.fuzzy( ) ) );
 		p.assign( jointRotateLeg( p, skeleton.hipRightPos, posture.hipRight, hipRight ) );
 
 	} );
@@ -1327,9 +1276,9 @@ var tslNormalNode = tsl.Fn( ( { skeleton, posture } )=>{
 
 	// CENTRAL BODY AXIS
 
-	p.assign( jointRotateNormal( p, posture.head, selectHead( skeleton ) ) );
-	p.assign( jointRotateNormal( p, posture.chest, selectChest( skeleton ) ) );
-	p.assign( jointRotateNormal( p, posture.waist, selectWaist( skeleton ) ) );
+	p.assign( jointRotateNormal( p, posture.head, skeleton.head.fuzzy( ) ) );
+	p.assign( jointRotateNormal( p, posture.chest, skeleton.chest.fuzzy( ) ) );
+	p.assign( jointRotateNormal( p, posture.waist, skeleton.waist.fuzzy( ) ) );
 
 
 
@@ -1340,10 +1289,10 @@ var tslNormalNode = tsl.Fn( ( { skeleton, posture } )=>{
 	tsl.If( hipLeft.greaterThan( 0 ), ()=>{
 
 		p.assign( jointRotateNormal( p, posture.footLeft, selectFootLeft( skeleton ) ) );
-		p.assign( jointRotateNormal( p, posture.ankleLeft, selectAnkleLeft( skeleton ) ) );
-		p.assign( jointRotateNormal( p, posture.legLeft, selectLegLeft( skeleton ) ) );
-		p.assign( jointRotateNormal( p, posture.kneeLeft, selectKneeLeft( skeleton ) ) );
-		p.assign( jointRotateNormalLeg( p, posture.hip2Left, selectHip2Left( skeleton ) ) );
+		p.assign( jointRotateNormal( p, posture.ankleLeft, skeleton.ankle.fuzzy( ) ) );
+		p.assign( jointRotateNormal( p, posture.legLeft, skeleton.leg.fuzzy( ) ) );
+		p.assign( jointRotateNormal( p, posture.kneeLeft, skeleton.knee.fuzzy( ) ) );
+		p.assign( jointRotateNormalLeg( p, posture.hip2Left, skeleton.hip2.fuzzy( ) ) );
 		p.assign( jointRotateNormalLeg( p, posture.hipLeft, hipLeft ) );
 
 	} );
@@ -1357,10 +1306,10 @@ var tslNormalNode = tsl.Fn( ( { skeleton, posture } )=>{
 	tsl.If( hipRight.greaterThan( 0 ), ()=>{
 
 		p.assign( jointRotateNormal( p, posture.footRight, selectFootRight( skeleton ) ) );
-		p.assign( jointRotateNormal( p, posture.ankleRight, selectAnkleRight( skeleton ) ) );
-		p.assign( jointRotateNormal( p, posture.legRight, selectLegRight( skeleton ) ) );
-		p.assign( jointRotateNormal( p, posture.kneeRight, selectKneeRight( skeleton ) ) );
-		p.assign( jointRotateNormalLeg( p, posture.hip2Right, selectHip2Right( skeleton ) ) );
+		p.assign( jointRotateNormal( p, posture.ankleRight, skeleton.ankle.fuzzy( ) ) );
+		p.assign( jointRotateNormal( p, posture.legRight, skeleton.leg.fuzzy( ) ) );
+		p.assign( jointRotateNormal( p, posture.kneeRight, skeleton.knee.fuzzy( ) ) );
+		p.assign( jointRotateNormalLeg( p, posture.hip2Right, skeleton.hip2.fuzzy( ) ) );
 		p.assign( jointRotateNormalLeg( p, posture.hipRight, hipRight ) );
 
 	} );
@@ -1377,16 +1326,16 @@ var tslEmissiveNode = tsl.Fn( ( { skeleton, posture } )=>{
 
 	var s = posture.select;
 	var k = tsl.float( 0 )
-		.add( selectHead( skeleton ).mul( tsl.select( s.equal( 1 ), 1, 0 ) ) )
-		.add( selectChest( skeleton ).mul( tsl.select( s.equal( 2 ), 1, 0 ) ) )
-		.add( selectWaist( skeleton ).mul( tsl.select( s.equal( 3 ), 1, 0 ) ) )
+		.add( skeleton.head.fuzzy( ).mul( tsl.select( s.equal( 1 ), 1, 0 ) ) )
+		.add( skeleton.chest.fuzzy( ).mul( tsl.select( s.equal( 2 ), 1, 0 ) ) )
+		.add( skeleton.waist.fuzzy( ).mul( tsl.select( s.equal( 3 ), 1, 0 ) ) )
 
 		.add( selectHipLeft( skeleton ).mul( tsl.select( s.equal( 11 ), 1, 0 ) ) )
-		.add( selectLegLeft( skeleton ).mul( tsl.select( s.equal( 12 ), 1, 0 ) ) )
-		.add( selectKneeLeft( skeleton ).mul( tsl.select( s.equal( 13 ), 1, 0 ) ) )
-		.add( selectAnkleLeft( skeleton ).mul( tsl.select( s.equal( 14 ), 1, 0 ) ) )
+		.add( skeleton.leg.fuzzy( ).mul( tsl.select( s.equal( 12 ), 1, 0 ) ) )
+		.add( skeleton.knee.fuzzy( ).mul( tsl.select( s.equal( 13 ), 1, 0 ) ) )
+		.add( skeleton.ankle.fuzzy( ).mul( tsl.select( s.equal( 14 ), 1, 0 ) ) )
 		.add( selectFootLeft( skeleton ).mul( tsl.select( s.equal( 16 ), 1, 0 ) ) )
-		.add( selectHip2Left( skeleton ).mul( tsl.select( s.equal( 15 ), 1, 0 ) ) )
+		.add( skeleton.hip2.fuzzy( ).mul( tsl.select( s.equal( 15 ), 1, 0 ) ) )
 
 		.add( selectArmLeft( skeleton ).mul( tsl.select( s.equal( 21 ), 1, 0 ) ) )
 		.add( selectElbowLeft( skeleton ).mul( tsl.select( s.equal( 22 ), 1, 0 ) ) )
@@ -1462,6 +1411,7 @@ function tslPosture( ) {
 
 }
 
+exports.HorizontalLocus = HorizontalLocus;
 exports.createGui = createGui;
 exports.credits = credits;
 exports.matRotXYZ = matRotXYZ;

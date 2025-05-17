@@ -1,3 +1,9 @@
+v0.0.8
+  - introduced zones, 6 joints converted to zones
+
+v0.0.7
+  - minor fixes of version numbers
+
 v0.0.6
   - fixed normal vectors
   - first example "Liquid metal"
