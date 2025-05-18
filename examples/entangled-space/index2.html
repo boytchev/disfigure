@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+
+
+<html>
+
+
+<head>
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+	<link rel="shortcut icon" href="../assets/logo/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="../../assets/logo/favicon.ico" type="image/x-icon">
+	
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+	<link rel="stylesheet" href="styles.css">
+	
+	<script type="importmap">
+	  {
+		"imports": {
+			"three": "https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.webgpu.min.js",
+			"three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.webgpu.min.js",
+			"three/tsl": "https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.tsl.min.js",
+			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.176.0/examples/jsm/"
+		}
+	  }
+	</script>
+</head>
+
+
+<body>
+	<header>
+		<h1><b>Disfigure</b> Posture Editor</h1>
+		<h3> This is a WIP prototype, all sources available at <a href="https://boytchev.github.io/disfigure/">Github</a>.</br>
+		<span id="credits1"></span><br>
+		and <span id="credits2"></span>.</h3>
+	</header>
+
+	
+	<script type="module">
+
+import * as THREE from "three";
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { createGui, credits, LocusX, LocusY, LocusYZ, processModel, scene, tslColorNode, tslEmissiveNode, tslNormalNode, tslPositionNode, tslPosture } from "./disfigure.min.js";
+
+
+console.clear( );
+
+
+const MODEL_URL = '../../assets/models/mc-powerful-deep-chestnut-bougainvillea-t-pose.glb';
+const ENV_MAP = '../../assets/models/rostock_laage_airport.jpg';
+
+
+
+
+var overModel = new THREE.Object3D();
+scene.add( overModel );
+
+
+var envMap = new THREE.TextureLoader().load( ENV_MAP );
+envMap.mapping = THREE.EquirectangularReflectionMapping;
+scene.environment = envMap;
+
+
+
+new GLTFLoader().load( MODEL_URL, ( gltf ) => {
+
+	var p = new THREE.Mesh( new THREE.BoxGeometry( 2, 1.8, 1, 8, 8, 4 ) );
+	p.position.y = 2;
+	p.material.opacity = 0.2;
+	p.material.transparent = true;
+	p.material.side = THREE.DoubleSide;
+	scene.add( p ); gltf.scene.attach( p );
+
+	/*
+		var p = new THREE.Mesh( new THREE.BoxGeometry( 2, 2, 0.01 ) );
+		gltf.scene.add( p );
+		p = new THREE.Mesh( new THREE.BoxGeometry( 0.01, 2, 2 ) );
+		gltf.scene.add( p );
+		p = new THREE.Mesh( new THREE.BoxGeometry( 2, 0.01, 2 ) );
+		gltf.scene.add( p );
+	*/
+
+	var posture = tslPosture( );
+
+	var model = processModel(
+		gltf.scene,
+		skeleton,
+		posture,
+		{
+			positionNode: tslPositionNode, // rigging
+			normalNode: tslNormalNode, // lighting
+			colorNode: tslColorNode, // optional debug texture
+			//emissiveNode: tslEmissiveNode, // optional debug marking
+		} );
+
+
+	createGui( skeleton, posture, model );
+
+	credits( MODEL_URL, 'credits1' );
+	credits( ENV_MAP, 'credits2' );
+
+	overModel.add( model );
+
+} );
+
+
+
+
+
+var skeleton = {
+
+	// TORSO
+	head: new LocusYZ( 0, 2.56, -0.02, 2.51, 2.64, 20 ),
+	chest: new LocusY( 0, 2.3, 0, 2.1, 2.4 ),
+	waist: new LocusY( 0, 2.1, 0, 1.9, 2.5 ),
+
+	// LEGS
+	knee: new LocusY( 0.08, 1.655, -0.01, 1.7, 1.6 ),
+	ankle: new LocusY( 0.085, 1.3, -0.04, 1.325, 1.265 ),
+	leg: new LocusY( 0.1, 2, -0.04, 1.9, 0.4 ),
+	hip2: new LocusY( 0.011, 2, 0.01, 2, 1.5 ),
+	foot: new LocusYZ( 0, 1.23, 0.05, 1.21, 1.11, 120 ),
+
+	hipLeftPos: new THREE.Vector3( 0.052, 2, -0.04 ),
+	hipLeftSpan: new THREE.Vector4( 2.3, 1.9, 1.98, 1.85 ),
+
+	hipRightPos: new THREE.Vector3( -0.052, 2, -0.04 ),
+	hipRightSpan: new THREE.Vector4( 2.3, 1.9, 1.98, 1.85 ),
+
+	// ARMS
+	elbow: new LocusX( 0.42, 2.46, -0.05, 0.39, 0.46 ),
+	forearm: new LocusX( 0.42, 2.46, -0.05, 0.30, 0.70 ),
+	wrist: new LocusX( 0.68, 2.45, -0.06, 0.67, 0.69 ),
+
+	armLeftPos: new THREE.Vector3( 0.17, 2.44, -0.06 ),
+	armLeftSpan: new THREE.Vector4( 0.115, 0.215, 2.315, 2.37 ),
+
+	armRightPos: new THREE.Vector3( -0.17, 2.44, -0.06 ),
+	armRightSpan: new THREE.Vector4( -0.115, -0.215, 2.315, 2.37 ),
+
+};
+
+	</script>
+</body>
+</html>
