@@ -529,11 +529,11 @@ function showPivotPoint( index ) {
 		case 12: pivot.position.copy( skeleton.leg.pivot ); break;
 		case 13: pivot.position.copy( skeleton.knee.pivot ); break;
 		case 14: pivot.position.copy( skeleton.ankle.pivot ); break;
-		case 16: pivot.position.copy( skeleton.footLeftPos ); break;
+		case 16: pivot.position.copy( skeleton.foot.pivot ); break;
 
 		case 21: pivot.position.copy( skeleton.armLeftPos ); break;
 		case 22: pivot.position.copy( skeleton.elbowLeftPos ); break;
-		case 23: pivot.position.copy( skeleton.forearmLeftPos ); break;
+		case 23: pivot.position.copy( skeleton.forearm.pivot ); break;
 		case 24: pivot.position.copy( skeleton.wristLeftPos ); break;
 
 		default: model.remove( pivot );

@@ -1,5 +1,5 @@
 v0.0.8
-  - introduced zones, 6 joints converted to zones
+  - introduced zones, 11 joints converted to zones
 
 v0.0.7
   - minor fixes of version numbers
