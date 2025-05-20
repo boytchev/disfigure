@@ -42,7 +42,7 @@
 
 import * as THREE from "three";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { createGui, credits, LocusX, LocusY, LocusYZ, processModel, scene, tslColorNode, tslEmissiveNode, tslNormalNode, tslPositionNode, tslPosture } from "./disfigure.js";
+import { createGui, credits, LocusX, LocusXY, LocusY, LocusYZ, processModel, scene, tslColorNode, tslEmissiveNode, tslNormalNode, tslPositionNode, tslPosture } from "./disfigure.js";
 
 
 console.clear( );
@@ -93,7 +93,7 @@ new GLTFLoader().load( MODEL_URL, ( gltf ) => {
 			positionNode: tslPositionNode, // rigging
 			normalNode: tslNormalNode, // lighting
 			colorNode: tslColorNode, // optional debug texture
-			//emissiveNode: tslEmissiveNode, // optional debug marking
+			emissiveNode: tslEmissiveNode, // optional debug marking
 		} );
 
 
@@ -134,16 +134,10 @@ var skeleton = {
 	elbow: new LocusX( 0.42, 2.46, -0.05, 0.39, 0.46 ),
 	forearm: new LocusX( 0.42, 2.46, -0.05, 0.30, 0.70 ),
 	wrist: new LocusX( 0.68, 2.45, -0.06, 0.67, 0.69 ),
-
-	armLeftPos: new THREE.Vector3( 0.17, 2.44, -0.06 ),
-	armLeftSpan: new THREE.Vector4( 0.115, 0.215, 2.315, 2.37 ),
-
-	armRightPos: new THREE.Vector3( -0.17, 2.44, -0.06 ),
-	armRightSpan: new THREE.Vector4( -0.115, -0.215, 2.315, 2.37 ),
+	arm: new LocusXY( 0.17, 2.44, -0.06, 0.115, 0.215, 2.315, 2.37 ),
 
 };
 
-console.log( skeleton );
 
 	</script>
 </body>

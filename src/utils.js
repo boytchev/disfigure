@@ -279,6 +279,9 @@ function ennodeModel( model, skeleton, posture, nodes ) {
 			material.metalness = 0.1;
 			material.roughness = 0.6;
 
+			//			material.metalness = 0.5;
+			//			material.roughness = 0.3;
+
 			if ( nodes.colorNode )
 				material.colorNode = nodes.colorNode( );
 
