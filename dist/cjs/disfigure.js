@@ -1038,27 +1038,11 @@ function selectHipRight( { hipRightSpan } ) {
 
 var jointRotate= tsl.Fn( ([ pos, center, angle, amount ])=>{
 
+	// for legs matRotYZX was better, but for all others matRotYXZ is better
 	return pos.sub( center ).mul( matRotYXZ( angle.mul( amount ) ) ).add( center );
 
 } ).setLayout( {
 	name: 'jointRotate',
-	type: 'vec3',
-	inputs: [
-		{ name: 'pos', type: 'vec3' },
-		{ name: 'center', type: 'vec3' },
-		{ name: 'angle', type: 'vec3' },
-		{ name: 'amount', type: 'float' },
-	]
-} );
-
-
-
-var jointRotateLeg= tsl.Fn( ([ pos, center, angle, amount ])=>{
-
-	return pos.sub( center ).mul( matRotYZX( angle.mul( amount ) ) ).add( center );
-
-} ).setLayout( {
-	name: 'jointRotateLeg',
 	type: 'vec3',
 	inputs: [
 		{ name: 'pos', type: 'vec3' },
@@ -1088,9 +1072,29 @@ var jointRotateArm= tsl.Fn( ([ pos, center, angle, amount ])=>{
 
 
 
-var tslPositionNode = tsl.Fn( ( { skeleton, posture } )=>{
+function tslPositionNode( options ) {
 
-	var p = tsl.positionGeometry.toVar();
+	options.vertex = tsl.positionGeometry;
+	options.mode = tsl.float( 1 );
+	return tslPositionNode2( options );
+
+}
+
+
+
+function tslNormalNode( options ) {
+
+	options.vertex = tsl.normalGeometry;
+	options.mode = tsl.float( 0 );
+	return tsl.transformNormalToView( tslPositionNode2( options ) ).normalize( );
+
+}
+
+
+
+var tslPositionNode2 = tsl.Fn( ( { skeleton, posture, mode, vertex } )=>{
+
+	var p = vertex.toVar();
 
 
 
@@ -1100,10 +1104,10 @@ var tslPositionNode = tsl.Fn( ( { skeleton, posture } )=>{
 
 	tsl.If( armLeft.greaterThan( 0 ), ()=>{
 
-		p.assign( jointRotate( p, skeleton.wrist.pivot, posture.wristLeft, skeleton.wrist.fuzzy( ) ) );
-		p.assign( jointRotate( p, skeleton.forearm.pivot, posture.forearmLeft, skeleton.forearm.fuzzy( ) ) );
-		p.assign( jointRotate( p, skeleton.elbow.pivot, posture.elbowLeft, skeleton.elbow.fuzzy( ) ) );
-		p.assign( jointRotateArm( p, skeleton.arm.pivot, posture.armLeft, armLeft ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.wrist.pivot ), posture.wristLeft, skeleton.wrist.fuzzy( ) ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.forearm.pivot ), posture.forearmLeft, skeleton.forearm.fuzzy( ) ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.elbow.pivot ), posture.elbowLeft, skeleton.elbow.fuzzy( ) ) );
+		p.assign( jointRotateArm( p, mode.mul( skeleton.arm.pivot ), posture.armLeft, armLeft ) );
 
 	} );
 
@@ -1115,10 +1119,10 @@ var tslPositionNode = tsl.Fn( ( { skeleton, posture } )=>{
 
 	tsl.If( armRight.greaterThan( 0 ), ()=>{
 
-		p.assign( jointRotate( p, skeleton.wrist.mirrorPivot, posture.wristRight, skeleton.wrist.mirrorFuzzy( ) ) );
-		p.assign( jointRotate( p, skeleton.forearm.mirrorPivot, posture.forearmRight, skeleton.forearm.mirrorFuzzy( ) ) );
-		p.assign( jointRotate( p, skeleton.elbow.mirrorPivot, posture.elbowRight, skeleton.elbow.mirrorFuzzy( ) ) );
-		p.assign( jointRotateArm( p, skeleton.arm.mirrorPivot, posture.armRight, armRight ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.wrist.mirrorPivot ), posture.wristRight, skeleton.wrist.mirrorFuzzy( ) ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.forearm.mirrorPivot ), posture.forearmRight, skeleton.forearm.mirrorFuzzy( ) ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.elbow.mirrorPivot ), posture.elbowRight, skeleton.elbow.mirrorFuzzy( ) ) );
+		p.assign( jointRotateArm( p, mode.mul( skeleton.arm.mirrorPivot ), posture.armRight, armRight ) );
 
 	} );
 
@@ -1126,9 +1130,9 @@ var tslPositionNode = tsl.Fn( ( { skeleton, posture } )=>{
 
 	// CENTRAL BODY AXIS
 
-	p.assign( jointRotate( p, skeleton.head.pivot, posture.head, skeleton.head.fuzzy( ) ) );
-	p.assign( jointRotate( p, skeleton.chest.pivot, posture.chest, skeleton.chest.fuzzy() ) );
-	p.assign( jointRotate( p, skeleton.waist.pivot, posture.waist, skeleton.waist.fuzzy() ) );
+	p.assign( jointRotate( p, mode.mul( skeleton.head.pivot ), posture.head, skeleton.head.fuzzy( ) ) );
+	p.assign( jointRotate( p, mode.mul( skeleton.chest.pivot ), posture.chest, skeleton.chest.fuzzy() ) );
+	p.assign( jointRotate( p, mode.mul( skeleton.waist.pivot ), posture.waist, skeleton.waist.fuzzy() ) );
 
 
 
@@ -1138,12 +1142,12 @@ var tslPositionNode = tsl.Fn( ( { skeleton, posture } )=>{
 
 	tsl.If( hipLeft.greaterThan( 0 ), ()=>{
 
-		p.assign( jointRotate( p, skeleton.foot.pivot, posture.footLeft, skeleton.foot.fuzzy( ) ) );
-		p.assign( jointRotate( p, skeleton.ankle.pivot, posture.ankleLeft, skeleton.ankle.fuzzy( ) ) );
-		p.assign( jointRotate( p, skeleton.leg.pivot, posture.legLeft, skeleton.leg.fuzzy( ) ) );
-		p.assign( jointRotate( p, skeleton.knee.pivot, posture.kneeLeft, skeleton.knee.fuzzy( ) ) );
-		p.assign( jointRotateLeg( p, skeleton.hip2.pivot, posture.hip2Left, skeleton.hip2.fuzzy( ) ) );
-		p.assign( jointRotateLeg( p, skeleton.hipLeftPos, posture.hipLeft, hipLeft ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.foot.pivot ), posture.footLeft, skeleton.foot.fuzzy( ) ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.ankle.pivot ), posture.ankleLeft, skeleton.ankle.fuzzy( ) ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.leg.pivot ), posture.legLeft, skeleton.leg.fuzzy( ) ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.knee.pivot ), posture.kneeLeft, skeleton.knee.fuzzy( ) ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.hip2.pivot ), posture.hip2Left, skeleton.hip2.fuzzy( ) ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.hipLeftPos ), posture.hipLeft, hipLeft ) );
 
 	} );
 
@@ -1155,97 +1159,16 @@ var tslPositionNode = tsl.Fn( ( { skeleton, posture } )=>{
 
 	tsl.If( hipRight.greaterThan( 0 ), ()=>{
 
-		p.assign( jointRotate( p, skeleton.foot.mirrorPivot, posture.footRight, skeleton.ankle.fuzzy( ) ) );
-		p.assign( jointRotate( p, skeleton.ankle.mirrorPivot, posture.ankleRight, skeleton.ankle.fuzzy( ) ) );
-		p.assign( jointRotate( p, skeleton.leg.mirrorPivot, posture.legRight, skeleton.leg.fuzzy( ) ) );
-		p.assign( jointRotate( p, skeleton.knee.mirrorPivot, posture.kneeRight, skeleton.knee.fuzzy( ) ) );
-		p.assign( jointRotateLeg( p, skeleton.hip2.mirrorPivot, posture.hip2Right, skeleton.hip2.fuzzy( ) ) );
-		p.assign( jointRotateLeg( p, skeleton.hipRightPos, posture.hipRight, hipRight ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.foot.mirrorPivot ), posture.footRight, skeleton.ankle.fuzzy( ) ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.ankle.mirrorPivot ), posture.ankleRight, skeleton.ankle.fuzzy( ) ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.leg.mirrorPivot ), posture.legRight, skeleton.leg.fuzzy( ) ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.knee.mirrorPivot ), posture.kneeRight, skeleton.knee.fuzzy( ) ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.hip2.mirrorPivot ), posture.hip2Right, skeleton.hip2.fuzzy( ) ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.hipRightPos ), posture.hipRight, hipRight ) );
 
 	} );
 
 	return p;
-
-} );
-
-
-
-var tslNormalNode = tsl.Fn( ( { skeleton, posture } )=>{
-
-	var p = tsl.normalGeometry.toVar();
-
-
-
-	// LEFT-UPPER BODY
-
-	var armLeft = skeleton.arm.fuzzy( ).toVar();
-
-	tsl.If( armLeft.greaterThan( 0 ), ()=>{
-
-		p.assign( jointRotate( p, tsl.vec3( 0 ), posture.wristLeft, skeleton.wrist.fuzzy( ) ) );
-		p.assign( jointRotate( p, tsl.vec3( 0 ), posture.forearmLeft, skeleton.forearm.fuzzy( ) ) );
-		p.assign( jointRotate( p, tsl.vec3( 0 ), posture.elbowLeft, skeleton.elbow.fuzzy( ) ) );
-		p.assign( jointRotateArm( p, tsl.vec3( 0 ), posture.armLeft, armLeft ) );
-
-	} );
-
-
-
-	// RIGHT-UPPER BODY
-
-	var armRight = skeleton.arm.mirrorFuzzy( ).toVar();
-
-	tsl.If( armRight.greaterThan( 0 ), ()=>{
-
-		p.assign( jointRotate( p, tsl.vec3( 0 ), posture.wristRight, skeleton.wrist.mirrorFuzzy( ) ) );
-		p.assign( jointRotate( p, tsl.vec3( 0 ), posture.forearmRight, skeleton.forearm.mirrorFuzzy( ) ) );
-		p.assign( jointRotate( p, tsl.vec3( 0 ), posture.elbowRight, skeleton.elbow.mirrorFuzzy( ) ) );
-		p.assign( jointRotateArm( p, tsl.vec3( 0 ), posture.armRight, armRight ) );
-
-	} );
-
-
-
-	// CENTRAL BODY AXIS
-	p.assign( jointRotate( p, tsl.vec3( 0 ), posture.head, skeleton.head.fuzzy( ) ) );
-	p.assign( jointRotate( p, tsl.vec3( 0 ), posture.chest, skeleton.chest.fuzzy( ) ) );
-	p.assign( jointRotate( p, tsl.vec3( 0 ), posture.waist, skeleton.waist.fuzzy() ) );
-
-
-
-	// LEFT-LOWER BODY
-
-	var hipLeft = selectHipLeft( skeleton ).toVar();
-
-	tsl.If( hipLeft.greaterThan( 0 ), ()=>{
-
-		p.assign( jointRotate( p, tsl.vec3( 0 ), posture.footLeft, skeleton.foot.fuzzy( ) ) );
-		p.assign( jointRotate( p, tsl.vec3( 0 ), posture.ankleLeft, skeleton.ankle.fuzzy( ) ) );
-		p.assign( jointRotate( p, tsl.vec3( 0 ), posture.legLeft, skeleton.leg.fuzzy( ) ) );
-		p.assign( jointRotate( p, tsl.vec3( 0 ), posture.kneeLeft, skeleton.knee.fuzzy( ) ) );
-		p.assign( jointRotateLeg( p, tsl.vec3( 0 ), posture.hip2Left, skeleton.hip2.fuzzy( ) ) );
-		p.assign( jointRotateLeg( p, tsl.vec3( 0 ), posture.hipLeft, hipLeft ) );
-
-	} );
-
-
-
-	// RIGHT-LOWER BODY
-
-	var hipRight = selectHipRight( skeleton ).toVar();
-
-	tsl.If( hipRight.greaterThan( 0 ), ()=>{
-
-		p.assign( jointRotate( p, tsl.vec3( 0 ), posture.footRight, skeleton.foot.fuzzy( ) ) );
-		p.assign( jointRotate( p, tsl.vec3( 0 ), posture.ankleRight, skeleton.ankle.fuzzy( ) ) );
-		p.assign( jointRotate( p, tsl.vec3( 0 ), posture.legRight, skeleton.leg.fuzzy( ) ) );
-		p.assign( jointRotate( p, tsl.vec3( 0 ), posture.kneeRight, skeleton.knee.fuzzy( ) ) );
-		p.assign( jointRotateLeg( p, tsl.vec3( 0 ), posture.hip2Right, skeleton.hip2.fuzzy( ) ) );
-		p.assign( jointRotateLeg( p, tsl.vec3( 0 ), posture.hipRight, hipRight ) );
-
-	} );
-
-	return tsl.transformNormalToView( p ).normalize( );
 
 } );
 

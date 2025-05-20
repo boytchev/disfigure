@@ -1,3 +1,6 @@
+v0.0.9
+  - position and normals disfiguring merged in a single function
+
 v0.0.8
   - introduced zones, 11 joints converted to zones
 
