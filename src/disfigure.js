@@ -8,7 +8,7 @@ import { matRotXZY, matRotYXZ } from "./utils.js";
 
 
 
-// a class defining a locus in 3D space with fuzzy boundaries and orientation
+// a general class defining a locus in 3D space with fuzzy boundaries and orientation
 class Locus {
 
 	constructor( x, y, z, min, max ) {
@@ -25,7 +25,7 @@ class Locus {
 
 
 
-// a horizontal XZ-flat locus, horizontally infinite, vertically from min to max
+// a horizontal planar locus, vertically is from min to max, horizontally is infinite
 class LocusY extends Locus {
 
 	fuzzy( ) {
@@ -38,7 +38,8 @@ class LocusY extends Locus {
 
 
 
-// a horizontal XZ-flat locus at angle degrees, horizontally infinite, vertically from min to max
+// a horizontal planar locus that can tilt fowrard (i.e. around X axix, towards the screen)
+// vertically is from min to max, horizontally is infinite
 class LocusYZ extends Locus {
 
 	constructor( x, y, z, min, max, angle ) {
@@ -58,7 +59,7 @@ class LocusYZ extends Locus {
 
 
 
-// a vertical YZ-flat locus at angle degrees, vertically infinite, X-horizontally from min to max
+// a vertical planar locus, perpendiculra to X, vertically infinite, horizontally from min to max
 class LocusX extends Locus {
 
 	fuzzy( ) {
@@ -77,6 +78,7 @@ class LocusX extends Locus {
 
 
 
+// an intersection of LocusX and LocusY
 class LocusXY extends Locus {
 
 	constructor( x, y, z, minX, maxX, minY, maxY ) {
@@ -109,31 +111,47 @@ class LocusXY extends Locus {
 
 
 
-function selectHipLeft( { hipLeftSpan } ) {
+// trapezoidal Locus for hips
+class LocusT extends Locus {
 
-	var x = positionGeometry.x;
-	var y = positionGeometry.y;
+	constructor( x, y, z, minY, maxY, topY ) {
 
-	return y.sub( x.mul( 2 ) )
-		.smoothstep( hipLeftSpan.z, float( hipLeftSpan.w ).sub( x.mul( 1.6 ) ) )
-		.mul( y.smoothstep( hipLeftSpan.x, hipLeftSpan.y ) )
-		.mul( x.smoothstep( -0.01, 0.01 ) );
+		super( x, y, z, minY, maxY );
+		this.topY = topY;
 
-} // inlined
+	}
 
+	fuzzy( ) {
 
+		var x = positionGeometry.x;
+		var y = positionGeometry.y;
 
-function selectHipRight( { hipRightSpan } ) {
+		return y.step( this.topY )
+			.mul( x.smoothstep( -0.01, 0.015 ) )
+			.mul( y.smoothstep(
+				x.div( 0.7 ).add( this.min ),
+				x.div( 7 ).add( this.max )
+			)
+			).pow( 2 );
 
-	var x = positionGeometry.x;
-	var y = positionGeometry.y;
+	}
 
-	return y.add( x.mul( 2 ) )
-		.smoothstep( hipRightSpan.z, float( hipRightSpan.w ).add( x.mul( 1.6 ) ) )
-		.mul( y.smoothstep( hipRightSpan.x, hipRightSpan.y ) )
-		.mul( x.smoothstep( 0.01, -0.01 ) );
+	mirrorFuzzy( ) {
 
-} // inlined
+		var x = positionGeometry.x;
+		var y = positionGeometry.y;
+
+		return y.step( this.topY )
+			.mul( x.smoothstep( 0.01, -0.015 ) )
+			.mul( y.smoothstep(
+				x.div( -0.7 ).add( this.min ),
+				x.div( -7 ).add( this.max )
+			)
+			).pow( 2 );
+
+	}
+
+}
 
 
 
@@ -239,7 +257,7 @@ var disfigure = Fn( ( { skeleton, posture, mode, vertex } )=>{
 
 	// LEFT-LOWER BODY
 
-	var hipLeft = selectHipLeft( skeleton ).toVar();
+	var hipLeft = skeleton.hip.fuzzy( ).toVar();
 
 	If( hipLeft.greaterThan( 0 ), ()=>{
 
@@ -248,7 +266,7 @@ var disfigure = Fn( ( { skeleton, posture, mode, vertex } )=>{
 		p.assign( jointRotate( p, mode.mul( skeleton.leg.pivot ), posture.legLeft, skeleton.leg.fuzzy( ) ) );
 		p.assign( jointRotate( p, mode.mul( skeleton.knee.pivot ), posture.kneeLeft, skeleton.knee.fuzzy( ) ) );
 		p.assign( jointRotate( p, mode.mul( skeleton.hip2.pivot ), posture.hip2Left, skeleton.hip2.fuzzy( ) ) );
-		p.assign( jointRotate( p, mode.mul( skeleton.hipLeftPos ), posture.hipLeft, hipLeft ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.hip.pivot ), posture.hipLeft, hipLeft ) );
 
 	} );
 
@@ -256,7 +274,7 @@ var disfigure = Fn( ( { skeleton, posture, mode, vertex } )=>{
 
 	// RIGHT-LOWER BODY
 
-	var hipRight = selectHipRight( skeleton ).toVar();
+	var hipRight = skeleton.hip.mirrorFuzzy( ).toVar();
 
 	If( hipRight.greaterThan( 0 ), ()=>{
 
@@ -265,7 +283,7 @@ var disfigure = Fn( ( { skeleton, posture, mode, vertex } )=>{
 		p.assign( jointRotate( p, mode.mul( skeleton.leg.mirrorPivot ), posture.legRight, skeleton.leg.fuzzy( ) ) );
 		p.assign( jointRotate( p, mode.mul( skeleton.knee.mirrorPivot ), posture.kneeRight, skeleton.knee.fuzzy( ) ) );
 		p.assign( jointRotate( p, mode.mul( skeleton.hip2.mirrorPivot ), posture.hip2Right, skeleton.hip2.fuzzy( ) ) );
-		p.assign( jointRotate( p, mode.mul( skeleton.hipRightPos ), posture.hipRight, hipRight ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.hip.mirrorPivot ), posture.hipRight, hipRight ) );
 
 	} );
 
@@ -285,7 +303,7 @@ var tslEmissiveNode = Fn( ( { skeleton, posture } )=>{
 		.add( skeleton.chest.fuzzy( ).mul( select( s.equal( 2 ), 1, 0 ) ) )
 		.add( skeleton.waist.fuzzy( ).mul( select( s.equal( 3 ), 1, 0 ) ) )
 
-		.add( selectHipLeft( skeleton ).mul( select( s.equal( 11 ), 1, 0 ) ) )
+		.add( skeleton.hip.fuzzy( ).mul( select( s.equal( 11 ), 1, 0 ) ) )
 		.add( skeleton.leg.fuzzy( ).mul( select( s.equal( 12 ), 1, 0 ) ) )
 		.add( skeleton.knee.fuzzy( ).mul( select( s.equal( 13 ), 1, 0 ) ) )
 		.add( skeleton.ankle.fuzzy( ).mul( select( s.equal( 14 ), 1, 0 ) ) )
@@ -297,14 +315,20 @@ var tslEmissiveNode = Fn( ( { skeleton, posture } )=>{
 		.add( skeleton.forearm.fuzzy( ).mul( select( s.equal( 23 ), 1, 0 ) ) )
 		.add( skeleton.wrist.fuzzy( ).mul( select( s.equal( 24 ), 1, 0 ) ) )
 
+		.clamp( 0, 1 )
+		.negate( )
 		.toVar( );
-
+	/*
 	k.assign( select( posture.isolated,
 		k.smoothstep( 0, 1 ).mul( 2*Math.PI ).sub( Math.PI ).cos().add( 1 ).div( 2 ).pow( 1/4 ).mul( 1.1 ).negate(),
 		k.clamp( 0, 1 ).pow( 0.75 ).negate()
 	) );
+*/
+	If( k.lessThan( -0.999 ), ()=>{
 
+		k.assign( 0.2 );
 
+	} );
 	return vec3( 0, k.div( 2 ), k.div( 1 ) );
 
 } );
@@ -368,6 +392,5 @@ function tslPosture( ) {
 
 
 
-export { tslPositionNode, tslEmissiveNode, tslColorNode, tslNormalNode, tslPosture, LocusY, LocusYZ, LocusX, LocusXY };
+export { tslPositionNode, tslEmissiveNode, tslColorNode, tslNormalNode, tslPosture, LocusY, LocusYZ, LocusX, LocusXY, LocusT };
 export * from "./utils.js";
-export * from "./disfigure-gui.js";

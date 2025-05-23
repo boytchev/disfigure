@@ -42,7 +42,8 @@
 
 import * as THREE from "three";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { createGui, credits, LocusX, LocusXY, LocusY, LocusYZ, processModel, scene, tslColorNode, tslEmissiveNode, tslNormalNode, tslPositionNode, tslPosture } from "./disfigure.js";
+import { credits, LocusT, LocusX, LocusXY, LocusY, LocusYZ, processModel, tslColorNode, tslEmissiveNode, tslNormalNode, tslPositionNode, tslPosture } from "./disfigure.js";
+import { createGui, scene } from "./editor-gui.js";
 
 
 console.clear( );
@@ -123,12 +124,7 @@ var skeleton = {
 	leg: new LocusY( 0.1, 2, -0.04, 1.9, 0.4 ),
 	hip2: new LocusY( 0.011, 2, 0.01, 2, 1.5 ),
 	foot: new LocusYZ( 0, 1.23, 0.05, 1.21, 1.11, 120 ),
-
-	hipLeftPos: new THREE.Vector3( 0.052, 2, -0.04 ),
-	hipLeftSpan: new THREE.Vector4( 2.3, 1.9, 1.98, 1.85 ),
-
-	hipRightPos: new THREE.Vector3( -0.052, 2, -0.04 ),
-	hipRightSpan: new THREE.Vector4( 2.3, 1.9, 1.98, 1.85 ),
+	hip: new LocusT( 0.052, 2, -0.04, 2.05, 1.9, 2.3 ),
 
 	// ARMS
 	elbow: new LocusX( 0.42, 2.46, -0.05, 0.39, 0.46 ),

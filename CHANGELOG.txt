@@ -1,5 +1,7 @@
 v0.0.9
   - position and normals disfiguring merged in a single function
+  - all joints represented as instances of Locus
+  - editor gui moved out of distribution files
 
 v0.0.8
   - introduced zones, 11 joints converted to zones

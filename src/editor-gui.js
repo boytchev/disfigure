@@ -13,6 +13,7 @@ import { uniform } from "three/tsl";
 
 
 const DEBUG = false;
+const DEBUG_JOINT = 0;
 
 
 var scene = new THREE.Scene();
@@ -85,8 +86,8 @@ function createGui( skeletonData, postureData, modelObject ) {
 	skeleton = skeletonData;
 
 	posture = postureData;
-	posture.select = uniform( 0, 'int' ); // 0..24
-	posture.isolated = uniform( 0, 'int' ); // 0 or 1
+	posture.select = uniform( DEBUG?DEBUG_JOINT:0, 'int' ); // 0..24
+	posture.isolated = uniform( DEBUG?1:0, 'int' ); // 0 or 1
 	model = modelObject;
 
 
@@ -105,12 +106,13 @@ function createGui( skeletonData, postureData, modelObject ) {
 	} ).name( 'Show' ).onChange( showPivotPoint );
 
 	if ( DEBUG ) {
-
-		mfolder.add( posture.hipLeftPos.value, 'x', 0., 1 ).name( 'px' ).onChange( changePivotPoint );
-		mfolder.add( posture.hipLeftPos.value, 'y', 1.0, 1.7 ).name( 'py' ).onChange( changePivotPoint );
-		mfolder.add( posture.hipLeftPos.value, 'z', -0.5, 0.5 ).name( 'pz' ).onChange( changePivotPoint );
-		mfolder.add( posture.hipLeftSpan.value, 'x', 1, 2 ).name( 'sx' ).onChange( changePivotPoint );
-		mfolder.add( posture.hipLeftSpan.value, 'y', 1, 2 ).name( 'sy' ).onChange( changePivotPoint );
+		// mfolder.add( skeleton.hipLeftPos.value, 'x', 0., 1 ).name( 'px' ).onChange( changePivotPoint );
+		// mfolder.add( skeleton.hipLeftPos.value, 'y', 1, 3 ).name( 'py' ).onChange( changePivotPoint );
+		// mfolder.add( skeleton.hipLeftPos.value, 'z', -0.5, 0.5 ).name( 'pz' ).onChange( changePivotPoint );
+		// mfolder.add( skeleton.hipLeftSpan.value, 'x', 1, 3 ).name( 'sx' ).onChange( changePivotPoint );
+		// mfolder.add( skeleton.hipLeftSpan.value, 'y', 1, 2 ).name( 'sy' ).onChange( changePivotPoint );
+		//		mfolder.add( skeleton.hipLeftSpan.value, 'z', 1, 3 ).name( 'sz' ).onChange( changePivotPoint );
+		//		mfolder.add( skeleton.hipLeftSpan.value, 'w', -2, 2 ).name( 'sw' ).onChange( changePivotPoint );
 
 	}
 
@@ -524,7 +526,7 @@ function showPivotPoint( index ) {
 		case 2: pivot.position.copy( skeleton.chest.pivot ); break;
 		case 3: pivot.position.copy( skeleton.waist.pivot ); break;
 
-		case 11: pivot.position.copy( skeleton.hipLeftPos ); break;
+		case 11: pivot.position.copy( skeleton.hip.pivot ); break;
 		case 15: pivot.position.copy( skeleton.hip2.pivot ); break;
 		case 12: pivot.position.copy( skeleton.leg.pivot ); break;
 		case 13: pivot.position.copy( skeleton.knee.pivot ); break;
@@ -547,7 +549,7 @@ function showPivotPoint( index ) {
 
 function changePivotPoint( ) {
 
-	pivot.position.copy( posture.hipLeftPos.value );
+	//	pivot.position.copy( skeleton.hipLeftPos.value );
 
 }
 
