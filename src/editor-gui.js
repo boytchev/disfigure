@@ -13,7 +13,7 @@ import { uniform } from "three/tsl";
 
 
 const DEBUG = false;
-const DEBUG_JOINT = 0;
+const DEBUG_JOINT = 21;
 
 
 var scene = new THREE.Scene();
@@ -28,7 +28,7 @@ camera.lookAt( scene.position );
 
 
 var renderer = new THREE.WebGPURenderer( { antialias: true } );
-renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.setSize( innerWidth, innerHeight );
 document.body.appendChild( renderer.domElement );
 
@@ -45,17 +45,18 @@ window.addEventListener( "resize", ( /*event*/ ) => {
 var controls = new OrbitControls( camera, renderer.domElement );
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
+controls.zoomSpeed = 10;
 //controls.autoRotate = true;
 //controls.autoRotateSpeed = 0.5;
 
 
 
-var ambientLight = new THREE.AmbientLight( 'white', 1 );
+var ambientLight = new THREE.AmbientLight( 'white', 0 );
 scene.add( ambientLight );
 
 
 
-var light = new THREE.DirectionalLight( 'white', 2 );
+var light = new THREE.DirectionalLight( 'white', 2+1 );
 light.position.set( 0, 0, 1 );
 scene.add( light );
 
@@ -157,7 +158,7 @@ function createGui( skeletonData, postureData, modelObject ) {
 		mfolder.add( posture.kneeLeft.value, 'x', -2.6, 0 ).name( html( 'Knee', '&#x2195;', 'border' ) );
 
 		mfolder.add( posture.ankleLeft.value, 'x', -1, 0.7 ).name( html( 'Ankle', '&#x2195;', 'border' ) );
-		mfolder.add( posture.legLeft.value, 'y', -3, 3 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.legLeft.value, 'y', -1, 1 ).name( html( '', '&#x2194;' ) );
 		mfolder.add( posture.ankleLeft.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21BA;' ) );
 
 		mfolder.add( posture.footLeft.value, 'x', -0.3, 0.6 ).name( html( 'Foot', '&#x2195;', 'border' ) );
@@ -174,7 +175,7 @@ function createGui( skeletonData, postureData, modelObject ) {
 		mfolder.add( posture.kneeRight.value, 'x', -2.6, 0 ).name( html( 'Knee', '&#x2195;', 'border' ) );
 
 		mfolder.add( posture.ankleRight.value, 'x', -1, 0.7 ).name( html( 'Ankle', '&#x2195;', 'border' ) );
-		mfolder.add( posture.legRight.value, 'y', -3, 3 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.legRight.value, 'y', -1, 1 ).name( html( '', '&#x2194;' ) );
 		mfolder.add( posture.ankleRight.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21BB;' ) );
 
 		mfolder.add( posture.footRight.value, 'x', -0.3, 0.6 ).name( html( 'Foot', '&#x2195;', 'border' ) );
@@ -217,7 +218,11 @@ function createGui( skeletonData, postureData, modelObject ) {
 
 
 
-function rigModel( time ) {
+function rigModel( time2 ) {
+
+	var time = time2; //+ Math.sin( 7*time2 )/6;
+
+	//model.rotation.set( 0.5*Math.sin( time ), time, 0.5*Math.cos( time ) );
 
 	posture.waist.value.set(
 		Math.sin( time )/4-0.2,
@@ -587,7 +592,8 @@ if ( DEBUG ) {
 
 	setTimeout( ()=>{
 
-		showPivotPoint( 11 ); changePivotPoint();
+		showPivotPoint( DEBUG_JOINT );
+		changePivotPoint();
 
 	}, 500 );
 

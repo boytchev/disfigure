@@ -1,4 +1,4 @@
-// disfigure v0.0.7
+// disfigure v0.0.9
 
 import { Mesh, MeshPhysicalNodeMaterial, Vector3, Box3 } from 'three';
 import { Fn, mat3, mix, float, If, select, vec3, positionGeometry, normalGeometry, transformNormalToView, uniform } from 'three/tsl';
@@ -206,12 +206,20 @@ const matScale = Fn( ([ scales ])=>{
 
 
 // center model
-function centerModel( model ) {
+function centerModel( model, dims ) {
 
 	var center = new Vector3();
 
-	new Box3().setFromObject( model, true ).getCenter( center );
+	var box = new Box3().setFromObject( model, true );
+
+	box.getCenter( center );
 	model.position.sub( center );
+
+	dims.x = ( box.max.x + box.min.x )/2;
+	dims.y = box.min.y;
+	dims.z = ( box.max.z + box.min.z )/2;
+
+	dims.scale = Math.max( box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z );
 
 }
 
@@ -269,8 +277,11 @@ function ennodeModel( model, skeleton, posture, nodes ) {
 			material.metalness = 0.1;
 			material.roughness = 0.6;
 
-			//			material.metalness = 0.5;
-			//			material.roughness = 0.3;
+			// material.metalness = 0;
+			// material.roughness = 1;
+
+			// material.metalness = 1;
+			// material.roughness = 0;
 
 			if ( nodes.colorNode )
 				material.colorNode = nodes.colorNode( );
@@ -295,11 +306,11 @@ function ennodeModel( model, skeleton, posture, nodes ) {
 
 
 // prepared a model for TSL rigging
-function processModel( model, skeleton, posture, nodes ) {
+function processModel( model, skeleton, posture, dims, nodes ) {
 
 	flattenModel( model );
 	ennodeModel( model, skeleton, posture, nodes );
-	centerModel( model );
+	centerModel( model, dims );
 
 	return model;
 
@@ -340,13 +351,76 @@ function credits( url, id ) {
 // a general class defining a locus in 3D space with fuzzy boundaries and orientation
 class Locus {
 
-	constructor( x, y, z, min, max ) {
+	constructor( dims, pivot, range ) {
 
-		this.pivot = new Vector3( x, y, z );
-		this.mirrorPivot = new Vector3( -x, y, z );
+		this.dims = dims;
 
-		this.min = min;
-		this.max = max;
+		this.pivot = new Vector3( pivot[ 0 ], pivot[ 1 ], pivot[ 2 ]);
+		this.mirrorPivot = new Vector3( -pivot[ 0 ], pivot[ 1 ], pivot[ 2 ]);
+
+		this.min = range[ 0 ];
+		this.max = range[ 1 ];
+
+	}
+
+	encodeX( inX ) {
+
+		var outX = Math.round( 1000*( inX-this.dims.x )/this.dims.scale );
+		console.log( inX.toFixed( 4 ), '→', outX, '→', this.decodeX( outX ).toFixed( 4 ), '(', ( this.decodeX( outX )/inX*100-100 ).toFixed( 4 ) );
+		return outX;
+
+	}
+
+	decodeX( outX ) {
+
+		var inX = this.dims.scale*outX/1000 + this.dims.x;
+		return inX;
+
+	}
+
+	encodeY( inY ) {
+
+		var outY = Math.round( 1000*( inY-this.dims.y )/this.dims.scale );
+		console.log( inY.toFixed( 4 ), '→', outY, '→', this.decodeY( outY ).toFixed( 4 ), '(', ( this.decodeY( outY )/inY*100-100 ).toFixed( 4 ) );
+		return outY;
+
+	}
+
+	decodeY( outY ) {
+
+		var inY = this.dims.scale*outY/1000 + this.dims.y;
+		return inY;
+
+	}
+
+
+	encodeZ( inZ ) {
+
+		var outZ = Math.round( 1000*( inZ-this.dims.z )/this.dims.scale );
+		console.log( inZ.toFixed( 4 ), '→', outZ, '→', this.decodeZ( outZ ).toFixed( 4 ), '(', ( this.decodeZ( outZ )/inZ*100-100 ).toFixed( 4 ) );
+		return outZ;
+
+	}
+
+	decodeZ( outZ ) {
+
+		var inZ = this.dims.scale*outZ/1000 + this.dims.z;
+		return inZ;
+
+	}
+
+	decode() {
+
+		// console.log('---------')
+		// this.encodeX(this.pivot.x);
+		// this.encodeY(this.pivot.y);
+		// this.encodeZ(this.pivot.z);
+		this.pivot.x = this.decodeX( this.pivot.x );
+		this.pivot.y = this.decodeY( this.pivot.y );
+		this.pivot.z = this.decodeZ( this.pivot.z );
+		this.mirrorPivot.x = this.decodeX( this.mirrorPivot.x );
+		this.mirrorPivot.y = this.decodeY( this.mirrorPivot.y );
+		this.mirrorPivot.z = this.decodeZ( this.mirrorPivot.z );
 
 	}
 
@@ -356,6 +430,25 @@ class Locus {
 
 // a horizontal planar locus, vertically is from min to max, horizontally is infinite
 class LocusY extends Locus {
+
+	constructor( dims, pivot, range ) {
+
+		super( dims, pivot, range );
+		this.decode();
+
+	}
+
+	decode( ) {
+
+		super.decode( );
+
+		// this.encodeY(this.min);
+		// this.encodeY(this.max);
+
+		this.min = this.decodeY( this.min );
+		this.max = this.decodeY( this.max );
+
+	}
 
 	fuzzy( ) {
 
@@ -369,11 +462,11 @@ class LocusY extends Locus {
 
 // a horizontal planar locus that can tilt fowrard (i.e. around X axix, towards the screen)
 // vertically is from min to max, horizontally is infinite
-class LocusYZ extends Locus {
+class LocusYZ extends LocusY {
 
-	constructor( x, y, z, min, max, angle ) {
+	constructor( dims, pivot, range, angle ) {
 
-		super( x, y, z, min, max );
+		super( dims, pivot, range );
 		this.slope = Math.tan( ( 90-angle ) * Math.PI/180 );
 
 	}
@@ -390,6 +483,25 @@ class LocusYZ extends Locus {
 
 // a vertical planar locus, perpendiculra to X, vertically infinite, horizontally from min to max
 class LocusX extends Locus {
+
+	constructor( dims, pivot, range ) {
+
+		super( dims, pivot, range );
+		this.decode();
+
+	}
+
+	decode( ) {
+
+		super.decode( );
+
+		// this.encodeX(this.min);
+		// this.encodeX(this.max);
+
+		this.min = this.decodeX( this.min );
+		this.max = this.decodeX( this.max );
+
+	}
 
 	fuzzy( ) {
 
@@ -410,11 +522,30 @@ class LocusX extends Locus {
 // an intersection of LocusX and LocusY
 class LocusXY extends Locus {
 
-	constructor( x, y, z, minX, maxX, minY, maxY ) {
+	constructor( dims, pivot, rangeX, rangeY ) {
 
-		super( x, y, z, minX, maxX );
-		this.minY = minY;
-		this.maxY = maxY;
+		super( dims, pivot, rangeX );
+		this.minY = rangeY[ 0 ];
+		this.maxY = rangeY[ 1 ];
+		this.decode();
+
+	}
+
+	decode( ) {
+
+		super.decode( );
+
+		// this.encodeX(this.min);
+		// this.encodeX(this.max);
+
+		// this.encodeY(this.minY);
+		// this.encodeY(this.maxY);
+
+		this.min = this.decodeX( this.min );
+		this.max = this.decodeX( this.max );
+
+		this.minY = this.decodeY( this.minY );
+		this.maxY = this.decodeY( this.maxY );
 
 	}
 
@@ -443,20 +574,45 @@ class LocusXY extends Locus {
 // trapezoidal Locus for hips
 class LocusT extends Locus {
 
-	constructor( x, y, z, minY, maxY, topY ) {
+	constructor( dims, pivot, rangeY, topY, rangeX ) {
 
-		super( x, y, z, minY, maxY );
+		super( dims, pivot, rangeY );
 		this.topY = topY;
+		this.minX = rangeX[ 0 ];
+		this.maxX = rangeX[ 1 ];
+		this.decode();
+
+	}
+
+	decode() {
+
+		super.decode( );
+
+		// this.encodeY(this.min);
+		// this.encodeY(this.max);
+		// this.encodeY(this.topY);
+		// this.encodeX(this.minX);
+		// this.encodeX(this.maxX);
+
+		this.min = this.decodeY( this.min );
+		this.max = this.decodeY( this.max );
+
+		this.topY = this.decodeY( this.topY );
+
+		this.minX = this.decodeX( this.minX );
+		this.maxX = this.decodeX( this.maxX );
 
 	}
 
 	fuzzy( ) {
 
-		var x = positionGeometry.x;
+		var x = positionGeometry.x.toVar();
 		var y = positionGeometry.y;
 
+		//		x.mulAssign( float(1).add(y.sub(this.topY).div(2)) );
+
 		return y.step( this.topY )
-			.mul( x.smoothstep( -0.01, 0.015 ) )
+			.mul( x.smoothstep( this.minX, this.maxX ) )
 			.mul( y.smoothstep(
 				x.div( 0.7 ).add( this.min ),
 				x.div( 7 ).add( this.max )
@@ -471,7 +627,7 @@ class LocusT extends Locus {
 		var y = positionGeometry.y;
 
 		return y.step( this.topY )
-			.mul( x.smoothstep( 0.01, -0.015 ) )
+			.mul( x.smoothstep( -this.minX, -this.maxX ) )
 			.mul( y.smoothstep(
 				x.div( -0.7 ).add( this.min ),
 				x.div( -7 ).add( this.max )
@@ -607,7 +763,7 @@ var disfigure = Fn( ( { skeleton, posture, mode, vertex } )=>{
 
 	If( hipRight.greaterThan( 0 ), ()=>{
 
-		p.assign( jointRotate( p, mode.mul( skeleton.foot.mirrorPivot ), posture.footRight, skeleton.ankle.fuzzy( ) ) );
+		p.assign( jointRotate( p, mode.mul( skeleton.foot.mirrorPivot ), posture.footRight, skeleton.foot.fuzzy( ) ) );
 		p.assign( jointRotate( p, mode.mul( skeleton.ankle.mirrorPivot ), posture.ankleRight, skeleton.ankle.fuzzy( ) ) );
 		p.assign( jointRotate( p, mode.mul( skeleton.leg.mirrorPivot ), posture.legRight, skeleton.leg.fuzzy( ) ) );
 		p.assign( jointRotate( p, mode.mul( skeleton.knee.mirrorPivot ), posture.kneeRight, skeleton.knee.fuzzy( ) ) );

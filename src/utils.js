@@ -216,12 +216,20 @@ const matScale = Fn( ([ scales ])=>{
 
 
 // center model
-function centerModel( model ) {
+function centerModel( model, dims ) {
 
 	var center = new Vector3();
 
-	new Box3().setFromObject( model, true ).getCenter( center );
+	var box = new Box3().setFromObject( model, true );
+
+	box.getCenter( center );
 	model.position.sub( center );
+
+	dims.x = ( box.max.x + box.min.x )/2;
+	dims.y = box.min.y;
+	dims.z = ( box.max.z + box.min.z )/2;
+
+	dims.scale = Math.max( box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z );
 
 }
 
@@ -279,8 +287,11 @@ function ennodeModel( model, skeleton, posture, nodes ) {
 			material.metalness = 0.1;
 			material.roughness = 0.6;
 
-			//			material.metalness = 0.5;
-			//			material.roughness = 0.3;
+			// material.metalness = 0;
+			// material.roughness = 1;
+
+			// material.metalness = 1;
+			// material.roughness = 0;
 
 			if ( nodes.colorNode )
 				material.colorNode = nodes.colorNode( );
@@ -305,11 +316,11 @@ function ennodeModel( model, skeleton, posture, nodes ) {
 
 
 // prepared a model for TSL rigging
-function processModel( model, skeleton, posture, nodes ) {
+function processModel( model, skeleton, posture, dims, nodes ) {
 
 	flattenModel( model );
 	ennodeModel( model, skeleton, posture, nodes );
-	centerModel( model );
+	centerModel( model, dims );
 
 	return model;
 

@@ -1,6 +1,7 @@
 v0.0.10
   - fixed right foot selector
   - added rigged skeleton example
+  - skeleton is relative and encoded into integers
   
 v0.0.9
   - position and normals disfiguring merged in a single function
