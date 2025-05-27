@@ -1,7 +1,9 @@
 v0.0.10
   - fixed right foot selector
   - added rigged skeleton example
-  - skeleton is relative and encoded into integers
+  - space is relative and encoded into integers
+  - separate entries for left and right space
+  - stock models moved to separate files
   
 v0.0.9
   - position and normals disfiguring merged in a single function

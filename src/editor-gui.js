@@ -12,8 +12,12 @@ import { uniform } from "three/tsl";
 
 
 
-const DEBUG = false;
-const DEBUG_JOINT = 21;
+const DEBUG = !false;
+const DEBUG_JOINT = 0;
+
+
+const USE_ENV_MAP = false;
+const ENV_MAP = '../assets/models/rostock_laage_airport.jpg';
 
 
 var scene = new THREE.Scene();
@@ -42,6 +46,16 @@ window.addEventListener( "resize", ( /*event*/ ) => {
 
 
 
+if ( USE_ENV_MAP ) {
+
+	var envMap = new THREE.TextureLoader().load( ENV_MAP );
+	envMap.mapping = THREE.EquirectangularReflectionMapping;
+	scene.environment = envMap;
+
+}
+
+
+
 var controls = new OrbitControls( camera, renderer.domElement );
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
@@ -64,7 +78,8 @@ scene.add( light );
 
 
 
-var pivot = new THREE.AxesHelper();
+var axis1 = new THREE.AxesHelper();
+var axis2 = new THREE.AxesHelper();
 
 
 var options = {
@@ -74,23 +89,74 @@ var options = {
 
 
 var debug = {
-	isolated: false,
+	reset: rigResetModel,
 	randomize: rigRandomModel,
+	showPlanes: false,
+	x: 0,
+	y: 500,
+	z: 0,
 };
 var posture = {};
-var skeleton = {};
+var space = {};
 var model = new THREE.Group();
 var gui;
 
-function createGui( skeletonData, postureData, modelObject ) {
+var planes = new THREE.Group();
+planes.visible = debug.showPlanes;
 
-	skeleton = skeletonData;
+function addCuttingPlanes( dims, model ) {
+
+	var grid = new THREE.GridHelper( dims.scale, 10, 'white', 'white' );
+	grid.rotation.x = Math.PI/2;
+
+	var geo = new THREE.PlaneGeometry( dims.scale, dims.scale );
+	var mat = new THREE.MeshBasicMaterial( {
+		color: 'royalblue',
+		opacity: 0.5,
+		transparent: true,
+		side: THREE.DoubleSide,
+		depthWrite: false,
+		polygonOffset: true,
+		polygonOffsetFactor: -1,
+		polygonOffsetUnits: -1,
+	} );
+
+	var p = new THREE.Mesh( geo, mat );
+	p.position.y = 0.5*dims.scale;
+	p.add( grid );
+	planes.add( p );
+
+	mat = mat.clone();
+	mat.color.set( 'green' );
+	p = new THREE.Mesh( geo, mat );
+	p.rotation.x = -Math.PI/2;
+	p.position.y = 0.5*dims.scale;
+	p.add( grid.clone() );
+	planes.add( p );
+
+	mat = mat.clone();
+	mat.color.set( 'tomato' );
+	p = new THREE.Mesh( geo, mat );
+	p.rotation.y = Math.PI/2;
+	p.position.y = 0.5*dims.scale;
+	p.add( grid.clone() );
+	planes.add( p );
+
+	model.add( planes );
+
+}
+
+
+
+function createGui( dims, spaceData, postureData, modelObject ) {
+
+	space = spaceData;
 
 	posture = postureData;
 	posture.select = uniform( DEBUG?DEBUG_JOINT:0, 'int' ); // 0..24
-	posture.isolated = uniform( DEBUG?1:0, 'int' ); // 0 or 1
 	model = modelObject;
 
+	if ( DEBUG ) addCuttingPlanes( dims, model );
 
 	gui = new lil.GUI(); // global gui
 	gui.domElement.style.marginRight = 0;
@@ -104,25 +170,25 @@ function createGui( skeletonData, postureData, modelObject ) {
 		Head: 1, Chest: 2, Waist: 3,
 		Hip: 11, Hip2: 15, Leg: 12, Knee: 13, Ankle: 14, Foot: 16,
 		Arm: 21, Elbow: 22, Forearm: 23, Wrist: 24,
-	} ).name( 'Show' ).onChange( showPivotPoint );
+	} ).name( 'Heatmap' ).onChange( showPivotPoint );
 
 	if ( DEBUG ) {
-		// mfolder.add( skeleton.hipLeftPos.value, 'x', 0., 1 ).name( 'px' ).onChange( changePivotPoint );
-		// mfolder.add( skeleton.hipLeftPos.value, 'y', 1, 3 ).name( 'py' ).onChange( changePivotPoint );
-		// mfolder.add( skeleton.hipLeftPos.value, 'z', -0.5, 0.5 ).name( 'pz' ).onChange( changePivotPoint );
-		// mfolder.add( skeleton.hipLeftSpan.value, 'x', 1, 3 ).name( 'sx' ).onChange( changePivotPoint );
-		// mfolder.add( skeleton.hipLeftSpan.value, 'y', 1, 2 ).name( 'sy' ).onChange( changePivotPoint );
-		//		mfolder.add( skeleton.hipLeftSpan.value, 'z', 1, 3 ).name( 'sz' ).onChange( changePivotPoint );
-		//		mfolder.add( skeleton.hipLeftSpan.value, 'w', -2, 2 ).name( 'sw' ).onChange( changePivotPoint );
+
+		mfolder.add( debug, 'showPlanes' ).name( 'Show planes' ).onChange( ( n )=>planes.visible = n );
+		mfolder.add( debug, 'x', -600, 600 ).step( 1 ).name( html( 'Red', '' ) ).onChange( ( n )=>planes.children[ 2 ].position.x = n/1000*dims.scale ).name( html( 'Red', '' ) );
+		mfolder.add( debug, 'y', -100, 1100 ).step( 1 ).onChange( ( n )=>planes.children[ 1 ].position.y = n/1000*dims.scale ).name( html( 'Green', '' ) );
+		mfolder.add( debug, 'z', -500, 500 ).step( 1 ).name( html( 'Blue', '' ) ).onChange( ( n )=>planes.children[ 0 ].position.z = n/1000*dims.scale );
+		// mfolder.add( space.hipLeftPos.value, 'y', 1, 3 ).name( 'py' ).onChange( changePivotPoint );
+		// mfolder.add( space.hipLeftPos.value, 'z', -0.5, 0.5 ).name( 'pz' ).onChange( changePivotPoint );
+		// mfolder.add( space.hipLeftSpan.value, 'x', 1, 3 ).name( 'sx' ).onChange( changePivotPoint );
+		// mfolder.add( space.hipLeftSpan.value, 'y', 1, 2 ).name( 'sy' ).onChange( changePivotPoint );
+		//		mfolder.add( space.hipLeftSpan.value, 'z', 1, 3 ).name( 'sz' ).onChange( changePivotPoint );
+		//		mfolder.add( space.hipLeftSpan.value, 'w', -2, 2 ).name( 'sw' ).onChange( changePivotPoint );
 
 	}
 
-	mfolder.add( debug, 'isolated', false ).name( 'Isolated' ).onChange( ()=>{
-
-		posture.isolated.value = debug.isolated?1:0;
-
-	} );
 	mfolder.add( options, 'animate', false ).name( 'Animate' );
+	mfolder.add( debug, 'reset' ).name( 'Reset' );
 	mfolder.add( debug, 'randomize' ).name( 'Randomize' );
 
 	function html( name, icon, classes='' ) {
@@ -522,28 +588,77 @@ function rigRandomModel( seed = THREE.MathUtils.randInt( Number.MIN_SAFE_INTEGER
 
 
 
+function rigResetModel( ) {
+
+	model.rotation.y = 0;
+
+	posture.waist.value.set( 0, 0, 0 );
+	posture.chest.value.set( 0, 0, 0 );
+	posture.head.value.set( 0, 0, 0 );
+	posture.kneeLeft.value.set( 0, 0, 0 );
+	posture.kneeRight.value.set( 0, 0, 0 );
+	posture.footLeft.value.set( 0, 0, 0 );
+	posture.footRight.value.set( 0, 0, 0 );
+	posture.ankleLeft.value.set( 0, 0, 0 );
+	posture.ankleRight.value.set( 0, 0, 0 );
+	posture.legLeft.value.set( 0, 0, 0 );
+	posture.legRight.value.set( 0, 0, 0 );
+	posture.hipLeft.value.set( 0, 0, 0 );
+	posture.hip2Left.value.set( 0, 0, 0 );
+	posture.hipRight.value.set( 0, 0, 0 );
+	posture.hip2Right.value.set( 0, 0, 0 );
+	posture.elbowLeft.value.set( 0, 0, 0 );
+	posture.elbowRight.value.set( 0, 0, 0 );
+	posture.forearmLeft.value.set( 0, 0, 0 );
+	posture.forearmRight.value.set( 0, 0, 0 );
+	posture.wristLeft.value.set( 0, 0, 0 );
+	posture.wristRight.value.set( 0, 0, 0 );
+	posture.armLeft.value.set( 0, 0, 0 );
+	posture.armRight.value.set( 0, 0, 0 );
+
+	updateGUI( );
+
+}
+
+
+
 function showPivotPoint( index ) {
 
-	model.add( pivot );
+	model.add( axis1 );
+	if ( index<10 )
+		model.remove( axis2 );
+	else
+		model.add( axis2 );
+
 	switch ( index ) {
 
-		case 1: pivot.position.copy( skeleton.head.pivot ); break;
-		case 2: pivot.position.copy( skeleton.chest.pivot ); break;
-		case 3: pivot.position.copy( skeleton.waist.pivot ); break;
+		case 1:	axis1.position.copy( space.head.pivot ); break;
+		case 2:	axis1.position.copy( space.chest.pivot ); break;
+		case 3:	axis1.position.copy( space.waist.pivot ); break;
 
-		case 11: pivot.position.copy( skeleton.hip.pivot ); break;
-		case 15: pivot.position.copy( skeleton.hip2.pivot ); break;
-		case 12: pivot.position.copy( skeleton.leg.pivot ); break;
-		case 13: pivot.position.copy( skeleton.knee.pivot ); break;
-		case 14: pivot.position.copy( skeleton.ankle.pivot ); break;
-		case 16: pivot.position.copy( skeleton.foot.pivot ); break;
+		case 11:axis1.position.copy( space.hipLeft.pivot );
+			axis2.position.copy( space.hipRight.pivot ); break;
+		case 15:axis1.position.copy( space.hip2Left.pivot );
+			axis2.position.copy( space.hip2Right.pivot ); break;
+		case 12:axis1.position.copy( space.legLeft.pivot );
+			axis2.position.copy( space.legRight.pivot ); break;
+		case 13:axis1.position.copy( space.kneeLeft.pivot );
+			axis2.position.copy( space.kneeRight.pivot ); break;
+		case 14:axis1.position.copy( space.ankleLeft.pivot );
+			axis2.position.copy( space.ankleRight.pivot ); break;
+		case 16:axis1.position.copy( space.footLeft.pivot );
+			axis2.position.copy( space.footRight.pivot ); break;
 
-		case 21: pivot.position.copy( skeleton.arm.pivot ); break;
-		case 22: pivot.position.copy( skeleton.elbow.pivot ); break;
-		case 23: pivot.position.copy( skeleton.forearm.pivot ); break;
-		case 24: pivot.position.copy( skeleton.wrist.pivot ); break;
+		case 21:axis1.position.copy( space.armLeft.pivot );
+			axis2.position.copy( space.armRight.pivot ); break;
+		case 22:axis1.position.copy( space.elbowLeft.pivot );
+			axis2.position.copy( space.elbowRight.pivot ); break;
+		case 23:axis1.position.copy( space.forearmLeft.pivot );
+			axis2.position.copy( space.forearmRight.pivot ); break;
+		case 24:axis1.position.copy( space.wristLeft.pivot );
+			axis2.position.copy( space.wristRight.pivot ); break;
 
-		default: model.remove( pivot );
+		default: model.remove( axis1 ); model.remove( axis2 );
 
 	}
 
@@ -554,7 +669,7 @@ function showPivotPoint( index ) {
 
 function changePivotPoint( ) {
 
-	//	pivot.position.copy( skeleton.hipLeftPos.value );
+	//	pivot.position.copy( space.hipLeftPos.value );
 
 }
 
@@ -588,6 +703,32 @@ function animationLoop( t ) {
 renderer.setAnimationLoop( animationLoop );
 
 
+
+// extract credits and place them in DOM element
+// replaces the resource url extension with "txt"
+// e.g. my-model.glb -> my-model.txt
+function credits( url, id ) {
+
+	var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function () {
+
+		if ( this.readyState == 4 && this.status == 200 )
+			document.getElementById( id ).innerHTML = this.responseText.split( '||' )[ 0 ];
+
+	};
+
+	url = url.split( '.' );
+	url.pop();
+	url.push( 'txt' );
+	url = url.join( '.' );
+
+	xhttp.open( "GET", url, true );
+	xhttp.send();
+
+}
+
+
+
 if ( DEBUG ) {
 
 	setTimeout( ()=>{
@@ -600,4 +741,4 @@ if ( DEBUG ) {
 }
 
 
-export { createGui, scene };
+export { createGui, addCuttingPlanes, scene, credits };

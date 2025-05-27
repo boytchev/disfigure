@@ -10,6 +10,7 @@
 
 import { Box3, Mesh, MeshPhysicalNodeMaterial, Vector3 } from 'three';
 import { Fn, mat3 } from 'three/tsl';
+import { Space } from './space.js';
 
 
 
@@ -250,7 +251,31 @@ function flattenModel( model ) {
 			var geo = mesh.geometry.clone().applyMatrix4( mesh.matrixWorld );
 			var mat = mesh.material.clone();
 
-			meshes.push( new Mesh( geo, mat ) );
+			if ( mesh.isSkinnedMesh ) {
+
+				mesh.pose();
+				var pos = geo.getAttribute( 'position' );
+				var nor = geo.getAttribute( 'normal' );
+				var v = new Vector3();
+
+				for ( var i=0; i<pos.count; i++ ) {
+
+					v.fromBufferAttribute( pos, i );
+					mesh.applyBoneTransform( i, v );
+					pos.setXYZ( i, ...v );
+
+					v.fromBufferAttribute( nor, i );
+					mesh.applyBoneTransform( i, v );
+					nor.setXYZ( i, ...v );
+
+				}
+
+			}
+
+			var newMesh = new Mesh( geo, mat );
+			newMesh.frustumCulled = false;
+
+			meshes.push( newMesh );
 
 		}
 
@@ -271,7 +296,7 @@ function flattenModel( model ) {
 
 // convert all model materials to Node materials
 // attach TSL functions for vertices, colors and emission
-function ennodeModel( model, skeleton, posture, nodes ) {
+function ennodeModel( model, space, posture, nodes, options ) {
 
 	model.traverse( ( child )=>{
 
@@ -284,26 +309,21 @@ function ennodeModel( model, skeleton, posture, nodes ) {
 			// copy all properties from the original material
 			Object.assign( material, child.material );
 
-			material.metalness = 0.1;
-			material.roughness = 0.6;
+			// copy all properties from the options
+			Object.assign( material, options );
 
-			// material.metalness = 0;
-			// material.roughness = 1;
-
-			// material.metalness = 1;
-			// material.roughness = 0;
-
+			// bind nodes
 			if ( nodes.colorNode )
 				material.colorNode = nodes.colorNode( );
 
 			if ( nodes.positionNode )
-				material.positionNode = nodes.positionNode( { skeleton: skeleton, posture: posture } );
+				material.positionNode = nodes.positionNode( { space: space, posture: posture } );
 
 			if ( nodes.normalNode )
-				material.normalNode = nodes.normalNode( { skeleton: skeleton, posture: posture } );
+				material.normalNode = nodes.normalNode( { space: space, posture: posture } );
 
 			if ( nodes.emissiveNode )
-				material.emissiveNode = nodes.emissiveNode( { skeleton: skeleton, posture: posture } );
+				material.emissiveNode = nodes.emissiveNode( { space: space, posture: posture } );
 
 			child.material = material;
 
@@ -316,45 +336,18 @@ function ennodeModel( model, skeleton, posture, nodes ) {
 
 
 // prepared a model for TSL rigging
-function processModel( model, skeleton, posture, dims, nodes ) {
+function processModel( model, space, posture, nodes, options={} ) {
+
+	var dims = {};
 
 	flattenModel( model );
-	ennodeModel( model, skeleton, posture, nodes );
 	centerModel( model, dims );
 
-	return model;
+	space = new Space( dims, space );
 
-}
+	ennodeModel( model, space, posture, nodes, options );
 
-
-
-// extract credits and place them in DOM element
-// replaces the resource url extension with "txt"
-// e.g. my-model.glb -> my-model.txt
-function credits( url, id ) {
-
-	var xhttp = new XMLHttpRequest();
-	xhttp.onreadystatechange = function () {
-
-		if ( this.readyState == 4 ) {
-
-			if ( this.status == 200 ) {
-
-				document.getElementById( id ).innerHTML = this.responseText.split( '||' )[ 0 ];
-
-			}
-
-		}
-
-	};
-
-	url = url.split( '.' );
-	url.pop();
-	url.push( 'txt' );
-	url = url.join( '.' );
-
-	xhttp.open( "GET", url, true );
-	xhttp.send();
+	return { model: model, dims: dims, space: space };
 
 }
 
@@ -370,5 +363,4 @@ export
 	matRotZYX,
 
 	processModel,
-	credits,
 };

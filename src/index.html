@@ -32,7 +32,7 @@
 <body>
 	<header>
 		<h1><b>Disfigure</b> Posture Editor</h1>
-		<h3> This is a WIP prototype, all sources available at <a href="https://boytchev.github.io/disfigure/">Github</a>.</br>
+		<h3> This is a WIP prototype, sources available at <a href="https://boytchev.github.io/disfigure/">Github</a>.</br>
 		<span id="credits1"></span><!--br>
 		and <span id="credits2"></span-->.</h3>
 	</header>
@@ -42,18 +42,17 @@
 
 import * as THREE from "three";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { credits, LocusT, LocusX, LocusXY, LocusY, LocusYZ, processModel, tslColorNode, tslEmissiveNode, tslNormalNode, tslPositionNode, tslPosture } from "./disfigure.js";
-import { createGui, scene } from "./editor-gui.js";
+import { processModel, tslColorNode, tslEmissiveNode, tslNormalNode, tslPositionNode, tslPosture } from "./disfigure.js";
+import { createGui, credits, scene } from "./editor-gui.js";
+
+import { SPACE, URL } from "./model-bougainvillea.js";
+//import { URL, SPACE } from "./model-skeleton.js";
+//import { URL, SPACE } from "./model-female.js";
+//import { URL, SPACE } from "./model-zooble.js";
+//import { SPACE, URL } from "./model-romi.js";
 
 
 console.clear( );
-
-
-const MODEL_URL = '../assets/models/mc-powerful-deep-chestnut-bougainvillea-t-pose.glb';
-//const MODEL_URL = '../assets/models/skeleton_t_pose.glb';
-//const MODEL_URL = '../assets/models/female_t-pose.glb';
-//const ENV_MAP = '../assets/models/rostock_laage_airport.jpg';
-
 
 
 
@@ -61,161 +60,39 @@ var overModel = new THREE.Object3D();
 scene.add( overModel );
 
 
-//var envMap = new THREE.TextureLoader().load( ENV_MAP );
-//envMap.mapping = THREE.EquirectangularReflectionMapping;
-//scene.environment = envMap;
-
-
-
-new GLTFLoader().load( MODEL_URL, ( gltf ) => {
-
-
-	/*
-		var p = new THREE.Mesh( new THREE.BoxGeometry( 2, 1.8, 1, 100, 100, 50 ) );
-		p.position.y = 0;
-		p.material.opacity = 0.2;
-		p.material.transparent = true;
-		p.material.side = THREE.DoubleSide;
-		scene.add( p ); gltf.scene.attach( p );
-		*/
-
-	/*
-		var p = new THREE.Mesh( new THREE.BoxGeometry( 2, 4, 0.001 ), new THREE.MeshBasicMaterial({color:'gray',transparent:true,opacity:0.5,}) );
-		gltf.scene.add( p );
-		p = new THREE.Mesh( new THREE.BoxGeometry( 0.01, 2, 2 ) );
-		gltf.scene.add( p );
-		p = new THREE.Mesh( new THREE.BoxGeometry( 2, 0.01, 2 ) );
-		gltf.scene.add( p );
-	*/
+new GLTFLoader().load( '../assets/models/'+URL, ( gltf ) => {
 
 	var posture = tslPosture( );
 
-	var dims = {};
-
-	var model = processModel(
+	var { model, dims, space } = processModel(
 		gltf.scene,
-		skeleton,
+		SPACE,
 		posture,
-		dims,
-		{
+		{	// nodes
 			positionNode: tslPositionNode, // rigging
 			normalNode: tslNormalNode, // lighting
 			colorNode: tslColorNode, // optional debug texture
-			emissiveNode: tslEmissiveNode, // optional debug marking
-		} );
+			emissiveNode: tslEmissiveNode, // optional debug heatmaps
+		},
+		{	// additional material properties
+			metalness: 0.3,
+			roughness: 1,
+		}
 
-	console.log( dims );
+	);
 
-	createGui( skeleton, posture, model );
 
-	credits( MODEL_URL, 'credits1' );
+	overModel.scale.setScalar( 1.5/dims.scale );
+
+	createGui( dims, space, posture, model );
+
+	credits( '../assets/models/'+URL, 'credits1' );
 	//credits( ENV_MAP, 'credits2' );
 
 	overModel.add( model );
 
 } );
 
-
-
-
-// mc-powerful-deep-chestnut-bougainvillea-t-pose
-
-var dims = {
-	scale: 1.7490679025650024,
-	x: -0.0000029206275939941406,
-	y: 1.2089526653289795,
-	z: 0.0034155696630477905,
-};
-
-var skeleton = {
-
-	// TORSO
-	head: new LocusYZ( dims, [ 0, 772, -13 ], [ 744, 818 ], 20 ),
-	chest: new LocusY( dims, [ 0, 624, -2 ], [ 509, 681 ]),
-	waist: new LocusY( dims, [ 0, 509, -2 ], [ 395, 738 ]),
-
-	// LEGS
-	knee: new LocusY( dims, [ 46, 255, -8 ], [ 281, 224 ]),
-	ankle: new LocusY( dims, [ 49, 52, -25 ], [ 66, 32 ]),
-	leg: new LocusY( dims, [ 57, 452, -25 ], [ 395, 0 ]),
-	hip2: new LocusY( dims, [ 6, 452, 4 ], [ 452, 166 ]),
-	foot: new LocusYZ( dims, [ 0, 12, 27 ], [ 1, -57 ], 120 ),
-	hip: new LocusT( dims, [ 30, 452, -25 ], [ 481, 395 ], 624, [ -6, 9 ]),
-
-	// ARMS
-	elbow: new LocusX( dims, [ 240, 715, -31 ], [ 223, 263 ]),
-	forearm: new LocusX( dims, [ 240, 715, -31 ], [ 172, 400 ]),
-	wrist: new LocusX( dims, [ 389, 710, -36 ], [ 383, 394 ]),
-	arm: new LocusXY( dims, [ 97, 704, -36 ], [ 66, 123 ], [ 632, 664 ]),
-
-};
-
-
-/*
-// skeleton_t_pose
-
-var dims = {
-	scale: 2.025539994239807,
-	x: 0.0005310177803039551,
-	y: -0.9260889887809753,
-	z: 0.0033015012741088867,
-}
-
-var skeleton = {
-
-	// TORSO
-	head: new LocusYZ( dims, [0, 783, -12], [763, 823], 20 ),
-	chest: new LocusY( dims, [0, 655, -2], [556, 704] ),
-	waist: new LocusY( dims, [0, 605, -2], [531, 714] ),
-
-	// LEGS
-	knee: new LocusY( dims, [39, 247, -7], [270, 220] ),
-	ankle: new LocusY( dims, [98, 47, -21], [52, 18] ),
-	leg: new LocusY( dims, [49, 418, -21], [368, 0] ),
-	hip2: new LocusY( dims, [5, 418, 3], [418, 171] ),
-	foot: new LocusYZ( dims, [0, 13, 13], [3, -46], 120 ),
-	hip: new LocusT( dims, [54, 479, -12], [442, 467], 566, [39, 54] ),
-
-	// ARMS
-	elbow: new LocusX( dims, [247, 734, -26], [227, 266] ),
-	forearm: new LocusX( dims, [247, 734, -26], [177, 280] ),
-	wrist: new LocusX( dims, [400, 729, -21], [395, 405] ),
-	arm: new LocusXY( dims, [98, 753, -36], [74, 106], [679, 704] ),
-
-};
-*/
-
-/*
-var dims = {
-	scale: 1.723729475165138,
-	x: 0.016281604766845703,
-	y: 1.6068687713755025e-8,
-	z: 0.044857390224933624,
-}
-
-var skeleton = {
-
-	// TORSO
-	head: new LocusYZ( dims, [-9, 847, -14], [806, 882], 20 ),
-	chest: new LocusY( dims, [-9, 685, -26], [557, 748] ),
-	waist: new LocusY( dims, [-9, 557, -26], [435, 806] ),
-
-	// LEGS
-	knee: new LocusY( dims, [37, 284, -14], [313, 249] ),
-	ankle: new LocusY( dims, [31, 64, -20], [75, 58] ),
-	leg: new LocusY( dims, [49, 493, -3], [435, 58] ),
-	hip2: new LocusY( dims, [49, 493, -20], [493, 180] ),
-	foot: new LocusYZ( dims, [-9, 17, 32], [-52, -110], 120 ),
-	hip: new LocusT( dims, [31, 534, -14], [540, 493], 638, [-11, -8] ),
-
-	// ARMS
-	elbow: new LocusX( dims, [234, 783, -55], [217, 257] ),
-	forearm: new LocusX( dims, [234, 783, -38], [165, 397] ),
-	wrist: new LocusX( dims, [385, 777, -32], [379, 391] ),
-	arm: new LocusXY( dims, [66, 772, -38], [66, 118], [690, 725] ),
-
-};
-*/
 
 	</script>
 </body>
