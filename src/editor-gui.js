@@ -12,7 +12,7 @@ import { uniform } from "three/tsl";
 
 
 
-const DEBUG = !false;
+const DEBUG = false;
 const DEBUG_JOINT = 0;
 
 
