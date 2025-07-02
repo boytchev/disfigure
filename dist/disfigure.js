@@ -1,12 +1,21 @@
-// disfigure v0.0.9
+// disfigure v0.0.10
 
-import { positionGeometry, Fn, mat3, mix, float, If, select, vec3, normalGeometry, transformNormalToView, uniform } from 'three/tsl';
+import { positionGeometry, float, vec3, min, Fn, mat3, If, normalGeometry, transformNormalToView, uniform } from 'three/tsl';
 import { Vector3, Mesh, Box3, MeshPhysicalNodeMaterial } from 'three';
 
 // calculate actual value from normalize value
-function decode( value, scale, offset ) {
+function decode( value, scale, offset=0 ) {
 
 	return scale*value/1000 + offset;
+
+}
+
+
+
+// calculate normalize value from actual value
+function encode( value, scale, offset=0 ) {
+
+	return ( value-offset )*1000/scale;
 
 }
 
@@ -40,14 +49,22 @@ function clone( instance ) {
 // define a horizontal planar locus that can tilt fowrard
 // (i.e. around X axix, towards the screen); vertically it
 // is from minY to maxY, horizontally it is infinite
+// areas outside rangeX are consider inside the locus
 class LocusY {
 
-	constructor( dims, pivot, rangeY, angle=0 ) {
+	constructor( dims, pivot, rangeY, angle=0, rangeX ) {
 
 		this.pivot = decodePivot( pivot, dims );
 
 		this.minY = decode( rangeY[ 0 ], dims.scale, dims.y );
 		this.maxY = decode( rangeY[ 1 ], dims.scale, dims.y );
+
+		if ( rangeX ) {
+
+			this.minX = decode( rangeX[ 0 ], dims.scale, dims.x );
+			this.maxX = decode( rangeX[ 1 ], dims.scale, dims.x );
+
+		}
 
 		this.slope = Math.tan( ( 90-angle ) * Math.PI/180 );
 
@@ -55,16 +72,41 @@ class LocusY {
 
 	mirror( ) {
 
-		return clone( this );
+		var obj = clone( this );
+		if ( 'minX' in obj ) {
+
+			obj.minX *= -1;
+			obj.maxX *= -1;
+
+		}
+
+		return obj;
 
 	}
 
-	locus( ) {
+	locus( pos = positionGeometry ) {
 
-		var y = positionGeometry.y;
-		if ( this.angle!=0 ) y = y.add( positionGeometry.z.div( this.slope ) );
+		var x = pos.x;
+		var y = pos.y;
+		var z = pos.z;
 
-		return y.smoothstep( this.minY, this.maxY );
+		if ( this.angle!=0 ) {
+
+			y = y.add( z.sub( this.pivot.z ).div( this.slope ) );
+
+		}
+
+		var k = smoother( this.minY, this.maxY, y );
+
+		if ( 'minX' in this ) {
+
+			k = k.max(
+				smoother( this.minX, this.maxX, x.abs().add( y.sub( this.pivot.y ) ) )
+			);
+
+		}
+
+		return k;
 
 	}
 
@@ -76,27 +118,45 @@ class LocusY {
 // vertically infinite, horizontally from minX to maxX
 class LocusX {
 
-	constructor( dims, pivot, rangeX ) {
+	constructor( dims, pivot, rangeX, angle=0 ) {
 
 		this.pivot = decodePivot( pivot, dims );
 
 		this.minX = decode( rangeX[ 0 ], dims.scale, dims.x );
 		this.maxX = decode( rangeX[ 1 ], dims.scale, dims.x );
 
+		this.slope = Math.tan( ( 90-angle ) * Math.PI/180 );
+
 	}
 
 	mirror( ) {
 
 		var obj = clone( this );
+
 		obj.minX *= -1;
 		obj.maxX *= -1;
+
 		return obj;
 
 	}
 
-	locus( ) {
+	locus( pos = positionGeometry ) {
 
-		return positionGeometry.x.smoothstep( this.minX, this.maxX );
+		var x = pos.x;
+		var z = pos.z;
+
+		var min = float( this.minX );
+		var max = float( this.maxX );
+
+		if ( this.angle!=0 ) {
+
+			var dz = z.sub( this.pivot.z ).div( this.slope ).max( 0.01 ).mul( x.sign() );
+			min = min.sub( dz );
+			max = max.add( dz );
+
+		}
+
+		return smoother( min, max, x );
 
 	}
 
@@ -117,12 +177,24 @@ class LocusXY extends LocusX {
 
 	}
 
-	locus( ) {
+	locus( pos = positionGeometry ) {
 
-		var x = positionGeometry.x.smoothstep( this.minX, this.maxX );
-		var y = positionGeometry.y.smoothstep( this.minY, this.maxY );
+		var x = pos.x;
+		var y = pos.y;
 
-		return x.mul( y );
+		var dx = pos.y.sub( this.pivot.y ).div( 4, x.sign() );
+
+		var k = 0.8;
+
+		return float( 1 )
+			.mul( smoother( float( this.minX ).sub( dx ), float( this.maxX ).sub( dx ), x ) )
+
+			.mul( min(
+				smoother( this.minY, this.minY*k+( 1-k )*this.maxY, y ),
+				smoother( this.maxY, this.maxY*k+( 1-k )*this.minY, y ),
+			) )
+			.pow( 2 )
+		;
 
 	}
 
@@ -133,26 +205,39 @@ class LocusXY extends LocusX {
 // define custom trapezoidal locus specifically for hips
 class LocusT extends LocusXY {
 
-	constructor( dims, pivot, rangeX, rangeY, topY ) {
+	constructor( dims, pivot, rangeX, rangeY, grown=0 ) {
 
 		super( dims, pivot, rangeX, rangeY );
 
-		this.topY = decode( topY, dims.scale, dims.y );
+		this.grown = grown;
 
 	}
 
-	locus( ) {
+	locus( pos = positionGeometry ) {
 
-		var x = positionGeometry.x.toVar();
-		var y = positionGeometry.y;
+		var x = pos.x;
+		var z = pos.z;
 
-		return y.step( this.topY )
-			.mul( x.smoothstep( this.minX, this.maxX ) )
-			.mul( y.smoothstep(
-				x.abs().div( 0.7 ).add( this.minY ),
-				x.abs().div( 7.0 ).add( this.maxY )
-			)
-			).pow( 2 );
+		if ( this.grown==0 ) {
+
+			var y = pos.y.sub( x.abs().mul( 1/5 ) ).add( z.mul( 1/6 ) );
+			var s = vec3( pos.x.mul( 2.0 ), pos.y, pos.z.min( 0 ) ).sub( vec3( 0, this.pivot.y, 0 ) ).length().smoothstep( 0, 0.13 ).pow( 10 );
+
+		} else {
+
+			var y = pos.y.sub( x.abs().mul( 1/5 ) ).add( z.abs().mul( 1/2 ) );
+			var s = vec3( pos.x.mul( 2.0 ), pos.y, pos.z.min( 0 ) ).sub( vec3( 0, this.pivot.y, 0 ) ).length().smoothstep( 0, 0.065 ).pow( 10 );
+
+		}
+
+
+		//  var s = vec3(pos.x.mul(2.0),pos.y,pos.z.min(0)).sub(vec3(0,this.pivot.y,0)).length().smoothstep(0,0.065).pow(10);
+
+		return float( s )
+			.mul(
+				x.smoothstep( this.minX, this.maxX ),
+				smoother( this.minY, this.maxY, y ).pow( 2 ),
+			);
 
 	}
 
@@ -164,16 +249,19 @@ class Space {
 
 	constructor( dims, bodyParts ) {
 
-		// bodyParts = { name:[LocusClass, data], ... }
+		const classes = { LocusT: LocusT, LocusX: LocusX, LocusXY: LocusXY, LocusY: LocusY/*, LocusBox:LocusBox*/ };
 
-		for ( var name in bodyParts ) {
+		// bodyParts = { _:[[rot]], name:[LocusClass, data], ... }
 
-			var partClass = bodyParts[ name ].shift();
+		for ( var name in bodyParts ) if ( name != '_' ) {
+
+			var partClass = classes[ bodyParts[ name ].shift() ];
 			bodyParts[ name ] = new partClass( dims, ... bodyParts[ name ]);
 
 		}
 
 		// bodyParts = { name:LocusInstance, ... }
+		this._ = bodyParts._;
 
 		// torso
 		this.head = bodyParts.head;
@@ -187,17 +275,17 @@ class Space {
 		this.ankleLeft = bodyParts?.ankleLeft ?? bodyParts.ankle;
 		this.ankleRight = bodyParts?.ankleRight ?? bodyParts.ankle.mirror();
 
-		this.legLeft = bodyParts?.legLeft ?? bodyParts.leg;
-		this.legRight = bodyParts?.legRight ?? bodyParts.leg.mirror();
+		this.ankleLongLeft = bodyParts?.ankleLongLeft ?? bodyParts.ankleLong;
+		this.ankleLongRight = bodyParts?.ankleLongRight ?? bodyParts.ankleLong.mirror();
 
-		this.hip2Left = bodyParts?.hip2Left ?? bodyParts.hip2;
-		this.hip2Right = bodyParts?.hip2Right ?? bodyParts.hip2.mirror();
+		this.legLongLeft = bodyParts?.legLongLeft ?? bodyParts.legLong;
+		this.legLongRight = bodyParts?.legLongRight ?? bodyParts.legLong.mirror();
 
 		this.footLeft = bodyParts?.footLeft ?? bodyParts.foot;
 		this.footRight = bodyParts?.footRight ?? bodyParts.foot.mirror();
 
-		this.hipLeft = bodyParts?.hipLeft ?? bodyParts.hip;
-		this.hipRight = bodyParts?.hipRight ?? bodyParts.hip.mirror();
+		this.legLeft = bodyParts?.legLeft ?? bodyParts.leg;
+		this.legRight = bodyParts?.legRight ?? bodyParts.leg.mirror();
 
 		// arms
 		this.elbowLeft = bodyParts?.elbowLeft ?? bodyParts.elbow;
@@ -441,7 +529,7 @@ function centerModel( model, dims ) {
 // merge a mesh into its parent, taking into consideration
 // positions, orientations and scale. flattening occurs only
 // for elements with a single child mesh
-function flattenModel( model ) {
+function flattenModel( model, rotate ) {
 
 	var meshes = [];
 
@@ -453,9 +541,14 @@ function flattenModel( model ) {
 			var geo = mesh.geometry.clone().applyMatrix4( mesh.matrixWorld );
 			var mat = mesh.material.clone();
 
+			if ( rotate[ 0 ]) geo.rotateX( rotate[ 0 ]);
+			if ( rotate[ 1 ]) geo.rotateY( rotate[ 1 ]);
+			if ( rotate[ 2 ]) geo.rotateZ( rotate[ 2 ]);
+
 			if ( mesh.isSkinnedMesh ) {
 
 				mesh.pose();
+
 				var pos = geo.getAttribute( 'position' );
 				var nor = geo.getAttribute( 'normal' );
 				var v = new Vector3();
@@ -476,6 +569,7 @@ function flattenModel( model ) {
 
 			var newMesh = new Mesh( geo, mat );
 			newMesh.frustumCulled = false;
+
 
 			meshes.push( newMesh );
 
@@ -542,7 +636,8 @@ function processModel( model, space, posture, nodes, options={} ) {
 
 	var dims = {};
 
-	flattenModel( model );
+	flattenModel( model, space?._?.rot ?? [ 0, 0, 0 ]);
+
 	centerModel( model, dims );
 
 	space = new Space( dims, space );
@@ -553,10 +648,29 @@ function processModel( model, space, posture, nodes, options={} ) {
 
 }
 
+
+
+
+
+
+// generate oversmooth function
+const smoother = Fn( ([ edgeFrom, edgeTo, value ])=>{
+
+	return value.smoothstep( edgeFrom, edgeTo ).smoothstep( 0, 1 ).smoothstep( 0, 1 );
+
+} ).setLayout( {
+	name: 'smoother',
+	type: 'float',
+	inputs: [
+		{ name: 'edgeFrom', type: 'float' },
+		{ name: 'edgeTo', type: 'float' },
+		{ name: 'value', type: 'float' },
+	]
+} );
+
 var jointRotate= Fn( ([ pos, center, angle, amount ])=>{
 
-	// for legs matRotYZX was better, but for all others matRotYXZ is better
-	return pos.sub( center ).mul( matRotYXZ( angle.mul( amount ) ) ).add( center );
+	return pos.sub( center ).mul( matRotYZX( angle.mul( amount ) ) ).add( center );
 
 } ).setLayout( {
 	name: 'jointRotate',
@@ -573,8 +687,12 @@ var jointRotate= Fn( ([ pos, center, angle, amount ])=>{
 
 var jointRotateArm= Fn( ([ pos, center, angle, amount ])=>{
 
-	//return pos.sub( center ).mul( matRotXZY( angle.mul( amount ) ) ).add( center );
-	return mix( pos, pos.sub( center ).mul( matRotXZY( angle.mul( amount ) ) ).mul( float( 1 ).sub( amount.mul( 2*Math.PI ).sub( Math.PI ).cos().add( 1 ).div( 2 ).div( 4 ).mul( angle.z.cos().oneMinus() ) ) ).add( center ), amount.pow( 0.25 ) );
+
+
+	//matRotXZY, matRotYXZ, matRotYZX
+	var newPos = pos.sub( center ).mul( matRotXZY( angle.mul( amount ) ) ).add( center ).toVar();
+
+	return newPos;
 
 } ).setLayout( {
 	name: 'jointRotate2',
@@ -614,7 +732,6 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 	var p = vertex.toVar();
 
 
-
 	// LEFT-UPPER BODY
 
 	var armLeft = space.armLeft.locus( ).toVar();
@@ -624,7 +741,7 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 		p.assign( jointRotate( p, mode.mul( space.wristLeft.pivot ), posture.wristLeft, space.wristLeft.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.forearmLeft.pivot ), posture.forearmLeft, space.forearmLeft.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.elbowLeft.pivot ), posture.elbowLeft, space.elbowLeft.locus( ) ) );
-		p.assign( jointRotateArm( p, mode.mul( space.armLeft.pivot ), posture.armLeft, armLeft ) );
+		p.assign( jointRotateArm( p, mode.mul( space.armLeft.pivot ), posture.armLeft, space.armLeft.locus( )/*, space.armLeft.sublocus(  )*/ ) );
 
 	} );
 
@@ -639,7 +756,7 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 		p.assign( jointRotate( p, mode.mul( space.wristRight.pivot ), posture.wristRight, space.wristRight.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.forearmRight.pivot ), posture.forearmRight, space.forearmRight.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.elbowRight.pivot ), posture.elbowRight, space.elbowRight.locus( ) ) );
-		p.assign( jointRotateArm( p, mode.mul( space.armRight.pivot ), posture.armRight, armRight ) );
+		p.assign( jointRotateArm( p, mode.mul( space.armRight.pivot ), posture.armRight, space.armRight.locus( )/*, space.armRight.sublocus(  )*/ ) );
 
 	} );
 
@@ -655,16 +772,16 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 
 	// LEFT-LOWER BODY
 
-	var hipLeft = space.hipLeft.locus( ).toVar();
+	var legLeft = space.legLeft.locus( ).toVar();
 
-	If( hipLeft.greaterThan( 0 ), ()=>{
+	If( legLeft.greaterThan( 0 ), ()=>{
 
 		p.assign( jointRotate( p, mode.mul( space.footLeft.pivot ), posture.footLeft, space.footLeft.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.ankleLeft.pivot ), posture.ankleLeft, space.ankleLeft.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.legLeft.pivot ), posture.legLeft, space.legLeft.locus( ) ) );
+		p.assign( jointRotate( p, mode.mul( space.ankleLongLeft.pivot ), posture.ankleLongLeft, space.ankleLongLeft.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.kneeLeft.pivot ), posture.kneeLeft, space.kneeLeft.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.hip2Left.pivot ), posture.hip2Left, space.hip2Left.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.hipLeft.pivot ), posture.hipLeft, hipLeft ) );
+		p.assign( jointRotate( p, mode.mul( space.legLongLeft.pivot ), posture.legLongLeft, space.legLongLeft.locus( ) ) );
+		p.assign( jointRotate( p, mode.mul( space.legLeft.pivot ), posture.legLeft, legLeft ) );
 
 	} );
 
@@ -672,106 +789,22 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 
 	// RIGHT-LOWER BODY
 
-	var hipRight = space.hipRight.locus( ).toVar();
+	var legRight = space.legRight.locus( ).toVar();
 
-	If( hipRight.greaterThan( 0 ), ()=>{
+	If( legRight.greaterThan( 0 ), ()=>{
 
 		p.assign( jointRotate( p, mode.mul( space.footRight.pivot ), posture.footRight, space.footRight.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.ankleRight.pivot ), posture.ankleRight, space.ankleRight.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.legRight.pivot ), posture.legRight, space.legRight.locus( ) ) );
+		p.assign( jointRotate( p, mode.mul( space.ankleLongRight.pivot ), posture.ankleLongRight, space.ankleLongRight.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.kneeRight.pivot ), posture.kneeRight, space.kneeRight.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.hip2Right.pivot ), posture.hip2Right, space.hip2Right.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.hipRight.pivot ), posture.hipRight, hipRight ) );
+		p.assign( jointRotate( p, mode.mul( space.legLongRight.pivot ), posture.legLongRight, space.legLongRight.locus( ) ) );
+		p.assign( jointRotate( p, mode.mul( space.legRight.pivot ), posture.legRight, legRight ) );
 
 	} );
 
 	return p;
 
 } ); // disfigure
-
-
-
-// dubug function used to mark areas on the 3D model
-
-var tslEmissiveNode = Fn( ( { space, posture } )=>{
-
-	var s = posture.select;
-	var k = float( 0 )
-		.add( space.head.locus( ).mul( select( s.equal( 1 ), 1, 0 ) ) )
-		.add( space.chest.locus( ).mul( select( s.equal( 2 ), 1, 0 ) ) )
-		.add( space.waist.locus( ).mul( select( s.equal( 3 ), 1, 0 ) ) )
-
-		.add( space.hipLeft.locus( ).mul( select( s.equal( 11 ), 1, 0 ) ) )
-		.add( space.hipRight.locus( ).mul( select( s.equal( 11 ), 1, 0 ) ) )
-
-		.add( space.legLeft.locus( ).mul( select( s.equal( 12 ), 1, 0 ) ) )
-		.add( space.legRight.locus( ).mul( select( s.equal( 12 ), 1, 0 ) ) )
-
-		.add( space.kneeLeft.locus( ).mul( select( s.equal( 13 ), 1, 0 ) ) )
-		.add( space.kneeRight.locus( ).mul( select( s.equal( 13 ), 1, 0 ) ) )
-
-		.add( space.ankleLeft.locus( ).mul( select( s.equal( 14 ), 1, 0 ) ) )
-		.add( space.ankleRight.locus( ).mul( select( s.equal( 14 ), 1, 0 ) ) )
-
-		.add( space.footLeft.locus( ).mul( select( s.equal( 16 ), 1, 0 ) ) )
-		.add( space.footRight.locus( ).mul( select( s.equal( 16 ), 1, 0 ) ) )
-
-		.add( space.hip2Left.locus( ).mul( select( s.equal( 15 ), 1, 0 ) ) )
-		.add( space.hip2Right.locus( ).mul( select( s.equal( 15 ), 1, 0 ) ) )
-
-		.add( space.armLeft.locus( ).mul( select( s.equal( 21 ), 1, 0 ) ) )
-		.add( space.armRight.locus( ).mul( select( s.equal( 21 ), 1, 0 ) ) )
-
-		.add( space.elbowLeft.locus( ).mul( select( s.equal( 22 ), 1, 0 ) ) )
-		.add( space.elbowRight.locus( ).mul( select( s.equal( 22 ), 1, 0 ) ) )
-
-		.add( space.forearmLeft.locus( ).mul( select( s.equal( 23 ), 1, 0 ) ) )
-		.add( space.forearmRight.locus( ).mul( select( s.equal( 23 ), 1, 0 ) ) )
-
-		.add( space.wristLeft.locus( ).mul( select( s.equal( 24 ), 1, 0 ) ) )
-		.add( space.wristRight.locus( ).mul( select( s.equal( 24 ), 1, 0 ) ) )
-
-		.clamp( 0, 1 )
-		.negate( )
-		.toVar( );
-
-	var color = vec3( float( -1 ).sub( k ), k.div( 2 ), k.div( 1/2 ) ).toVar();
-
-	If( k.lessThan( -0.99 ), ()=>{
-
-		color.assign( vec3( 0, 0, 0 ) );
-
-	} );
-
-	If( k.greaterThan( -0.01 ), ()=>{
-
-		color.assign( vec3( 0, 0, 0 ) );
-
-	} );
-
-
-	return color;
-
-} );
-
-
-
-var tslColorNode = Fn( ()=>{
-
-	var p = positionGeometry;
-
-	var k = float( 0 )
-		.add( p.x.mul( 72 ).cos().smoothstep( 0.9, 1 ) )
-		.add( p.y.mul( 74 ).cos().smoothstep( 0.9, 1 ) )
-		.add( p.z.mul( 74 ).add( p.y.mul( 4.5 ).add( 0.5 ).cos().mul( 1 ).add( 2.5 ) ).abs().smoothstep( 0.6, 0 ) )
-		.smoothstep( 0.6, 1 )
-		.oneMinus()
-		.pow( 0.1 )
-		;
-
-	return vec3( k );
-
-} );
 
 
 
@@ -791,12 +824,12 @@ function tslPosture( ) {
 		ankleRight: uniform( vec3( 0, 0, 0 ) ),
 		footLeft: uniform( vec3( 0, 0, 0 ) ),
 		footRight: uniform( vec3( 0, 0, 0 ) ),
-		hipLeft: uniform( vec3( 0, 0, 0 ) ),
-		hip2Left: uniform( vec3( 0, 0, 0 ) ),
-		hipRight: uniform( vec3( 0, 0, 0 ) ),
-		hip2Right: uniform( vec3( 0, 0, 0 ) ),
 		legLeft: uniform( vec3( 0, 0, 0 ) ),
+		legLongLeft: uniform( vec3( 0, 0, 0 ) ),
 		legRight: uniform( vec3( 0, 0, 0 ) ),
+		legLongRight: uniform( vec3( 0, 0, 0 ) ),
+		ankleLongLeft: uniform( vec3( 0, 0, 0 ) ),
+		ankleLongRight: uniform( vec3( 0, 0, 0 ) ),
 
 		// ARMS
 		elbowLeft: uniform( vec3( 0, 0, 0 ) ),
@@ -807,8 +840,9 @@ function tslPosture( ) {
 		wristRight: uniform( vec3( 0, 0, 0 ) ),
 		armLeft: uniform( vec3( 0, 0, 0 ) ),
 		armRight: uniform( vec3( 0, 0, 0 ) ),
+
 	};
 
 }
 
-export { LocusT, LocusX, LocusXY, LocusY, Space, matRotXYZ, matRotXZY, matRotYXZ, matRotYZX, matRotZXY, matRotZYX, processModel, tslColorNode, tslEmissiveNode, tslNormalNode, tslPositionNode, tslPosture };
+export { LocusT, LocusX, Space, decode, encode, matRotXYZ, matRotXZY, matRotYXZ, matRotYZX, matRotZXY, matRotZYX, processModel, smoother, tslNormalNode, tslPositionNode, tslPosture };

@@ -2,15 +2,14 @@
 // disfigure
 // to do: simplify matrix operation when rotations are DOF<3
 
-import { float, Fn, If, mix, normalGeometry, positionGeometry, select, transformNormalToView, uniform, vec3 } from "three/tsl";
-import { matRotXZY, matRotYXZ } from "./utils.js";
+import { float, Fn, If, normalGeometry, positionGeometry, transformNormalToView, uniform, vec3 } from "three/tsl";
+import { matRotXZY, matRotYZX } from "./utils.js";
 
 
 
 var jointRotate= Fn( ([ pos, center, angle, amount ])=>{
 
-	// for legs matRotYZX was better, but for all others matRotYXZ is better
-	return pos.sub( center ).mul( matRotYXZ( angle.mul( amount ) ) ).add( center );
+	return pos.sub( center ).mul( matRotYZX( angle.mul( amount ) ) ).add( center );
 
 } ).setLayout( {
 	name: 'jointRotate',
@@ -27,8 +26,12 @@ var jointRotate= Fn( ([ pos, center, angle, amount ])=>{
 
 var jointRotateArm= Fn( ([ pos, center, angle, amount ])=>{
 
-	//return pos.sub( center ).mul( matRotXZY( angle.mul( amount ) ) ).add( center );
-	return mix( pos, pos.sub( center ).mul( matRotXZY( angle.mul( amount ) ) ).mul( float( 1 ).sub( amount.mul( 2*Math.PI ).sub( Math.PI ).cos().add( 1 ).div( 2 ).div( 4 ).mul( angle.z.cos().oneMinus() ) ) ).add( center ), amount.pow( 0.25 ) );
+
+
+	//matRotXZY, matRotYXZ, matRotYZX
+	var newPos = pos.sub( center ).mul( matRotXZY( angle.mul( amount ) ) ).add( center ).toVar();
+
+	return newPos;
 
 } ).setLayout( {
 	name: 'jointRotate2',
@@ -68,7 +71,6 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 	var p = vertex.toVar();
 
 
-
 	// LEFT-UPPER BODY
 
 	var armLeft = space.armLeft.locus( ).toVar();
@@ -78,7 +80,7 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 		p.assign( jointRotate( p, mode.mul( space.wristLeft.pivot ), posture.wristLeft, space.wristLeft.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.forearmLeft.pivot ), posture.forearmLeft, space.forearmLeft.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.elbowLeft.pivot ), posture.elbowLeft, space.elbowLeft.locus( ) ) );
-		p.assign( jointRotateArm( p, mode.mul( space.armLeft.pivot ), posture.armLeft, armLeft ) );
+		p.assign( jointRotateArm( p, mode.mul( space.armLeft.pivot ), posture.armLeft, space.armLeft.locus( )/*, space.armLeft.sublocus(  )*/ ) );
 
 	} );
 
@@ -93,7 +95,7 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 		p.assign( jointRotate( p, mode.mul( space.wristRight.pivot ), posture.wristRight, space.wristRight.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.forearmRight.pivot ), posture.forearmRight, space.forearmRight.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.elbowRight.pivot ), posture.elbowRight, space.elbowRight.locus( ) ) );
-		p.assign( jointRotateArm( p, mode.mul( space.armRight.pivot ), posture.armRight, armRight ) );
+		p.assign( jointRotateArm( p, mode.mul( space.armRight.pivot ), posture.armRight, space.armRight.locus( )/*, space.armRight.sublocus(  )*/ ) );
 
 	} );
 
@@ -109,16 +111,16 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 
 	// LEFT-LOWER BODY
 
-	var hipLeft = space.hipLeft.locus( ).toVar();
+	var legLeft = space.legLeft.locus( ).toVar();
 
-	If( hipLeft.greaterThan( 0 ), ()=>{
+	If( legLeft.greaterThan( 0 ), ()=>{
 
 		p.assign( jointRotate( p, mode.mul( space.footLeft.pivot ), posture.footLeft, space.footLeft.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.ankleLeft.pivot ), posture.ankleLeft, space.ankleLeft.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.legLeft.pivot ), posture.legLeft, space.legLeft.locus( ) ) );
+		p.assign( jointRotate( p, mode.mul( space.ankleLongLeft.pivot ), posture.ankleLongLeft, space.ankleLongLeft.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.kneeLeft.pivot ), posture.kneeLeft, space.kneeLeft.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.hip2Left.pivot ), posture.hip2Left, space.hip2Left.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.hipLeft.pivot ), posture.hipLeft, hipLeft ) );
+		p.assign( jointRotate( p, mode.mul( space.legLongLeft.pivot ), posture.legLongLeft, space.legLongLeft.locus( ) ) );
+		p.assign( jointRotate( p, mode.mul( space.legLeft.pivot ), posture.legLeft, legLeft ) );
 
 	} );
 
@@ -126,106 +128,22 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 
 	// RIGHT-LOWER BODY
 
-	var hipRight = space.hipRight.locus( ).toVar();
+	var legRight = space.legRight.locus( ).toVar();
 
-	If( hipRight.greaterThan( 0 ), ()=>{
+	If( legRight.greaterThan( 0 ), ()=>{
 
 		p.assign( jointRotate( p, mode.mul( space.footRight.pivot ), posture.footRight, space.footRight.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.ankleRight.pivot ), posture.ankleRight, space.ankleRight.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.legRight.pivot ), posture.legRight, space.legRight.locus( ) ) );
+		p.assign( jointRotate( p, mode.mul( space.ankleLongRight.pivot ), posture.ankleLongRight, space.ankleLongRight.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.kneeRight.pivot ), posture.kneeRight, space.kneeRight.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.hip2Right.pivot ), posture.hip2Right, space.hip2Right.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.hipRight.pivot ), posture.hipRight, hipRight ) );
+		p.assign( jointRotate( p, mode.mul( space.legLongRight.pivot ), posture.legLongRight, space.legLongRight.locus( ) ) );
+		p.assign( jointRotate( p, mode.mul( space.legRight.pivot ), posture.legRight, legRight ) );
 
 	} );
 
 	return p;
 
 } ); // disfigure
-
-
-
-// dubug function used to mark areas on the 3D model
-
-var tslEmissiveNode = Fn( ( { space, posture } )=>{
-
-	var s = posture.select;
-	var k = float( 0 )
-		.add( space.head.locus( ).mul( select( s.equal( 1 ), 1, 0 ) ) )
-		.add( space.chest.locus( ).mul( select( s.equal( 2 ), 1, 0 ) ) )
-		.add( space.waist.locus( ).mul( select( s.equal( 3 ), 1, 0 ) ) )
-
-		.add( space.hipLeft.locus( ).mul( select( s.equal( 11 ), 1, 0 ) ) )
-		.add( space.hipRight.locus( ).mul( select( s.equal( 11 ), 1, 0 ) ) )
-
-		.add( space.legLeft.locus( ).mul( select( s.equal( 12 ), 1, 0 ) ) )
-		.add( space.legRight.locus( ).mul( select( s.equal( 12 ), 1, 0 ) ) )
-
-		.add( space.kneeLeft.locus( ).mul( select( s.equal( 13 ), 1, 0 ) ) )
-		.add( space.kneeRight.locus( ).mul( select( s.equal( 13 ), 1, 0 ) ) )
-
-		.add( space.ankleLeft.locus( ).mul( select( s.equal( 14 ), 1, 0 ) ) )
-		.add( space.ankleRight.locus( ).mul( select( s.equal( 14 ), 1, 0 ) ) )
-
-		.add( space.footLeft.locus( ).mul( select( s.equal( 16 ), 1, 0 ) ) )
-		.add( space.footRight.locus( ).mul( select( s.equal( 16 ), 1, 0 ) ) )
-
-		.add( space.hip2Left.locus( ).mul( select( s.equal( 15 ), 1, 0 ) ) )
-		.add( space.hip2Right.locus( ).mul( select( s.equal( 15 ), 1, 0 ) ) )
-
-		.add( space.armLeft.locus( ).mul( select( s.equal( 21 ), 1, 0 ) ) )
-		.add( space.armRight.locus( ).mul( select( s.equal( 21 ), 1, 0 ) ) )
-
-		.add( space.elbowLeft.locus( ).mul( select( s.equal( 22 ), 1, 0 ) ) )
-		.add( space.elbowRight.locus( ).mul( select( s.equal( 22 ), 1, 0 ) ) )
-
-		.add( space.forearmLeft.locus( ).mul( select( s.equal( 23 ), 1, 0 ) ) )
-		.add( space.forearmRight.locus( ).mul( select( s.equal( 23 ), 1, 0 ) ) )
-
-		.add( space.wristLeft.locus( ).mul( select( s.equal( 24 ), 1, 0 ) ) )
-		.add( space.wristRight.locus( ).mul( select( s.equal( 24 ), 1, 0 ) ) )
-
-		.clamp( 0, 1 )
-		.negate( )
-		.toVar( );
-
-	var color = vec3( float( -1 ).sub( k ), k.div( 2 ), k.div( 1/2 ) ).toVar();
-
-	If( k.lessThan( -0.99 ), ()=>{
-
-		color.assign( vec3( 0, 0, 0 ) );
-
-	} );
-
-	If( k.greaterThan( -0.01 ), ()=>{
-
-		color.assign( vec3( 0, 0, 0 ) );
-
-	} );
-
-
-	return color;
-
-} );
-
-
-
-var tslColorNode = Fn( ()=>{
-
-	var p = positionGeometry;
-
-	var k = float( 0 )
-		.add( p.x.mul( 72 ).cos().smoothstep( 0.9, 1 ) )
-		.add( p.y.mul( 74 ).cos().smoothstep( 0.9, 1 ) )
-		.add( p.z.mul( 74 ).add( p.y.mul( 4.5 ).add( 0.5 ).cos().mul( 1 ).add( 2.5 ) ).abs().smoothstep( 0.6, 0 ) )
-		.smoothstep( 0.6, 1 )
-		.oneMinus()
-		.pow( 0.1 )
-		;
-
-	return vec3( k );
-
-} );
 
 
 
@@ -245,12 +163,12 @@ function tslPosture( ) {
 		ankleRight: uniform( vec3( 0, 0, 0 ) ),
 		footLeft: uniform( vec3( 0, 0, 0 ) ),
 		footRight: uniform( vec3( 0, 0, 0 ) ),
-		hipLeft: uniform( vec3( 0, 0, 0 ) ),
-		hip2Left: uniform( vec3( 0, 0, 0 ) ),
-		hipRight: uniform( vec3( 0, 0, 0 ) ),
-		hip2Right: uniform( vec3( 0, 0, 0 ) ),
 		legLeft: uniform( vec3( 0, 0, 0 ) ),
+		legLongLeft: uniform( vec3( 0, 0, 0 ) ),
 		legRight: uniform( vec3( 0, 0, 0 ) ),
+		legLongRight: uniform( vec3( 0, 0, 0 ) ),
+		ankleLongLeft: uniform( vec3( 0, 0, 0 ) ),
+		ankleLongRight: uniform( vec3( 0, 0, 0 ) ),
 
 		// ARMS
 		elbowLeft: uniform( vec3( 0, 0, 0 ) ),
@@ -261,12 +179,13 @@ function tslPosture( ) {
 		wristRight: uniform( vec3( 0, 0, 0 ) ),
 		armLeft: uniform( vec3( 0, 0, 0 ) ),
 		armRight: uniform( vec3( 0, 0, 0 ) ),
+
 	};
 
 }
 
 
 
-export { tslPositionNode, tslEmissiveNode, tslColorNode, tslNormalNode, tslPosture };
+export { tslPositionNode, tslNormalNode, tslPosture };
 export * from "./space.js";
 export * from "./utils.js";

@@ -1,3 +1,10 @@
+v0.0.12
+  - added 3 models - man, woman, child
+  - fix selector parameters
+
+v0.0.11
+  - added model pre-rotation
+
 v0.0.10
   - fixed right foot selector
   - added rigged skeleton example

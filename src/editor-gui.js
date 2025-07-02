@@ -8,20 +8,20 @@
 import * as THREE from "three";
 import * as lil from "three/addons/libs/lil-gui.module.min.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { uniform } from "three/tsl";
+import { float, Fn, If, positionGeometry, select, uniform, vec3 } from "three/tsl";
+import { decode, encode, LocusT, LocusX } from "./space.js";
+import { DEBUG, DEBUG_JOINT, DEBUG_NAME } from "./debug.js";
 
-
-
-const DEBUG = false;
-const DEBUG_JOINT = 0;
 
 
 const USE_ENV_MAP = false;
-const ENV_MAP = '../assets/models/rostock_laage_airport.jpg';
+const ENV_MAP = '../assets/models/envmap.jpg';
 
 
 var scene = new THREE.Scene();
 scene.background = new THREE.Color( 'whitesmoke' );
+//scene.background = new THREE.Color( 'gray' );
+//scene.background = new THREE.Color( 0x202020 );
 
 
 
@@ -65,21 +65,17 @@ controls.zoomSpeed = 10;
 
 
 
-var ambientLight = new THREE.AmbientLight( 'white', 0 );
-scene.add( ambientLight );
 
-
-
-var light = new THREE.DirectionalLight( 'white', 2+1 );
-light.position.set( 0, 0, 1 );
+var light = new THREE.PointLight( 'white', 40 );
 scene.add( light );
 
 
 
 
 
-var axis1 = new THREE.AxesHelper();
-var axis2 = new THREE.AxesHelper();
+
+var axis1 = new THREE.AxesHelper( 60 );
+var axis2 = new THREE.AxesHelper( 60 );
 
 
 var options = {
@@ -95,11 +91,14 @@ var debug = {
 	x: 0,
 	y: 500,
 	z: 0,
+	minY: 0,
+	maxY: 0,
 };
 var posture = {};
 var space = {};
 var model = new THREE.Group();
 var gui;
+var dims = {};
 
 var planes = new THREE.Group();
 planes.visible = debug.showPlanes;
@@ -122,7 +121,7 @@ function addCuttingPlanes( dims, model ) {
 	} );
 
 	var p = new THREE.Mesh( geo, mat );
-	p.position.y = 0.5*dims.scale;
+	//	p.position.y = 0.5*dims.scale;
 	p.add( grid );
 	planes.add( p );
 
@@ -130,7 +129,7 @@ function addCuttingPlanes( dims, model ) {
 	mat.color.set( 'green' );
 	p = new THREE.Mesh( geo, mat );
 	p.rotation.x = -Math.PI/2;
-	p.position.y = 0.5*dims.scale;
+	//	p.position.y = 0.5*dims.scale;
 	p.add( grid.clone() );
 	planes.add( p );
 
@@ -138,25 +137,49 @@ function addCuttingPlanes( dims, model ) {
 	mat.color.set( 'tomato' );
 	p = new THREE.Mesh( geo, mat );
 	p.rotation.y = Math.PI/2;
-	p.position.y = 0.5*dims.scale;
+	//	p.position.y = 0.5*dims.scale;
 	p.add( grid.clone() );
 	planes.add( p );
 
+	planes.position.x = dims.x;
+	planes.position.y = dims.y+0.5*dims.scale;
+	planes.position.z = dims.z;
 	model.add( planes );
 
 }
 
 
 
-function createGui( dims, spaceData, postureData, modelObject ) {
+function createGui( dimsData, spaceData, postureData, modelObject ) {
 
 	space = spaceData;
+	dims = dimsData;
 
 	posture = postureData;
 	posture.select = uniform( DEBUG?DEBUG_JOINT:0, 'int' ); // 0..24
 	model = modelObject;
 
-	if ( DEBUG ) addCuttingPlanes( dims, model );
+	if ( DEBUG ) {
+
+		addCuttingPlanes( dims, model );
+
+		if ( space[ DEBUG_NAME ] instanceof LocusX && !( space[ DEBUG_NAME ] instanceof LocusT ) ) {
+
+			debug.minY = encode( space[ DEBUG_NAME ].minX.value, dims.scale, dims.x );
+			debug.maxY = encode( space[ DEBUG_NAME ].maxX.value, dims.scale, dims.x );
+
+		} else {
+
+			debug.minY = encode( space[ DEBUG_NAME ].minY.value, dims.scale, dims.y );
+			debug.maxY = encode( space[ DEBUG_NAME ].maxY.value, dims.scale, dims.y );
+
+		}
+
+		debug.x = encode( space[ DEBUG_NAME ].pivot.value.x, dims.scale, dims.x );
+		debug.y = encode( space[ DEBUG_NAME ].pivot.value.y, dims.scale, dims.y );
+		debug.z = encode( space[ DEBUG_NAME ].pivot.value.z, dims.scale, dims.z );
+
+	}
 
 	gui = new lil.GUI(); // global gui
 	gui.domElement.style.marginRight = 0;
@@ -166,24 +189,25 @@ function createGui( dims, spaceData, postureData, modelObject ) {
 	if ( !DEBUG ) mfolder.close();
 
 	mfolder.add( posture.select, 'value', {
-		Nothing: 0,
-		Head: 1, Chest: 2, Waist: 3,
-		Hip: 11, Hip2: 15, Leg: 12, Knee: 13, Ankle: 14, Foot: 16,
-		Arm: 21, Elbow: 22, Forearm: 23, Wrist: 24,
+		Torso: 0,
+		' &#x25CC; Head': 1, ' &#x25CC; Chest': 2, ' &#x25CC; Waist': 3,
+		Leg: 11, ' &#x25CC; Leg (ext)': 12, ' &#x25CC; Knee': 13, ' &#x25CC; Ankle': 15, ' &#x25CC; Ankle (ext)': 14, ' &#x25CC; Foot': 16,
+		Arm: 21, ' &#x25CC; Elbow': 22, ' &#x25CC; Forearm': 23, ' &#x25CC; Wrist': 24, /*' &#x25CC; Prearm': 25,*/
 	} ).name( 'Heatmap' ).onChange( showPivotPoint );
 
 	if ( DEBUG ) {
 
-		mfolder.add( debug, 'showPlanes' ).name( 'Show planes' ).onChange( ( n )=>planes.visible = n );
-		mfolder.add( debug, 'x', -600, 600 ).step( 1 ).name( html( 'Red', '' ) ).onChange( ( n )=>planes.children[ 2 ].position.x = n/1000*dims.scale ).name( html( 'Red', '' ) );
-		mfolder.add( debug, 'y', -100, 1100 ).step( 1 ).onChange( ( n )=>planes.children[ 1 ].position.y = n/1000*dims.scale ).name( html( 'Green', '' ) );
-		mfolder.add( debug, 'z', -500, 500 ).step( 1 ).name( html( 'Blue', '' ) ).onChange( ( n )=>planes.children[ 0 ].position.z = n/1000*dims.scale );
-		// mfolder.add( space.hipLeftPos.value, 'y', 1, 3 ).name( 'py' ).onChange( changePivotPoint );
-		// mfolder.add( space.hipLeftPos.value, 'z', -0.5, 0.5 ).name( 'pz' ).onChange( changePivotPoint );
-		// mfolder.add( space.hipLeftSpan.value, 'x', 1, 3 ).name( 'sx' ).onChange( changePivotPoint );
-		// mfolder.add( space.hipLeftSpan.value, 'y', 1, 2 ).name( 'sy' ).onChange( changePivotPoint );
-		//		mfolder.add( space.hipLeftSpan.value, 'z', 1, 3 ).name( 'sz' ).onChange( changePivotPoint );
-		//		mfolder.add( space.hipLeftSpan.value, 'w', -2, 2 ).name( 'sw' ).onChange( changePivotPoint );
+		//mfolder.add( debug, 'showPlanes' ).name( 'Show planes' ).onChange( ( n )=>planes.visible = n );
+		//mfolder.add( debug, 'x', -600, 600 ).step( 1 ).name( html( 'Red', '' ) ).onChange( ( n )=>planes.children[ 2 ].position.x = n/1000*dims.scale ).name( html( 'Red', '' ) );
+		//mfolder.add( debug, 'y', -100, 1100 ).step( 1 ).onChange( ( n )=>planes.children[ 1 ].position.y = (n-500)/1000*dims.scale ).name( html( 'Green', '' ) );
+		//mfolder.add( debug, 'z', -500, 500 ).step( 1 ).name( html( 'Blue', '' ) ).onChange( ( n )=>planes.children[ 0 ].position.z = n/1000*dims.scale );
+
+		mfolder.add( debug, 'x', -500, 500 ).name( html( 'Pivot', 'x' ) ).step( 1 ).onChange( changePivotPoint );
+		mfolder.add( debug, 'y', -100, 1100 ).name( html( '', 'y' ) ).step( 1 ).onChange( changePivotPoint );
+		mfolder.add( debug, 'z', -100, 100 ).name( html( '', 'z' ) ).step( 1 ).onChange( changePivotPoint );
+
+		mfolder.add( debug, 'minY', -200, 1000 ).name( html( 'Range', 'min' ) ).step( 1 ).onChange( changePivotPoint );
+		mfolder.add( debug, 'maxY', -200, 1000 ).name( html( '', 'max' ) ).step( 1 ).onChange( changePivotPoint );
 
 	}
 
@@ -198,7 +222,7 @@ function createGui( dims, spaceData, postureData, modelObject ) {
 	}
 
 
-	mfolder = gui.addFolder( 'TORSO' );//.close();
+	mfolder = gui.addFolder( 'TORSO' ).close();
 	{
 
 		mfolder.add( posture.head.value, 'x', -0.7, 0.5 ).name( html( 'Head', '&#x2195;' ) );
@@ -214,17 +238,17 @@ function createGui( dims, spaceData, postureData, modelObject ) {
 
 	}
 
-	mfolder = gui.addFolder( 'LEFT LEG' ).close();
+	mfolder = gui.addFolder( 'LEFT LEG' );//.close();
 	{
 
-		mfolder.add( posture.hipLeft.value, 'x', -0.6, 2.7 ).name( html( 'Leg', '&#x2195;' ) );
-		mfolder.add( posture.hipLeft.value, 'z', -2.4, 0.2 ).name( html( '', '&#x21BA;' ) );
-		mfolder.add( posture.hip2Left.value, 'y', -1.4, 1.4 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.legLeft.value, 'x', -0.6, 2.7 ).name( html( 'Leg', '&#x2195;' ) );
+		mfolder.add( posture.legLeft.value, 'z', -2.4, 0.2 ).name( html( '', '&#x21BA;' ) );
+		mfolder.add( posture.legLongLeft.value, 'y', -2, 1.4 ).name( html( '', '&#x2194;' ) );
 
 		mfolder.add( posture.kneeLeft.value, 'x', -2.6, 0 ).name( html( 'Knee', '&#x2195;', 'border' ) );
 
 		mfolder.add( posture.ankleLeft.value, 'x', -1, 0.7 ).name( html( 'Ankle', '&#x2195;', 'border' ) );
-		mfolder.add( posture.legLeft.value, 'y', -1, 1 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.ankleLongLeft.value, 'y', -1, 1 ).name( html( '', '&#x2194;' ) );
 		mfolder.add( posture.ankleLeft.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21BA;' ) );
 
 		mfolder.add( posture.footLeft.value, 'x', -0.3, 0.6 ).name( html( 'Foot', '&#x2195;', 'border' ) );
@@ -234,14 +258,14 @@ function createGui( dims, spaceData, postureData, modelObject ) {
 	mfolder = gui.addFolder( 'RIGHT LEG' ).close();
 	{
 
-		mfolder.add( posture.hipRight.value, 'x', -0.6, 2.7 ).name( html( 'Leg', '&#x2195;' ) );
-		mfolder.add( posture.hipRight.value, 'z', -0.2, 2.4 ).name( html( '', '&#x21BB;' ) ); // swapped
-		mfolder.add( posture.hip2Right.value, 'y', -1.4, 1.4 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.legRight.value, 'x', -0.6, 2.7 ).name( html( 'Leg', '&#x2195;' ) );
+		mfolder.add( posture.legRight.value, 'z', -0.2, 2.4 ).name( html( '', '&#x21BB;' ) ); // swapped
+		mfolder.add( posture.legLongRight.value, 'y', -1.4, 2 ).name( html( '', '&#x2194;' ) );
 
 		mfolder.add( posture.kneeRight.value, 'x', -2.6, 0 ).name( html( 'Knee', '&#x2195;', 'border' ) );
 
 		mfolder.add( posture.ankleRight.value, 'x', -1, 0.7 ).name( html( 'Ankle', '&#x2195;', 'border' ) );
-		mfolder.add( posture.legRight.value, 'y', -1, 1 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.ankleLongRight.value, 'y', -1, 1 ).name( html( '', '&#x2194;' ) );
 		mfolder.add( posture.ankleRight.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21BB;' ) );
 
 		mfolder.add( posture.footRight.value, 'x', -0.3, 0.6 ).name( html( 'Foot', '&#x2195;', 'border' ) );
@@ -356,25 +380,25 @@ function rigModel( time2 ) {
 		0,
 	);
 
-	posture.hipLeft.value.set(
+	posture.legLeft.value.set(
 		( Math.cos( time*3 )/1+0.25 ),
 		0, //08.05.25 Math.cos( time*2.8 ),///4,
 		-( Math.cos( time*2.2 )+1 )/4,
 	);
 
-	posture.hip2Left.value.set(
+	posture.legLongLeft.value.set(
 		0,
 		Math.cos( time*2.8 ),
 		0,
 	);
 
-	posture.hipRight.value.set(
+	posture.legRight.value.set(
 		( Math.sin( time*2.2 )/1+0.25 ),
 		0, //08.05.25 Math.sin( time*3.2 )/4,
 		( Math.sin( time*2.6 )+1 )/4,
 	);
 
-	posture.hip2Right.value.set(
+	posture.legLongRight.value.set(
 		0,
 		Math.sin( time*3.2 ),
 		0,
@@ -498,37 +522,37 @@ function rigRandomModel( seed = THREE.MathUtils.randInt( Number.MIN_SAFE_INTEGER
 		rand( )/4,
 	);
 
-	posture.legLeft.value.set(
+	posture.ankleLongLeft.value.set(
 		0,
 		rand( )-0.25,
 		0,
 	);
 
-	posture.legRight.value.set(
+	posture.ankleLongRight.value.set(
 		0,
 		rand( )+0.25,
 		0,
 	);
 
-	posture.hipLeft.value.set(
+	posture.legLeft.value.set(
 		( rand( )/1+0.25 ),
 		0,
 		-( rand( )+1 )/4,
 	);
 
-	posture.hip2Left.value.set(
+	posture.legLongLeft.value.set(
 		0,
 		rand( ),
 		0,
 	);
 
-	posture.hipRight.value.set(
+	posture.legRight.value.set(
 		( rand( )/1+0.25 ),
 		0,
 		( rand( )+1 )/4,
 	);
 
-	posture.hip2Right.value.set(
+	posture.legLongRight.value.set(
 		0,
 		rand( ),
 		0,
@@ -601,12 +625,12 @@ function rigResetModel( ) {
 	posture.footRight.value.set( 0, 0, 0 );
 	posture.ankleLeft.value.set( 0, 0, 0 );
 	posture.ankleRight.value.set( 0, 0, 0 );
+	posture.ankleLongLeft.value.set( 0, 0, 0 );
+	posture.ankleLongRight.value.set( 0, 0, 0 );
 	posture.legLeft.value.set( 0, 0, 0 );
+	posture.legLongLeft.value.set( 0, 0, 0 );
 	posture.legRight.value.set( 0, 0, 0 );
-	posture.hipLeft.value.set( 0, 0, 0 );
-	posture.hip2Left.value.set( 0, 0, 0 );
-	posture.hipRight.value.set( 0, 0, 0 );
-	posture.hip2Right.value.set( 0, 0, 0 );
+	posture.legLongRight.value.set( 0, 0, 0 );
 	posture.elbowLeft.value.set( 0, 0, 0 );
 	posture.elbowRight.value.set( 0, 0, 0 );
 	posture.forearmLeft.value.set( 0, 0, 0 );
@@ -615,6 +639,8 @@ function rigResetModel( ) {
 	posture.wristRight.value.set( 0, 0, 0 );
 	posture.armLeft.value.set( 0, 0, 0 );
 	posture.armRight.value.set( 0, 0, 0 );
+	// posture.prearmLeft.value.set( 0, 0, 0 );
+	// posture.prearmRight.value.set( 0, 0, 0 );
 
 	updateGUI( );
 
@@ -624,6 +650,8 @@ function rigResetModel( ) {
 
 function showPivotPoint( index ) {
 
+	if ( !DEBUG ) return;
+
 	model.add( axis1 );
 	if ( index<10 )
 		model.remove( axis2 );
@@ -632,27 +660,30 @@ function showPivotPoint( index ) {
 
 	switch ( index ) {
 
-		case 1:	axis1.position.copy( space.head.pivot ); break;
+		case 1:	axis1.position.copy( space.head.pivot.value ); break;
 		case 2:	axis1.position.copy( space.chest.pivot ); break;
 		case 3:	axis1.position.copy( space.waist.pivot ); break;
 
-		case 11:axis1.position.copy( space.hipLeft.pivot );
-			axis2.position.copy( space.hipRight.pivot ); break;
-		case 15:axis1.position.copy( space.hip2Left.pivot );
-			axis2.position.copy( space.hip2Right.pivot ); break;
-		case 12:axis1.position.copy( space.legLeft.pivot );
+		case 11:axis1.position.copy( space.legLeft.pivot );
 			axis2.position.copy( space.legRight.pivot ); break;
+		case 12:axis1.position.copy( space.legLongLeft.pivot );
+			axis2.position.copy( space.legLongRight.pivot ); break;
+		case 14:axis1.position.copy( space.ankleLongLeft.pivot );
+			axis2.position.copy( space.ankleLongRight.pivot ); break;
 		case 13:axis1.position.copy( space.kneeLeft.pivot );
 			axis2.position.copy( space.kneeRight.pivot ); break;
-		case 14:axis1.position.copy( space.ankleLeft.pivot );
+		case 15:axis1.position.copy( space.ankleLeft.pivot );
 			axis2.position.copy( space.ankleRight.pivot ); break;
 		case 16:axis1.position.copy( space.footLeft.pivot );
 			axis2.position.copy( space.footRight.pivot ); break;
 
+		// case 25:axis1.position.copy( space.prearmLeft.pivot );
+			// axis2.position.copy( space.prearmRight.pivot ); break;
 		case 21:axis1.position.copy( space.armLeft.pivot );
 			axis2.position.copy( space.armRight.pivot ); break;
 		case 22:axis1.position.copy( space.elbowLeft.pivot );
-			axis2.position.copy( space.elbowRight.pivot ); break;
+			axis2.position.copy( space.elbowRight.pivot );
+			break;
 		case 23:axis1.position.copy( space.forearmLeft.pivot );
 			axis2.position.copy( space.forearmRight.pivot ); break;
 		case 24:axis1.position.copy( space.wristLeft.pivot );
@@ -666,12 +697,28 @@ function showPivotPoint( index ) {
 
 
 
-
 function changePivotPoint( ) {
 
-	//	pivot.position.copy( space.hipLeftPos.value );
+	space[ DEBUG_NAME ].pivot.value.x = decode( debug.x, dims.scale, dims.x );
+	space[ DEBUG_NAME ].pivot.value.y = decode( debug.y, dims.scale, dims.y );
+	space[ DEBUG_NAME ].pivot.value.z = decode( debug.z, dims.scale, dims.z );
+
+	axis1.position.copy( space[ DEBUG_NAME ].pivot.value );
+
+	if ( space[ DEBUG_NAME ] instanceof LocusX && !( space[ DEBUG_NAME ] instanceof LocusT ) ) {
+
+		space[ DEBUG_NAME ].minX.value = decode( debug.minY, dims.scale, dims.x );
+		space[ DEBUG_NAME ].maxX.value = decode( debug.maxY, dims.scale, dims.x );
+
+	} else {
+
+		space[ DEBUG_NAME ].minY.value = decode( debug.minY, dims.scale, dims.y );
+		space[ DEBUG_NAME ].maxY.value = decode( debug.maxY, dims.scale, dims.y );
+
+	}
 
 }
+
 
 
 
@@ -694,8 +741,18 @@ function animationLoop( t ) {
 
 	controls.update( );
 	light.position.copy( camera.position );
+	light.position.setLength( 4 );
 
-	renderer.render( scene, camera );
+	try {
+
+		renderer.render( scene, camera );
+
+	} catch ( error ) {
+
+		renderer.setAnimationLoop( null );
+		throw error;
+
+	}
 
 }
 
@@ -741,4 +798,109 @@ if ( DEBUG ) {
 }
 
 
-export { createGui, addCuttingPlanes, scene, credits };
+
+
+
+
+
+// dubug function used to mark areas on the 3D model
+
+var tslEmissiveNode = Fn( ( { space, posture } )=>{
+
+	var s = posture.select;
+	var k = float( 0 )
+		.add( space.head.locus( ).mul( select( s.equal( 1 ), 1, 0 ) ) )
+		.add( space.chest.locus( ).mul( select( s.equal( 2 ), 1, 0 ) ) )
+		.add( space.waist.locus( ).mul( select( s.equal( 3 ), 1, 0 ) ) )
+
+		.add( space.legLeft.locus( ).mul( select( s.equal( 11 ), 1, 0 ) ) )
+		.add( space.legRight.locus( ).mul( select( s.equal( 11 ), 1, 0 ) ) )
+
+		.add( space.ankleLongLeft.locus( ).mul( select( s.equal( 14 ), 1, 0 ) ) )
+		.add( space.ankleLongRight.locus( ).mul( select( s.equal( 14 ), 1, 0 ) ) )
+
+		.add( space.kneeLeft.locus( ).mul( select( s.equal( 13 ), 1, 0 ) ) )
+		.add( space.kneeRight.locus( ).mul( select( s.equal( 13 ), 1, 0 ) ) )
+
+		.add( space.ankleLeft.locus( ).mul( select( s.equal( 15 ), 1, 0 ) ) )
+		.add( space.ankleRight.locus( ).mul( select( s.equal( 15 ), 1, 0 ) ) )
+
+		.add( space.footLeft.locus( ).mul( select( s.equal( 16 ), 1, 0 ) ) )
+		.add( space.footRight.locus( ).mul( select( s.equal( 16 ), 1, 0 ) ) )
+
+		.add( space.legLongLeft.locus( ).mul( select( s.equal( 12 ), 1, 0 ) ) )
+		.add( space.legLongRight.locus( ).mul( select( s.equal( 12 ), 1, 0 ) ) )
+
+		.add( space.armLeft.locus( ).mul( select( s.equal( 21 ), 1, 0 ) ) )
+		.add( space.armRight.locus( ).mul( select( s.equal( 21 ), 1, 0 ) ) )
+
+		.add( space.elbowLeft.locus( ).mul( select( s.equal( 22 ), 1, 0 ) ) )
+		.add( space.elbowRight.locus( ).mul( select( s.equal( 22 ), 1, 0 ) ) )
+
+		.add( space.forearmLeft.locus( ).mul( select( s.equal( 23 ), 1, 0 ) ) )
+		.add( space.forearmRight.locus( ).mul( select( s.equal( 23 ), 1, 0 ) ) )
+
+		.add( space.wristLeft.locus( ).mul( select( s.equal( 24 ), 1, 0 ) ) )
+		.add( space.wristRight.locus( ).mul( select( s.equal( 24 ), 1, 0 ) ) )
+
+		.clamp( 0, 1 )
+	//		.negate( )
+		.toVar( );
+
+	var color = vec3( float( -1 ).add( k ), k.div( -2 ), k.div( -1/2 ) ).toVar();
+
+
+	If( k.lessThan( 0.0001 ), ()=>{
+
+		color.assign( vec3( 0, 0, 0 ) );
+
+	} );
+
+	If( k.greaterThan( 0.99 ), ()=>{
+
+		color.assign( vec3( 0, 0, 0 ) );
+
+	} );
+
+	If( k.greaterThan( 0.9999 ), ()=>{
+
+		color.assign( vec3( -0.25, -1, -1 ) );
+
+	} );
+
+
+	return color;
+
+} );
+
+
+
+var tslColorNode = Fn( ()=>{
+
+	var p = positionGeometry;
+
+	var k = float( 0 )
+		.add( p.x.mul( 70 ).cos().smoothstep( 0.85, 1 ) )
+		.add( p.y.mul( 56.3 ).cos().smoothstep( 0.85, 1 ) )
+		.add( p.z.mul( 30 ).add( p.y.mul( -6 ), 4 ).cos().smoothstep( 0.95, 1 ).mul( p.y.negate().step( -2.54 ) ) )
+
+		.add( p.z.mul( 30 ).add( p.y.mul( -1 ), 2.5, p.y.mul( 6 ).add( -2 ).cos().div( 2 ) ).cos().smoothstep( 0.95, 1 ).mul( p.y.step( 2.393 ) ) )
+
+		.oneMinus()
+		.pow( 0.15 )
+		.step( 0.5 )
+		.oneMinus().mul( 1.1 );
+
+	return vec3( k );
+
+} );
+
+
+
+var tslWhiteNode = Fn( ()=>{
+
+	return vec3( 1 );
+
+} );
+
+export { createGui, addCuttingPlanes, scene, credits, tslEmissiveNode, tslColorNode, tslWhiteNode };

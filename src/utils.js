@@ -239,7 +239,7 @@ function centerModel( model, dims ) {
 // merge a mesh into its parent, taking into consideration
 // positions, orientations and scale. flattening occurs only
 // for elements with a single child mesh
-function flattenModel( model ) {
+function flattenModel( model, rotate ) {
 
 	var meshes = [];
 
@@ -251,9 +251,14 @@ function flattenModel( model ) {
 			var geo = mesh.geometry.clone().applyMatrix4( mesh.matrixWorld );
 			var mat = mesh.material.clone();
 
+			if ( rotate[ 0 ]) geo.rotateX( rotate[ 0 ]);
+			if ( rotate[ 1 ]) geo.rotateY( rotate[ 1 ]);
+			if ( rotate[ 2 ]) geo.rotateZ( rotate[ 2 ]);
+
 			if ( mesh.isSkinnedMesh ) {
 
 				mesh.pose();
+
 				var pos = geo.getAttribute( 'position' );
 				var nor = geo.getAttribute( 'normal' );
 				var v = new Vector3();
@@ -274,6 +279,7 @@ function flattenModel( model ) {
 
 			var newMesh = new Mesh( geo, mat );
 			newMesh.frustumCulled = false;
+
 
 			meshes.push( newMesh );
 
@@ -340,7 +346,8 @@ function processModel( model, space, posture, nodes, options={} ) {
 
 	var dims = {};
 
-	flattenModel( model );
+	flattenModel( model, space?._?.rot ?? [ 0, 0, 0 ]);
+
 	centerModel( model, dims );
 
 	space = new Space( dims, space );
@@ -350,6 +357,27 @@ function processModel( model, space, posture, nodes, options={} ) {
 	return { model: model, dims: dims, space: space };
 
 }
+
+
+
+
+
+
+// generate oversmooth function
+const smoother = Fn( ([ edgeFrom, edgeTo, value ])=>{
+
+	return value.smoothstep( edgeFrom, edgeTo ).smoothstep( 0, 1 ).smoothstep( 0, 1 );
+
+} ).setLayout( {
+	name: 'smoother',
+	type: 'float',
+	inputs: [
+		{ name: 'edgeFrom', type: 'float' },
+		{ name: 'edgeTo', type: 'float' },
+		{ name: 'value', type: 'float' },
+	]
+} );
+
 
 
 
@@ -363,4 +391,5 @@ export
 	matRotZYX,
 
 	processModel,
+	smoother,
 };

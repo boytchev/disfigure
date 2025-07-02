@@ -42,14 +42,15 @@
 
 import * as THREE from "three";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { processModel, tslColorNode, tslEmissiveNode, tslNormalNode, tslPositionNode, tslPosture } from "./disfigure.js";
-import { createGui, credits, scene } from "./editor-gui.js";
+import { Fn, vec3 } from 'three/tsl';
+import { processModel, tslNormalNode, tslPositionNode, tslPosture } from "./disfigure.js";
+import { createGui, credits, scene, tslEmissiveNode } from "./editor-gui.js";
 
-import { SPACE, URL } from "./model-bougainvillea.js";
-//import { URL, SPACE } from "./model-skeleton.js";
-//import { URL, SPACE } from "./model-female.js";
-//import { URL, SPACE } from "./model-zooble.js";
-//import { SPACE, URL } from "./model-romi.js";
+//import { SPACE, URL } from "./models/default.js";
+import { SPACE, URL } from "./models/man.js";
+//import { SPACE, URL } from "./models/child.js";
+//import { SPACE, URL } from "./models/woman.js";
+
 
 
 console.clear( );
@@ -60,9 +61,24 @@ var overModel = new THREE.Object3D();
 scene.add( overModel );
 
 
+console.time( 'Model loading' );
+
 new GLTFLoader().load( '../assets/models/'+URL, ( gltf ) => {
 
-	var posture = tslPosture( );
+	console.timeEnd( 'Model loading' );
+	console.time( 'Model processing' );
+
+
+
+	var posture = tslPosture( SPACE );
+
+	/*
+	gltf.scene.add(
+		new THREE.Mesh(
+			new THREE.BoxGeometry(1,2,0.001,100,200,1).translate(-0.01,1,0),
+		)
+	);
+*/
 
 	var { model, dims, space } = processModel(
 		gltf.scene,
@@ -71,18 +87,22 @@ new GLTFLoader().load( '../assets/models/'+URL, ( gltf ) => {
 		{	// nodes
 			positionNode: tslPositionNode, // rigging
 			normalNode: tslNormalNode, // lighting
-			colorNode: tslColorNode, // optional debug texture
+			colorNode: Fn( ()=>vec3( 1, 1, 1 ) ), // optional debug texture
+			//colorNode: tslColorNode, // optional debug texture
 			emissiveNode: tslEmissiveNode, // optional debug heatmaps
 		},
 		{	// additional material properties
+			color: 'tan',
 			metalness: 0.3,
-			roughness: 1,
+			roughness: 0.6,
+			//wireframe: true,
 		}
+
 
 	);
 
-
 	overModel.scale.setScalar( 1.5/dims.scale );
+	console.timeEnd( 'Model processing' );
 
 	createGui( dims, space, posture, model );
 
@@ -90,6 +110,10 @@ new GLTFLoader().load( '../assets/models/'+URL, ( gltf ) => {
 	//credits( ENV_MAP, 'credits2' );
 
 	overModel.add( model );
+
+	//console.log('dims',dims )
+	//console.log('space',space)
+	//console.log('posture',posture)
 
 } );
 
