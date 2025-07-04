@@ -3,6 +3,10 @@
 
 # Disfigure<br>User Guide and API
 
+Work in progress.
+
+
+
 ## <small><small>Този документ е наличен и на [български език](userguide-bg.md)</small></small>
 
 <!--
@@ -11,38 +15,26 @@
 - **[Other functions](#other-functions)** (<small>[Colors](#custom-colors) | [Body modification](#body-modification) | [Positioning](#global-position)</small>)
 - **[Using Mannequin.js](#using-mannequinjs)** (<small>[CDN](#running-from-a-cdn) | [local web server](#running-via-a-local-web-server) | [Nodes.js](#running-via-nodesjs) | [API](#api)</small>) 
 -->
-Disfigure is a simple library of an articulated human figures. The motion of the
-figures in done in TSL by modifying a matrix field around the figure. Here is a
-minimal example that shows a male figure [live example](example-minimal-cdn.html).
+Disfigure is a simple library of an articulated human figures. The motion of
+the figures in done in TSL by modifying a matrix field of the space around
+the figures. Here is a minimal example that shows a male figure
+[live example](../examples/minimal-cdn.html).
 
 ```html
 <!DOCTYPE html>
 
-<html>
+<script src="importmap.js"></script>
+<script type="module">
 
-<head>
-   <script type="importmap">
-   {
-      "imports": {
-         "three": "https://cdn.jsdelivr.net/npm/three@0.178.0/build/three.module.js",
-         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
-         "mannequin": "https://cdn.jsdelivr.net/npm/mannequin-js@latest/src/mannequin.js"
-      }
-   }
-   </script>
-</head>
+	import * as Happy from 'disfigure'
+	
+	new Happy.World
+	new Happy.Man
 
-<body>
-   <script type="module">
-      import { createStage, Male } from "mannequin";
-      createStage( );
-      new Male();
-   </script>
-</body>
-</html>
+</script>
 ```
 
-
+<!--
 # Body parts
 
 ### Figure types

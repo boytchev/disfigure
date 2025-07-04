@@ -27,6 +27,15 @@ var everybody = [];
 
 
 
+var world;
+
+
+function setWorld( newWorld )
+{
+	world = newWorld;
+}
+
+
 //https://i.pinimg.com/474x/42/0f/9b/420f9b0944dc8f9b47ba431a2b628c10.jpg
 
 // var colors = [
@@ -85,6 +94,8 @@ class Disfigure extends THREE.Group {
 			this.add( model );
 			everybody.push( this );
 
+			if( world ) world.add( this );
+			
 		} ); // load
 
 	} // Disfigure.constructor
@@ -203,4 +214,4 @@ class Child extends Disfigure {
 
 
 
-export { Man, Woman, Child, everybody };
+export { Man, Woman, Child, everybody, setWorld };

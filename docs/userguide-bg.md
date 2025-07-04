@@ -3,6 +3,10 @@
 
 # Disfigure<br>Потребителска документация
 
+В процес на изработка.
+
+
+
 ## <small><small>This document is also available in [English](userguide.md)</small></small>
 
 <!--
@@ -10,42 +14,27 @@
 - **[Поза на тялото](#поза-на-тялото)** (<small>[Статична поза](#статична-поза) | [Динамична поза](#динамична-поза) | [Работа с пози](#работа-с-пози)</small>)
 - **[Други функционалности](#други-функционалности)** (<small>[Собствени цветове](#собствени-цветове) | [Модификация на тяло](#модификация-на-тяло) | [Позициониране](#глобална-позиция)</small>)
 - **[Използване на Mannequin.js](#използване-на-mannequinjs)** (<small>[CDN](#пускане-от-cdn) | [локален уеб сървър](#пускане-през-локален-уеб-сървър) | [Nodes.js](#пускане-през-nodesjs) | [АПИ](#апи)</small>)
+-->
 
-
-Mannequin.js е несложна библиптека за движение на фигури. Формата и движенията
-им става през JavaScript. Ето кратък пример, който показва мъжка фигура
-[пример на живо](example-minimal-cdn.html).
+Disfigure е несложна библиптека за движение на фигури. Движението на фигурите
+е направено с TSL като се променя матричното поле на пространството около 
+фигурите. Ето минимален пример, който показва мъжка фигура
+[пример на живо](../examples/minimal-cdn.html).
 
 ```html
 <!DOCTYPE html>
 
-<html>
+<script src="importmap.js"></script>
+<script type="module">
 
-<head>
-   <script type="importmap">
-   {
-      "imports": {
-         "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
-         "mannequin": "https://cdn.jsdelivr.net/npm/mannequin-js@latest/src/mannequin.js"
-      }
-   }
-   </script>
-</head>
+	import * as Happy from 'disfigure'
+	
+	new Happy.World
+	new Happy.Man
 
-<body>
-   <script type="module">
-      import { createStage, Male } from "mannequin";
-      createStage( );
-      new Male();
-   </script>
-</body>
-</html>
+</script>
 ```
-
-
-
-
+<!--
 # Части на тялото
 
 ### Видове фигури

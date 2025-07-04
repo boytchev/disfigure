@@ -7,6 +7,12 @@ A library to rig boneless and morphless 3D models. **WIP.**
 [<img style="border:solid 1px black;" src="https://boytchev.github.io/disfigure/docs/snapshots/poser-prototype.jpg">](https://boytchev.github.io/disfigure/src)
 
 
+### Documentation (work in progress)
+
+* [User guide and API](https://boytchev.github.io/disfigure/docs/userguide.html)
+* [Ръководство на потребителя](https://boytchev.github.io/disfigure/docs/userguide-bg.html)
+
+
 ### Demos
 
 Videos of work-in-progress states of the TSL rigging. Click on a snapshot to go to an X post with a video and a link to live demo (if avaiable).

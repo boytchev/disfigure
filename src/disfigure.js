@@ -18,7 +18,7 @@ export {
 
 export {
 
-	world,
+	World,
 	renderer,
 	scene,
 	camera,
