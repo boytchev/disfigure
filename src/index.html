@@ -22,7 +22,9 @@
 			"three": "https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.webgpu.min.js",
 			"three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.webgpu.min.js",
 			"three/tsl": "https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.tsl.min.js",
-			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.176.0/examples/jsm/"
+			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.176.0/examples/jsm/",
+			"disfigure": "../src/disfigure.js",
+			"disfigure/": "../src/"
 		}
 	  }
 	</script>
@@ -43,8 +45,10 @@
 import * as THREE from "three";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Fn, vec3 } from 'three/tsl';
-import { processModel, tslNormalNode, tslPositionNode, tslPosture } from "./disfigure.js";
+import { tslNormalNode, tslPositionNode, tslPosture } from "./motion.js";
 import { createGui, credits, scene, tslEmissiveNode } from "./editor-gui.js";
+import { centerModel, ennodeModel, flattenModel } from "./utils.js";
+import { Space } from "./space.js";
 
 //import { SPACE, URL } from "./models/default.js";
 import { SPACE, URL } from "./models/man.js";
@@ -61,12 +65,9 @@ var overModel = new THREE.Object3D();
 scene.add( overModel );
 
 
-console.time( 'Model loading' );
 
 new GLTFLoader().load( '../assets/models/'+URL, ( gltf ) => {
 
-	console.timeEnd( 'Model loading' );
-	console.time( 'Model processing' );
 
 
 
@@ -80,29 +81,26 @@ new GLTFLoader().load( '../assets/models/'+URL, ( gltf ) => {
 	);
 */
 
-	var { model, dims, space } = processModel(
-		gltf.scene,
-		SPACE,
-		posture,
-		{	// nodes
-			positionNode: tslPositionNode, // rigging
-			normalNode: tslNormalNode, // lighting
-			colorNode: Fn( ()=>vec3( 1, 1, 1 ) ), // optional debug texture
-			//colorNode: tslColorNode, // optional debug texture
-			emissiveNode: tslEmissiveNode, // optional debug heatmaps
-		},
-		{	// additional material properties
-			color: 'tan',
-			metalness: 0.3,
-			roughness: 0.6,
-			//wireframe: true,
-		}
-
-
+	var dims = {};
+	var model = flattenModel( gltf.scene, SPACE?._?.rot ?? [ 0, 0, 0 ]);
+	centerModel( model, dims );
+	var space = new Space( dims, SPACE );
+	ennodeModel( model, space, posture, {	// nodes
+		positionNode: tslPositionNode, // rigging
+		normalNode: tslNormalNode, // lighting
+		colorNode: Fn( ()=>vec3( 1, 1, 1 ) ), // optional debug texture
+		//colorNode: tslColorNode, // optional debug texture
+		emissiveNode: tslEmissiveNode, // optional debug heatmaps
+	},
+	{	// additional material properties
+		color: 'tan',
+		metalness: 0.3,
+		roughness: 0.6,
+		//wireframe: true,
+	}
 	);
 
 	overModel.scale.setScalar( 1.5/dims.scale );
-	console.timeEnd( 'Model processing' );
 
 	createGui( dims, space, posture, model );
 

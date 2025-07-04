@@ -14,7 +14,14 @@ export default [
 			format: 'es',
 			banner: `// disfigure v${pkg.version}\n`,
 		},
-		external: ['three', 'three/tsl', 'three/addons/libs/lil-gui.module.min.js', 'three/addons/controls/OrbitControls.js'],
+		external: [
+			'three',
+			'three/tsl',
+			'three/addons/libs/lil-gui.module.min.js',
+			'three/addons/controls/OrbitControls.js',
+			'three/addons/loaders/GLTFLoader.js',
+			'three/addons/math/SimplexNoise.js'
+		],
 	},
 
 	{
@@ -24,7 +31,14 @@ export default [
 			format: 'es',
 			banner: `/*! disfigure v${pkg.version} */\n`,
 		},
-		external: ['three', 'three/tsl', 'three/addons/libs/lil-gui.module.min.js', 'three/addons/controls/OrbitControls.js'],
+		external: [
+			'three',
+			'three/tsl',
+			'three/addons/libs/lil-gui.module.min.js',
+			'three/addons/controls/OrbitControls.js',
+			'three/addons/loaders/GLTFLoader.js',
+			'three/addons/math/SimplexNoise.js'
+		],
 		plugins: [
 			terser({
 				format: {
@@ -42,7 +56,14 @@ export default [
 			banner: `// disfigure v${pkg.version}\n`,
 			sourcemap: false
 		},
-		external: ['three', 'three/tsl', 'three/addons/libs/lil-gui.module.min.js', 'three/addons/controls/OrbitControls.js'],
+		external: [
+			'three',
+			'three/tsl',
+			'three/addons/libs/lil-gui.module.min.js',
+			'three/addons/controls/OrbitControls.js',
+			'three/addons/loaders/GLTFLoader.js',
+			'three/addons/math/SimplexNoise.js'
+		],
 		plugins: [
 			resolve(),
 			commonjs()
@@ -57,7 +78,14 @@ export default [
 			banner: `/*! disfigure v${pkg.version} */\n`,
 			sourcemap: false
 		},
-		external: ['three', 'three/tsl', 'three/addons/libs/lil-gui.module.min.js', 'three/addons/controls/OrbitControls.js'],
+		external: [
+			'three',
+			'three/tsl',
+			'three/addons/libs/lil-gui.module.min.js',
+			'three/addons/controls/OrbitControls.js',
+			'three/addons/loaders/GLTFLoader.js',
+			'three/addons/math/SimplexNoise.js'
+		],
 		plugins: [
 			resolve(),
 			commonjs(),

@@ -1,5 +1,7 @@
 ﻿
-// disfigure utils
+// disfigure
+//
+// a collections
 //
 // module with various utility functions:
 //
@@ -8,9 +10,12 @@
 
 
 
-import { Box3, Mesh, MeshPhysicalNodeMaterial, Vector3 } from 'three';
-import { Fn, mat3 } from 'three/tsl';
-import { Space } from './space.js';
+import { Box3, Group, Mesh, MeshPhysicalNodeMaterial, Vector3 } from 'three';
+import { Fn, mat3, vec3 } from 'three/tsl';
+//import { Space } from './space.js';
+import { SimplexNoise } from "three/addons/math/SimplexNoise.js";
+
+
 
 
 
@@ -288,6 +293,7 @@ function flattenModel( model, rotate ) {
 	} );
 
 	// clear model
+	/*
 	model.clear( );
 	model.position.set( 0, 0, 0 );
 	model.rotation.set( 0, 0, 0, 'XYZ' );
@@ -295,6 +301,11 @@ function flattenModel( model, rotate ) {
 
 	// add meshes
 	model.add( ...meshes );
+	*/
+
+	var newModel = new Group();
+	newModel.add( ...meshes );
+	return newModel;
 
 }
 
@@ -332,6 +343,8 @@ function ennodeModel( model, space, posture, nodes, options ) {
 				material.emissiveNode = nodes.emissiveNode( { space: space, posture: posture } );
 
 			child.material = material;
+			child.castShadow = true;
+			child.receiveShadow = true;
 
 		}
 
@@ -340,13 +353,13 @@ function ennodeModel( model, space, posture, nodes, options ) {
 }
 
 
-
+/*
 // prepared a model for TSL rigging
 function processModel( model, space, posture, nodes, options={} ) {
 
 	var dims = {};
 
-	flattenModel( model, space?._?.rot ?? [ 0, 0, 0 ]);
+	model = flattenModel( model, space?._?.rot ?? [ 0, 0, 0 ]);
 
 	centerModel( model, dims );
 
@@ -357,7 +370,7 @@ function processModel( model, space, posture, nodes, options={} ) {
 	return { model: model, dims: dims, space: space };
 
 }
-
+*/
 
 
 
@@ -380,6 +393,27 @@ const smoother = Fn( ([ edgeFrom, edgeTo, value ])=>{
 
 
 
+var tslWhiteNode = Fn( ()=>{
+
+	return vec3( 1 );
+
+} );
+
+
+var simplex = new SimplexNoise( );
+
+function chaotic( x, y=0, min=-1, max=1 ) {
+
+	return min + ( simplex.noise( x, y )+1 )/( max-min );
+
+}
+
+function regular( x, y=0 ) {
+
+	return Math.sin( x+y );
+
+}
+
 
 export
 {
@@ -390,6 +424,13 @@ export
 	matRotZXY,
 	matRotZYX,
 
-	processModel,
+	flattenModel,
+	centerModel,
+	ennodeModel,
+	tslWhiteNode,
+
+	/*processModel,*/
 	smoother,
+	chaotic,
+	regular,
 };

@@ -3,18 +3,17 @@
 
 # Disfigure<br>User Guide and API
 
-<!--
 ## <small><small>Този документ е наличен и на [български език](userguide-bg.md)</small></small>
 
+<!--
 - **[Body parts](#body-parts)** (<small>[Central body parts](#central-body-parts) | [Upper limbs](#upper-limbs) | [Lower limbs](#lower-limbs)</small>)
 - **[Body posture](#body-posture)** (<small>[Static](#static-posture) | [Dynamic](#dynamic-posture) | [Working with postures](#working-with-postures)</small>)
 - **[Other functions](#other-functions)** (<small>[Colors](#custom-colors) | [Body modification](#body-modification) | [Positioning](#global-position)</small>)
 - **[Using Mannequin.js](#using-mannequinjs)** (<small>[CDN](#running-from-a-cdn) | [local web server](#running-via-a-local-web-server) | [Nodes.js](#running-via-nodesjs) | [API](#api)</small>) 
-
-Mannequin.js is a simple library of an articulated mannequin
-figures. The shape and the motion of the figures are done in
-JavaScript. Here is a short example that shows a male figure
-[live example](example-minimal-cdn.html).
+-->
+Disfigure is a simple library of an articulated human figures. The motion of the
+figures in done in TSL by modifying a matrix field around the figure. Here is a
+minimal example that shows a male figure [live example](example-minimal-cdn.html).
 
 ```html
 <!DOCTYPE html>
@@ -25,7 +24,7 @@ JavaScript. Here is a short example that shows a male figure
    <script type="importmap">
    {
       "imports": {
-         "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+         "three": "https://cdn.jsdelivr.net/npm/three@0.178.0/build/three.module.js",
          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
          "mannequin": "https://cdn.jsdelivr.net/npm/mannequin-js@latest/src/mannequin.js"
       }

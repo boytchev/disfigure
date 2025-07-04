@@ -222,7 +222,7 @@ function createGui( dimsData, spaceData, postureData, modelObject ) {
 	}
 
 
-	mfolder = gui.addFolder( 'TORSO' )//.close();
+	mfolder = gui.addFolder( 'TORSO' );//.close();
 	{
 
 		mfolder.add( posture.head.value, 'x', -0.7, 0.5 ).name( html( 'Head', '&#x2195;' ) );
@@ -238,7 +238,7 @@ function createGui( dimsData, spaceData, postureData, modelObject ) {
 
 	}
 
-	mfolder = gui.addFolder( 'LEFT LEG' )//.close();
+	mfolder = gui.addFolder( 'LEFT LEG' );//.close();
 	{
 
 		mfolder.add( posture.legLeft.value, 'x', -0.6, 2.7 ).name( html( 'Leg', '&#x2195;' ) );
@@ -897,10 +897,6 @@ var tslColorNode = Fn( ()=>{
 
 
 
-var tslWhiteNode = Fn( ()=>{
 
-	return vec3( 1 );
 
-} );
-
-export { createGui, addCuttingPlanes, scene, credits, tslEmissiveNode, tslColorNode, tslWhiteNode };
+export { createGui, addCuttingPlanes, scene, credits, tslEmissiveNode, tslColorNode };

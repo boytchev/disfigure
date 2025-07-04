@@ -1,9 +1,14 @@
 ﻿
-// mannequin-man
+// disfigure
+//
+// This file is the space description of a female 3D model,
+// i.e. 3D locations in space that correspond to various
+// body movement. The model and the spaces and not quite
+// perfect, this I've already spent enough time on this.
 
 
 
-var URL = 'woman.glb';
+var URL = 'woman.glb'; // model file
 
 
 
