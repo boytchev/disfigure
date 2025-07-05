@@ -40,7 +40,7 @@ Disfigure е библиотека за движение на фигури чре
 </td></tr>
 <tr><td>
 
-```html
+<pre>
 <!DOCTYPE html>
 
 <script src="importmap.js"></script>
@@ -52,7 +52,7 @@ Disfigure е библиотека за движение на фигури чре
 	new Happy.Man
 
 </script>
-```
+</pre>
 
 </td></tr>
 </table>
