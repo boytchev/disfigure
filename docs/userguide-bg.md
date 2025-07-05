@@ -42,8 +42,11 @@ Disfigure е библиотека за движение на фигури чре
 </td></tr>
 <tr><td>
 
-<pre>
-&lt;!DOCTYPE html>
+<pre lang="html">
+jhg jhg jhga
+iu sk ui
+ouhi poij iy
+<!DOCTYPE html>
 
 <script src="importmap.js"></script>
 <script type="module">
