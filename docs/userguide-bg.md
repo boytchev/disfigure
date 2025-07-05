@@ -36,9 +36,10 @@ Disfigure е библиотека за движение на фигури чре
 
 <table>
 <tr><td>
-[<img src="https://boytchev.github.io/disfigure/docs/snapshots/poser-prototype.jpg">](https://boytchev.github.io/disfigure/src/poser)
+[<img width="200" src="https://boytchev.github.io/disfigure/docs/snapshots/poser-prototype.jpg">](https://boytchev.github.io/disfigure/src/poser)
 </td></tr>
 <tr><td>
+
 ```html
 <!DOCTYPE html>
 
@@ -52,6 +53,7 @@ Disfigure е библиотека за движение на фигури чре
 
 </script>
 ```
+
 </td></tr>
 </table>
 
