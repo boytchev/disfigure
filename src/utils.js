@@ -1,29 +1,22 @@
 ﻿
 // disfigure
 //
-// a collections
-//
-// module with various utility functions:
-//
-// * processing models
-// * generating matrices
+// A collection of utility functions for matrix generation, 3D model processing
+// and number generation.
 
 
 
 import { Box3, Group, Mesh, MeshPhysicalNodeMaterial, Vector3 } from 'three';
 import { Fn, mat3, vec3 } from 'three/tsl';
-//import { Space } from './space.js';
 import { SimplexNoise } from "three/addons/math/SimplexNoise.js";
-
-
 
 
 
 // generate X-rotation matrix
 const matRotX = Fn( ([ angle ])=>{
 
-	var	cos = angle.cos().toVar(),
-		sin = angle.sin().toVar();
+	var	cos = angle.cos(),
+		sin = angle.sin();
 
 	return mat3(
 		1, 0, 0,
@@ -31,21 +24,15 @@ const matRotX = Fn( ([ angle ])=>{
 		0, sin.negate(), cos,
 	);
 
-} ).setLayout( {
-	name: 'matRotX',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angle', type: 'float' },
-	]
-} );
+}, { angle: 'float', return: 'mat3' } );
 
 
 
 // generate Y-rotation matrix
 const matRotY = Fn( ([ angle ])=>{
 
-	var	cos = angle.cos().toVar(),
-		sin = angle.sin().toVar();
+	var	cos = angle.cos(),
+		sin = angle.sin();
 
 	return mat3(
 		cos, 0, sin.negate(),
@@ -53,21 +40,15 @@ const matRotY = Fn( ([ angle ])=>{
 		sin, 0, cos,
 	);
 
-} ).setLayout( {
-	name: 'matRotY',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angle', type: 'float' },
-	]
-} );
+}, { angle: 'float', return: 'mat3' } );
 
 
 
 // generate Z-rotation matrix
 const matRotZ = Fn( ([ angle ])=>{
 
-	var	cos = angle.cos().toVar(),
-		sin = angle.sin().toVar();
+	var	cos = angle.cos(),
+		sin = angle.sin();
 
 	return mat3(
 		cos, sin, 0,
@@ -75,13 +56,7 @@ const matRotZ = Fn( ([ angle ])=>{
 		0, 0, 1,
 	);
 
-} ).setLayout( {
-	name: 'matRotZ',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angle', type: 'float' },
-	]
-} );
+}, { angle: 'float', return: 'mat3' } );
 
 
 
@@ -94,13 +69,7 @@ const matRotYXZ = Fn( ([ angles ])=>{
 
 	return RY.mul( RX ).mul( RZ );
 
-} ).setLayout( {
-	name: 'matRotYXZ',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angles', type: 'vec3' },
-	]
-} );
+}, { angles: 'vec3', return: 'mat3' } );
 
 
 
@@ -113,13 +82,7 @@ const matRotYZX = Fn( ([ angles ])=>{
 
 	return RY.mul( RZ ).mul( RX );
 
-} ).setLayout( {
-	name: 'matRotYZX',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angles', type: 'vec3' },
-	]
-} );
+}, { angles: 'vec3', return: 'mat3' } );
 
 
 
@@ -132,13 +95,7 @@ const matRotXYZ = Fn( ([ angles ])=>{
 
 	return RX.mul( RY ).mul( RZ );
 
-} ).setLayout( {
-	name: 'matRotXYZ',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angles', type: 'vec3' },
-	]
-} );
+}, { angles: 'vec3', return: 'mat3' } );
 
 
 
@@ -151,13 +108,7 @@ const matRotXZY = Fn( ([ angles ])=>{
 
 	return RX.mul( RZ ).mul( RY );
 
-} ).setLayout( {
-	name: 'matRotXZY',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angles', type: 'vec3' },
-	]
-} );
+}, { angles: 'vec3', return: 'mat3' } );
 
 
 
@@ -170,13 +121,7 @@ const matRotZXY = Fn( ([ angles ])=>{
 
 	return RZ.mul( RX ).mul( RY );
 
-} ).setLayout( {
-	name: 'matRotZXY',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angles', type: 'vec3' },
-	]
-} );
+}, { angles: 'vec3', return: 'mat3' } );
 
 
 
@@ -189,39 +134,11 @@ const matRotZYX = Fn( ([ angles ])=>{
 
 	return RZ.mul( RY ).mul( RX );
 
-} ).setLayout( {
-	name: 'matRotZYX',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angles', type: 'vec3' },
-	]
-} );
+}, { angles: 'vec3', return: 'mat3' } );
 
 
 
-
-/*
-// generate scaling matrix
-const matScale = Fn( ([ scales ])=>{
-
-	return mat3(
-		scales.x, 0, 0,
-		0, scales.y, 0,
-		0, 0, scales.z,
-	);
-
-} ).setLayout( {
-	name: 'matScale',
-	type: 'mat3',
-	inputs: [
-		{ name: 'scales', type: 'vec3' },
-	]
-} );
-*/
-
-
-
-// center model
+// center model and get it dimensions
 function centerModel( model, dims ) {
 
 	var center = new Vector3();
@@ -237,13 +154,14 @@ function centerModel( model, dims ) {
 
 	dims.scale = Math.max( box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z );
 
+	dims.height = box.max.y - box.min.y;
+
 }
 
 
 
-// merge a mesh into its parent, taking into consideration
-// positions, orientations and scale. flattening occurs only
-// for elements with a single child mesh
+// merge a mesh into its parent, taking into consideration positions, orientations
+// and scale. flattening occurs only for elements with a single child mesh
 function flattenModel( model, rotate ) {
 
 	var meshes = [];
@@ -260,6 +178,7 @@ function flattenModel( model, rotate ) {
 			if ( rotate[ 1 ]) geo.rotateY( rotate[ 1 ]);
 			if ( rotate[ 2 ]) geo.rotateZ( rotate[ 2 ]);
 
+			/* the current models have no skinning
 			if ( mesh.isSkinnedMesh ) {
 
 				mesh.pose();
@@ -280,11 +199,11 @@ function flattenModel( model, rotate ) {
 
 				}
 
-			}
+			} // isSkinnedMesh
+			*/
 
 			var newMesh = new Mesh( geo, mat );
 			newMesh.frustumCulled = false;
-
 
 			meshes.push( newMesh );
 
@@ -292,27 +211,17 @@ function flattenModel( model, rotate ) {
 
 	} );
 
-	// clear model
-	/*
-	model.clear( );
-	model.position.set( 0, 0, 0 );
-	model.rotation.set( 0, 0, 0, 'XYZ' );
-	model.scale.set( 1, 1, 1 );
-
-	// add meshes
-	model.add( ...meshes );
-	*/
-
 	var newModel = new Group();
 	newModel.add( ...meshes );
+
 	return newModel;
 
 }
 
 
 
-// convert all model materials to Node materials
-// attach TSL functions for vertices, colors and emission
+// convert all model materials to Node materials, attach TSL functions for
+// vertices, colors and emission
 function ennodeModel( model, space, posture, nodes, options ) {
 
 	model.traverse( ( child )=>{
@@ -353,43 +262,13 @@ function ennodeModel( model, space, posture, nodes, options ) {
 }
 
 
-/*
-// prepared a model for TSL rigging
-function processModel( model, space, posture, nodes, options={} ) {
-
-	var dims = {};
-
-	model = flattenModel( model, space?._?.rot ?? [ 0, 0, 0 ]);
-
-	centerModel( model, dims );
-
-	space = new Space( dims, space );
-
-	ennodeModel( model, space, posture, nodes, options );
-
-	return { model: model, dims: dims, space: space };
-
-}
-*/
-
-
-
-
 
 // generate oversmooth function
 const smoother = Fn( ([ edgeFrom, edgeTo, value ])=>{
 
 	return value.smoothstep( edgeFrom, edgeTo ).smoothstep( 0, 1 ).smoothstep( 0, 1 );
 
-} ).setLayout( {
-	name: 'smoother',
-	type: 'float',
-	inputs: [
-		{ name: 'edgeFrom', type: 'float' },
-		{ name: 'edgeTo', type: 'float' },
-		{ name: 'value', type: 'float' },
-	]
-} );
+}, { edgeFrom: 'float', edgeTo: 'float', value: 'float', return: 'float' } );
 
 
 
@@ -400,19 +279,27 @@ var tslWhiteNode = Fn( ()=>{
 } );
 
 
+
+// number generators
+
 var simplex = new SimplexNoise( );
 
-function chaotic( x, y=0, min=-1, max=1 ) {
+// generate chaotic but random sequence of numbers in [min.max]
+function chaotic( time, offset=0, min=-1, max=1 ) {
 
-	return min + ( simplex.noise( x, y )+1 )/( max-min );
+	return min + ( max-min )*( simplex.noise( time, offset )+1 )/2;
+
+}
+
+
+
+// generate repeated sequence of numbers in [min.max]
+function regular( time, offset=0, min=-1, max=1 ) {
+
+	return min + ( max-min )*( Math.sin( time+offset )+1 )/2;
 
 }
 
-function regular( x, y=0 ) {
-
-	return Math.sin( x+y );
-
-}
 
 
 export
@@ -424,13 +311,14 @@ export
 	matRotZXY,
 	matRotZYX,
 
+	smoother,
+
+	tslWhiteNode,
+
 	flattenModel,
 	centerModel,
 	ennodeModel,
-	tslWhiteNode,
 
-	/*processModel,*/
-	smoother,
 	chaotic,
 	regular,
 };

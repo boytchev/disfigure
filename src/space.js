@@ -1,5 +1,10 @@
 ﻿
-// space 333
+// disfigure
+//
+// A collection of space selectors - functions that return 1 if a point is inside
+// the selected space, and 0 if it is outside. Boundaries of the spaces are foggy,
+// so values between 0 and 1 are also possible.
+
 
 
 import { Vector3 } from "three";
@@ -9,7 +14,9 @@ import { DEBUG_NAME } from "./debug.js";
 
 
 
-// calculate actual value from normalize value
+// calculate actual value from normalized value - the space definition assumes
+// overall body sizes are within [0,1000] range, decoding calculates the actual
+// value scaled to the actual size
 function decode( value, scale, offset=0 ) {
 
 	return scale*value/1000 + offset;
@@ -18,7 +25,7 @@ function decode( value, scale, offset=0 ) {
 
 
 
-// calculate normalize value from actual value
+// calculate normalized value from actual value
 function encode( value, scale, offset=0 ) {
 
 	return ( value-offset )*1000/scale;
@@ -40,7 +47,8 @@ function decodePivot( pivot, dims ) {
 
 
 
-// clone an object and flip its pivot horizontally
+// clone an object and flip its pivot horizontally - this is used for all spaces
+// that represent left-right symmetry in human body (e.g. left arm and right arm)
 function clone( instance ) {
 
 	var obj = Object.assign( Object.create( instance ), instance );
@@ -52,10 +60,9 @@ function clone( instance ) {
 
 
 
-// define a horizontal planar locus that can tilt fowrard
-// (i.e. around X axix, towards the screen); vertically it
-// is from minY to maxY, horizontally it is infinite
-// areas outside rangeX are consider inside the locus
+// define a horizontal planar locus that can tilt fowrard (i.e. around X axix,
+// towards the screen); vertically it is from minY to maxY, horizontally it is
+// infinite; areas outside rangeX are consider inside the locus
 class LocusY {
 
 	constructor( dims, pivot, rangeY, angle=0, rangeX ) {
@@ -74,7 +81,7 @@ class LocusY {
 
 		this.slope = Math.tan( ( 90-angle ) * Math.PI/180 );
 
-	}
+	} // constructor
 
 	mirror( ) {
 
@@ -88,7 +95,7 @@ class LocusY {
 
 		return obj;
 
-	}
+	} // mirror
 
 	locus( pos = positionGeometry ) {
 
@@ -114,14 +121,14 @@ class LocusY {
 
 		return k;
 
-	}
+	} // locus
 
-}
+} // LocusY
 
 
 
-// define a vertical planar locus, perpendicular to X,
-// vertically infinite, horizontally from minX to maxX
+// define a vertical planar locus, perpendicular to X; vertically infinite,
+// horizontally from minX to maxX
 class LocusX {
 
 	constructor( dims, pivot, rangeX, angle=0 ) {
@@ -133,7 +140,7 @@ class LocusX {
 
 		this.slope = Math.tan( ( 90-angle ) * Math.PI/180 );
 
-	}
+	} // constructor
 
 	mirror( ) {
 
@@ -144,7 +151,7 @@ class LocusX {
 
 		return obj;
 
-	}
+	} // mirror
 
 	locus( pos = positionGeometry ) {
 
@@ -164,14 +171,13 @@ class LocusX {
 
 		return smoother( min, max, x );
 
-	}
+	} // locus
 
-}
+} // LocusX
 
 
 
-// define a rectangular locus, from minX to maxX, from minY
-// to maxY, but infinite along Z
+// define a rectangular locus, from minX to maxX, from minY to maxY, but infinite along Z
 class LocusXY extends LocusX {
 
 	constructor( dims, pivot, rangeX, rangeY ) {
@@ -181,7 +187,7 @@ class LocusXY extends LocusX {
 		this.minY = decode( rangeY[ 0 ], dims.scale, dims.y );
 		this.maxY = decode( rangeY[ 1 ], dims.scale, dims.y );
 
-	}
+	} // constructor
 
 	locus( pos = positionGeometry ) {
 
@@ -194,21 +200,19 @@ class LocusXY extends LocusX {
 
 		return float( 1 )
 			.mul( smoother( float( this.minX ).sub( dx ), float( this.maxX ).sub( dx ), x ) )
-
 			.mul( min(
 				smoother( this.minY, this.minY*k+( 1-k )*this.maxY, y ),
 				smoother( this.maxY, this.maxY*k+( 1-k )*this.minY, y ),
 			) )
-			.pow( 2 )
-		;
+			.pow( 2 );
 
-	}
+	} // locus
 
-}
-
+} // LocusXY
 
 
-// define custom trapezoidal locus specifically for hips
+
+// define custom locus specifically for hips
 class LocusT extends LocusXY {
 
 	constructor( dims, pivot, rangeX, rangeY, grown=0 ) {
@@ -217,7 +221,7 @@ class LocusT extends LocusXY {
 
 		this.grown = grown;
 
-	}
+	} // constructor
 
 	locus( pos = positionGeometry ) {
 
@@ -229,6 +233,7 @@ class LocusT extends LocusXY {
 			var y = pos.y.sub( x.abs().mul( 1/5 ) ).add( z.mul( 1/6 ) );
 			var s = vec3( pos.x.mul( 2.0 ), pos.y, pos.z.min( 0 ) ).sub( vec3( 0, this.pivot.y, 0 ) ).length().smoothstep( 0, 0.13 ).pow( 10 );
 
+
 		} else {
 
 			var y = pos.y.sub( x.abs().mul( 1/5 ) ).add( z.abs().mul( 1/2 ) );
@@ -236,38 +241,37 @@ class LocusT extends LocusXY {
 
 		}
 
-
-		//  var s = vec3(pos.x.mul(2.0),pos.y,pos.z.min(0)).sub(vec3(0,this.pivot.y,0)).length().smoothstep(0,0.065).pow(10);
-
 		return float( s )
 			.mul(
 				x.smoothstep( this.minX, this.maxX ),
 				smoother( this.minY, this.maxY, y ).pow( 2 ),
 			);
 
-	}
+	} // locus
 
-}
+} // LocusT
 
 
 
+// the definition of a space around a model including properties of individual
+// subspaces that simulate joints
 class Space {
 
-	constructor( dims, bodyParts ) {
+	constructor( dims, bodyPartsDef ) {
 
 		const classes = { LocusT: LocusT, LocusX: LocusX, LocusXY: LocusXY, LocusY: LocusY/*, LocusBox:LocusBox*/ };
 
-		// bodyParts = { _:[[rot]], name:[LocusClass, data], ... }
+		// bodyPartsDef = { _:[[rot]], name:[LocusClassName, data], ... }
+		var bodyParts = { };
+		for ( var name in bodyPartsDef ) if ( name != '_' ) {
 
-		for ( var name in bodyParts ) if ( name != '_' ) {
-
-			var partClass = classes[ bodyParts[ name ].shift() ];
-			bodyParts[ name ] = new partClass( dims, ... bodyParts[ name ]);
+			var partClass = classes[ bodyPartsDef[ name ][ 0 ] ];
+			bodyParts[ name ] = new partClass( dims, ... bodyPartsDef[ name ].slice( 1 ) );
 
 		}
 
 		// bodyParts = { name:LocusInstance, ... }
-		this._ = bodyParts._;
+		this._ = bodyPartsDef._;
 
 		// torso
 		this.head = bodyParts.head;

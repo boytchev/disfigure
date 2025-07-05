@@ -1,71 +1,73 @@
 ﻿
 // disfigure
 //
-// this is a kind of additional file for creating a predefined
-// 3D world with all basic properties (like colors and lights).
-// it exports one function for world creation and all Three.js
-// instances used to manage a virtual scene.
+// Non-core functionality for creating a predefined 3D world with all basic
+// Three.js elements (like renderer, scene, camera, lights). This is mainly done
+// to make concise demos and examples.
 
 
 
-import * as THREE from 'three';
+import { CanvasTexture, CircleGeometry, Color, DirectionalLight, Mesh, MeshLambertMaterial, PCFSoftShadowMap, PerspectiveCamera, Scene, WebGPURenderer } from 'three';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { everybody, setWorld } from './body.js';
 
 
 
-var renderer, scene, camera, light, cameraLight, controls, userAnimationLoop;
+var renderer, scene, camera, light, cameraLight, controls, userAnimationLoop, everybody = [];
 
 
 
-// creates a default world with all its primary attributes
-// the options parameters is a collection of flags that turn
-// on/off specific features:
+// creates a default world with all its primary attributes the options parameters
+// is a collection of flags that turn on/off specific features:
 //
 // options.lights		true, whether lights are created
 // options.controls		true, whether OrbitControls is created
 // options.ground		true, whether ground is created
+// options.shadows		true, whether shadows are enabled
 
 class World {
+
 	constructor( options ) {
 
-		renderer = new THREE.WebGPURenderer( { antialias: true } );
+		renderer = new WebGPURenderer( { antialias: true } );
 		renderer.setSize( innerWidth, innerHeight );
-		renderer.shadowMap.enabled = true;
-		renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+		renderer.shadowMap.enabled = options?.shadows ?? true;
+		renderer.shadowMap.type = PCFSoftShadowMap;
 
 		document.body.appendChild( renderer.domElement );
 		document.body.style.overflow = 'hidden';
 		document.body.style.margin = '0';
 
-		scene = new THREE.Scene();
-		scene.background = new THREE.Color( 'whitesmoke' );
+		scene = new Scene();
+		scene.background = new Color( 'whitesmoke' );
 
-		setWorld( scene );
-		
-		camera = new THREE.PerspectiveCamera( 30, innerWidth/innerHeight );
+		camera = new PerspectiveCamera( 30, innerWidth/innerHeight );
 		camera.position.set( 0, 1, 4 );
 		camera.lookAt( 0, 1, 0 );
 
 		if ( options?.lights ?? true ) {
 
-			light = new THREE.DirectionalLight( 'white', 1.5 );
+			light = new DirectionalLight( 'white', 1.5 );
 			light.decay = 0;
-			light.position.set( 0, 2, 1 ).setLength( 15 );
-			light.shadow.mapSize.width = 2048;
-			light.shadow.mapSize.height = light.shadow.mapSize.width;
-			light.shadow.camera.near = 1;//13;
-			light.shadow.camera.far = 50;//18.5;
-			light.shadow.camera.left = -5;
-			light.shadow.camera.right = 5;
-			light.shadow.camera.top = 5;
-			light.shadow.camera.bottom = -5;
-			light.shadow.normalBias = 0.01;
-			light.autoUpdate = false;
-			light.castShadow = true;
+			light.position.set( 0, 14, 7 );
+			if ( options?.shadows ?? true ) {
+
+				light.shadow.mapSize.width = 2048;
+				light.shadow.mapSize.height = light.shadow.mapSize.width;
+				light.shadow.camera.near = 1;//13;
+				light.shadow.camera.far = 50;//18.5;
+				light.shadow.camera.left = -5;
+				light.shadow.camera.right = 5;
+				light.shadow.camera.top = 5;
+				light.shadow.camera.bottom = -5;
+				light.shadow.normalBias = 0.01;
+				light.autoUpdate = false;
+				light.castShadow = true;
+
+			} // light shadows
+
 			scene.add( light );
 
-			cameraLight = new THREE.DirectionalLight( 'white', 1.5 );
+			cameraLight = new DirectionalLight( 'white', 1.5 );
 			cameraLight.decay = 0;
 			cameraLight.target = scene;
 			camera.add( cameraLight );
@@ -95,13 +97,13 @@ class World {
 			context.arc( 256/4, 256/4, 150/4, 0, 2*Math.PI );
 			context.fill();
 
-			var ground = new THREE.Mesh(
-				new THREE.CircleGeometry( 50 ),
-				new THREE.MeshLambertMaterial(
+			var ground = new Mesh(
+				new CircleGeometry( 50 ),
+				new MeshLambertMaterial(
 					{
 						color: 'antiquewhite',
 						transparent: true,
-						map: new THREE.CanvasTexture( canvas )
+						map: new CanvasTexture( canvas )
 					} )
 			);
 			ground.receiveShadow = true;
@@ -120,57 +122,54 @@ class World {
 		} );
 
 		renderer.setAnimationLoop( defaultAnimationLoop );
+
 	} // World.constructor
-	
+
 } // World
 
 
 
-// custom event to distribute animation requests to models
-
-class NewEvent extends Event {
+class AnimateEvent extends Event {
 
 	#target;
+	constructor() {
 
-	constructor( e ) {
-
-		super( e );
+		super( 'animate' );
 
 	}
-
 	get target() {
 
 		return this.#target;
 
 	}
+	set target( t ) {
 
-	set target( a ) {
-
-		this.#target = a;
+		this.#target = t;
 
 	}
 
-} // NewEvent
+}
+
+var animateEvent = new AnimateEvent( 'animate' );
 
 
 
-// default animation loop that dispatches animation event
-// to the window and to each body
+// default animation loop that dispatches animation events to the window and to
+// each body in the scene
 
-function defaultAnimationLoop( ) {
+function defaultAnimationLoop( time ) {
 
-	var animateEvent = new Event( 'animate' );
+	animateEvent.time = time;
+
 	window.dispatchEvent( animateEvent );
 
-	animateEvent = new NewEvent( 'animate' );
 	everybody.forEach( ( p )=>{
 
-		animateEvent.target = p;
 		p.dispatchEvent( animateEvent );
 
 	} );
 
-	if ( userAnimationLoop ) userAnimationLoop( animateEvent.timeStamp );
+	if ( userAnimationLoop ) userAnimationLoop( time );
 
 	if ( controls ) controls.update( );
 
@@ -180,7 +179,7 @@ function defaultAnimationLoop( ) {
 
 
 
-// function to set animation loop, if events are not used
+// function to set animation loop, for when the user is scared to use events
 
 function setAnimationLoop( animationLoop ) {
 
@@ -190,4 +189,4 @@ function setAnimationLoop( animationLoop ) {
 
 
 
-export { World, renderer, scene, camera, light, cameraLight, controls, setAnimationLoop };
+export { World, renderer, scene, camera, light, cameraLight, controls, everybody, setAnimationLoop };

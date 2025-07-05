@@ -1,15 +1,14 @@
 ﻿
 // disfigure
 //
-// This file is the space description of a make 3D model,
-// i.e. 3D locations in space that correspond to various
-// body movement. The model and the spaces and not quite
-// perfect, but this is the first model I tried, so it is
-// kept because of santimental reasons.
+// The space description of a make 3D model, i.e. 3D locations in space that
+// correspond to various body movement. The model and the spaces and not quite
+// perfect, but this is the first model I tried, so it is kept because of
+// santimental reasons.
 
 
 
-var URL = 'default.glb'; // model file
+var URL = 'default.glb';
 
 
 

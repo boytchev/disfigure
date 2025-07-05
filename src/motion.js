@@ -1,75 +1,67 @@
 ﻿
-// motion
-// to do: simplify matrix operation when rotations are DOF<3
+// disfigure
+//
+// Functions to generate motion by bending a body as if it has joints and muscles
+
+
 
 import { float, Fn, If, normalGeometry, positionGeometry, transformNormalToView, uniform, vec3 } from "three/tsl";
 import { matRotXZY, matRotYZX } from "./utils.js";
 
 
 
+// general DOF=3 rotator, used for most joints
 var jointRotate= Fn( ([ pos, center, angle, amount ])=>{
 
 	return pos.sub( center ).mul( matRotYZX( angle.mul( amount ) ) ).add( center );
 
-} ).setLayout( {
-	name: 'jointRotate',
-	type: 'vec3',
-	inputs: [
-		{ name: 'pos', type: 'vec3' },
-		{ name: 'center', type: 'vec3' },
-		{ name: 'angle', type: 'vec3' },
-		{ name: 'amount', type: 'float' },
-	]
-} );
+}, { pos: 'vec3', center: 'vec3', angle: 'vec3', amount: 'float', return: 'vec3' } );
 
 
 
+// specific DOF=3 rotator, used for arm joints (different order of rotations)
 var jointRotateArm= Fn( ([ pos, center, angle, amount ])=>{
 
-
-
-	//matRotXZY, matRotYXZ, matRotYZX
 	var newPos = pos.sub( center ).mul( matRotXZY( angle.mul( amount ) ) ).add( center ).toVar();
 
 	return newPos;
 
-} ).setLayout( {
-	name: 'jointRotate2',
-	type: 'vec3',
-	inputs: [
-		{ name: 'pos', type: 'vec3' },
-		{ name: 'center', type: 'vec3' },
-		{ name: 'angle', type: 'vec3' },
-		{ name: 'amount', type: 'float' },
-	]
-} );
+}, { pos: 'vec3', center: 'vec3', angle: 'vec3', amount: 'float', return: 'vec3' } );
 
 
 
+// calculate vertices of bent body surface
 function tslPositionNode( options ) {
 
 	options.vertex = positionGeometry;
 	options.mode = float( 1 );
+
 	return disfigure( options );
 
 }
 
 
 
+// calculate normals of bent body surface
 function tslNormalNode( options ) {
 
 	options.vertex = normalGeometry;
 	options.mode = float( 0 );
-	return transformNormalToView( disfigure( options ) ).xyz;//.normalize( );
+
+	return transformNormalToView( disfigure( options ) ).xyz;
 
 }
 
 
 
+// implement the actual body bending
+//		space - compiled definition of the space around the body
+//		posture - collection of angles for body posture
+//		mode - 1 for vertixes, 0 for normals
+//		vertex - vertex or normal coordinates to use as input data
 var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 
 	var p = vertex.toVar();
-
 
 	// LEFT-UPPER BODY
 
@@ -147,6 +139,7 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 
 
 
+// create a default posture
 function tslPosture( ) {
 
 	return {

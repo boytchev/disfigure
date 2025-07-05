@@ -1,7 +1,7 @@
-// disfigure v0.0.12
+// disfigure v0.0.13
 
 import * as THREE from 'three';
-import { Vector3, Mesh, Group, Box3, MeshPhysicalNodeMaterial } from 'three';
+import { Mesh, Group, Vector3, Box3, MeshPhysicalNodeMaterial, WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, CircleGeometry, MeshLambertMaterial, CanvasTexture } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Fn, mat3, vec3, If, uniform, normalGeometry, float, transformNormalToView, positionGeometry, min } from 'three/tsl';
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
@@ -10,8 +10,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 // generate X-rotation matrix
 const matRotX = Fn( ([ angle ])=>{
 
-	var	cos = angle.cos().toVar(),
-		sin = angle.sin().toVar();
+	var	cos = angle.cos(),
+		sin = angle.sin();
 
 	return mat3(
 		1, 0, 0,
@@ -19,21 +19,15 @@ const matRotX = Fn( ([ angle ])=>{
 		0, sin.negate(), cos,
 	);
 
-} ).setLayout( {
-	name: 'matRotX',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angle', type: 'float' },
-	]
-} );
+}, { angle: 'float', return: 'mat3' } );
 
 
 
 // generate Y-rotation matrix
 const matRotY = Fn( ([ angle ])=>{
 
-	var	cos = angle.cos().toVar(),
-		sin = angle.sin().toVar();
+	var	cos = angle.cos(),
+		sin = angle.sin();
 
 	return mat3(
 		cos, 0, sin.negate(),
@@ -41,21 +35,15 @@ const matRotY = Fn( ([ angle ])=>{
 		sin, 0, cos,
 	);
 
-} ).setLayout( {
-	name: 'matRotY',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angle', type: 'float' },
-	]
-} );
+}, { angle: 'float', return: 'mat3' } );
 
 
 
 // generate Z-rotation matrix
 const matRotZ = Fn( ([ angle ])=>{
 
-	var	cos = angle.cos().toVar(),
-		sin = angle.sin().toVar();
+	var	cos = angle.cos(),
+		sin = angle.sin();
 
 	return mat3(
 		cos, sin, 0,
@@ -63,13 +51,7 @@ const matRotZ = Fn( ([ angle ])=>{
 		0, 0, 1,
 	);
 
-} ).setLayout( {
-	name: 'matRotZ',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angle', type: 'float' },
-	]
-} );
+}, { angle: 'float', return: 'mat3' } );
 
 
 
@@ -82,13 +64,7 @@ Fn( ([ angles ])=>{
 
 	return RY.mul( RX ).mul( RZ );
 
-} ).setLayout( {
-	name: 'matRotYXZ',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angles', type: 'vec3' },
-	]
-} );
+}, { angles: 'vec3', return: 'mat3' } );
 
 
 
@@ -101,13 +77,7 @@ const matRotYZX = Fn( ([ angles ])=>{
 
 	return RY.mul( RZ ).mul( RX );
 
-} ).setLayout( {
-	name: 'matRotYZX',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angles', type: 'vec3' },
-	]
-} );
+}, { angles: 'vec3', return: 'mat3' } );
 
 
 
@@ -120,13 +90,7 @@ Fn( ([ angles ])=>{
 
 	return RX.mul( RY ).mul( RZ );
 
-} ).setLayout( {
-	name: 'matRotXYZ',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angles', type: 'vec3' },
-	]
-} );
+}, { angles: 'vec3', return: 'mat3' } );
 
 
 
@@ -139,13 +103,7 @@ const matRotXZY = Fn( ([ angles ])=>{
 
 	return RX.mul( RZ ).mul( RY );
 
-} ).setLayout( {
-	name: 'matRotXZY',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angles', type: 'vec3' },
-	]
-} );
+}, { angles: 'vec3', return: 'mat3' } );
 
 
 
@@ -158,13 +116,7 @@ Fn( ([ angles ])=>{
 
 	return RZ.mul( RX ).mul( RY );
 
-} ).setLayout( {
-	name: 'matRotZXY',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angles', type: 'vec3' },
-	]
-} );
+}, { angles: 'vec3', return: 'mat3' } );
 
 
 
@@ -177,39 +129,11 @@ Fn( ([ angles ])=>{
 
 	return RZ.mul( RY ).mul( RX );
 
-} ).setLayout( {
-	name: 'matRotZYX',
-	type: 'mat3',
-	inputs: [
-		{ name: 'angles', type: 'vec3' },
-	]
-} );
+}, { angles: 'vec3', return: 'mat3' } );
 
 
 
-
-/*
-// generate scaling matrix
-const matScale = Fn( ([ scales ])=>{
-
-	return mat3(
-		scales.x, 0, 0,
-		0, scales.y, 0,
-		0, 0, scales.z,
-	);
-
-} ).setLayout( {
-	name: 'matScale',
-	type: 'mat3',
-	inputs: [
-		{ name: 'scales', type: 'vec3' },
-	]
-} );
-*/
-
-
-
-// center model
+// center model and get it dimensions
 function centerModel( model, dims ) {
 
 	var center = new Vector3();
@@ -225,13 +149,14 @@ function centerModel( model, dims ) {
 
 	dims.scale = Math.max( box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z );
 
+	dims.height = box.max.y - box.min.y;
+
 }
 
 
 
-// merge a mesh into its parent, taking into consideration
-// positions, orientations and scale. flattening occurs only
-// for elements with a single child mesh
+// merge a mesh into its parent, taking into consideration positions, orientations
+// and scale. flattening occurs only for elements with a single child mesh
 function flattenModel( model, rotate ) {
 
 	var meshes = [];
@@ -244,6 +169,7 @@ function flattenModel( model, rotate ) {
 			var geo = mesh.geometry.clone().applyMatrix4( mesh.matrixWorld );
 			var mat = mesh.material.clone();
 
+			/* the current models have no skinning
 			if ( mesh.isSkinnedMesh ) {
 
 				mesh.pose();
@@ -264,11 +190,11 @@ function flattenModel( model, rotate ) {
 
 				}
 
-			}
+			} // isSkinnedMesh
+			*/
 
 			var newMesh = new Mesh( geo, mat );
 			newMesh.frustumCulled = false;
-
 
 			meshes.push( newMesh );
 
@@ -276,27 +202,17 @@ function flattenModel( model, rotate ) {
 
 	} );
 
-	// clear model
-	/*
-	model.clear( );
-	model.position.set( 0, 0, 0 );
-	model.rotation.set( 0, 0, 0, 'XYZ' );
-	model.scale.set( 1, 1, 1 );
-
-	// add meshes
-	model.add( ...meshes );
-	*/
-
 	var newModel = new Group();
 	newModel.add( ...meshes );
+
 	return newModel;
 
 }
 
 
 
-// convert all model materials to Node materials
-// attach TSL functions for vertices, colors and emission
+// convert all model materials to Node materials, attach TSL functions for
+// vertices, colors and emission
 function ennodeModel( model, space, posture, nodes, options ) {
 
 	model.traverse( ( child )=>{
@@ -337,43 +253,13 @@ function ennodeModel( model, space, posture, nodes, options ) {
 }
 
 
-/*
-// prepared a model for TSL rigging
-function processModel( model, space, posture, nodes, options={} ) {
-
-	var dims = {};
-
-	model = flattenModel( model, space?._?.rot ?? [ 0, 0, 0 ]);
-
-	centerModel( model, dims );
-
-	space = new Space( dims, space );
-
-	ennodeModel( model, space, posture, nodes, options );
-
-	return { model: model, dims: dims, space: space };
-
-}
-*/
-
-
-
-
 
 // generate oversmooth function
 const smoother = Fn( ([ edgeFrom, edgeTo, value ])=>{
 
 	return value.smoothstep( edgeFrom, edgeTo ).smoothstep( 0, 1 ).smoothstep( 0, 1 );
 
-} ).setLayout( {
-	name: 'smoother',
-	type: 'float',
-	inputs: [
-		{ name: 'edgeFrom', type: 'float' },
-		{ name: 'edgeTo', type: 'float' },
-		{ name: 'value', type: 'float' },
-	]
-} );
+}, { edgeFrom: 'float', edgeTo: 'float', value: 'float', return: 'float' } );
 
 
 
@@ -384,71 +270,79 @@ Fn( ()=>{
 } );
 
 
-new SimplexNoise( );
 
+// number generators
+
+var simplex = new SimplexNoise( );
+
+// generate chaotic but random sequence of numbers in [min.max]
+function chaotic( time, offset=0, min=-1, max=1 ) {
+
+	return min + ( max-min )*( simplex.noise( time, offset )+1 )/2;
+
+}
+
+
+
+// generate repeated sequence of numbers in [min.max]
+function regular( time, offset=0, min=-1, max=1 ) {
+
+	return min + ( max-min )*( Math.sin( time+offset )+1 )/2;
+
+}
+
+// general DOF=3 rotator, used for most joints
 var jointRotate= Fn( ([ pos, center, angle, amount ])=>{
 
 	return pos.sub( center ).mul( matRotYZX( angle.mul( amount ) ) ).add( center );
 
-} ).setLayout( {
-	name: 'jointRotate',
-	type: 'vec3',
-	inputs: [
-		{ name: 'pos', type: 'vec3' },
-		{ name: 'center', type: 'vec3' },
-		{ name: 'angle', type: 'vec3' },
-		{ name: 'amount', type: 'float' },
-	]
-} );
+}, { pos: 'vec3', center: 'vec3', angle: 'vec3', amount: 'float', return: 'vec3' } );
 
 
 
+// specific DOF=3 rotator, used for arm joints (different order of rotations)
 var jointRotateArm= Fn( ([ pos, center, angle, amount ])=>{
 
-
-
-	//matRotXZY, matRotYXZ, matRotYZX
 	var newPos = pos.sub( center ).mul( matRotXZY( angle.mul( amount ) ) ).add( center ).toVar();
 
 	return newPos;
 
-} ).setLayout( {
-	name: 'jointRotate2',
-	type: 'vec3',
-	inputs: [
-		{ name: 'pos', type: 'vec3' },
-		{ name: 'center', type: 'vec3' },
-		{ name: 'angle', type: 'vec3' },
-		{ name: 'amount', type: 'float' },
-	]
-} );
+}, { pos: 'vec3', center: 'vec3', angle: 'vec3', amount: 'float', return: 'vec3' } );
 
 
 
+// calculate vertices of bent body surface
 function tslPositionNode( options ) {
 
 	options.vertex = positionGeometry;
 	options.mode = float( 1 );
+
 	return disfigure( options );
 
 }
 
 
 
+// calculate normals of bent body surface
 function tslNormalNode( options ) {
 
 	options.vertex = normalGeometry;
 	options.mode = float( 0 );
-	return transformNormalToView( disfigure( options ) ).xyz;//.normalize( );
+
+	return transformNormalToView( disfigure( options ) ).xyz;
 
 }
 
 
 
+// implement the actual body bending
+//		space - compiled definition of the space around the body
+//		posture - collection of angles for body posture
+//		mode - 1 for vertixes, 0 for normals
+//		vertex - vertex or normal coordinates to use as input data
 var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 
 	var p = vertex.toVar();
-
 
 	// LEFT-UPPER BODY
 
@@ -526,6 +420,7 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 
 
 
+// create a default posture
 function tslPosture( ) {
 
 	return {
@@ -563,7 +458,9 @@ function tslPosture( ) {
 
 }
 
-// calculate actual value from normalize value
+// calculate actual value from normalized value - the space definition assumes
+// overall body sizes are within [0,1000] range, decoding calculates the actual
+// value scaled to the actual size
 function decode( value, scale, offset=0 ) {
 
 	return scale*value/1000 + offset;
@@ -585,7 +482,8 @@ function decodePivot( pivot, dims ) {
 
 
 
-// clone an object and flip its pivot horizontally
+// clone an object and flip its pivot horizontally - this is used for all spaces
+// that represent left-right symmetry in human body (e.g. left arm and right arm)
 function clone( instance ) {
 
 	var obj = Object.assign( Object.create( instance ), instance );
@@ -597,10 +495,9 @@ function clone( instance ) {
 
 
 
-// define a horizontal planar locus that can tilt fowrard
-// (i.e. around X axix, towards the screen); vertically it
-// is from minY to maxY, horizontally it is infinite
-// areas outside rangeX are consider inside the locus
+// define a horizontal planar locus that can tilt fowrard (i.e. around X axix,
+// towards the screen); vertically it is from minY to maxY, horizontally it is
+// infinite; areas outside rangeX are consider inside the locus
 class LocusY {
 
 	constructor( dims, pivot, rangeY, angle=0, rangeX ) {
@@ -619,7 +516,7 @@ class LocusY {
 
 		this.slope = Math.tan( ( 90-angle ) * Math.PI/180 );
 
-	}
+	} // constructor
 
 	mirror( ) {
 
@@ -633,7 +530,7 @@ class LocusY {
 
 		return obj;
 
-	}
+	} // mirror
 
 	locus( pos = positionGeometry ) {
 
@@ -659,14 +556,14 @@ class LocusY {
 
 		return k;
 
-	}
+	} // locus
 
-}
+} // LocusY
 
 
 
-// define a vertical planar locus, perpendicular to X,
-// vertically infinite, horizontally from minX to maxX
+// define a vertical planar locus, perpendicular to X; vertically infinite,
+// horizontally from minX to maxX
 class LocusX {
 
 	constructor( dims, pivot, rangeX, angle=0 ) {
@@ -678,7 +575,7 @@ class LocusX {
 
 		this.slope = Math.tan( ( 90-angle ) * Math.PI/180 );
 
-	}
+	} // constructor
 
 	mirror( ) {
 
@@ -689,7 +586,7 @@ class LocusX {
 
 		return obj;
 
-	}
+	} // mirror
 
 	locus( pos = positionGeometry ) {
 
@@ -709,14 +606,13 @@ class LocusX {
 
 		return smoother( min, max, x );
 
-	}
+	} // locus
 
-}
+} // LocusX
 
 
 
-// define a rectangular locus, from minX to maxX, from minY
-// to maxY, but infinite along Z
+// define a rectangular locus, from minX to maxX, from minY to maxY, but infinite along Z
 class LocusXY extends LocusX {
 
 	constructor( dims, pivot, rangeX, rangeY ) {
@@ -726,7 +622,7 @@ class LocusXY extends LocusX {
 		this.minY = decode( rangeY[ 0 ], dims.scale, dims.y );
 		this.maxY = decode( rangeY[ 1 ], dims.scale, dims.y );
 
-	}
+	} // constructor
 
 	locus( pos = positionGeometry ) {
 
@@ -739,21 +635,19 @@ class LocusXY extends LocusX {
 
 		return float( 1 )
 			.mul( smoother( float( this.minX ).sub( dx ), float( this.maxX ).sub( dx ), x ) )
-
 			.mul( min(
 				smoother( this.minY, this.minY*k+( 1-k )*this.maxY, y ),
 				smoother( this.maxY, this.maxY*k+( 1-k )*this.minY, y ),
 			) )
-			.pow( 2 )
-		;
+			.pow( 2 );
 
-	}
+	} // locus
 
-}
-
+} // LocusXY
 
 
-// define custom trapezoidal locus specifically for hips
+
+// define custom locus specifically for hips
 class LocusT extends LocusXY {
 
 	constructor( dims, pivot, rangeX, rangeY, grown=0 ) {
@@ -762,7 +656,7 @@ class LocusT extends LocusXY {
 
 		this.grown = grown;
 
-	}
+	} // constructor
 
 	locus( pos = positionGeometry ) {
 
@@ -774,6 +668,7 @@ class LocusT extends LocusXY {
 			var y = pos.y.sub( x.abs().mul( 1/5 ) ).add( z.mul( 1/6 ) );
 			var s = vec3( pos.x.mul( 2.0 ), pos.y, pos.z.min( 0 ) ).sub( vec3( 0, this.pivot.y, 0 ) ).length().smoothstep( 0, 0.13 ).pow( 10 );
 
+
 		} else {
 
 			var y = pos.y.sub( x.abs().mul( 1/5 ) ).add( z.abs().mul( 1/2 ) );
@@ -781,38 +676,37 @@ class LocusT extends LocusXY {
 
 		}
 
-
-		//  var s = vec3(pos.x.mul(2.0),pos.y,pos.z.min(0)).sub(vec3(0,this.pivot.y,0)).length().smoothstep(0,0.065).pow(10);
-
 		return float( s )
 			.mul(
 				x.smoothstep( this.minX, this.maxX ),
 				smoother( this.minY, this.maxY, y ).pow( 2 ),
 			);
 
-	}
+	} // locus
 
-}
+} // LocusT
 
 
 
+// the definition of a space around a model including properties of individual
+// subspaces that simulate joints
 class Space {
 
-	constructor( dims, bodyParts ) {
+	constructor( dims, bodyPartsDef ) {
 
 		const classes = { LocusT: LocusT, LocusX: LocusX, LocusXY: LocusXY, LocusY: LocusY/*, LocusBox:LocusBox*/ };
 
-		// bodyParts = { _:[[rot]], name:[LocusClass, data], ... }
+		// bodyPartsDef = { _:[[rot]], name:[LocusClassName, data], ... }
+		var bodyParts = { };
+		for ( var name in bodyPartsDef ) if ( name != '_' ) {
 
-		for ( var name in bodyParts ) if ( name != '_' ) {
-
-			var partClass = classes[ bodyParts[ name ].shift() ];
-			bodyParts[ name ] = new partClass( dims, ... bodyParts[ name ]);
+			var partClass = classes[ bodyPartsDef[ name ][ 0 ] ];
+			bodyParts[ name ] = new partClass( dims, ... bodyPartsDef[ name ].slice( 1 ) );
 
 		}
 
 		// bodyParts = { name:LocusInstance, ... }
-		this._ = bodyParts._;
+		this._ = bodyPartsDef._;
 
 		// torso
 		this.head = bodyParts.head;
@@ -855,11 +749,185 @@ class Space {
 
 }
 
+var renderer, scene, camera, light, cameraLight, controls, userAnimationLoop, everybody = [];
+
+
+
+// creates a default world with all its primary attributes the options parameters
+// is a collection of flags that turn on/off specific features:
+//
+// options.lights		true, whether lights are created
+// options.controls		true, whether OrbitControls is created
+// options.ground		true, whether ground is created
+// options.shadows		true, whether shadows are enabled
+
+class World {
+
+	constructor( options ) {
+
+		renderer = new WebGPURenderer( { antialias: true } );
+		renderer.setSize( innerWidth, innerHeight );
+		renderer.shadowMap.enabled = options?.shadows ?? true;
+		renderer.shadowMap.type = PCFSoftShadowMap;
+
+		document.body.appendChild( renderer.domElement );
+		document.body.style.overflow = 'hidden';
+		document.body.style.margin = '0';
+
+		scene = new Scene();
+		scene.background = new Color( 'whitesmoke' );
+
+		camera = new PerspectiveCamera( 30, innerWidth/innerHeight );
+		camera.position.set( 0, 1, 4 );
+		camera.lookAt( 0, 1, 0 );
+
+		if ( options?.lights ?? true ) {
+
+			light = new DirectionalLight( 'white', 1.5 );
+			light.decay = 0;
+			light.position.set( 0, 14, 7 );
+			if ( options?.shadows ?? true ) {
+
+				light.shadow.mapSize.width = 2048;
+				light.shadow.mapSize.height = light.shadow.mapSize.width;
+				light.shadow.camera.near = 1;//13;
+				light.shadow.camera.far = 50;//18.5;
+				light.shadow.camera.left = -5;
+				light.shadow.camera.right = 5;
+				light.shadow.camera.top = 5;
+				light.shadow.camera.bottom = -5;
+				light.shadow.normalBias = 0.01;
+				light.autoUpdate = false;
+				light.castShadow = true;
+
+			} // light shadows
+
+			scene.add( light );
+
+			cameraLight = new DirectionalLight( 'white', 1.5 );
+			cameraLight.decay = 0;
+			cameraLight.target = scene;
+			camera.add( cameraLight );
+			scene.add( camera );
+
+		} // lights
+
+		if ( options?.controls ?? true ) {
+
+			controls = new OrbitControls( camera, renderer.domElement );
+			controls.enableDamping = true;
+			controls.target.set( 0, 0.8, 0 );
+
+		} // controls
+
+		if ( options?.ground ?? true ) {
+
+			// generate ground texture
+			var canvas = document.createElement( 'CANVAS' );
+			canvas.width = 512/4;
+			canvas.height = 512/4;
+
+			var context = canvas.getContext( '2d' );
+			context.fillStyle = 'white';
+			context.filter = 'blur(10px)';
+			context.beginPath();
+			context.arc( 256/4, 256/4, 150/4, 0, 2*Math.PI );
+			context.fill();
+
+			var ground = new Mesh(
+				new CircleGeometry( 50 ),
+				new MeshLambertMaterial(
+					{
+						color: 'antiquewhite',
+						transparent: true,
+						map: new CanvasTexture( canvas )
+					} )
+			);
+			ground.receiveShadow = true;
+			ground.rotation.x = -Math.PI / 2;
+			ground.renderOrder = -1;
+			scene.add( ground );
+
+		} // ground
+
+		window.addEventListener( "resize", ( /*event*/ ) => {
+
+			camera.aspect = innerWidth/innerHeight;
+			camera.updateProjectionMatrix( );
+			renderer.setSize( innerWidth, innerHeight );
+
+		} );
+
+		renderer.setAnimationLoop( defaultAnimationLoop );
+
+	} // World.constructor
+
+} // World
+
+
+
+class AnimateEvent extends Event {
+
+	#target;
+	constructor() {
+
+		super( 'animate' );
+
+	}
+	get target() {
+
+		return this.#target;
+
+	}
+	set target( t ) {
+
+		this.#target = t;
+
+	}
+
+}
+
+var animateEvent = new AnimateEvent( 'animate' );
+
+
+
+// default animation loop that dispatches animation events to the window and to
+// each body in the scene
+
+function defaultAnimationLoop( time ) {
+
+	animateEvent.time = time;
+
+	window.dispatchEvent( animateEvent );
+
+	everybody.forEach( ( p )=>{
+
+		p.dispatchEvent( animateEvent );
+
+	} );
+
+	if ( userAnimationLoop ) userAnimationLoop( time );
+
+	if ( controls ) controls.update( );
+
+	renderer.render( scene, camera );
+
+}
+
+
+
+// function to set animation loop, for when the user is scared to use events
+
+function setAnimationLoop( animationLoop ) {
+
+	userAnimationLoop = animationLoop;
+
+}
+
 // disfigure
 //
-// This file is the space description of a male 3D model,
-// i.e. 3D locations in space that correspond to various
-// body movement. The model and the spaces and not quite
+// The space description of a male 3D model, i.e. 3D locations in space that
+// correspond to various body movement. The model and the spaces and not quite
 // perfect, this I've already spent enough time on this.
 
 
@@ -899,14 +967,13 @@ var MAN = /*#__PURE__*/Object.freeze({
 
 // disfigure
 //
-// This file is the space description of a female 3D model,
-// i.e. 3D locations in space that correspond to various
-// body movement. The model and the spaces and not quite
+// The space description of a female 3D model, i.e. 3D locations in space that
+// correspond to various body movement. The model and the spaces and not quite
 // perfect, this I've already spent enough time on this.
 
 
 
-var URL$1 = 'woman.glb'; // model file
+var URL$1 = 'woman.glb';
 
 
 
@@ -941,14 +1008,13 @@ var WOMAN = /*#__PURE__*/Object.freeze({
 
 // disfigure
 //
-// This file is the space description of a child 3D model,
-// i.e. 3D locations in space that correspond to various
-// body movement. The model and the spaces and not quite
+// The space description of a child 3D model, // i.e. 3D locations in space that
+// correspond to various body movement. The model and the spaces and not quite
 // perfect, this I've already spent enough time on this.
 
 
 
-var URL = 'child.glb'; // model file
+var URL = 'child.glb';
 
 
 
@@ -981,139 +1047,201 @@ var CHILD = /*#__PURE__*/Object.freeze({
 	URL: URL
 });
 
+// path to models as GLB files
 const MODEL_PATH = '../assets/models/';
-const PI2 = 2*Math.PI;
 
 
 
-//var models = {}; // a set of all models
 var loader = new GLTFLoader();
-var everybody = [];
-
-
-
-//https://i.pinimg.com/474x/42/0f/9b/420f9b0944dc8f9b47ba431a2b628c10.jpg
-
-// var colors = [
-// 0xfed1b9, 0xfdc786, 0xaa6948, 0xfbc5a4, 0xfbbe9b, 0x9a572a, 0xfdcec7, 0x6f331d,
-// 0x1e0e08, 0xfcbd84, 0x633c1d, 0x34251b, 0xa87256, 0x855f44, 0xb89c84, 0x9f6c56,
-// ];
-
-
 
 function angle( x ) {
 
 	x = ( ( x%360 ) + 360 )%360;
 	x = x>180?x-360:x;
-	return x * PI2/360;
+	return x * 2*Math.PI/360;
 
 }
 
 
 
+class Joint {
+
+	constructor( jointX, jointY, jointZ, nameX='x', nameY='y', nameZ='z' ) {
+
+		this.jointX = jointX;
+		this.jointY = jointY ?? jointX;
+		this.jointZ = jointZ ?? jointX;
+		this.nameX = nameX;
+		this.nameY = nameY;
+		this.nameZ = nameZ;
+
+	}
+
+	get nod( ) {
+
+		return this.jointX.value.x;
+
+	}
+
+	set nod( a ) {
+
+		this.jointX.value.x = angle( a );
+
+	}
+
+	get bend( ) {
+
+		return this.jointX.value[ this.nameX ];
+
+	}
+
+	set bend( a ) {
+
+		this.jointX.value[ this.nameX ] = angle( a );
+
+	}
+
+	get raise( ) {
+
+		return this.jointX.value[ this.nameX ];
+
+	}
+
+	set raise( a ) {
+
+		this.jointX.value[ this.nameX ] = angle( a );
+
+	}
+
+	get turn( ) {
+
+		return this.jointY.value[ this.nameY ];
+
+	}
+	set turn( a ) {
+
+		this.jointY.value[ this.nameY ] = angle( a );
+
+	}
+
+	get tilt( ) {
+
+		return this.jointZ.value[ this.nameZ ];
+
+	}
+
+	set tilt( a ) {
+
+		this.jointZ.value[ this.nameZ ] = angle( a );
+
+	}
+
+	get straddle( ) {
+
+		return this.jointZ.value[ this.nameZ ];
+
+	}
+
+	set straddle( a ) {
+
+		this.jointZ.value[ this.nameZ ] = angle( a );
+
+	}
+
+} // Joint
+
+
+
 class Disfigure extends THREE.Group {
 
-	constructor( MODEL_DEFINITION ) {
+	constructor( MODEL_DEFINITION, height ) {
 
 		super();
+
+		// unique number for each body, used to make their motions different
+		this.uid = 10*Math.random();
 
 		this.castShadow = true;
 		this.receiveShadow = true;
 
+		// dimensions of the body, including its height
 		this.dims = {};
+
+		// posture of the body, containing only angles
 		this.posture = tslPosture( MODEL_DEFINITION.SPACE );
 
+		this.head = new Joint( this.posture.head );
+		this.chest = new Joint( this.posture.chest );
+		this.waist = new Joint( this.posture.waist );
+
+		this.legLeft = new Joint( this.posture.legLeft, this.posture.legLongLeft );
+		this.kneeLeft = new Joint( this.posture.kneeLeft );
+		this.ankleLeft = new Joint( this.posture.ankleLeft, this.posture.ankleLongLeft );
+		this.footLeft = new Joint( this.posture.footLeft );
+
+		this.legRight = new Joint( this.posture.legRight, this.posture.legLongRight );
+		this.kneeRight = new Joint( this.posture.kneeRight );
+		this.ankleRight = new Joint( this.posture.ankleRight, this.posture.ankleLongRight );
+		this.footRight = new Joint( this.posture.footRight );
+
+		this.armLeft = new Joint( this.posture.armLeft, this.posture.armLeft, this.posture.armLeft, 'y', 'x', 'z' );
+		this.elbowLeft = new Joint( this.posture.elbowLeft, null, null, 'y' );
+		this.wristLeft = new Joint( this.posture.wristLeft, this.posture.forearmLeft, this.posture.wristLeft, 'z', 'x', 'y' );
+
+		this.armRight = new Joint( this.posture.armRight, this.posture.armRight, this.posture.armRight, 'y', 'x', 'z' );
+		this.elbowRight = new Joint( this.posture.elbowRight, null, null, 'y' );
+		this.wristRight = new Joint( this.posture.wristRight, this.posture.forearmRight, this.posture.wristRight, 'z', 'x', 'y' );
+
+		// load the model and prepare it
 		loader.load( MODEL_PATH + MODEL_DEFINITION.URL, ( gltf ) => {
 
+			// reduce the hierarchy of the model
 			var model = flattenModel( gltf.scene);
+
+			// center the model and get its dimensions
 			centerModel( model, this.dims );
 
+			// create the space around the model
 			var space = new Space( this.dims, MODEL_DEFINITION.SPACE );
 
-
+			// sets the materials of the model hooking them to TSL functions
 			ennodeModel( model, space, this.posture,
 				{	// nodes
-					//colorNode: tslWhiteNode, // color
 					positionNode: tslPositionNode, // rigging
 					normalNode: tslNormalNode, // lighting
-					//colorNode: Fn( ()=>{return vec3( 0x30/0xFF, 0x20/0xFF, 0x10/0xFF ).pow(2.2);} ),
+					colorNode: Fn( ()=>{
+
+						return vec3( 0xFE/0xFF, 0xD1/0xFF, 0xB9/0xFF ).pow( 2.2 );
+
+					} ),
 				},
 				{	// additional material properties
-					color: new THREE.Color( 0xfed1b9 ),
 					metalness: 0,
 					roughness: 0.6,
 				} );
 
+			// move the model so it stands on plane y=0
 			model.position.y = -this.dims.y/2;
+
+			// rescale the model to the desired height (optional)
+			if ( height ) {
+
+				model.scale.setScalar( height / this.dims.height );
+
+			}
+
 			model.castShadow = true;
 			model.receiveShadow = true;
+
 			this.add( model );
+
+			// register the model
 			everybody.push( this );
+			if ( scene ) scene.add( this );
 
 		} ); // load
 
 	} // Disfigure.constructor
-
-	head( nod, spin=0, tilt=0 ) {
-
-		this.posture.head.value.set( nod, spin, tilt );
-
-	}
-
-	get headNod( ) {
-
-		return this.posture.head.value.x;
-
-	}
-	set headNod( a ) {
-
-		this.posture.head.value.x = angle( a );
-
-	}
-
-	get headSpin( ) {
-
-		return this.posture.head.value.y;
-
-	}
-	set headSpin( a ) {
-
-		this.posture.head.value.y = angle( a );
-
-	}
-
-	get headTilt( ) {
-
-		return this.posture.head.value.z;
-
-	}
-	set headTilt( a ) {
-
-		this.posture.head.value.z = angle( a );
-
-	}
-
-	get waistNod( ) {
-
-		return this.posture.waist.value.x;
-
-	}
-	set waistNod( a ) {
-
-		this.posture.waist.value.x = angle( a );
-
-	}
-
-	get waistSpin( ) {
-
-		return this.posture.waist.value.y;
-
-	}
-	set waistSpin( a ) {
-
-		this.posture.waist.value.y = angle( a );
-
-	}
 
 
 } // Disfigure
@@ -1122,15 +1250,26 @@ class Disfigure extends THREE.Group {
 
 class Man extends Disfigure {
 
-	constructor( ) {
+	constructor( height ) {
 
-		super( MAN );
+		super( MAN, height );
 
-		this.posture.legLeft.value.z = -0.1;
-		this.posture.legRight.value.z = 0.1;
+		this.legLeft.straddle = -5;
+		this.legRight.straddle = 5;
 
-		this.posture.ankleLeft.value.z = 0.1;
-		this.posture.ankleRight.value.z = -0.1;
+		this.ankleLeft.tilt = 5;
+		this.ankleRight.tilt = -5;
+
+		this.ankleLeft.bend = -3;
+		this.ankleRight.bend = -3;
+
+		this.position.y = -5e-3;
+
+		this.armLeft.straddle = 45;
+		this.armRight.straddle = -45;
+
+		this.elbowLeft.bend = 20;
+		this.elbowRight.bend = -20;
 
 	} // Man.constructor
 
@@ -1140,12 +1279,26 @@ class Man extends Disfigure {
 
 class Woman extends Disfigure {
 
-	constructor( ) {
+	constructor( height ) {
 
-		super( WOMAN );
+		super( WOMAN, height );
 
-		this.posture.legLeft.value.z = 0.05;
-		this.posture.legRight.value.z = -0.05;
+		this.legLeft.straddle = 2.9;
+		this.legRight.straddle = -2.9;
+
+		this.ankleLeft.tilt = -2.9;
+		this.ankleRight.tilt = 2.9;
+
+		this.ankleLeft.bend = -3;
+		this.ankleRight.bend = -3;
+
+		this.position.y = -5e-3;
+
+		this.armLeft.straddle = 45;
+		this.armRight.straddle = -45;
+
+		this.elbowLeft.bend = 20;
+		this.elbowRight.bend = -20;
 
 	} // Woman.constructor
 
@@ -1155,182 +1308,23 @@ class Woman extends Disfigure {
 
 class Child extends Disfigure {
 
-	constructor( ) {
+	constructor( height ) {
 
-		super( CHILD );
+		super( CHILD, height );
+
+		this.ankleLeft.bend = -3;
+		this.ankleRight.bend = -3;
+
+		this.position.y = -5e-3;
+
+		this.armLeft.straddle = 45;
+		this.armRight.straddle = -45;
+
+		this.elbowLeft.bend = 20;
+		this.elbowRight.bend = -20;
 
 	} // Child.constructor
 
 } // Child
 
-var renderer, scene, camera, light, cameraLight, controls, userAnimationLoop;
-
-
-
-// creates a default world with all its primary attributes
-// the options parameters is a collection of flags that turn
-// on/off specific features:
-//
-// options.lights		true, whether lights are created
-// options.controls		true, whether OrbitControls is created
-// options.ground		true, whether ground is created
-
-function world( options ) {
-
-	renderer = new THREE.WebGPURenderer( { antialias: true } );
-	renderer.setSize( innerWidth, innerHeight );
-	renderer.shadowMap.enabled = true;
-	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-	document.body.appendChild( renderer.domElement );
-	document.body.style.overflow = 'hidden';
-	document.body.style.margin = '0';
-
-	scene = new THREE.Scene();
-	scene.background = new THREE.Color( 'whitesmoke' );
-
-	camera = new THREE.PerspectiveCamera( 30, innerWidth/innerHeight );
-	camera.position.set( 0, 1, 4 );
-	camera.lookAt( 0, 1, 0 );
-
-	if ( options?.lights ?? true ) {
-
-		light = new THREE.DirectionalLight( 'white', 2 );
-		light.decay = 0;
-		light.position.set( 0, 2, 1 ).setLength( 15 );
-		light.shadow.mapSize.width = 2048;
-		light.shadow.mapSize.height = light.shadow.mapSize.width;
-		light.shadow.camera.near = 1;//13;
-		light.shadow.camera.far = 50;//18.5;
-		light.shadow.camera.left = -5;
-		light.shadow.camera.right = 5;
-		light.shadow.camera.top = 5;
-		light.shadow.camera.bottom = -5;
-		light.shadow.normalBias = 0.01;
-		light.autoUpdate = false;
-		light.castShadow = true;
-		scene.add( light );
-
-		cameraLight = new THREE.DirectionalLight( 'white', 2 );
-		cameraLight.decay = 0;
-		cameraLight.target = scene;
-		camera.add( cameraLight );
-		scene.add( camera );
-
-	} // lights
-
-	if ( options?.controls ?? true ) {
-
-		controls = new OrbitControls( camera, renderer.domElement );
-		controls.enableDamping = true;
-		controls.target.set( 0, 0.8, 0 );
-
-	} // controls
-
-	if ( options?.ground ?? true ) {
-
-		// generate ground texture
-		var canvas = document.createElement( 'CANVAS' );
-		canvas.width = 512/4;
-		canvas.height = 512/4;
-
-		var context = canvas.getContext( '2d' );
-		context.fillStyle = 'white';
-		context.filter = 'blur(10px)';
-		context.beginPath();
-		context.arc( 256/4, 256/4, 150/4, 0, 2*Math.PI );
-		context.fill();
-
-		var ground = new THREE.Mesh(
-			new THREE.CircleGeometry( 50 ),
-			new THREE.MeshLambertMaterial(
-				{
-					color: 'antiquewhite',
-					transparent: true,
-					map: new THREE.CanvasTexture( canvas )
-				} )
-		);
-		ground.receiveShadow = true;
-		ground.rotation.x = -Math.PI / 2;
-		ground.renderOrder = -1;
-		scene.add( ground );
-
-	} // ground
-
-	window.addEventListener( "resize", ( /*event*/ ) => {
-
-		camera.aspect = innerWidth/innerHeight;
-		camera.updateProjectionMatrix( );
-		renderer.setSize( innerWidth, innerHeight );
-
-	} );
-
-	renderer.setAnimationLoop( defaultAnimationLoop );
-
-} // world
-
-
-
-// custom event to distribute animation requests to models
-
-class NewEvent extends Event {
-
-	#target;
-
-	constructor( e ) {
-
-		super( e );
-
-	}
-
-	get target() {
-
-		return this.#target;
-
-	}
-
-	set target( a ) {
-
-		this.#target = a;
-
-	}
-
-} // NewEvent
-
-
-
-// default animation loop that dispatches animation event
-// to the window and to each body
-
-function defaultAnimationLoop( ) {
-
-	var animateEvent = new Event( 'animate' );
-	window.dispatchEvent( animateEvent );
-
-	animateEvent = new NewEvent( 'animate' );
-	everybody.forEach( ( p )=>{
-
-		animateEvent.target = p;
-		p.dispatchEvent( animateEvent );
-
-	} );
-
-	if ( userAnimationLoop ) userAnimationLoop( animateEvent.timeStamp );
-
-	if ( controls ) controls.update( );
-
-	renderer.render( scene, camera );
-
-}
-
-
-
-// function to set animation loop, if events are not used
-
-function setAnimationLoop( animationLoop ) {
-
-	userAnimationLoop = animationLoop;
-
-}
-
-export { Child, Man, Woman, camera, cameraLight, controls, everybody, light, renderer, scene, setAnimationLoop, world };
+export { Child, Man, Woman, World, camera, cameraLight, chaotic, controls, everybody, light, regular, renderer, scene, setAnimationLoop };

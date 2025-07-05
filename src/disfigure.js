@@ -1,7 +1,9 @@
 ﻿
 // disfigure
 //
-// this file just exports to the users what might be useful
+// A software burrito -- a wrapper this pack everything in a single file and
+// exports only the things that I thought someone might need. I'd try to make
+// the exports as few as reasonable possible.
 
 
 
@@ -10,9 +12,8 @@ export {
 	Man,
 	Woman,
 	Child,
-	everybody,
 
-} from "./body.js";
+} from './body.js';
 
 
 
@@ -25,6 +26,16 @@ export {
 	light,
 	cameraLight,
 	controls,
+	everybody,
 	setAnimationLoop,
 
-} from "./world.js";
+} from './world.js';
+
+
+
+export {
+
+	regular,
+	chaotic,
+
+} from './utils.js';

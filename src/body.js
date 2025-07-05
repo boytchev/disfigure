@@ -1,168 +1,224 @@
 ﻿
-// body
+// disfigure
+//
+// Definitions of man, woman and child classes based on general disfigure class.
+// Different motions of body parts are defined as methods.
+
 
 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-//import { Fn, vec3, vec4 } from 'three/tsl';
+import { Fn, vec3 } from 'three/tsl';
 
 import { tslNormalNode, tslPositionNode, tslPosture } from './motion.js';
 import { centerModel, ennodeModel, flattenModel } from './utils.js';
 import { Space } from './space.js';
+import { everybody, scene } from './world.js';
 
+
+
+// definitions of spaces
 import * as MAN from './models/man.js';
 import * as WOMAN from './models/woman.js';
 import * as CHILD from './models/child.js';
 
 
 
+// path to models as GLB files
 const MODEL_PATH = '../assets/models/';
-const PI2 = 2*Math.PI;
 
 
 
-//var models = {}; // a set of all models
 var loader = new GLTFLoader();
-var everybody = [];
-
-
-
-var world;
-
-
-function setWorld( newWorld )
-{
-	world = newWorld;
-}
-
-
-//https://i.pinimg.com/474x/42/0f/9b/420f9b0944dc8f9b47ba431a2b628c10.jpg
-
-// var colors = [
-// 0xfed1b9, 0xfdc786, 0xaa6948, 0xfbc5a4, 0xfbbe9b, 0x9a572a, 0xfdcec7, 0x6f331d,
-// 0x1e0e08, 0xfcbd84, 0x633c1d, 0x34251b, 0xa87256, 0x855f44, 0xb89c84, 0x9f6c56,
-// ];
-
-
 
 function angle( x ) {
 
 	x = ( ( x%360 ) + 360 )%360;
 	x = x>180?x-360:x;
-	return x * PI2/360;
+	return x * 2*Math.PI/360;
 
 }
 
 
 
+class Joint {
+
+	constructor( jointX, jointY, jointZ, nameX='x', nameY='y', nameZ='z' ) {
+
+		this.jointX = jointX;
+		this.jointY = jointY ?? jointX;
+		this.jointZ = jointZ ?? jointX;
+		this.nameX = nameX;
+		this.nameY = nameY;
+		this.nameZ = nameZ;
+
+	}
+
+	get nod( ) {
+
+		return this.jointX.value.x;
+
+	}
+
+	set nod( a ) {
+
+		this.jointX.value.x = angle( a );
+
+	}
+
+	get bend( ) {
+
+		return this.jointX.value[ this.nameX ];
+
+	}
+
+	set bend( a ) {
+
+		this.jointX.value[ this.nameX ] = angle( a );
+
+	}
+
+	get raise( ) {
+
+		return this.jointX.value[ this.nameX ];
+
+	}
+
+	set raise( a ) {
+
+		this.jointX.value[ this.nameX ] = angle( a );
+
+	}
+
+	get turn( ) {
+
+		return this.jointY.value[ this.nameY ];
+
+	}
+	set turn( a ) {
+
+		this.jointY.value[ this.nameY ] = angle( a );
+
+	}
+
+	get tilt( ) {
+
+		return this.jointZ.value[ this.nameZ ];
+
+	}
+
+	set tilt( a ) {
+
+		this.jointZ.value[ this.nameZ ] = angle( a );
+
+	}
+
+	get straddle( ) {
+
+		return this.jointZ.value[ this.nameZ ];
+
+	}
+
+	set straddle( a ) {
+
+		this.jointZ.value[ this.nameZ ] = angle( a );
+
+	}
+
+} // Joint
+
+
+
 class Disfigure extends THREE.Group {
 
-	constructor( MODEL_DEFINITION ) {
+	constructor( MODEL_DEFINITION, height ) {
 
 		super();
+
+		// unique number for each body, used to make their motions different
+		this.uid = 10*Math.random();
 
 		this.castShadow = true;
 		this.receiveShadow = true;
 
+		// dimensions of the body, including its height
 		this.dims = {};
+
+		// posture of the body, containing only angles
 		this.posture = tslPosture( MODEL_DEFINITION.SPACE );
 
+		this.head = new Joint( this.posture.head );
+		this.chest = new Joint( this.posture.chest );
+		this.waist = new Joint( this.posture.waist );
+
+		this.legLeft = new Joint( this.posture.legLeft, this.posture.legLongLeft );
+		this.kneeLeft = new Joint( this.posture.kneeLeft );
+		this.ankleLeft = new Joint( this.posture.ankleLeft, this.posture.ankleLongLeft );
+		this.footLeft = new Joint( this.posture.footLeft );
+
+		this.legRight = new Joint( this.posture.legRight, this.posture.legLongRight );
+		this.kneeRight = new Joint( this.posture.kneeRight );
+		this.ankleRight = new Joint( this.posture.ankleRight, this.posture.ankleLongRight );
+		this.footRight = new Joint( this.posture.footRight );
+
+		this.armLeft = new Joint( this.posture.armLeft, this.posture.armLeft, this.posture.armLeft, 'y', 'x', 'z' );
+		this.elbowLeft = new Joint( this.posture.elbowLeft, null, null, 'y' );
+		this.wristLeft = new Joint( this.posture.wristLeft, this.posture.forearmLeft, this.posture.wristLeft, 'z', 'x', 'y' );
+
+		this.armRight = new Joint( this.posture.armRight, this.posture.armRight, this.posture.armRight, 'y', 'x', 'z' );
+		this.elbowRight = new Joint( this.posture.elbowRight, null, null, 'y' );
+		this.wristRight = new Joint( this.posture.wristRight, this.posture.forearmRight, this.posture.wristRight, 'z', 'x', 'y' );
+
+		// load the model and prepare it
 		loader.load( MODEL_PATH + MODEL_DEFINITION.URL, ( gltf ) => {
 
+			// reduce the hierarchy of the model
 			var model = flattenModel( gltf.scene, [ 0, 0, 0 ]);
+
+			// center the model and get its dimensions
 			centerModel( model, this.dims );
 
+			// create the space around the model
 			var space = new Space( this.dims, MODEL_DEFINITION.SPACE );
 
-
+			// sets the materials of the model hooking them to TSL functions
 			ennodeModel( model, space, this.posture,
 				{	// nodes
-					//colorNode: tslWhiteNode, // color
 					positionNode: tslPositionNode, // rigging
 					normalNode: tslNormalNode, // lighting
-					//colorNode: Fn( ()=>{return vec3( 0x30/0xFF, 0x20/0xFF, 0x10/0xFF ).pow(2.2);} ),
+					colorNode: Fn( ()=>{
+
+						return vec3( 0xFE/0xFF, 0xD1/0xFF, 0xB9/0xFF ).pow( 2.2 );
+
+					} ),
 				},
 				{	// additional material properties
-					color: new THREE.Color( 0xfed1b9 ),
 					metalness: 0,
 					roughness: 0.6,
 				} );
 
+			// move the model so it stands on plane y=0
 			model.position.y = -this.dims.y/2;
+
+			// rescale the model to the desired height (optional)
+			if ( height ) {
+
+				model.scale.setScalar( height / this.dims.height );
+
+			}
+
 			model.castShadow = true;
 			model.receiveShadow = true;
-			this.add( model );
-			everybody.push( this );
 
-			if( world ) world.add( this );
-			
+			this.add( model );
+
+			// register the model
+			everybody.push( this );
+			if ( scene ) scene.add( this );
+
 		} ); // load
 
 	} // Disfigure.constructor
-
-	head( nod, spin=0, tilt=0 ) {
-
-		this.posture.head.value.set( nod, spin, tilt );
-
-	}
-
-	get headNod( ) {
-
-		return this.posture.head.value.x;
-
-	}
-	set headNod( a ) {
-
-		this.posture.head.value.x = angle( a );
-
-	}
-
-	get headSpin( ) {
-
-		return this.posture.head.value.y;
-
-	}
-	set headSpin( a ) {
-
-		this.posture.head.value.y = angle( a );
-
-	}
-
-	get headTilt( ) {
-
-		return this.posture.head.value.z;
-
-	}
-	
-	set headTilt( a ) {
-
-		this.posture.head.value.z = angle( a );
-
-	}
-
-	get waistNod( ) {
-
-		return this.posture.waist.value.x;
-
-	}
-	
-	set waistNod( a ) {
-
-		this.posture.waist.value.x = angle( a );
-
-	}
-
-	get waistSpin( ) {
-
-		return this.posture.waist.value.y;
-
-	}
-	
-	set waistSpin( a ) {
-
-		this.posture.waist.value.y = angle( a );
-
-	}
 
 
 } // Disfigure
@@ -171,15 +227,26 @@ class Disfigure extends THREE.Group {
 
 class Man extends Disfigure {
 
-	constructor( ) {
+	constructor( height ) {
 
-		super( MAN );
+		super( MAN, height );
 
-		this.posture.legLeft.value.z = -0.1;
-		this.posture.legRight.value.z = 0.1;
+		this.legLeft.straddle = -5;
+		this.legRight.straddle = 5;
 
-		this.posture.ankleLeft.value.z = 0.1;
-		this.posture.ankleRight.value.z = -0.1;
+		this.ankleLeft.tilt = 5;
+		this.ankleRight.tilt = -5;
+
+		this.ankleLeft.bend = -3;
+		this.ankleRight.bend = -3;
+
+		this.position.y = -0.005;
+
+		this.armLeft.straddle = 45;
+		this.armRight.straddle = -45;
+
+		this.elbowLeft.bend = 20;
+		this.elbowRight.bend = -20;
 
 	} // Man.constructor
 
@@ -189,12 +256,26 @@ class Man extends Disfigure {
 
 class Woman extends Disfigure {
 
-	constructor( ) {
+	constructor( height ) {
 
-		super( WOMAN );
+		super( WOMAN, height );
 
-		this.posture.legLeft.value.z = 0.05;
-		this.posture.legRight.value.z = -0.05;
+		this.legLeft.straddle = 2.9;
+		this.legRight.straddle = -2.9;
+
+		this.ankleLeft.tilt = -2.9;
+		this.ankleRight.tilt = 2.9;
+
+		this.ankleLeft.bend = -3;
+		this.ankleRight.bend = -3;
+
+		this.position.y = -0.005;
+
+		this.armLeft.straddle = 45;
+		this.armRight.straddle = -45;
+
+		this.elbowLeft.bend = 20;
+		this.elbowRight.bend = -20;
 
 	} // Woman.constructor
 
@@ -204,9 +285,20 @@ class Woman extends Disfigure {
 
 class Child extends Disfigure {
 
-	constructor( ) {
+	constructor( height ) {
 
-		super( CHILD );
+		super( CHILD, height );
+
+		this.ankleLeft.bend = -3;
+		this.ankleRight.bend = -3;
+
+		this.position.y = -0.005;
+
+		this.armLeft.straddle = 45;
+		this.armRight.straddle = -45;
+
+		this.elbowLeft.bend = 20;
+		this.elbowRight.bend = -20;
 
 	} // Child.constructor
 
@@ -214,4 +306,4 @@ class Child extends Disfigure {
 
 
 
-export { Man, Woman, Child, everybody, setWorld };
+export { Man, Woman, Child };
