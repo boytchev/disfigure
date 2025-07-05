@@ -3,7 +3,7 @@
 
 # Disfigure<br>User Guide and API
 
-Work in progress.
+## <small><small>Work in progress.</small></small>
 
 
 
@@ -15,10 +15,8 @@ Work in progress.
 - **[Other functions](#other-functions)** (<small>[Colors](#custom-colors) | [Body modification](#body-modification) | [Positioning](#global-position)</small>)
 - **[Using Mannequin.js](#using-mannequinjs)** (<small>[CDN](#running-from-a-cdn) | [local web server](#running-via-a-local-web-server) | [Nodes.js](#running-via-nodesjs) | [API](#api)</small>) 
 -->
-Disfigure is a simple library of an articulated human figures. The motion of
-the figures in done in TSL by modifying a matrix field of the space around
-the figures. Here is a minimal example that shows a male figure
-[live example](../examples/minimal-cdn.html).
+Disfigure is a library for animating human figures by modifying a matrix field
+of the space around them. Here is an absurdly minimal example [live example](../examples/minimal-cdn.html).
 
 ```html
 <!DOCTYPE html>

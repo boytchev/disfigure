@@ -3,7 +3,7 @@
 
 # Disfigure<br>Потребителска документация
 
-В процес на изработка.
+## <small><small>В процес на изработка.</small></small>
 
 
 
@@ -16,9 +16,8 @@
 - **[Използване на Mannequin.js](#използване-на-mannequinjs)** (<small>[CDN](#пускане-от-cdn) | [локален уеб сървър](#пускане-през-локален-уеб-сървър) | [Nodes.js](#пускане-през-nodesjs) | [АПИ](#апи)</small>)
 -->
 
-Disfigure е несложна библиптека за движение на фигури. Движението на фигурите
-е направено с TSL като се променя матричното поле на пространството около 
-фигурите. Ето минимален пример, който показва мъжка фигура
+Disfigure е библиотека за движение на фигури чрез промяна на матричното поле на
+пространството около тях. Ето абсурдно минимален пример
 [пример на живо](../examples/minimal-cdn.html).
 
 ```html
@@ -34,6 +33,29 @@ Disfigure е несложна библиптека за движение на ф
 
 </script>
 ```
+
+<table>
+<tr><td>
+[<img src="https://boytchev.github.io/disfigure/docs/snapshots/poser-prototype.jpg">](https://boytchev.github.io/disfigure/src/poser)
+</td></tr>
+<tr><td>
+```html
+<!DOCTYPE html>
+
+<script src="importmap.js"></script>
+<script type="module">
+
+	import * as Happy from 'disfigure'
+	
+	new Happy.World
+	new Happy.Man
+
+</script>
+```
+</td></tr>
+</table>
+
+
 <!--
 # Части на тялото
 
