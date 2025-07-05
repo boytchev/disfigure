@@ -16,7 +16,7 @@
 - **[Using Mannequin.js](#using-mannequinjs)** (<small>[CDN](#running-from-a-cdn) | [local web server](#running-via-a-local-web-server) | [Nodes.js](#running-via-nodesjs) | [API](#api)</small>) 
 -->
 Disfigure is a library for animating human figures by modifying a matrix field
-of the space around them. Here is an absurdly minimal example [live example](../examples/minimal-cdn.html).
+of the space around them. Here is an absurdly minimal [live example](../examples/minimal-cdn.html).
 
 ```html
 <!DOCTYPE html>
