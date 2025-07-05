@@ -7,8 +7,8 @@
 <head>
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 
-	<link rel="shortcut icon" href="../assets/logo/favicon.ico" type="image/x-icon">
-	<link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
+	<link rel="shortcut icon" href="../../assets/logo/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="../../assets/logo/favicon.ico" type="image/x-icon">
 	
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,8 +23,8 @@
 			"three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.webgpu.min.js",
 			"three/tsl": "https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.tsl.min.js",
 			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.176.0/examples/jsm/",
-			"disfigure": "../src/disfigure.js",
-			"disfigure/": "../src/"
+			"disfigure": "../../src/disfigure.js",
+			"disfigure/": "../../src/"
 		}
 	  }
 	</script>
@@ -45,15 +45,15 @@
 import * as THREE from "three";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Fn, vec3 } from 'three/tsl';
-import { tslNormalNode, tslPositionNode, tslPosture } from "./motion.js";
-import { createGui, credits, scene, tslEmissiveNode } from "./editor-gui.js";
-import { centerModel, ennodeModel, flattenModel } from "./utils.js";
-import { Space } from "./space.js";
+import { tslNormalNode, tslPositionNode, tslPosture } from "../motion.js";
+import { createGui, credits, scene, tslEmissiveNode } from "./gui.js";
+import { centerModel, ennodeModel, flattenModel } from "../utils.js";
+import { Space } from "../space.js";
 
-//import { SPACE, URL } from "./models/default.js";
-import { SPACE, URL } from "./models/man.js";
-//import { SPACE, URL } from "./models/child.js";
-//import { SPACE, URL } from "./models/woman.js";
+//import { SPACE, URL } from "../models/default.js";
+import { SPACE, URL } from "../models/man.js";
+//import { SPACE, URL } from "../models/child.js";
+//import { SPACE, URL } from "../models/woman.js";
 
 
 
@@ -66,7 +66,7 @@ scene.add( overModel );
 
 
 
-new GLTFLoader().load( '../assets/models/'+URL, ( gltf ) => {
+new GLTFLoader().load( '../../assets/models/'+URL, ( gltf ) => {
 
 
 

@@ -10,7 +10,7 @@
 import { Vector3 } from "three";
 import { float, min, positionGeometry, uniform, vec3 } from "three/tsl";
 import { smoother } from "./utils.js";
-import { DEBUG_NAME } from "./debug.js";
+//import { DEBUG_NAME } from "./debug.js";
 
 
 
@@ -310,6 +310,7 @@ class Space {
 		this.armLeft = bodyParts?.armLeft ?? bodyParts.arm;
 		this.armRight = bodyParts?.armRight ?? bodyParts.arm.mirror();
 
+/*
 		if ( DEBUG_NAME ) {
 
 			this[ DEBUG_NAME ].pivot = uniform( this[ DEBUG_NAME ].pivot );
@@ -325,11 +326,12 @@ class Space {
 
 			}
 
-		}
+		} // DEBUG_NAME
+*/
 
-	}
+	} // Space.constructor
 
-}
+} // Space
 
 
 

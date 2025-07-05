@@ -4,10 +4,10 @@ A library to rig non-rigged 3D models. **WIP.**
 
 * [Disfigure home](https://boytchev.github.io/disfigure/index.html)
 * [User guide](https://boytchev.github.io/disfigure/docs/userguide.html)
-<!--* [Posture editor](https://boytchev.github.io/mannequin.js/src/editor/posture-editor.html)-->
+* [Posture editor](https://boytchev.github.io/disfigure/src/poser)
 
 
-[<img src="https://boytchev.github.io/disfigure/docs/snapshots/poser-prototype.jpg">](https://boytchev.github.io/disfigure/src)
+[<img src="https://boytchev.github.io/disfigure/docs/snapshots/poser-prototype.jpg">](https://boytchev.github.io/disfigure/src/poser)
 
 ### Demos
 

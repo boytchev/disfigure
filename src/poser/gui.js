@@ -9,13 +9,13 @@ import * as THREE from "three";
 import * as lil from "three/addons/libs/lil-gui.module.min.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { float, Fn, If, positionGeometry, select, uniform, vec3 } from "three/tsl";
-import { decode, encode, LocusT, LocusX } from "./space.js";
+import { decode, encode, LocusT, LocusX } from "../space.js";
 import { DEBUG, DEBUG_JOINT, DEBUG_NAME } from "./debug.js";
 
 
 
 const USE_ENV_MAP = false;
-const ENV_MAP = '../assets/models/envmap.jpg';
+const ENV_MAP = '../../assets/models/envmap.jpg';
 
 
 var scene = new THREE.Scene();
