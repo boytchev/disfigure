@@ -314,7 +314,7 @@ function regular( time, offset=0, min=-1, max=1 ) {
 // general DOF=3 rotator, used for most joints
 var jointRotate= tsl.Fn( ([ pos, center, angle, amount ])=>{
 
-	return pos.sub( center ).mul( matRotYZX( angle.mul( amount ) ) ).add( center );
+	return pos.sub( center ).mul( matRotYZX( angle.mul( amount, tsl.vec3( -1, -1, 1 ) ) ) ).add( center );
 
 }, { pos: 'vec3', center: 'vec3', angle: 'vec3', amount: 'float', return: 'vec3' } );
 
@@ -323,7 +323,7 @@ var jointRotate= tsl.Fn( ([ pos, center, angle, amount ])=>{
 // specific DOF=3 rotator, used for arm joints (different order of rotations)
 var jointRotateArm= tsl.Fn( ([ pos, center, angle, amount ])=>{
 
-	var newPos = pos.sub( center ).mul( matRotXZY( angle.mul( amount ) ) ).add( center ).toVar();
+	var newPos = pos.sub( center ).mul( matRotXZY( angle.mul( amount, tsl.vec3( -1, -1, 1 ) ) ) ).add( center ).toVar();
 
 	return newPos;
 
@@ -370,10 +370,10 @@ var disfigure = tsl.Fn( ( { space, posture, mode, vertex } )=>{
 
 	tsl.If( armLeft.greaterThan( 0 ), ()=>{
 
-		p.assign( jointRotate( p, mode.mul( space.wristLeft.pivot ), posture.wristLeft, space.wristLeft.locus( ) ) );
+		p.assign( jointRotate( p, mode.mul( space.wristLeft.pivot ), posture.wristLeft.mul( tsl.vec3( 1, -1, 1 ) ), space.wristLeft.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.forearmLeft.pivot ), posture.forearmLeft, space.forearmLeft.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.elbowLeft.pivot ), posture.elbowLeft, space.elbowLeft.locus( ) ) );
-		p.assign( jointRotateArm( p, mode.mul( space.armLeft.pivot ), posture.armLeft, space.armLeft.locus( )/*, space.armLeft.sublocus(  )*/ ) );
+		p.assign( jointRotate( p, mode.mul( space.elbowLeft.pivot ), posture.elbowLeft.mul( -1 ), space.elbowLeft.locus( ) ) );
+		p.assign( jointRotateArm( p, mode.mul( space.armLeft.pivot ), posture.armLeft.mul( tsl.vec3( 1, -1, 1 ) ), space.armLeft.locus( )/*, space.armLeft.sublocus(  )*/ ) );
 
 	} );
 
@@ -385,10 +385,10 @@ var disfigure = tsl.Fn( ( { space, posture, mode, vertex } )=>{
 
 	tsl.If( armRight.greaterThan( 0 ), ()=>{
 
-		p.assign( jointRotate( p, mode.mul( space.wristRight.pivot ), posture.wristRight, space.wristRight.locus( ) ) );
+		p.assign( jointRotate( p, mode.mul( space.wristRight.pivot ), posture.wristRight.mul( tsl.vec3( 1, 1, -1 ) ), space.wristRight.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.forearmRight.pivot ), posture.forearmRight, space.forearmRight.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.elbowRight.pivot ), posture.elbowRight, space.elbowRight.locus( ) ) );
-		p.assign( jointRotateArm( p, mode.mul( space.armRight.pivot ), posture.armRight, space.armRight.locus( )/*, space.armRight.sublocus(  )*/ ) );
+		p.assign( jointRotateArm( p, mode.mul( space.armRight.pivot ), posture.armRight.mul( tsl.vec3( 1, 1, -1 ) ), space.armRight.locus( )/*, space.armRight.sublocus(  )*/ ) );
 
 	} );
 
@@ -409,11 +409,11 @@ var disfigure = tsl.Fn( ( { space, posture, mode, vertex } )=>{
 	tsl.If( legLeft.greaterThan( 0 ), ()=>{
 
 		p.assign( jointRotate( p, mode.mul( space.footLeft.pivot ), posture.footLeft, space.footLeft.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.ankleLeft.pivot ), posture.ankleLeft, space.ankleLeft.locus( ) ) );
+		p.assign( jointRotate( p, mode.mul( space.ankleLeft.pivot ), posture.ankleLeft.mul( tsl.vec3( 1, 1, -1 ) ), space.ankleLeft.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.ankleLongLeft.pivot ), posture.ankleLongLeft, space.ankleLongLeft.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.kneeLeft.pivot ), posture.kneeLeft, space.kneeLeft.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.legLongLeft.pivot ), posture.legLongLeft, space.legLongLeft.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.legLeft.pivot ), posture.legLeft, legLeft ) );
+		p.assign( jointRotate( p, mode.mul( space.legLeft.pivot ), posture.legLeft.mul( tsl.vec3( -1, 1, -1 ) ), legLeft ) );
 
 	} );
 
@@ -427,10 +427,10 @@ var disfigure = tsl.Fn( ( { space, posture, mode, vertex } )=>{
 
 		p.assign( jointRotate( p, mode.mul( space.footRight.pivot ), posture.footRight, space.footRight.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.ankleRight.pivot ), posture.ankleRight, space.ankleRight.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.ankleLongRight.pivot ), posture.ankleLongRight, space.ankleLongRight.locus( ) ) );
+		p.assign( jointRotate( p, mode.mul( space.ankleLongRight.pivot ), posture.ankleLongRight.mul( -1 ), space.ankleLongRight.locus( ) ) );
 		p.assign( jointRotate( p, mode.mul( space.kneeRight.pivot ), posture.kneeRight, space.kneeRight.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.legLongRight.pivot ), posture.legLongRight, space.legLongRight.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.legRight.pivot ), posture.legRight, legRight ) );
+		p.assign( jointRotate( p, mode.mul( space.legLongRight.pivot ), posture.legLongRight.negate(), space.legLongRight.locus( ) ) );
+		p.assign( jointRotate( p, mode.mul( space.legRight.pivot ), posture.legRight.mul( tsl.vec3( -1, 1, 1 ) ), legRight ) );
 
 	} );
 
@@ -477,6 +477,10 @@ function tslPosture( ) {
 	};
 
 }
+
+//import { DEBUG_NAME } from "./debug.js";
+
+
 
 // calculate actual value from normalized value - the space definition assumes
 // overall body sizes are within [0,1000] range, decoding calculates the actual
@@ -765,9 +769,28 @@ class Space {
 		this.armLeft = bodyParts?.armLeft ?? bodyParts.arm;
 		this.armRight = bodyParts?.armRight ?? bodyParts.arm.mirror();
 
-	}
+		/*
+		if ( DEBUG_NAME ) {
 
-}
+			this[ DEBUG_NAME ].pivot = uniform( this[ DEBUG_NAME ].pivot );
+			if ( this[ DEBUG_NAME ] instanceof LocusX && !( this[ DEBUG_NAME ] instanceof LocusT ) ) {
+
+				this[ DEBUG_NAME ].minX = uniform( this[ DEBUG_NAME ].minX );
+				this[ DEBUG_NAME ].maxX = uniform( this[ DEBUG_NAME ].maxX );
+
+			} else {
+
+				this[ DEBUG_NAME ].minY = uniform( this[ DEBUG_NAME ].minY );
+				this[ DEBUG_NAME ].maxY = uniform( this[ DEBUG_NAME ].maxY );
+
+			}
+
+		} // DEBUG_NAME
+*/
+
+	} // Space.constructor
+
+} // Space
 
 exports.renderer = void 0; exports.scene = void 0; exports.camera = void 0; exports.light = void 0; exports.cameraLight = void 0; exports.controls = void 0; var userAnimationLoop, everybody = [];
 
@@ -1086,8 +1109,9 @@ function angle( x ) {
 
 class Joint {
 
-	constructor( jointX, jointY, jointZ, nameX='x', nameY='y', nameZ='z' ) {
+	constructor( isRight, jointX, jointY, jointZ, nameX='x', nameY='y', nameZ='z' ) {
 
+		this.isRight = isRight;
 		this.jointX = jointX;
 		this.jointY = jointY ?? jointX;
 		this.jointZ = jointZ ?? jointX;
@@ -1190,27 +1214,27 @@ class Disfigure extends THREE__namespace.Group {
 		// posture of the body, containing only angles
 		this.posture = tslPosture( MODEL_DEFINITION.SPACE );
 
-		this.head = new Joint( this.posture.head );
-		this.chest = new Joint( this.posture.chest );
-		this.waist = new Joint( this.posture.waist );
+		this.head = new Joint( false, this.posture.head );
+		this.chest = new Joint( false, this.posture.chest );
+		this.waist = new Joint( false, this.posture.waist );
 
-		this.legLeft = new Joint( this.posture.legLeft, this.posture.legLongLeft );
-		this.kneeLeft = new Joint( this.posture.kneeLeft );
-		this.ankleLeft = new Joint( this.posture.ankleLeft, this.posture.ankleLongLeft );
-		this.footLeft = new Joint( this.posture.footLeft );
+		this.legLeft = new Joint( false, this.posture.legLeft, this.posture.legLongLeft );
+		this.kneeLeft = new Joint( false, this.posture.kneeLeft );
+		this.ankleLeft = new Joint( false, this.posture.ankleLeft, this.posture.ankleLongLeft );
+		this.footLeft = new Joint( false, this.posture.footLeft );
 
-		this.legRight = new Joint( this.posture.legRight, this.posture.legLongRight );
-		this.kneeRight = new Joint( this.posture.kneeRight );
-		this.ankleRight = new Joint( this.posture.ankleRight, this.posture.ankleLongRight );
-		this.footRight = new Joint( this.posture.footRight );
+		this.legRight = new Joint( true, this.posture.legRight, this.posture.legLongRight );
+		this.kneeRight = new Joint( true, this.posture.kneeRight );
+		this.ankleRight = new Joint( true, this.posture.ankleRight, this.posture.ankleLongRight );
+		this.footRight = new Joint( true, this.posture.footRight );
 
-		this.armLeft = new Joint( this.posture.armLeft, this.posture.armLeft, this.posture.armLeft, 'y', 'x', 'z' );
-		this.elbowLeft = new Joint( this.posture.elbowLeft, null, null, 'y' );
-		this.wristLeft = new Joint( this.posture.wristLeft, this.posture.forearmLeft, this.posture.wristLeft, 'z', 'x', 'y' );
+		this.armLeft = new Joint( false, this.posture.armLeft, this.posture.armLeft, this.posture.armLeft, 'y', 'x', 'z' );
+		this.elbowLeft = new Joint( false, this.posture.elbowLeft, null, null, 'y' );
+		this.wristLeft = new Joint( false, this.posture.wristLeft, this.posture.forearmLeft, this.posture.wristLeft, 'z', 'x', 'y' );
 
-		this.armRight = new Joint( this.posture.armRight, this.posture.armRight, this.posture.armRight, 'y', 'x', 'z' );
-		this.elbowRight = new Joint( this.posture.elbowRight, null, null, 'y' );
-		this.wristRight = new Joint( this.posture.wristRight, this.posture.forearmRight, this.posture.wristRight, 'z', 'x', 'y' );
+		this.armRight = new Joint( true, this.posture.armRight, this.posture.armRight, this.posture.armRight, 'y', 'x', 'z' );
+		this.elbowRight = new Joint( true, this.posture.elbowRight, null, null, 'y' );
+		this.wristRight = new Joint( true, this.posture.wristRight, this.posture.forearmRight, this.posture.wristRight, 'z', 'x', 'y' );
 
 		// load the model and prepare it
 		loader.load( MODEL_PATH + MODEL_DEFINITION.URL, ( gltf ) => {
@@ -1274,22 +1298,22 @@ class Man extends Disfigure {
 
 		super( MAN, height );
 
-		this.legLeft.straddle = -5;
+		this.legLeft.straddle = 5;
 		this.legRight.straddle = 5;
 
-		this.ankleLeft.tilt = 5;
+		this.ankleLeft.tilt = -5;
 		this.ankleRight.tilt = -5;
 
-		this.ankleLeft.bend = -3;
-		this.ankleRight.bend = -3;
+		this.ankleLeft.bend = 3;
+		this.ankleRight.bend = 3;
 
 		this.position.y = -5e-3;
 
-		this.armLeft.straddle = 45;
-		this.armRight.straddle = -45;
+		this.armLeft.straddle = 65;
+		this.armRight.straddle = 65;
 
 		this.elbowLeft.bend = 20;
-		this.elbowRight.bend = -20;
+		this.elbowRight.bend = 20;
 
 	} // Man.constructor
 
@@ -1303,22 +1327,22 @@ class Woman extends Disfigure {
 
 		super( WOMAN, height );
 
-		this.legLeft.straddle = 2.9;
+		this.legLeft.straddle = -2.9;
 		this.legRight.straddle = -2.9;
 
-		this.ankleLeft.tilt = -2.9;
+		this.ankleLeft.tilt = 2.9;
 		this.ankleRight.tilt = 2.9;
 
-		this.ankleLeft.bend = -3;
-		this.ankleRight.bend = -3;
+		this.ankleLeft.bend = 3;
+		this.ankleRight.bend = 3;
 
 		this.position.y = -5e-3;
 
-		this.armLeft.straddle = 45;
-		this.armRight.straddle = -45;
+		this.armLeft.straddle = 65;
+		this.armRight.straddle = 65;
 
 		this.elbowLeft.bend = 20;
-		this.elbowRight.bend = -20;
+		this.elbowRight.bend = 20;
 
 	} // Woman.constructor
 
@@ -1332,16 +1356,16 @@ class Child extends Disfigure {
 
 		super( CHILD, height );
 
-		this.ankleLeft.bend = -3;
-		this.ankleRight.bend = -3;
+		this.ankleLeft.bend = 3;
+		this.ankleRight.bend = 3;
 
 		this.position.y = -5e-3;
 
-		this.armLeft.straddle = 45;
-		this.armRight.straddle = -45;
+		this.armLeft.straddle = 65;
+		this.armRight.straddle = 65;
 
 		this.elbowLeft.bend = 20;
-		this.elbowRight.bend = -20;
+		this.elbowRight.bend = 20;
 
 	} // Child.constructor
 

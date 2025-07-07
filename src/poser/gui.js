@@ -222,14 +222,14 @@ function createGui( dimsData, spaceData, postureData, modelObject ) {
 	}
 
 
-	mfolder = gui.addFolder( 'TORSO' );//.close();
+	mfolder = gui.addFolder( 'TORSO' )//.close();
 	{
 
-		mfolder.add( posture.head.value, 'x', -0.7, 0.5 ).name( html( 'Head', '&#x2195;' ) );
+		mfolder.add( posture.head.value, 'x', -0.5, 0.5 ).name( html( 'Head', '&#x2195;' ) );
 		mfolder.add( posture.head.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21B6;' ) );
 		mfolder.add( posture.head.value, 'y', -1, 1 ).name( html( '', '&#x2194;' ) );
 
-		mfolder.add( posture.chest.value, 'x', -0.7, 0.4 ).name( html( 'Chest', '&#x2195;', 'border' ) );
+		mfolder.add( posture.chest.value, 'x', -0.4, 0.7 ).name( html( 'Chest', '&#x2195;', 'border' ) );
 		mfolder.add( posture.chest.value, 'z', -0.5, 0.5 ).name( html( '', '&#x21B6;' ) );
 
 		mfolder.add( posture.waist.value, 'x', -1.0, 0.6 ).name( html( 'Waist', '&#x2195;', 'border' ) );
@@ -238,14 +238,14 @@ function createGui( dimsData, spaceData, postureData, modelObject ) {
 
 	}
 
-	mfolder = gui.addFolder( 'LEFT LEG' );//.close();
+	mfolder = gui.addFolder( 'LEFT LEG' ).close();
 	{
 
 		mfolder.add( posture.legLeft.value, 'x', -0.6, 2.7 ).name( html( 'Leg', '&#x2195;' ) );
-		mfolder.add( posture.legLeft.value, 'z', -2.4, 0.2 ).name( html( '', '&#x21BA;' ) );
-		mfolder.add( posture.legLongLeft.value, 'y', -2, 1.4 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.legLeft.value, 'z', -0.2, 2.4 ).name( html( '', '&#x21BA;' ) );
+		mfolder.add( posture.legLongLeft.value, 'y', -1.4, 2 ).name( html( '', '&#x2194;' ) );
 
-		mfolder.add( posture.kneeLeft.value, 'x', -2.6, 0 ).name( html( 'Knee', '&#x2195;', 'border' ) );
+		mfolder.add( posture.kneeLeft.value, 'x', 0, 2.6 ).name( html( 'Knee', '&#x2195;', 'border' ) );
 
 		mfolder.add( posture.ankleLeft.value, 'x', -1, 0.7 ).name( html( 'Ankle', '&#x2195;', 'border' ) );
 		mfolder.add( posture.ankleLongLeft.value, 'y', -1, 1 ).name( html( '', '&#x2194;' ) );
@@ -262,7 +262,7 @@ function createGui( dimsData, spaceData, postureData, modelObject ) {
 		mfolder.add( posture.legRight.value, 'z', -0.2, 2.4 ).name( html( '', '&#x21BB;' ) ); // swapped
 		mfolder.add( posture.legLongRight.value, 'y', -1.4, 2 ).name( html( '', '&#x2194;' ) );
 
-		mfolder.add( posture.kneeRight.value, 'x', -2.6, 0 ).name( html( 'Knee', '&#x2195;', 'border' ) );
+		mfolder.add( posture.kneeRight.value, 'x', 0, 2.6 ).name( html( 'Knee', '&#x2195;', 'border' ) );
 
 		mfolder.add( posture.ankleRight.value, 'x', -1, 0.7 ).name( html( 'Ankle', '&#x2195;', 'border' ) );
 		mfolder.add( posture.ankleLongRight.value, 'y', -1, 1 ).name( html( '', '&#x2194;' ) );
@@ -282,7 +282,7 @@ function createGui( dimsData, spaceData, postureData, modelObject ) {
 		mfolder.add( posture.elbowLeft.value, 'y', 0, 2.7 ).name( html( 'Elbow', '&#x2195;', 'border' ) );
 
 		mfolder.add( posture.wristLeft.value, 'z', -1.4, 1.4 ).name( html( 'Wrist', '&#x2195;', 'border' ) );
-		mfolder.add( posture.wristLeft.value, 'y', -0.6, 0.4 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.wristLeft.value, 'y', -0.5, 0.5 ).name( html( '', '&#x2194;' ) );
 		mfolder.add( posture.forearmLeft.value, 'x', -1.5, 3 ).name( html( '', '&#x21BB;' ) );
 
 	}
@@ -291,13 +291,13 @@ function createGui( dimsData, spaceData, postureData, modelObject ) {
 	{
 
 		mfolder.add( posture.armRight.value, 'z', -1.5, 1.7 ).name( html( 'Arm', '&#x2195;' ) );
-		mfolder.add( posture.armRight.value, 'y', -2, 0.5 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.armRight.value, 'y', -0.5, 2 ).name( html( '', '&#x2194;' ) );
 		mfolder.add( posture.armRight.value, 'x', -0.5, 0.5 ).name( html( '', '&#x21BB;' ) );
 
-		mfolder.add( posture.elbowRight.value, 'y', -2.7, 0 ).name( html( 'Elbow', '&#x2195;', 'border' ) );
+		mfolder.add( posture.elbowRight.value, 'y', 0, 2.7 ).name( html( 'Elbow', '&#x2195;', 'border' ) );
 
 		mfolder.add( posture.wristRight.value, 'z', -1.4, 1.4 ).name( html( 'Wrist', '&#x2195;', 'border' ) );
-		mfolder.add( posture.wristRight.value, 'y', -0.4, 0.6 ).name( html( '', '&#x2194;' ) );
+		mfolder.add( posture.wristRight.value, 'y', -0.5, 0.5 ).name( html( '', '&#x2194;' ) );
 		mfolder.add( posture.forearmRight.value, 'x', -1.5, 3 ).name( html( '', '&#x21BB;' ) );
 
 	}
@@ -310,21 +310,7 @@ function createGui( dimsData, spaceData, postureData, modelObject ) {
 
 function rigModel( time2 ) {
 
-	var time = time2; //+ Math.sin( 7*time2 )/6;
-
-	//model.rotation.set( 0.5*Math.sin( time ), time, 0.5*Math.cos( time ) );
-
-	posture.waist.value.set(
-		Math.sin( time )/4-0.2,
-		Math.cos( time*1.2 )/2,
-		Math.sin( time*3 )/2.5
-	);
-
-	posture.chest.value.set(
-		Math.cos( time*3 )/3,
-		0, //08.05.25 Math.sin( time*1.2*2 )/2,
-		Math.cos( time*3*1.5 )/3
-	);
+	var time = time2;
 
 	posture.head.value.set(
 		Math.cos( time*3 )/2,
@@ -332,18 +318,30 @@ function rigModel( time2 ) {
 		Math.cos( time*3*1.5 )/3
 	);
 
+	posture.waist.value.set(
+		Math.sin( time )/4+0.2,
+		Math.cos( time*1.2 )/2,
+		Math.sin( time*3 )/2.5
+	);
+
+	posture.chest.value.set(
+		Math.cos( time*3 )/2+0.2,
+		0, 
+		Math.cos( time*3*1.5 )/3
+	);
+
 	posture.kneeLeft.value.set(
-		-( Math.cos( time*3 )+1 )/1.5,
+		( Math.cos( time*3 )+1 )/1.5,
 		0,
 		0,
 	);
 
 	posture.kneeRight.value.set(
-		-( Math.sin( time*2.4 )+1 )/1.5,
+		( Math.sin( time*2.4 )+1 )/1.5,
 		0,
 		0,
 	);
-
+	
 	posture.footLeft.value.set(
 		( Math.cos( time*1.7 ) )*0.5+0.15,
 		0,
@@ -368,22 +366,11 @@ function rigModel( time2 ) {
 		Math.sin( time*2.1 )/4,
 	);
 
-	posture.legLeft.value.set(
-		0,
-		Math.cos( time*2.8 )-0.25,
-		0,
-	);
-
-	posture.legRight.value.set(
-		0,
-		Math.cos( time*2.3 )+0.25,
-		0,
-	);
 
 	posture.legLeft.value.set(
 		( Math.cos( time*3 )/1+0.25 ),
-		0, //08.05.25 Math.cos( time*2.8 ),///4,
-		-( Math.cos( time*2.2 )+1 )/4,
+		0, 
+		( Math.cos( time*2.2 )+1 )/4,
 	);
 
 	posture.legLongLeft.value.set(
@@ -397,7 +384,7 @@ function rigModel( time2 ) {
 		0, //08.05.25 Math.sin( time*3.2 )/4,
 		( Math.sin( time*2.6 )+1 )/4,
 	);
-
+	
 	posture.legLongRight.value.set(
 		0,
 		Math.sin( time*3.2 ),
@@ -412,7 +399,7 @@ function rigModel( time2 ) {
 
 	posture.elbowRight.value.set(
 		0,
-		-( Math.sin( time*1.8 )+1 ),
+		( Math.sin( time*1.8 )+1 ),
 		0,
 	);
 
@@ -437,18 +424,18 @@ function rigModel( time2 ) {
 	posture.wristRight.value.set(
 		0,
 		( Math.cos( time*3.6-1 )*0.5+0.1 ),
-		-( Math.cos( time*2.6+1 )*0.7 ),
+		( Math.cos( time*2.6+1 )*0.7 ),
 	);
 
 	posture.armLeft.value.set(
-		0.7*( Math.cos( time*3 )/1.5-0.15 ),
-		0, //-0.7*( Math.cos( time*2.8 )*1-0.6 ),
+		0, 
+		-1.1*( Math.cos( time*3 )/1.5-0.5 ),
 		0.7*( Math.cos( time*2.2 ) ),
 	);
 
 	posture.armRight.value.set(
-		0.7*( Math.sin( time*2.4 )/1.5-0.15 ),
-		0, //-0.7*-( Math.cos( time*3.1 )*1-0.6 ),
+		0, 
+		-1.1*( Math.sin( time*2.4 )/1.5-0.5 ),
 		0.7*( Math.sin( time*2.7 ) ),
 	);
 
@@ -456,156 +443,10 @@ function rigModel( time2 ) {
 
 
 
-function rigRandomModel( seed = THREE.MathUtils.randInt( Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER ) ) {
+function rigRandomModel( ) {
 
-	THREE.MathUtils.seededRandom( seed );
-
-	function rand( from=-1, to=1 ) {
-
-		return THREE.MathUtils.seededRandom() * ( to-from ) + from;
-
-	}
-
-	model.rotation.y += rand( )-0.2;
-
-	posture.waist.value.set(
-		rand()/4-0.2,
-		rand()/2,
-		rand()/2.5
-	);
-
-	posture.chest.value.set(
-		rand()/3,
-		0,
-		rand( )/3
-	);
-
-	posture.head.value.set(
-		rand( )/2,
-		rand( )/2,
-		rand( )/3
-	);
-
-	posture.kneeLeft.value.set(
-		-( rand( )+1 )/1.5,
-		0,
-		0,
-	);
-
-	posture.kneeRight.value.set(
-		-( rand( )+1 )/1.5,
-		0,
-		0,
-	);
-
-	posture.footLeft.value.set(
-		( rand( ) )*0.5+0.15,
-		0,
-		0,
-	);
-
-	posture.footRight.value.set(
-		( rand( ) )*0.5+0.15,
-		0,
-		0,
-	);
-
-	posture.ankleLeft.value.set(
-		rand( )/2,
-		0,
-		rand( )/4,
-	);
-
-	posture.ankleRight.value.set(
-		rand( )/2,
-		0,
-		rand( )/4,
-	);
-
-	posture.ankleLongLeft.value.set(
-		0,
-		rand( )-0.25,
-		0,
-	);
-
-	posture.ankleLongRight.value.set(
-		0,
-		rand( )+0.25,
-		0,
-	);
-
-	posture.legLeft.value.set(
-		( rand( )/1+0.25 ),
-		0,
-		-( rand( )+1 )/4,
-	);
-
-	posture.legLongLeft.value.set(
-		0,
-		rand( ),
-		0,
-	);
-
-	posture.legRight.value.set(
-		( rand( )/1+0.25 ),
-		0,
-		( rand( )+1 )/4,
-	);
-
-	posture.legLongRight.value.set(
-		0,
-		rand( ),
-		0,
-	);
-
-	posture.elbowLeft.value.set(
-		0,
-		( rand( )+1 ),
-		0,
-	);
-
-	posture.elbowRight.value.set(
-		0,
-		-( rand( )+1 ),
-		0,
-	);
-
-	posture.forearmLeft.value.set(
-		0.5*( rand( )*1.5+1 ),
-		0,
-		0,
-	);
-
-	posture.forearmRight.value.set(
-		0.5*( rand( )*1.5+1 ),
-		0,
-		0,
-	);
-
-	posture.wristLeft.value.set(
-		0,
-		( rand( )*0.5+0.1 ),
-		( rand( )*0.7 ),
-	);
-
-	posture.wristRight.value.set(
-		0,
-		( rand( )*0.5+0.1 ),
-		-( rand( )*0.7 ),
-	);
-
-	posture.armLeft.value.set(
-		0.7*( rand( )/1.5-0.15 ),
-		0,
-		0.7*( rand( ) ),
-	);
-
-	posture.armRight.value.set(
-		0.7*( rand( )/1.5-0.15 ),
-		0,
-		0.7*( rand( ) ),
-	);
-
+	rigModel( Math.random()*10000 );
+	model.rotation.y += Math.random( )-0.2;
 	updateGUI( );
 
 }

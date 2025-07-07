@@ -43,8 +43,9 @@ function angle( x ) {
 
 class Joint {
 
-	constructor( jointX, jointY, jointZ, nameX='x', nameY='y', nameZ='z' ) {
+	constructor( isRight, jointX, jointY, jointZ, nameX='x', nameY='y', nameZ='z' ) {
 
+		this.isRight = isRight;
 		this.jointX = jointX;
 		this.jointY = jointY ?? jointX;
 		this.jointZ = jointZ ?? jointX;
@@ -147,27 +148,27 @@ class Disfigure extends THREE.Group {
 		// posture of the body, containing only angles
 		this.posture = tslPosture( MODEL_DEFINITION.SPACE );
 
-		this.head = new Joint( this.posture.head );
-		this.chest = new Joint( this.posture.chest );
-		this.waist = new Joint( this.posture.waist );
+		this.head = new Joint( false, this.posture.head );
+		this.chest = new Joint( false, this.posture.chest );
+		this.waist = new Joint( false, this.posture.waist );
 
-		this.legLeft = new Joint( this.posture.legLeft, this.posture.legLongLeft );
-		this.kneeLeft = new Joint( this.posture.kneeLeft );
-		this.ankleLeft = new Joint( this.posture.ankleLeft, this.posture.ankleLongLeft );
-		this.footLeft = new Joint( this.posture.footLeft );
+		this.legLeft = new Joint( false, this.posture.legLeft, this.posture.legLongLeft );
+		this.kneeLeft = new Joint( false, this.posture.kneeLeft );
+		this.ankleLeft = new Joint( false, this.posture.ankleLeft, this.posture.ankleLongLeft );
+		this.footLeft = new Joint( false, this.posture.footLeft );
 
-		this.legRight = new Joint( this.posture.legRight, this.posture.legLongRight );
-		this.kneeRight = new Joint( this.posture.kneeRight );
-		this.ankleRight = new Joint( this.posture.ankleRight, this.posture.ankleLongRight );
-		this.footRight = new Joint( this.posture.footRight );
+		this.legRight = new Joint( true, this.posture.legRight, this.posture.legLongRight );
+		this.kneeRight = new Joint( true, this.posture.kneeRight );
+		this.ankleRight = new Joint( true, this.posture.ankleRight, this.posture.ankleLongRight );
+		this.footRight = new Joint( true, this.posture.footRight );
 
-		this.armLeft = new Joint( this.posture.armLeft, this.posture.armLeft, this.posture.armLeft, 'y', 'x', 'z' );
-		this.elbowLeft = new Joint( this.posture.elbowLeft, null, null, 'y' );
-		this.wristLeft = new Joint( this.posture.wristLeft, this.posture.forearmLeft, this.posture.wristLeft, 'z', 'x', 'y' );
+		this.armLeft = new Joint( false, this.posture.armLeft, this.posture.armLeft, this.posture.armLeft, 'y', 'x', 'z' );
+		this.elbowLeft = new Joint( false, this.posture.elbowLeft, null, null, 'y' );
+		this.wristLeft = new Joint( false, this.posture.wristLeft, this.posture.forearmLeft, this.posture.wristLeft, 'z', 'x', 'y' );
 
-		this.armRight = new Joint( this.posture.armRight, this.posture.armRight, this.posture.armRight, 'y', 'x', 'z' );
-		this.elbowRight = new Joint( this.posture.elbowRight, null, null, 'y' );
-		this.wristRight = new Joint( this.posture.wristRight, this.posture.forearmRight, this.posture.wristRight, 'z', 'x', 'y' );
+		this.armRight = new Joint( true, this.posture.armRight, this.posture.armRight, this.posture.armRight, 'y', 'x', 'z' );
+		this.elbowRight = new Joint( true, this.posture.elbowRight, null, null, 'y' );
+		this.wristRight = new Joint( true, this.posture.wristRight, this.posture.forearmRight, this.posture.wristRight, 'z', 'x', 'y' );
 
 		// load the model and prepare it
 		loader.load( MODEL_PATH + MODEL_DEFINITION.URL, ( gltf ) => {
@@ -231,22 +232,22 @@ class Man extends Disfigure {
 
 		super( MAN, height );
 
-		this.legLeft.straddle = -5;
+		this.legLeft.straddle = 5;
 		this.legRight.straddle = 5;
 
-		this.ankleLeft.tilt = 5;
+		this.ankleLeft.tilt = -5;
 		this.ankleRight.tilt = -5;
 
-		this.ankleLeft.bend = -3;
-		this.ankleRight.bend = -3;
+		this.ankleLeft.bend = 3;
+		this.ankleRight.bend = 3;
 
 		this.position.y = -0.005;
 
-		this.armLeft.straddle = 45;
-		this.armRight.straddle = -45;
+		this.armLeft.straddle = 65;
+		this.armRight.straddle = 65;
 
 		this.elbowLeft.bend = 20;
-		this.elbowRight.bend = -20;
+		this.elbowRight.bend = 20;
 
 	} // Man.constructor
 
@@ -260,22 +261,22 @@ class Woman extends Disfigure {
 
 		super( WOMAN, height );
 
-		this.legLeft.straddle = 2.9;
+		this.legLeft.straddle = -2.9;
 		this.legRight.straddle = -2.9;
 
-		this.ankleLeft.tilt = -2.9;
+		this.ankleLeft.tilt = 2.9;
 		this.ankleRight.tilt = 2.9;
 
-		this.ankleLeft.bend = -3;
-		this.ankleRight.bend = -3;
+		this.ankleLeft.bend = 3;
+		this.ankleRight.bend = 3;
 
 		this.position.y = -0.005;
 
-		this.armLeft.straddle = 45;
-		this.armRight.straddle = -45;
+		this.armLeft.straddle = 65;
+		this.armRight.straddle = 65;
 
 		this.elbowLeft.bend = 20;
-		this.elbowRight.bend = -20;
+		this.elbowRight.bend = 20;
 
 	} // Woman.constructor
 
@@ -289,16 +290,16 @@ class Child extends Disfigure {
 
 		super( CHILD, height );
 
-		this.ankleLeft.bend = -3;
-		this.ankleRight.bend = -3;
+		this.ankleLeft.bend = 3;
+		this.ankleRight.bend = 3;
 
 		this.position.y = -0.005;
 
-		this.armLeft.straddle = 45;
-		this.armRight.straddle = -45;
+		this.armLeft.straddle = 65;
+		this.armRight.straddle = 65;
 
 		this.elbowLeft.bend = 20;
-		this.elbowRight.bend = -20;
+		this.elbowRight.bend = 20;
 
 	} // Child.constructor
 
