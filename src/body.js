@@ -24,8 +24,8 @@ import * as CHILD from './models/child.js';
 
 
 // path to models as GLB files
-const MODEL_PATH = import.meta.url.replace('/src/body.js','/assets/models/');
-console.log(MODEL_PATH);
+const MODEL_PATH = import.meta.url.replace( '/src/body.js', '/assets/models/' );
+
 
 
 console.time( 'Preload' );

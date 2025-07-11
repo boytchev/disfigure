@@ -1,4 +1,4 @@
-// disfigure v0.0.14
+// disfigure v0.0.15
 
 import * as THREE from 'three';
 import { Vector3, Box3, MeshPhysicalNodeMaterial, WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture } from 'three';
@@ -890,7 +890,9 @@ var SPACE = {
 };
 
 // path to models as GLB files
-const MODEL_PATH = '/assets/models/';
+const MODEL_PATH = import.meta.url.replace( '/src/body.js', '/assets/models/' );
+
+
 
 console.time( 'Preload' );
 var loader = new GLTFLoader();
