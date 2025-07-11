@@ -25,7 +25,7 @@ import * as CHILD from './models/child.js';
 
 
 // path to models as GLB files
-const MODEL_PATH = '../assets/models/';
+const MODEL_PATH = './assets/models/';
 
 console.time( 'Preload' );
 var loader = new GLTFLoader();
