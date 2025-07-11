@@ -310,25 +310,6 @@ class Space {
 		this.armLeft = bodyParts?.armLeft ?? bodyParts.arm;
 		this.armRight = bodyParts?.armRight ?? bodyParts.arm.mirror();
 
-		/*
-		if ( DEBUG_NAME ) {
-
-			this[ DEBUG_NAME ].pivot = uniform( this[ DEBUG_NAME ].pivot );
-			if ( this[ DEBUG_NAME ] instanceof LocusX && !( this[ DEBUG_NAME ] instanceof LocusT ) ) {
-
-				this[ DEBUG_NAME ].minX = uniform( this[ DEBUG_NAME ].minX );
-				this[ DEBUG_NAME ].maxX = uniform( this[ DEBUG_NAME ].maxX );
-
-			} else {
-
-				this[ DEBUG_NAME ].minY = uniform( this[ DEBUG_NAME ].minY );
-				this[ DEBUG_NAME ].maxY = uniform( this[ DEBUG_NAME ].maxY );
-
-			}
-
-		} // DEBUG_NAME
-*/
-
 	} // Space.constructor
 
 } // Space

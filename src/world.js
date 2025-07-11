@@ -9,10 +9,10 @@
 
 import { CanvasTexture, CircleGeometry, Color, DirectionalLight, Mesh, MeshLambertMaterial, PCFSoftShadowMap, PerspectiveCamera, Scene, WebGPURenderer } from 'three';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import Stats from 'three/addons/libs/stats.module.js';
 
 
-
-var renderer, scene, camera, light, cameraLight, controls, userAnimationLoop, everybody = [];
+var renderer, scene, camera, light, cameraLight, controls, userAnimationLoop, stats, everybody = [];
 
 
 
@@ -23,6 +23,7 @@ var renderer, scene, camera, light, cameraLight, controls, userAnimationLoop, ev
 // options.controls		true, whether OrbitControls is created
 // options.ground		true, whether ground is created
 // options.shadows		true, whether shadows are enabled
+// options.stats		false, whether to create stats panel
 
 class World {
 
@@ -43,6 +44,13 @@ class World {
 		camera = new PerspectiveCamera( 30, innerWidth/innerHeight );
 		camera.position.set( 0, 1, 4 );
 		camera.lookAt( 0, 1, 0 );
+
+		if ( options?.stats ?? false ) {
+
+			stats = new Stats();
+			document.body.appendChild( stats.dom );
+
+		} // stats
 
 		if ( options?.lights ?? true ) {
 
@@ -165,6 +173,7 @@ function defaultAnimationLoop( time ) {
 
 	everybody.forEach( ( p )=>{
 
+		p.update( );
 		p.dispatchEvent( animateEvent );
 
 	} );
@@ -172,6 +181,8 @@ function defaultAnimationLoop( time ) {
 	if ( userAnimationLoop ) userAnimationLoop( time );
 
 	if ( controls ) controls.update( );
+
+	if ( stats ) stats.update( );
 
 	renderer.render( scene, camera );
 

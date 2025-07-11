@@ -1,5 +1,9 @@
+v0.0.15
+  - removed model flattening, the GLB are flattened
+  - reduced the number of matrix operations
+  
 v0.0.14
-  - methods fo all body motions
+  - methods for all body motions
   - fixed orientation and symmetry of angles
   - fixed issue #10
   

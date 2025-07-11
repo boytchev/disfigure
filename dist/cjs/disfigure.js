@@ -1,4 +1,4 @@
-// disfigure v0.0.13
+// disfigure v0.0.14
 
 'use strict';
 
@@ -170,62 +170,6 @@ function centerModel( model, dims ) {
 	dims.scale = Math.max( box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z );
 
 	dims.height = box.max.y - box.min.y;
-
-}
-
-
-
-// merge a mesh into its parent, taking into consideration positions, orientations
-// and scale. flattening occurs only for elements with a single child mesh
-function flattenModel( model, rotate ) {
-
-	var meshes = [];
-
-	// extract meshes
-	model.traverse( ( mesh )=>{
-
-		if ( mesh.isMesh ) {
-
-			var geo = mesh.geometry.clone().applyMatrix4( mesh.matrixWorld );
-			var mat = mesh.material.clone();
-
-			/* the current models have no skinning
-			if ( mesh.isSkinnedMesh ) {
-
-				mesh.pose();
-
-				var pos = geo.getAttribute( 'position' );
-				var nor = geo.getAttribute( 'normal' );
-				var v = new Vector3();
-
-				for ( var i=0; i<pos.count; i++ ) {
-
-					v.fromBufferAttribute( pos, i );
-					mesh.applyBoneTransform( i, v );
-					pos.setXYZ( i, ...v );
-
-					v.fromBufferAttribute( nor, i );
-					mesh.applyBoneTransform( i, v );
-					nor.setXYZ( i, ...v );
-
-				}
-
-			} // isSkinnedMesh
-			*/
-
-			var newMesh = new THREE.Mesh( geo, mat );
-			newMesh.frustumCulled = false;
-
-			meshes.push( newMesh );
-
-		}
-
-	} );
-
-	var newModel = new THREE.Group();
-	newModel.add( ...meshes );
-
-	return newModel;
 
 }
 
@@ -1240,7 +1184,7 @@ class Disfigure extends THREE__namespace.Group {
 		loader.load( MODEL_PATH + MODEL_DEFINITION.URL, ( gltf ) => {
 
 			// reduce the hierarchy of the model
-			var model = flattenModel( gltf.scene);
+			var model = gltf.scene;
 
 			// center the model and get its dimensions
 			centerModel( model, this.dims );

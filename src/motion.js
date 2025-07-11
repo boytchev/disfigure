@@ -4,29 +4,28 @@
 // Functions to generate motion by bending a body as if it has joints and muscles
 
 
-
-import { float, Fn, If, normalGeometry, positionGeometry, transformNormalToView, uniform, vec3 } from "three/tsl";
-import { matRotXZY, matRotYZX } from "./utils.js";
+import { Vector3 } from 'three';
+import { Fn, If, mat3, mix, normalGeometry, positionGeometry, transformNormalToView, uniform } from "three/tsl";
 
 
 
 // general DOF=3 rotator, used for most joints
-var jointRotate= Fn( ([ pos, center, angle, amount ])=>{
+var jointRotateMat= Fn( ([ pos, joint, mat ])=>{
 
-	return pos.sub( center ).mul( matRotYZX( angle.mul( amount, vec3( -1, -1, 1 ) ) ) ).add( center );
+	var p = pos.sub( joint.pivot ).mul( mat ).add( joint.pivot );
+	return mix( pos, p, joint.locus() );
 
-}, { pos: 'vec3', center: 'vec3', angle: 'vec3', amount: 'float', return: 'vec3' } );
+} );//, { pos: 'vec3', center: 'vec3', amount: 'float', mat: 'mat3', return: 'vec3' } );
 
 
 
-// specific DOF=3 rotator, used for arm joints (different order of rotations)
-var jointRotateArm= Fn( ([ pos, center, angle, amount ])=>{
+// general DOF=3 rotator, used for most joints
+var jointNormalMat= Fn( ([ pos, joint, mat ])=>{
 
-	var newPos = pos.sub( center ).mul( matRotXZY( angle.mul( amount, vec3( -1, -1, 1 ) ) ) ).add( center ).toVar();
+	var p = pos.mul( mat );
+	return mix( pos, p, joint.locus() );
 
-	return newPos;
-
-}, { pos: 'vec3', center: 'vec3', angle: 'vec3', amount: 'float', return: 'vec3' } );
+} );//, { pos: 'vec3', center: 'vec3', amount: 'float', mat: 'mat3', return: 'vec3' } );
 
 
 
@@ -34,7 +33,7 @@ var jointRotateArm= Fn( ([ pos, center, angle, amount ])=>{
 function tslPositionNode( options ) {
 
 	options.vertex = positionGeometry;
-	options.mode = float( 1 );
+	options.fn = jointRotateMat;
 
 	return disfigure( options );
 
@@ -46,7 +45,7 @@ function tslPositionNode( options ) {
 function tslNormalNode( options ) {
 
 	options.vertex = normalGeometry;
-	options.mode = float( 0 );
+	options.fn = jointNormalMat;
 
 	return transformNormalToView( disfigure( options ) ).xyz;
 
@@ -57,9 +56,8 @@ function tslNormalNode( options ) {
 // implement the actual body bending
 //		space - compiled definition of the space around the body
 //		posture - collection of angles for body posture
-//		mode - 1 for vertixes, 0 for normals
 //		vertex - vertex or normal coordinates to use as input data
-var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
+var disfigure = Fn( ( { fn, space, posture, vertex } )=>{
 
 	var p = vertex.toVar();
 
@@ -69,10 +67,10 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 
 	If( armLeft.greaterThan( 0 ), ()=>{
 
-		p.assign( jointRotate( p, mode.mul( space.wristLeft.pivot ), posture.wristLeft.mul( vec3( 1, -1, 1 ) ), space.wristLeft.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.forearmLeft.pivot ), posture.forearmLeft, space.forearmLeft.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.elbowLeft.pivot ), posture.elbowLeft.mul( -1 ), space.elbowLeft.locus( ) ) );
-		p.assign( jointRotateArm( p, mode.mul( space.armLeft.pivot ), posture.armLeft.mul( vec3( 1, -1, 1 ) ), space.armLeft.locus( )/*, space.armLeft.sublocus(  )*/ ) );
+		p.assign( fn( p, space.wristLeft, posture.wristLeftMatrix ) );
+		p.assign( fn( p, space.forearmLeft, posture.forearmLeftMatrix ) );
+		p.assign( fn( p, space.elbowLeft, posture.elbowLeftMatrix ) );
+		p.assign( fn( p, space.armLeft, posture.armLeftMatrix ) );
 
 	} );
 
@@ -84,10 +82,10 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 
 	If( armRight.greaterThan( 0 ), ()=>{
 
-		p.assign( jointRotate( p, mode.mul( space.wristRight.pivot ), posture.wristRight.mul( vec3( 1, 1, -1 ) ), space.wristRight.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.forearmRight.pivot ), posture.forearmRight, space.forearmRight.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.elbowRight.pivot ), posture.elbowRight, space.elbowRight.locus( ) ) );
-		p.assign( jointRotateArm( p, mode.mul( space.armRight.pivot ), posture.armRight.mul( vec3( 1, 1, -1 ) ), space.armRight.locus( )/*, space.armRight.sublocus(  )*/ ) );
+		p.assign( fn( p, space.wristRight, posture.wristRightMatrix ) );
+		p.assign( fn( p, space.forearmRight, posture.forearmRightMatrix ) );
+		p.assign( fn( p, space.elbowRight, posture.elbowRightMatrix ) );
+		p.assign( fn( p, space.armRight, posture.armRightMatrix ) );
 
 	} );
 
@@ -95,9 +93,9 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 
 	// CENTRAL BODY AXIS
 
-	p.assign( jointRotate( p, mode.mul( space.head.pivot ), posture.head, space.head.locus( ) ) );
-	p.assign( jointRotate( p, mode.mul( space.chest.pivot ), posture.chest, space.chest.locus() ) );
-	p.assign( jointRotate( p, mode.mul( space.waist.pivot ), posture.waist, space.waist.locus() ) );
+	p.assign( fn( p, space.head, posture.headMatrix ) );
+	p.assign( fn( p, space.chest, posture.chestMatrix ) );
+	p.assign( fn( p, space.waist, posture.waistMatrix ) );
 
 
 
@@ -107,12 +105,12 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 
 	If( legLeft.greaterThan( 0 ), ()=>{
 
-		p.assign( jointRotate( p, mode.mul( space.footLeft.pivot ), posture.footLeft, space.footLeft.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.ankleLeft.pivot ), posture.ankleLeft.mul( vec3( 1, 1, -1 ) ), space.ankleLeft.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.ankleLongLeft.pivot ), posture.ankleLongLeft, space.ankleLongLeft.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.kneeLeft.pivot ), posture.kneeLeft, space.kneeLeft.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.legLongLeft.pivot ), posture.legLongLeft, space.legLongLeft.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.legLeft.pivot ), posture.legLeft.mul( vec3( -1, 1, -1 ) ), legLeft ) );
+		p.assign( fn( p, space.footLeft, posture.footLeftMatrix ) );
+		p.assign( fn( p, space.ankleLeft, posture.ankleLeftMatrix ) );
+		p.assign( fn( p, space.ankleLongLeft, posture.ankleLongLeftMatrix ) );
+		p.assign( fn( p, space.kneeLeft, posture.kneeLeftMatrix ) );
+		p.assign( fn( p, space.legLongLeft, posture.legLongLeftMatrix ) );
+		p.assign( fn( p, space.legLeft, posture.legLeftMatrix ) );
 
 	} );
 
@@ -124,12 +122,12 @@ var disfigure = Fn( ( { space, posture, mode, vertex } )=>{
 
 	If( legRight.greaterThan( 0 ), ()=>{
 
-		p.assign( jointRotate( p, mode.mul( space.footRight.pivot ), posture.footRight, space.footRight.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.ankleRight.pivot ), posture.ankleRight, space.ankleRight.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.ankleLongRight.pivot ), posture.ankleLongRight.mul( -1 ), space.ankleLongRight.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.kneeRight.pivot ), posture.kneeRight, space.kneeRight.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.legLongRight.pivot ), posture.legLongRight.negate(), space.legLongRight.locus( ) ) );
-		p.assign( jointRotate( p, mode.mul( space.legRight.pivot ), posture.legRight.mul( vec3( -1, 1, 1 ) ), legRight ) );
+		p.assign( fn( p, space.footRight, posture.footRightMatrix ) );
+		p.assign( fn( p, space.ankleRight, posture.ankleRightMatrix ) );
+		p.assign( fn( p, space.ankleLongRight, posture.ankleLongRightMatrix ) );
+		p.assign( fn( p, space.kneeRight, posture.kneeRightMatrix ) );
+		p.assign( fn( p, space.legLongRight, posture.legLongRightMatrix ) );
+		p.assign( fn( p, space.legRight, posture.legRightMatrix ) );
 
 	} );
 
@@ -144,34 +142,64 @@ function tslPosture( ) {
 
 	return {
 
+
 		// TORSO
-		head: uniform( vec3( 0, 0, 0 ) ),
-		chest: uniform( vec3( 0, 0, 0 ) ),
-		waist: uniform( vec3( 0, 0, 0 ) ),
+		head: new Vector3( ),
+		chest: new Vector3( ),
+		waist: new Vector3( ),
+
+		// TORSO
+		headMatrix: uniform( mat3() ),
+		chestMatrix: uniform( mat3() ),
+		waistMatrix: uniform( mat3() ),
 
 		// LEGS
-		kneeLeft: uniform( vec3( 0, 0, 0 ) ),
-		kneeRight: uniform( vec3( 0, 0, 0 ) ),
-		ankleLeft: uniform( vec3( 0, 0, 0 ) ),
-		ankleRight: uniform( vec3( 0, 0, 0 ) ),
-		footLeft: uniform( vec3( 0, 0, 0 ) ),
-		footRight: uniform( vec3( 0, 0, 0 ) ),
-		legLeft: uniform( vec3( 0, 0, 0 ) ),
-		legLongLeft: uniform( vec3( 0, 0, 0 ) ),
-		legRight: uniform( vec3( 0, 0, 0 ) ),
-		legLongRight: uniform( vec3( 0, 0, 0 ) ),
-		ankleLongLeft: uniform( vec3( 0, 0, 0 ) ),
-		ankleLongRight: uniform( vec3( 0, 0, 0 ) ),
+		kneeLeft: new Vector3( ),
+		kneeRight: new Vector3( ),
+		ankleLeft: new Vector3( ),
+		ankleRight: new Vector3( ),
+		footLeft: new Vector3( ),
+		footRight: new Vector3( ),
+		legLeft: new Vector3( ),
+		legLongLeft: new Vector3( ),
+		legRight: new Vector3( ),
+		legLongRight: new Vector3( ),
+		ankleLongLeft: new Vector3( ),
+		ankleLongRight: new Vector3( ),
+
+		// LEGS
+		kneeLeftMatrix: uniform( mat3() ),
+		kneeRightMatrix: uniform( mat3() ),
+		ankleLeftMatrix: uniform( mat3() ),
+		ankleRightMatrix: uniform( mat3() ),
+		footLeftMatrix: uniform( mat3() ),
+		footRightMatrix: uniform( mat3() ),
+		legLeftMatrix: uniform( mat3() ),
+		legLongLeftMatrix: uniform( mat3() ),
+		legRightMatrix: uniform( mat3() ),
+		legLongRightMatrix: uniform( mat3() ),
+		ankleLongLeftMatrix: uniform( mat3() ),
+		ankleLongRightMatrix: uniform( mat3() ),
 
 		// ARMS
-		elbowLeft: uniform( vec3( 0, 0, 0 ) ),
-		elbowRight: uniform( vec3( 0, 0, 0 ) ),
-		forearmLeft: uniform( vec3( 0, 0, 0 ) ),
-		forearmRight: uniform( vec3( 0, 0, 0 ) ),
-		wristLeft: uniform( vec3( 0, 0, 0 ) ),
-		wristRight: uniform( vec3( 0, 0, 0 ) ),
-		armLeft: uniform( vec3( 0, 0, 0 ) ),
-		armRight: uniform( vec3( 0, 0, 0 ) ),
+		elbowLeft: new Vector3( ),
+		elbowRight: new Vector3( ),
+		forearmLeft: new Vector3( ),
+		forearmRight: new Vector3( ),
+		wristLeft: new Vector3( ),
+		wristRight: new Vector3( ),
+		armLeft: new Vector3( ),
+		armRight: new Vector3( ),
+
+		// ARMS
+		armLeftMatrix: uniform( mat3() ),
+		armRightMatrix: uniform( mat3() ),
+		elbowLeftMatrix: uniform( mat3() ),
+		elbowRightMatrix: uniform( mat3() ),
+		forearmLeftMatrix: uniform( mat3() ),
+		forearmRightMatrix: uniform( mat3() ),
+		wristLeftMatrix: uniform( mat3() ),
+		wristRightMatrix: uniform( mat3() ),
 
 	};
 

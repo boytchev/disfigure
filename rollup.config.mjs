@@ -18,6 +18,7 @@ export default [
 			'three',
 			'three/tsl',
 			'three/addons/libs/lil-gui.module.min.js',
+			'three/addons/libs/stats.module.js',
 			'three/addons/controls/OrbitControls.js',
 			'three/addons/loaders/GLTFLoader.js',
 			'three/addons/math/SimplexNoise.js'
@@ -35,6 +36,7 @@ export default [
 			'three',
 			'three/tsl',
 			'three/addons/libs/lil-gui.module.min.js',
+			'three/addons/libs/stats.module.js',
 			'three/addons/controls/OrbitControls.js',
 			'three/addons/loaders/GLTFLoader.js',
 			'three/addons/math/SimplexNoise.js'
@@ -60,6 +62,7 @@ export default [
 			'three',
 			'three/tsl',
 			'three/addons/libs/lil-gui.module.min.js',
+			'three/addons/libs/stats.module.js',
 			'three/addons/controls/OrbitControls.js',
 			'three/addons/loaders/GLTFLoader.js',
 			'three/addons/math/SimplexNoise.js'
@@ -82,6 +85,7 @@ export default [
 			'three',
 			'three/tsl',
 			'three/addons/libs/lil-gui.module.min.js',
+			'three/addons/libs/stats.module.js',
 			'three/addons/controls/OrbitControls.js',
 			'three/addons/loaders/GLTFLoader.js',
 			'three/addons/math/SimplexNoise.js'

@@ -5,7 +5,7 @@ const DEBUG = false;
 
 
 
-const DEBUG_JOINT = 21; // see DEBUG_NAME for numeric values
+const DEBUG_JOINT = 1; // see DEBUG_NAME for numeric values
 
 
 
