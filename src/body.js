@@ -23,10 +23,10 @@ import * as WOMAN from './models/woman.js';
 import * as CHILD from './models/child.js';
 
 
-console.log( import.meta.url );
-
 // path to models as GLB files
-const MODEL_PATH = '../../assets/models/';
+const MODEL_PATH = import.meta.url.replace('/src/body.js','/assets/models/');
+console.log(MODEL_PATH);
+
 
 console.time( 'Preload' );
 var loader = new GLTFLoader();
