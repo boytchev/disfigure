@@ -23,6 +23,7 @@ import * as WOMAN from './models/woman.js';
 import * as CHILD from './models/child.js';
 
 
+console.log( import.meta.url );
 
 // path to models as GLB files
 const MODEL_PATH = '../../assets/models/';

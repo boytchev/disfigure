@@ -15,7 +15,6 @@ import { Man } from "../body.js";
 import { DEBUG, DEBUG_JOINT, DEBUG_NAME } from "./debug.js";
 
 
-console.clear( );
 
 new World();
 var model = new Man();
