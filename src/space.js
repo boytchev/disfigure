@@ -8,9 +8,8 @@
 
 
 import { Vector3 } from "three";
-import { float, min, positionGeometry, /*uniform,*/ vec3 } from "three/tsl";
+import { float, mat3, min, positionGeometry, uniform, vec3 } from "three/tsl";
 import { smoother } from "./utils.js";
-//import { DEBUG_NAME } from "./debug.js";
 
 
 
@@ -34,19 +33,6 @@ function encode( value, scale, offset=0 ) {
 
 
 
-// calculate a pivot vector with actual coordinates
-function decodePivot( pivot, dims ) {
-
-	return new Vector3(
-		decode( pivot[ 0 ], dims.scale, dims.x ),
-		decode( pivot[ 1 ], dims.scale, dims.y ),
-		decode( pivot[ 2 ], dims.scale, dims.z ),
-	);
-
-}
-
-
-
 // clone an object and flip its pivot horizontally - this is used for all spaces
 // that represent left-right symmetry in human body (e.g. left arm and right arm)
 function clone( instance ) {
@@ -54,20 +40,42 @@ function clone( instance ) {
 	var obj = Object.assign( Object.create( instance ), instance );
 	obj.pivot = obj.pivot.clone();
 	obj.pivot.x *= -1;
+	obj.angle = new Vector3();
+	obj.matrix = uniform( mat3() );
 	return obj;
 
 }
 
 
 
+class Locus {
+
+	constructor( dims, pivot ) {
+
+		// calculate a pivot vector with actual coordinates
+		this.pivot = new Vector3(
+			decode( pivot[ 0 ], dims.scale, dims.x ),
+			decode( pivot[ 1 ], dims.scale, dims.y ),
+			decode( pivot[ 2 ], dims.scale, dims.z ),
+		);
+
+		this.angle = new Vector3();
+		this.matrix = uniform( mat3() );
+
+	} // Locus.constructor
+
+} // Locus
+
+
+
 // define a horizontal planar locus that can tilt fowrard (i.e. around X axix,
 // towards the screen); vertically it is from minY to maxY, horizontally it is
 // infinite; areas outside rangeX are consider inside the locus
-class LocusY {
+class LocusY extends Locus {
 
 	constructor( dims, pivot, rangeY, angle=0, rangeX ) {
 
-		this.pivot = decodePivot( pivot, dims );
+		super( dims, pivot );
 
 		this.minY = decode( rangeY[ 0 ], dims.scale, dims.y );
 		this.maxY = decode( rangeY[ 1 ], dims.scale, dims.y );
@@ -129,11 +137,11 @@ class LocusY {
 
 // define a vertical planar locus, perpendicular to X; vertically infinite,
 // horizontally from minX to maxX
-class LocusX {
+class LocusX extends Locus {
 
 	constructor( dims, pivot, rangeX, angle=0 ) {
 
-		this.pivot = decodePivot( pivot, dims );
+		super( dims, pivot );
 
 		this.minX = decode( rangeX[ 0 ], dims.scale, dims.x );
 		this.maxX = decode( rangeX[ 1 ], dims.scale, dims.x );

@@ -8,10 +8,10 @@
 import * as THREE from "three";
 import * as lil from "three/addons/libs/lil-gui.module.min.js";
 import { float, Fn, If, mix, select, uniform, vec3 } from "three/tsl";
-import { decode, encode, LocusT, LocusX } from "../space.js";
-import { scene, setAnimationLoop, World } from "../world.js";
-import { chaotic } from "../utils.js";
-import { Man } from "../body.js";
+import { decode, encode, LocusT, LocusX } from "../src/space.js";
+import { scene, setAnimationLoop, World } from "../src/world.js";
+import { chaotic } from "../src/utils.js";
+import { Man } from "../src/body.js";
 import { DEBUG, DEBUG_JOINT, DEBUG_NAME } from "./debug.js";
 
 
@@ -192,7 +192,7 @@ function updateDebug() {
 
 function createGui( ) {
 
-	model.posture.select = uniform( DEBUG?DEBUG_JOINT:0, 'int' ); // 0..24
+	model.space.select = uniform( DEBUG?DEBUG_JOINT:0, 'int' ); // 0..24
 
 
 	if ( DEBUG ) {
@@ -210,7 +210,7 @@ function createGui( ) {
 	if ( !DEBUG ) folder.close();
 
 
-	folder.add( model.posture.select, 'value', {
+	folder.add( model.space.select, 'value', {
 		Torso: 0,
 		' &#x22B8; Head': 1, ' &#x22B8; Chest': 2, ' &#x22B8; Waist': 3,
 		Leg: 11, ' &#x22B8; Leg (ext)': 12, ' &#x22B8; Knee': 13, ' &#x22B8; Ankle': 15, ' &#x22B8; Ankle (ext)': 14, ' &#x22B8; Foot': 16,
@@ -426,9 +426,9 @@ function rigResetModel( ) {
 
 	model.rotation.y = 0;
 
-	for ( var name of Object.keys( model.posture ) )
-		if ( model.posture[ name ].isVector3 )
-			model.posture[ name ].set( 0, 0, 0 );
+	for ( var name of Object.keys( model.space ) )
+		if ( model.space[ name ]?.angle?.isVector3 )
+			model.space[ name ].angle.set( 0, 0, 0 );
 
 	updateGUI( );
 
@@ -566,9 +566,9 @@ if ( DEBUG ) {
 
 // dubug function used to mark areas on the 3D model
 
-var tslSelectionNode = Fn( ( { space, posture } )=>{
+var tslSelectionNode = Fn( ( { space } )=>{
 
-	var s = posture.select;
+	var s = space.select;
 	var k = float( 0 )
 		.add( space.head.locus( ).mul( select( s.equal( 1 ), 1, 0 ) ) )
 		.add( space.chest.locus( ).mul( select( s.equal( 2 ), 1, 0 ) ) )
@@ -632,6 +632,6 @@ var tslSelectionNode = Fn( ( { space, posture } )=>{
 createGui( );
 
 
-model.children[ 0 ].material.colorNode = tslSelectionNode( { space: model.space, posture: model.posture } );
+model.children[ 0 ].material.colorNode = tslSelectionNode( { space: model.space } );
 //model.children[0].material.colorNode = vec3( 1 );
 model.children[ 0 ].material.roughness = 0.2;

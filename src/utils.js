@@ -5,8 +5,8 @@
 
 
 
-import { Box3, MeshPhysicalNodeMaterial, Vector3 } from 'three';
-import { Fn, vec3 } from 'three/tsl';
+import { Box3, Vector3 } from 'three';
+import { Fn } from 'three/tsl';
 import { SimplexNoise } from "three/addons/math/SimplexNoise.js";
 
 
@@ -14,60 +14,20 @@ import { SimplexNoise } from "three/addons/math/SimplexNoise.js";
 // center model and get it dimensions
 function centerModel( model, dims ) {
 
-	var center = new Vector3();
+	var v = new Vector3();
 
 	var box = new Box3().setFromObject( model, true );
 
-	box.getCenter( center );
-	model.position.sub( center );
+	box.getCenter( v );
+	model.position.sub( v );
 
-	dims.x = ( box.max.x + box.min.x )/2;
+	dims.x = v.x;
 	dims.y = box.min.y;
-	dims.z = ( box.max.z + box.min.z )/2;
+	dims.z = v.z;
 
-	dims.scale = Math.max( box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z );
-
-	dims.height = box.max.y - box.min.y;
-
-}
-
-
-
-// convert all model materials to Node materials, attach TSL functions for
-// vertices, colors and emission
-function ennodeModel( model, space, posture, nodes, options ) {
-
-	model.traverse( ( child )=>{
-
-		if ( child.isMesh ) {
-
-			// convert the material into Node material
-			//var material = new MeshStandardNodeMaterial();
-			var material = new MeshPhysicalNodeMaterial();
-
-			// copy all properties from the original material
-			Object.assign( material, child.material );
-
-			// copy all properties from the options
-			Object.assign( material, options );
-
-			// bind nodes
-			if ( nodes.colorNode )
-				material.colorNode = nodes.colorNode( );
-
-			if ( nodes.positionNode )
-				material.positionNode = nodes.positionNode( { space: space, posture: posture } );
-
-			if ( nodes.normalNode )
-				material.normalNode = nodes.normalNode( { space: space, posture: posture } );
-
-			child.material = material;
-			child.castShadow = true;
-			child.receiveShadow = true;
-
-		}
-
-	} );
+	box.getSize( v );
+	dims.scale = Math.max( ...v );
+	dims.height = v.y;
 
 }
 
@@ -79,14 +39,6 @@ const smoother = Fn( ([ edgeFrom, edgeTo, value ])=>{
 	return value.smoothstep( edgeFrom, edgeTo ).smoothstep( 0, 1 ).smoothstep( 0, 1 );
 
 }, { edgeFrom: 'float', edgeTo: 'float', value: 'float', return: 'float' } );
-
-
-
-var tslWhiteNode = Fn( ()=>{
-
-	return vec3( 1 );
-
-} );
 
 
 
@@ -116,12 +68,7 @@ export
 {
 
 	smoother,
-
-	tslWhiteNode,
-
 	centerModel,
-	ennodeModel,
-
 	chaotic,
 	regular,
 };

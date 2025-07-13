@@ -1,3 +1,9 @@
+v0.0.16
+  - labels
+  - attached objects to body
+  - posture merged into space
+  - refactored code
+  
 v0.0.15
   - removed model flattening, the GLB are flattened
   - reduced the number of matrix operations

@@ -1,30 +1,29 @@
 // disfigure v0.0.15
 
-import * as THREE from 'three';
-import { Vector3, Box3, MeshPhysicalNodeMaterial, WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture } from 'three';
+import { Vector3, Box3, WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Matrix3, Matrix4, Euler, Group, MeshPhysicalNodeMaterial } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { Fn, mix, If, uniform, mat3, normalGeometry, transformNormalToView, positionGeometry, vec3, float, min } from 'three/tsl';
+import { Fn, mix, If, normalGeometry, transformNormalToView, positionGeometry, float, min, vec3, uniform, mat3 } from 'three/tsl';
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
 
 // general DOF=3 rotator, used for most joints
-var jointRotateMat= Fn( ([ pos, joint, mat ])=>{
+var jointRotateMat= Fn( ([ pos, joint ])=>{
 
-	var p = pos.sub( joint.pivot ).mul( mat ).add( joint.pivot );
+	var p = pos.sub( joint.pivot ).mul( joint.matrix ).add( joint.pivot );
 	return mix( pos, p, joint.locus() );
 
-} );//, { pos: 'vec3', center: 'vec3', amount: 'float', mat: 'mat3', return: 'vec3' } );
+} );
 
 
 
 // general DOF=3 rotator, used for most joints
-var jointNormalMat= Fn( ([ pos, joint, mat ])=>{
+var jointNormalMat= Fn( ([ pos, joint ])=>{
 
-	var p = pos.mul( mat );
+	var p = pos.mul( joint.matrix );
 	return mix( pos, p, joint.locus() );
 
-} );//, { pos: 'vec3', center: 'vec3', amount: 'float', mat: 'mat3', return: 'vec3' } );
+} );
 
 
 
@@ -51,25 +50,21 @@ function tslNormalNode( options ) {
 }
 
 
-
 // implement the actual body bending
 //		space - compiled definition of the space around the body
-//		posture - collection of angles for body posture
 //		vertex - vertex or normal coordinates to use as input data
-var disfigure = Fn( ( { fn, space, posture, vertex } )=>{
+var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 	var p = vertex.toVar();
 
 	// LEFT-UPPER BODY
 
-	var armLeft = space.armLeft.locus( ).toVar();
+	If( space.armLeft.locus( ), ()=>{
 
-	If( armLeft.greaterThan( 0 ), ()=>{
-
-		p.assign( fn( p, space.wristLeft, posture.wristLeftMatrix ) );
-		p.assign( fn( p, space.forearmLeft, posture.forearmLeftMatrix ) );
-		p.assign( fn( p, space.elbowLeft, posture.elbowLeftMatrix ) );
-		p.assign( fn( p, space.armLeft, posture.armLeftMatrix ) );
+		p.assign( fn( p, space.wristLeft ) );
+		p.assign( fn( p, space.forearmLeft ) );
+		p.assign( fn( p, space.elbowLeft ) );
+		p.assign( fn( p, space.armLeft ) );
 
 	} );
 
@@ -77,14 +72,12 @@ var disfigure = Fn( ( { fn, space, posture, vertex } )=>{
 
 	// RIGHT-UPPER BODY
 
-	var armRight = space.armRight.locus( ).toVar();
+	If( space.armRight.locus( ), ()=>{
 
-	If( armRight.greaterThan( 0 ), ()=>{
-
-		p.assign( fn( p, space.wristRight, posture.wristRightMatrix ) );
-		p.assign( fn( p, space.forearmRight, posture.forearmRightMatrix ) );
-		p.assign( fn( p, space.elbowRight, posture.elbowRightMatrix ) );
-		p.assign( fn( p, space.armRight, posture.armRightMatrix ) );
+		p.assign( fn( p, space.wristRight ) );
+		p.assign( fn( p, space.forearmRight ) );
+		p.assign( fn( p, space.elbowRight ) );
+		p.assign( fn( p, space.armRight ) );
 
 	} );
 
@@ -92,24 +85,22 @@ var disfigure = Fn( ( { fn, space, posture, vertex } )=>{
 
 	// CENTRAL BODY AXIS
 
-	p.assign( fn( p, space.head, posture.headMatrix ) );
-	p.assign( fn( p, space.chest, posture.chestMatrix ) );
-	p.assign( fn( p, space.waist, posture.waistMatrix ) );
+	p.assign( fn( p, space.head ) );
+	p.assign( fn( p, space.chest ) );
+	p.assign( fn( p, space.waist ) );
 
 
 
 	// LEFT-LOWER BODY
 
-	var legLeft = space.legLeft.locus( ).toVar();
+	If( space.legLeft.locus( ), ()=>{
 
-	If( legLeft.greaterThan( 0 ), ()=>{
-
-		p.assign( fn( p, space.footLeft, posture.footLeftMatrix ) );
-		p.assign( fn( p, space.ankleLeft, posture.ankleLeftMatrix ) );
-		p.assign( fn( p, space.ankleLongLeft, posture.ankleLongLeftMatrix ) );
-		p.assign( fn( p, space.kneeLeft, posture.kneeLeftMatrix ) );
-		p.assign( fn( p, space.legLongLeft, posture.legLongLeftMatrix ) );
-		p.assign( fn( p, space.legLeft, posture.legLeftMatrix ) );
+		p.assign( fn( p, space.footLeft ) );
+		p.assign( fn( p, space.ankleLeft ) );
+		p.assign( fn( p, space.ankleLongLeft ) );
+		p.assign( fn( p, space.kneeLeft ) );
+		p.assign( fn( p, space.legLongLeft ) );
+		p.assign( fn( p, space.legLeft ) );
 
 	} );
 
@@ -117,16 +108,14 @@ var disfigure = Fn( ( { fn, space, posture, vertex } )=>{
 
 	// RIGHT-LOWER BODY
 
-	var legRight = space.legRight.locus( ).toVar();
+	If( space.legRight.locus( ), ()=>{
 
-	If( legRight.greaterThan( 0 ), ()=>{
-
-		p.assign( fn( p, space.footRight, posture.footRightMatrix ) );
-		p.assign( fn( p, space.ankleRight, posture.ankleRightMatrix ) );
-		p.assign( fn( p, space.ankleLongRight, posture.ankleLongRightMatrix ) );
-		p.assign( fn( p, space.kneeRight, posture.kneeRightMatrix ) );
-		p.assign( fn( p, space.legLongRight, posture.legLongRightMatrix ) );
-		p.assign( fn( p, space.legRight, posture.legRightMatrix ) );
+		p.assign( fn( p, space.footRight ) );
+		p.assign( fn( p, space.ankleRight ) );
+		p.assign( fn( p, space.ankleLongRight ) );
+		p.assign( fn( p, space.kneeRight ) );
+		p.assign( fn( p, space.legLongRight ) );
+		p.assign( fn( p, space.legRight ) );
 
 	} );
 
@@ -134,133 +123,23 @@ var disfigure = Fn( ( { fn, space, posture, vertex } )=>{
 
 } ); // disfigure
 
-
-
-// create a default posture
-function tslPosture( ) {
-
-	return {
-
-
-		// TORSO
-		head: new Vector3( ),
-		chest: new Vector3( ),
-		waist: new Vector3( ),
-
-		// TORSO
-		headMatrix: uniform( mat3() ),
-		chestMatrix: uniform( mat3() ),
-		waistMatrix: uniform( mat3() ),
-
-		// LEGS
-		kneeLeft: new Vector3( ),
-		kneeRight: new Vector3( ),
-		ankleLeft: new Vector3( ),
-		ankleRight: new Vector3( ),
-		footLeft: new Vector3( ),
-		footRight: new Vector3( ),
-		legLeft: new Vector3( ),
-		legLongLeft: new Vector3( ),
-		legRight: new Vector3( ),
-		legLongRight: new Vector3( ),
-		ankleLongLeft: new Vector3( ),
-		ankleLongRight: new Vector3( ),
-
-		// LEGS
-		kneeLeftMatrix: uniform( mat3() ),
-		kneeRightMatrix: uniform( mat3() ),
-		ankleLeftMatrix: uniform( mat3() ),
-		ankleRightMatrix: uniform( mat3() ),
-		footLeftMatrix: uniform( mat3() ),
-		footRightMatrix: uniform( mat3() ),
-		legLeftMatrix: uniform( mat3() ),
-		legLongLeftMatrix: uniform( mat3() ),
-		legRightMatrix: uniform( mat3() ),
-		legLongRightMatrix: uniform( mat3() ),
-		ankleLongLeftMatrix: uniform( mat3() ),
-		ankleLongRightMatrix: uniform( mat3() ),
-
-		// ARMS
-		elbowLeft: new Vector3( ),
-		elbowRight: new Vector3( ),
-		forearmLeft: new Vector3( ),
-		forearmRight: new Vector3( ),
-		wristLeft: new Vector3( ),
-		wristRight: new Vector3( ),
-		armLeft: new Vector3( ),
-		armRight: new Vector3( ),
-
-		// ARMS
-		armLeftMatrix: uniform( mat3() ),
-		armRightMatrix: uniform( mat3() ),
-		elbowLeftMatrix: uniform( mat3() ),
-		elbowRightMatrix: uniform( mat3() ),
-		forearmLeftMatrix: uniform( mat3() ),
-		forearmRightMatrix: uniform( mat3() ),
-		wristLeftMatrix: uniform( mat3() ),
-		wristRightMatrix: uniform( mat3() ),
-
-	};
-
-}
-
 // center model and get it dimensions
 function centerModel( model, dims ) {
 
-	var center = new Vector3();
+	var v = new Vector3();
 
 	var box = new Box3().setFromObject( model, true );
 
-	box.getCenter( center );
-	model.position.sub( center );
+	box.getCenter( v );
+	model.position.sub( v );
 
-	dims.x = ( box.max.x + box.min.x )/2;
+	dims.x = v.x;
 	dims.y = box.min.y;
-	dims.z = ( box.max.z + box.min.z )/2;
+	dims.z = v.z;
 
-	dims.scale = Math.max( box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z );
-
-	dims.height = box.max.y - box.min.y;
-
-}
-
-
-
-// convert all model materials to Node materials, attach TSL functions for
-// vertices, colors and emission
-function ennodeModel( model, space, posture, nodes, options ) {
-
-	model.traverse( ( child )=>{
-
-		if ( child.isMesh ) {
-
-			// convert the material into Node material
-			//var material = new MeshStandardNodeMaterial();
-			var material = new MeshPhysicalNodeMaterial();
-
-			// copy all properties from the original material
-			Object.assign( material, child.material );
-
-			// copy all properties from the options
-			Object.assign( material, options );
-
-			// bind nodes
-			if ( nodes.colorNode )
-				material.colorNode = nodes.colorNode( );
-
-			if ( nodes.positionNode )
-				material.positionNode = nodes.positionNode( { space: space, posture: posture } );
-
-			if ( nodes.normalNode )
-				material.normalNode = nodes.normalNode( { space: space, posture: posture } );
-
-			child.material = material;
-			child.castShadow = true;
-			child.receiveShadow = true;
-
-		}
-
-	} );
+	box.getSize( v );
+	dims.scale = Math.max( ...v );
+	dims.height = v.y;
 
 }
 
@@ -272,14 +151,6 @@ const smoother = Fn( ([ edgeFrom, edgeTo, value ])=>{
 	return value.smoothstep( edgeFrom, edgeTo ).smoothstep( 0, 1 ).smoothstep( 0, 1 );
 
 }, { edgeFrom: 'float', edgeTo: 'float', value: 'float', return: 'float' } );
-
-
-
-Fn( ()=>{
-
-	return vec3( 1 );
-
-} );
 
 
 
@@ -303,29 +174,12 @@ function regular( time, offset=0, min=-1, max=1 ) {
 
 }
 
-//import { DEBUG_NAME } from "./debug.js";
-
-
-
 // calculate actual value from normalized value - the space definition assumes
 // overall body sizes are within [0,1000] range, decoding calculates the actual
 // value scaled to the actual size
 function decode( value, scale, offset=0 ) {
 
 	return scale*value/1000 + offset;
-
-}
-
-
-
-// calculate a pivot vector with actual coordinates
-function decodePivot( pivot, dims ) {
-
-	return new Vector3(
-		decode( pivot[ 0 ], dims.scale, dims.x ),
-		decode( pivot[ 1 ], dims.scale, dims.y ),
-		decode( pivot[ 2 ], dims.scale, dims.z ),
-	);
 
 }
 
@@ -338,20 +192,42 @@ function clone( instance ) {
 	var obj = Object.assign( Object.create( instance ), instance );
 	obj.pivot = obj.pivot.clone();
 	obj.pivot.x *= -1;
+	obj.angle = new Vector3();
+	obj.matrix = uniform( mat3() );
 	return obj;
 
 }
 
 
 
+class Locus {
+
+	constructor( dims, pivot ) {
+
+		// calculate a pivot vector with actual coordinates
+		this.pivot = new Vector3(
+			decode( pivot[ 0 ], dims.scale, dims.x ),
+			decode( pivot[ 1 ], dims.scale, dims.y ),
+			decode( pivot[ 2 ], dims.scale, dims.z ),
+		);
+
+		this.angle = new Vector3();
+		this.matrix = uniform( mat3() );
+
+	} // Locus.constructor
+
+} // Locus
+
+
+
 // define a horizontal planar locus that can tilt fowrard (i.e. around X axix,
 // towards the screen); vertically it is from minY to maxY, horizontally it is
 // infinite; areas outside rangeX are consider inside the locus
-class LocusY {
+class LocusY extends Locus {
 
 	constructor( dims, pivot, rangeY, angle=0, rangeX ) {
 
-		this.pivot = decodePivot( pivot, dims );
+		super( dims, pivot );
 
 		this.minY = decode( rangeY[ 0 ], dims.scale, dims.y );
 		this.maxY = decode( rangeY[ 1 ], dims.scale, dims.y );
@@ -413,11 +289,11 @@ class LocusY {
 
 // define a vertical planar locus, perpendicular to X; vertically infinite,
 // horizontally from minX to maxX
-class LocusX {
+class LocusX extends Locus {
 
 	constructor( dims, pivot, rangeX, angle=0 ) {
 
-		this.pivot = decodePivot( pivot, dims );
+		super( dims, pivot );
 
 		this.minX = decode( rangeX[ 0 ], dims.scale, dims.x );
 		this.maxX = decode( rangeX[ 1 ], dims.scale, dims.x );
@@ -681,14 +557,14 @@ class World {
 
 			// generate ground texture
 			var canvas = document.createElement( 'CANVAS' );
-			canvas.width = 512/4;
-			canvas.height = 512/4;
+			canvas.width = 128;
+			canvas.height = 128;
 
 			var context = canvas.getContext( '2d' );
 			context.fillStyle = 'white';
 			context.filter = 'blur(10px)';
 			context.beginPath();
-			context.arc( 256/4, 256/4, 150/4, 0, 2*Math.PI );
+			context.arc( 64, 64, 38, 0, 2*Math.PI );
 			context.fill();
 
 			var ground = new Mesh(
@@ -894,7 +770,6 @@ const MODEL_PATH = import.meta.url.replace( '/src/body.js', '/assets/models/' );
 
 
 
-console.time( 'Preload' );
 var loader = new GLTFLoader();
 
 var [ gltf_man, gltf_woman, gltf_child ] = await Promise.all(
@@ -904,121 +779,90 @@ var [ gltf_man, gltf_woman, gltf_child ] = await Promise.all(
 		loader.loadAsync( MODEL_PATH + URL ),
 	]
 );
-console.timeEnd( 'Preload' );
 
 
 
-function toRad( x ) {
+// dummy vars
+var _mat = new Matrix3(),
+	_m = new Matrix3(),
+	_v = new Vector3();
 
-	return x * ( 2*Math.PI/360 );
+
+
+var toRad = x => x * ( 2*Math.PI/360 ),
+	toDeg = x => x / ( 2*Math.PI/360 );
+
+function getset( object, name, xyz ) {
+
+	Object.defineProperty( object, name, {
+		get() {
+
+			return toDeg( object.angle[ xyz ]);
+
+		},
+		set( value ) {
+
+			object.angle[ xyz ] = toRad( value );
+
+		}
+	} );
 
 }
 
 
+class Joint extends Group {
 
-function toDeg( x ) {
+	constructor( model, isRight, parent, space, spaceAux=space, axes='xyz' ) {
 
-	return x / ( 2*Math.PI/360 );
-
-}
-
-
-
-class Joint {
-
-	constructor( model, space, jointX, jointY, jointZ, nameX='x', nameY='y', nameZ='z' ) {
+		super();
 
 		this.model = model;
+		this.isRight = isRight;
+		this.parent = parent;
 		this.pivot = space.pivot;
-		this.jointX = jointX;
-		this.jointY = jointY ?? jointX;
-		this.jointZ = jointZ ?? jointX;
-		this.nameX = nameX;
-		this.nameY = nameY;
-		this.nameZ = nameZ;
+		this.angle = space.angle;
+		this.matrix = space.matrix;
+		this.angleAux = spaceAux.angle;
 
-	}
+		this.nameY = axes[ 1 ];
 
-	// bend raise turn tilt straddle
+		this.position.copy( space.pivot );
 
-	get bend( ) {
-
-		return toDeg( this.jointX[ this.nameX ]);
-
-	}
-
-	set bend( a ) {
-
-		this.jointX[ this.nameX ] = toRad( a );
-
-	}
-
-	get raise( ) {
-
-		return toDeg( this.jointX[ this.nameX ]);
-
-	}
-
-	set raise( a ) {
-
-		this.jointX[ this.nameX ] = toRad( a );
+		getset( this, 'bend', axes[ 0 ]);
+		getset( this, 'raise', axes[ 0 ]);
+		getset( this, 'tilt', axes[ 2 ]);
+		getset( this, 'straddle', axes[ 2 ]);
+		getset( this, 'foreward', axes[ 0 ]);
 
 	}
 
 	get turn( ) {
 
-		return toDeg( this.jointY[ this.nameY ]);
+		return toDeg( this.angleAux[ this.nameY ]);
 
 	}
 	set turn( a ) {
 
-		this.jointY[ this.nameY ] = toRad( a );
-
-	}
-
-	get tilt( ) {
-
-		return toDeg( this.jointZ[ this.nameZ ]);
-
-	}
-
-	set tilt( a ) {
-
-		this.jointZ[ this.nameZ ] = toRad( a );
-
-	}
-
-	get straddle( ) {
-
-		return toDeg( this.jointZ[ this.nameZ ]);
-
-	}
-
-	set straddle( a ) {
-
-		this.jointZ[ this.nameZ ] = toRad( a );
-
-	}
-
-	get foreward( ) {
-
-		return toDeg( this.jointX[ this.nameX ]);
-
-	}
-
-	set foreward( a ) {
-
-		this.jointX[ this.nameX ] = toRad( a );
+		this.angleAux[ this.nameY ] = toRad( a );
 
 	}
 
 	attach( mesh ) {
 
-		//mesh.position.copy( this.pivot );
-		//mesh.material = this.model.children[0].material;
-		//this.model.children[0].add( mesh );
-		mesh.matrixAutoUpdate = false;
-		this.model.add( mesh );
+		if ( mesh.parent ) mesh = mesh.clone();
+
+		var wrapper = new Group();
+		var subwrapper = new Group();
+
+		wrapper.add( subwrapper );
+		subwrapper.add( mesh );
+		subwrapper.rotation.z = this.isRight ? Math.PI : 0;
+		mesh.position.y *= this.isRight ? -1 : 1;
+		wrapper.matrixAutoUpdate = false;
+		wrapper.joint = this;
+
+		this.model.children[ 0 ].add( wrapper );
+		this.model.accessories.push( wrapper );
 
 	}
 
@@ -1028,11 +872,11 @@ class Joint {
 
 
 
-var m = new THREE.Matrix4(),
-	e = new THREE.Euler(),
+var m = new Matrix4(),
+	e = new Euler(),
 	_uid = 1;
 
-class Disfigure extends THREE.Group {
+class Disfigure extends Group {
 
 
 	constructor( gltf, space, height ) {
@@ -1048,12 +892,14 @@ class Disfigure extends THREE.Group {
 		this.castShadow = true;
 		this.receiveShadow = true;
 
+		this.accessories = [];
+
 		// dimensions of the body, including its height
 		this.dims = {};
 		this.space = {};
 
 		// reduce the hierarchy of the model
-		var model = new THREE.Mesh( gltf.scene.children[ 0 ].geometry );
+		var model = new Mesh( gltf.scene.children[ 0 ].geometry );
 
 		// center the model and get its dimensions
 		centerModel( model, this.dims );
@@ -1061,52 +907,36 @@ class Disfigure extends THREE.Group {
 		// create the space around the model
 		this.space = new Space( this.dims, space );
 
+		this.waist = new Joint( this, false, null, this.space.waist );
+		this.chest = new Joint( this, false, this.waist, this.space.chest );
+		this.head = new Joint( this, false, this.chest, this.space.head );
 
-		// posture of the body, containing only angles
-		this.posture = tslPosture( );
+		this.legLeft = new Joint( this, false, this.waist, this.space.legLeft, this.space.legLongLeft );
+		this.kneeLeft = new Joint( this, false, this.legLeft, this.space.kneeLeft );
+		this.ankleLeft = new Joint( this, false, this.kneeLeft, this.space.ankleLeft, this.space.ankleLongLeft );
+		this.footLeft = new Joint( this, false, this.ankleLeft, this.space.footLeft );
 
-		this.head = new Joint( this, this.space.head, this.posture.head );
-		this.chest = new Joint( this, this.space.chest, this.posture.chest );
-		this.waist = new Joint( this, this.space.waist, this.posture.waist );
+		this.legRight = new Joint( this, true, this.waist, this.space.legRight, this.space.legLongRight );
+		this.kneeRight = new Joint( this, true, this.legRight, this.space.kneeRight );
+		this.ankleRight = new Joint( this, true, this.kneeRight, this.space.ankleRight, this.space.ankleLongRight );
+		this.footRight = new Joint( this, true, this.ankleRight, this.space.footRight );
 
-		this.legLeft = new Joint( this, this.space.legLeft, this.posture.legLeft, this.posture.legLongLeft );
-		this.kneeLeft = new Joint( this, this.space.kneeLeft, this.posture.kneeLeft );
-		this.ankleLeft = new Joint( this, this.space.ankleLeft, this.posture.ankleLeft, this.posture.ankleLongLeft );
-		this.footLeft = new Joint( this, this.space.footLeft, this.posture.footLeft );
+		this.armLeft = new Joint( this, false, this.chest, this.space.armLeft, this.space.armLeft, 'yxz' );
+		this.elbowLeft = new Joint( this, false, this.armLeft, this.space.elbowLeft, this.space.elbowLeft, 'yxz' );
+		this.wristLeft = new Joint( this, false, this.elbowLeft, this.space.wristLeft, this.space.forearmLeft, 'zxy' );
 
-		this.legRight = new Joint( this, this.space.legRight, this.posture.legRight, this.posture.legLongRight );
-		this.kneeRight = new Joint( this, this.space.kneeRight, this.posture.kneeRight );
-		this.ankleRight = new Joint( this, this.space.ankleRight, this.posture.ankleRight, this.posture.ankleLongRight );
-		this.footRight = new Joint( this, this.space.footRight, this.posture.footRight );
-
-		this.armLeft = new Joint( this, this.space.armLeft, this.posture.armLeft, this.posture.armLeft, this.posture.armLeft, 'y', 'x', 'z' );
-		this.elbowLeft = new Joint( this, this.space.elbowLeft, this.posture.elbowLeft, null, null, 'y' );
-		this.wristLeft = new Joint( this, this.space.wristLeft, this.posture.wristLeft, this.posture.forearmLeft, this.posture.wristLeft, 'z', 'x', 'y' );
-
-		this.armRight = new Joint( this, this.space.armRight, this.posture.armRight, this.posture.armRight, this.posture.armRight, 'y', 'x', 'z' );
-		this.elbowRight = new Joint( this, this.space.elbowRight, this.posture.elbowRight, null, null, 'y' );
-		this.wristRight = new Joint( this, this.space.wristRight, this.posture.wristRight, this.posture.forearmRight, this.posture.wristRight, 'z', 'x', 'y' );
-
-
+		this.armRight = new Joint( this, true, this.chest, this.space.armRight, this.space.armRight, 'yxz' );
+		this.elbowRight = new Joint( this, true, this.armRight, this.space.elbowRight, this.space.elbowRight, 'yxz' );
+		this.wristRight = new Joint( this, true, this.elbowRight, this.space.wristRight, this.space.forearmRight, 'zxy' );
 
 		// sets the materials of the model hooking them to TSL functions
-		ennodeModel( model, this.space, this.posture,
-			{	// nodes
-				positionNode: tslPositionNode, // rigging
-				normalNode: tslNormalNode, // lighting
-				colorNode: Fn( ()=>{
-
-					return vec3( 0xFE/0xFF, 0xD1/0xFF, 0xB9/0xFF ).pow( 2.2 );
-
-				} ),
-			},
-			{	// additional material properties
-				metalness: 0,
-				roughness: 0.6,
-			} );
-
-		// move the model so it stands on plane y=0
-		model.position.y = -this.dims.y/2;
+		model.material = new MeshPhysicalNodeMaterial( {
+			positionNode: tslPositionNode( { space: this.space } ),
+			normalNode: tslNormalNode( { space: this.space } ),
+			colorNode: vec3( 0xFE/0xFF, 0xD1/0xFF, 0xB9/0xFF ).pow( 2.2 ),
+			metalness: 0,
+			roughness: 0.6,
+		} );
 
 		// rescale the model to the desired height (optional)
 		if ( height ) {
@@ -1119,6 +949,7 @@ class Disfigure extends THREE.Group {
 		model.receiveShadow = true;
 
 		this.model = model;
+		this.torso = model;
 		this.add( model );
 
 		// register the model
@@ -1139,43 +970,63 @@ class Disfigure extends THREE.Group {
 
 		}
 
-		anglesToMatrix( this.posture.headMatrix, this.posture.head, -1, -1, 1, 'YZX' );
-		anglesToMatrix( this.posture.chestMatrix, this.posture.chest, -1, -1, 1, 'YZX' );
-		anglesToMatrix( this.posture.waistMatrix, this.posture.waist, -1, 1, 1, 'YZX' );
+		anglesToMatrix( this.space.head.matrix, this.space.head.angle, -1, -1, 1, 'YZX' );
+		anglesToMatrix( this.space.chest.matrix, this.space.chest.angle, -1, -1, 1, 'YZX' );
+		anglesToMatrix( this.space.waist.matrix, this.space.waist.angle, -1, 1, 1, 'YZX' );
 
-		anglesToMatrix( this.posture.elbowLeftMatrix, this.posture.elbowLeft, 0, 1, 0, 'YZX' );
-		anglesToMatrix( this.posture.elbowRightMatrix, this.posture.elbowRight, 0, -1, 0, 'YZX' );
+		anglesToMatrix( this.space.elbowLeft.matrix, this.space.elbowLeft.angle, 0, 1, 0, 'YZX' );
+		anglesToMatrix( this.space.elbowRight.matrix, this.space.elbowRight.angle, 0, -1, 0, 'YZX' );
 
 		// wrist: tilt bend
-		anglesToMatrix( this.posture.wristLeftMatrix, this.posture.wristLeft, 0, 1, 1, 'YZX' );
-		anglesToMatrix( this.posture.wristRightMatrix, this.posture.wristRight, 0, -1, -1, 'YZX' );
+		anglesToMatrix( this.space.wristLeft.matrix, this.space.wristLeft.angle, 0, 1, 1, 'YZX' );
+		anglesToMatrix( this.space.wristRight.matrix, this.space.wristRight.angle, 0, -1, -1, 'YZX' );
 
 		// wrist: turn
-		anglesToMatrix( this.posture.forearmLeftMatrix, this.posture.forearmLeft, -1, 0, 0, 'YZX' );
-		anglesToMatrix( this.posture.forearmRightMatrix, this.posture.forearmRight, -1, 0, 0, 'YZX' );
+		anglesToMatrix( this.space.forearmLeft.matrix, this.space.forearmLeft.angle, -1, 0, 0, 'YZX' );
+		anglesToMatrix( this.space.forearmRight.matrix, this.space.forearmRight.angle, -1, 0, 0, 'YZX' );
 
-		anglesToMatrix( this.posture.armLeftMatrix, this.posture.armLeft, -1, 1, 1, 'XZY' );
-		anglesToMatrix( this.posture.armRightMatrix, this.posture.armRight, -1, -1, -1, 'XZY' );
+		anglesToMatrix( this.space.armLeft.matrix, this.space.armLeft.angle, -1, 1, 1, 'XZY' );
+		anglesToMatrix( this.space.armRight.matrix, this.space.armRight.angle, -1, -1, -1, 'XZY' );
 
-		anglesToMatrix( this.posture.kneeLeftMatrix, this.posture.kneeLeft, -1, 0, 0, 'YZX' );
-		anglesToMatrix( this.posture.kneeRightMatrix, this.posture.kneeRight, -1, 0, 0, 'YZX' );
+		anglesToMatrix( this.space.kneeLeft.matrix, this.space.kneeLeft.angle, -1, 0, 0, 'YZX' );
+		anglesToMatrix( this.space.kneeRight.matrix, this.space.kneeRight.angle, -1, 0, 0, 'YZX' );
 
-		anglesToMatrix( this.posture.ankleLeftMatrix, this.posture.ankleLeft, -1, 0, -1, 'YZX' );
-		anglesToMatrix( this.posture.ankleRightMatrix, this.posture.ankleRight, -1, 0, 1, 'YZX' );
+		anglesToMatrix( this.space.ankleLeft.matrix, this.space.ankleLeft.angle, -1, 0, -1, 'YZX' );
+		anglesToMatrix( this.space.ankleRight.matrix, this.space.ankleRight.angle, -1, 0, 1, 'YZX' );
 
-		anglesToMatrix( this.posture.ankleLongLeftMatrix, this.posture.ankleLongLeft, 0, -1, 0, 'YZX' );
-		anglesToMatrix( this.posture.ankleLongRightMatrix, this.posture.ankleLongRight, 0, 1, 0, 'YZX' );
+		anglesToMatrix( this.space.ankleLongLeft.matrix, this.space.ankleLongLeft.angle, 0, -1, 0, 'YZX' );
+		anglesToMatrix( this.space.ankleLongRight.matrix, this.space.ankleLongRight.angle, 0, 1, 0, 'YZX' );
 
-		anglesToMatrix( this.posture.footLeftMatrix, this.posture.footLeft, -1, 0, 0, 'YZX' );
-		anglesToMatrix( this.posture.footRightMatrix, this.posture.footRight, -1, 0, 0, 'YZX' );
+		anglesToMatrix( this.space.footLeft.matrix, this.space.footLeft.angle, -1, 0, 0, 'YZX' );
+		anglesToMatrix( this.space.footRight.matrix, this.space.footRight.angle, -1, 0, 0, 'YZX' );
 
 		// legs turn
-		anglesToMatrix( this.posture.legLongLeftMatrix, this.posture.legLongLeft, 0, -1, 0, 'YZX' );
-		anglesToMatrix( this.posture.legLongRightMatrix, this.posture.legLongRight, 0, 1, 0, 'YZX' );
+		anglesToMatrix( this.space.legLongLeft.matrix, this.space.legLongLeft.angle, 0, -1, 0, 'YZX' );
+		anglesToMatrix( this.space.legLongRight.matrix, this.space.legLongRight.angle, 0, 1, 0, 'YZX' );
 
 		// leg: foreward ??? straddle
-		anglesToMatrix( this.posture.legLeftMatrix, this.posture.legLeft, 1, 0, -1, 'YZX' );
-		anglesToMatrix( this.posture.legRightMatrix, this.posture.legRight, 1, 0, 1, 'YZX' );
+		anglesToMatrix( this.space.legLeft.matrix, this.space.legLeft.angle, 1, 0, -1, 'YZX' );
+		anglesToMatrix( this.space.legRight.matrix, this.space.legRight.angle, 1, 0, 1, 'YZX' );
+
+		for ( var wrapper of this.accessories ) {
+
+			var b = wrapper.joint;
+
+			_m.identity();
+			_v.copy( b.pivot );
+
+			for ( ; b; b=b.parent ) {
+
+				_mat.copy( b.matrix.value ).transpose();
+				_m.premultiply( _mat );
+				_v.sub( b.pivot ).applyMatrix3( _mat ).add( b.pivot );
+
+			}
+
+			wrapper.matrix.setFromMatrix3( _m );
+			wrapper.matrix.setPosition( _v );
+
+		}
 
 	}
 
@@ -1191,6 +1042,8 @@ class Man extends Disfigure {
 
 		this.url = MODEL_PATH + URL$2;
 
+		this.position.y = this.dims.height/2 - 0.01;
+
 		this.legLeft.straddle = 5;
 		this.legRight.straddle = 5;
 
@@ -1199,8 +1052,6 @@ class Man extends Disfigure {
 
 		this.ankleLeft.bend = 3;
 		this.ankleRight.bend = 3;
-
-		this.position.y = -5e-3;
 
 		this.armLeft.straddle = 65;
 		this.armRight.straddle = 65;
@@ -1222,6 +1073,8 @@ class Woman extends Disfigure {
 
 		this.url = MODEL_PATH + URL$1;
 
+		this.position.y = this.dims.height/2 - 0.005;
+
 		this.legLeft.straddle = -2.9;
 		this.legRight.straddle = -2.9;
 
@@ -1230,8 +1083,6 @@ class Woman extends Disfigure {
 
 		this.ankleLeft.bend = 3;
 		this.ankleRight.bend = 3;
-
-		this.position.y = -5e-3;
 
 		this.armLeft.straddle = 65;
 		this.armRight.straddle = 65;
@@ -1253,10 +1104,10 @@ class Child extends Disfigure {
 
 		this.url = MODEL_PATH + URL;
 
+		this.position.y = this.dims.height/2 - 0.005;
+
 		this.ankleLeft.bend = 3;
 		this.ankleRight.bend = 3;
-
-		this.position.y = -5e-3;
 
 		this.armLeft.straddle = 65;
 		this.armRight.straddle = 65;
@@ -1267,5 +1118,14 @@ class Child extends Disfigure {
 	} // Child.constructor
 
 } // Child
+
+// disfigure
+//
+// A software burrito that wraps everything in a single file
+// and exports only the things that I think someone might need.
+
+
+
+console.log( '%c\n\u22EE\u22EE\u22EE%cDISFIGURE\n\n', 'font-size:200%', 'font-size:150%; display:inline-block; padding:0.15em;' );
 
 export { Child, Man, Woman, World, camera, cameraLight, chaotic, controls, everybody, light, regular, renderer, scene, setAnimationLoop };

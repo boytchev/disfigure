@@ -4,28 +4,28 @@
 // Functions to generate motion by bending a body as if it has joints and muscles
 
 
-import { Vector3 } from 'three';
-import { Fn, If, mat3, mix, normalGeometry, positionGeometry, transformNormalToView, uniform } from "three/tsl";
+
+import { Fn, If, mix, normalGeometry, positionGeometry, transformNormalToView } from "three/tsl";
 
 
 
 // general DOF=3 rotator, used for most joints
-var jointRotateMat= Fn( ([ pos, joint, mat ])=>{
+var jointRotateMat= Fn( ([ pos, joint ])=>{
 
-	var p = pos.sub( joint.pivot ).mul( mat ).add( joint.pivot );
+	var p = pos.sub( joint.pivot ).mul( joint.matrix ).add( joint.pivot );
 	return mix( pos, p, joint.locus() );
 
-} );//, { pos: 'vec3', center: 'vec3', amount: 'float', mat: 'mat3', return: 'vec3' } );
+} );
 
 
 
 // general DOF=3 rotator, used for most joints
-var jointNormalMat= Fn( ([ pos, joint, mat ])=>{
+var jointNormalMat= Fn( ([ pos, joint ])=>{
 
-	var p = pos.mul( mat );
+	var p = pos.mul( joint.matrix );
 	return mix( pos, p, joint.locus() );
 
-} );//, { pos: 'vec3', center: 'vec3', amount: 'float', mat: 'mat3', return: 'vec3' } );
+} );
 
 
 
@@ -52,25 +52,21 @@ function tslNormalNode( options ) {
 }
 
 
-
 // implement the actual body bending
 //		space - compiled definition of the space around the body
-//		posture - collection of angles for body posture
 //		vertex - vertex or normal coordinates to use as input data
-var disfigure = Fn( ( { fn, space, posture, vertex } )=>{
+var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 	var p = vertex.toVar();
 
 	// LEFT-UPPER BODY
 
-	var armLeft = space.armLeft.locus( ).toVar();
+	If( space.armLeft.locus( ), ()=>{
 
-	If( armLeft.greaterThan( 0 ), ()=>{
-
-		p.assign( fn( p, space.wristLeft, posture.wristLeftMatrix ) );
-		p.assign( fn( p, space.forearmLeft, posture.forearmLeftMatrix ) );
-		p.assign( fn( p, space.elbowLeft, posture.elbowLeftMatrix ) );
-		p.assign( fn( p, space.armLeft, posture.armLeftMatrix ) );
+		p.assign( fn( p, space.wristLeft ) );
+		p.assign( fn( p, space.forearmLeft ) );
+		p.assign( fn( p, space.elbowLeft ) );
+		p.assign( fn( p, space.armLeft ) );
 
 	} );
 
@@ -78,14 +74,12 @@ var disfigure = Fn( ( { fn, space, posture, vertex } )=>{
 
 	// RIGHT-UPPER BODY
 
-	var armRight = space.armRight.locus( ).toVar();
+	If( space.armRight.locus( ), ()=>{
 
-	If( armRight.greaterThan( 0 ), ()=>{
-
-		p.assign( fn( p, space.wristRight, posture.wristRightMatrix ) );
-		p.assign( fn( p, space.forearmRight, posture.forearmRightMatrix ) );
-		p.assign( fn( p, space.elbowRight, posture.elbowRightMatrix ) );
-		p.assign( fn( p, space.armRight, posture.armRightMatrix ) );
+		p.assign( fn( p, space.wristRight ) );
+		p.assign( fn( p, space.forearmRight ) );
+		p.assign( fn( p, space.elbowRight ) );
+		p.assign( fn( p, space.armRight ) );
 
 	} );
 
@@ -93,24 +87,22 @@ var disfigure = Fn( ( { fn, space, posture, vertex } )=>{
 
 	// CENTRAL BODY AXIS
 
-	p.assign( fn( p, space.head, posture.headMatrix ) );
-	p.assign( fn( p, space.chest, posture.chestMatrix ) );
-	p.assign( fn( p, space.waist, posture.waistMatrix ) );
+	p.assign( fn( p, space.head ) );
+	p.assign( fn( p, space.chest ) );
+	p.assign( fn( p, space.waist ) );
 
 
 
 	// LEFT-LOWER BODY
 
-	var legLeft = space.legLeft.locus( ).toVar();
+	If( space.legLeft.locus( ), ()=>{
 
-	If( legLeft.greaterThan( 0 ), ()=>{
-
-		p.assign( fn( p, space.footLeft, posture.footLeftMatrix ) );
-		p.assign( fn( p, space.ankleLeft, posture.ankleLeftMatrix ) );
-		p.assign( fn( p, space.ankleLongLeft, posture.ankleLongLeftMatrix ) );
-		p.assign( fn( p, space.kneeLeft, posture.kneeLeftMatrix ) );
-		p.assign( fn( p, space.legLongLeft, posture.legLongLeftMatrix ) );
-		p.assign( fn( p, space.legLeft, posture.legLeftMatrix ) );
+		p.assign( fn( p, space.footLeft ) );
+		p.assign( fn( p, space.ankleLeft ) );
+		p.assign( fn( p, space.ankleLongLeft ) );
+		p.assign( fn( p, space.kneeLeft ) );
+		p.assign( fn( p, space.legLongLeft ) );
+		p.assign( fn( p, space.legLeft ) );
 
 	} );
 
@@ -118,16 +110,14 @@ var disfigure = Fn( ( { fn, space, posture, vertex } )=>{
 
 	// RIGHT-LOWER BODY
 
-	var legRight = space.legRight.locus( ).toVar();
+	If( space.legRight.locus( ), ()=>{
 
-	If( legRight.greaterThan( 0 ), ()=>{
-
-		p.assign( fn( p, space.footRight, posture.footRightMatrix ) );
-		p.assign( fn( p, space.ankleRight, posture.ankleRightMatrix ) );
-		p.assign( fn( p, space.ankleLongRight, posture.ankleLongRightMatrix ) );
-		p.assign( fn( p, space.kneeRight, posture.kneeRightMatrix ) );
-		p.assign( fn( p, space.legLongRight, posture.legLongRightMatrix ) );
-		p.assign( fn( p, space.legRight, posture.legRightMatrix ) );
+		p.assign( fn( p, space.footRight ) );
+		p.assign( fn( p, space.ankleRight ) );
+		p.assign( fn( p, space.ankleLongRight ) );
+		p.assign( fn( p, space.kneeRight ) );
+		p.assign( fn( p, space.legLongRight ) );
+		p.assign( fn( p, space.legRight ) );
 
 	} );
 
@@ -137,74 +127,4 @@ var disfigure = Fn( ( { fn, space, posture, vertex } )=>{
 
 
 
-// create a default posture
-function tslPosture( ) {
-
-	return {
-
-
-		// TORSO
-		head: new Vector3( ),
-		chest: new Vector3( ),
-		waist: new Vector3( ),
-
-		// TORSO
-		headMatrix: uniform( mat3() ),
-		chestMatrix: uniform( mat3() ),
-		waistMatrix: uniform( mat3() ),
-
-		// LEGS
-		kneeLeft: new Vector3( ),
-		kneeRight: new Vector3( ),
-		ankleLeft: new Vector3( ),
-		ankleRight: new Vector3( ),
-		footLeft: new Vector3( ),
-		footRight: new Vector3( ),
-		legLeft: new Vector3( ),
-		legLongLeft: new Vector3( ),
-		legRight: new Vector3( ),
-		legLongRight: new Vector3( ),
-		ankleLongLeft: new Vector3( ),
-		ankleLongRight: new Vector3( ),
-
-		// LEGS
-		kneeLeftMatrix: uniform( mat3() ),
-		kneeRightMatrix: uniform( mat3() ),
-		ankleLeftMatrix: uniform( mat3() ),
-		ankleRightMatrix: uniform( mat3() ),
-		footLeftMatrix: uniform( mat3() ),
-		footRightMatrix: uniform( mat3() ),
-		legLeftMatrix: uniform( mat3() ),
-		legLongLeftMatrix: uniform( mat3() ),
-		legRightMatrix: uniform( mat3() ),
-		legLongRightMatrix: uniform( mat3() ),
-		ankleLongLeftMatrix: uniform( mat3() ),
-		ankleLongRightMatrix: uniform( mat3() ),
-
-		// ARMS
-		elbowLeft: new Vector3( ),
-		elbowRight: new Vector3( ),
-		forearmLeft: new Vector3( ),
-		forearmRight: new Vector3( ),
-		wristLeft: new Vector3( ),
-		wristRight: new Vector3( ),
-		armLeft: new Vector3( ),
-		armRight: new Vector3( ),
-
-		// ARMS
-		armLeftMatrix: uniform( mat3() ),
-		armRightMatrix: uniform( mat3() ),
-		elbowLeftMatrix: uniform( mat3() ),
-		elbowRightMatrix: uniform( mat3() ),
-		forearmLeftMatrix: uniform( mat3() ),
-		forearmRightMatrix: uniform( mat3() ),
-		wristLeftMatrix: uniform( mat3() ),
-		wristRightMatrix: uniform( mat3() ),
-
-	};
-
-}
-
-
-
-export { tslPositionNode, tslNormalNode, tslPosture };
+export { tslPositionNode, tslNormalNode };

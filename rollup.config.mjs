@@ -48,56 +48,5 @@ export default [
 				}
 			})
 		]
-	},
-	
-	{
-		input: './src/disfigure.js',
-		output: {
-			file: `dist/cjs/disfigure.js`,
-			format: 'cjs',
-			banner: `// disfigure v${pkg.version}\n`,
-			sourcemap: false
-		},
-		external: [
-			'three',
-			'three/tsl',
-			'three/addons/libs/lil-gui.module.min.js',
-			'three/addons/libs/stats.module.js',
-			'three/addons/controls/OrbitControls.js',
-			'three/addons/loaders/GLTFLoader.js',
-			'three/addons/math/SimplexNoise.js'
-		],
-		plugins: [
-			resolve(),
-			commonjs()
-		]
-	},
-	
-	{
-		input: './src/disfigure.js',
-		output: {
-			file: `dist/cjs/disfigure.min.js`,
-			format: 'cjs',
-			banner: `/*! disfigure v${pkg.version} */\n`,
-			sourcemap: false
-		},
-		external: [
-			'three',
-			'three/tsl',
-			'three/addons/libs/lil-gui.module.min.js',
-			'three/addons/libs/stats.module.js',
-			'three/addons/controls/OrbitControls.js',
-			'three/addons/loaders/GLTFLoader.js',
-			'three/addons/math/SimplexNoise.js'
-		],
-		plugins: [
-			resolve(),
-			commonjs(),
-			terser({
-				format: {
-					comments: 'some'
-				}
-			})
-		]
 	}
 ];

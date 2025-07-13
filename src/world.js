@@ -95,14 +95,14 @@ class World {
 
 			// generate ground texture
 			var canvas = document.createElement( 'CANVAS' );
-			canvas.width = 512/4;
-			canvas.height = 512/4;
+			canvas.width = 128;
+			canvas.height = 128;
 
 			var context = canvas.getContext( '2d' );
 			context.fillStyle = 'white';
 			context.filter = 'blur(10px)';
 			context.beginPath();
-			context.arc( 256/4, 256/4, 150/4, 0, 2*Math.PI );
+			context.arc( 64, 64, 38, 0, 2*Math.PI );
 			context.fill();
 
 			var ground = new Mesh(
