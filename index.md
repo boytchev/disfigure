@@ -4,7 +4,7 @@
 
 A library to rig boneless and morphless 3D models. **WIP.**
 
-[<img style="border:solid 1px black;" src="https://boytchev.github.io/disfigure/docs/snapshots/poser-prototype.jpg">](https://boytchev.github.io/disfigure/src/poser)
+[<img style="border:solid 1px black;" src="https://boytchev.github.io/disfigure/docs/snapshots/poser-prototype.jpg">](https://boytchev.github.io/disfigure/poser)
 
 
 ### Documentation (work in progress)
