@@ -285,6 +285,7 @@ class Space {
 		this.head = bodyParts.head;
 		this.chest = bodyParts.chest;
 		this.waist = bodyParts.waist;
+		this.torso = bodyParts.torso;
 
 		// legs
 		this.kneeLeft = bodyParts?.kneeLeft ?? bodyParts.knee;

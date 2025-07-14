@@ -1,3 +1,9 @@
+v0.0.18
+  - added torso with bend, turn, tilt
+
+v0.0.17
+  - minor fixes in links
+  
 v0.0.16
   - labels
   - attached objects to body

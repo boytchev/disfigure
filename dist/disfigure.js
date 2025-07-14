@@ -1,4 +1,4 @@
-// disfigure v0.0.15
+// disfigure v0.0.17
 
 import { Vector3, Box3, WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Matrix3, Matrix4, Euler, Group, MeshPhysicalNodeMaterial } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -956,6 +956,8 @@ class Disfigure extends Group {
 		everybody.push( this );
 		if ( scene ) scene.add( this );
 
+		this.armLeft.straddle = this.armRight.straddle = 65;
+		this.elbowLeft.bend = this.elbowRight.bend = 20;
 
 	} // Disfigure.constructor
 
@@ -1028,7 +1030,7 @@ class Disfigure extends Group {
 
 		}
 
-	}
+	} // Disfigure.update
 
 } // Disfigure
 
@@ -1044,20 +1046,9 @@ class Man extends Disfigure {
 
 		this.position.y = this.dims.height/2 - 0.01;
 
-		this.legLeft.straddle = 5;
-		this.legRight.straddle = 5;
-
-		this.ankleLeft.tilt = -5;
-		this.ankleRight.tilt = -5;
-
-		this.ankleLeft.bend = 3;
-		this.ankleRight.bend = 3;
-
-		this.armLeft.straddle = 65;
-		this.armRight.straddle = 65;
-
-		this.elbowLeft.bend = 20;
-		this.elbowRight.bend = 20;
+		this.legLeft.straddle = this.legRight.straddle = 5;
+		this.ankleLeft.tilt = this.ankleRight.tilt = -5;
+		this.ankleLeft.bend = this.ankleRight.bend = 3;
 
 	} // Man.constructor
 
@@ -1075,20 +1066,9 @@ class Woman extends Disfigure {
 
 		this.position.y = this.dims.height/2 - 0.005;
 
-		this.legLeft.straddle = -2.9;
-		this.legRight.straddle = -2.9;
-
-		this.ankleLeft.tilt = 2.9;
-		this.ankleRight.tilt = 2.9;
-
-		this.ankleLeft.bend = 3;
-		this.ankleRight.bend = 3;
-
-		this.armLeft.straddle = 65;
-		this.armRight.straddle = 65;
-
-		this.elbowLeft.bend = 20;
-		this.elbowRight.bend = 20;
+		this.legLeft.straddle = this.legRight.straddle = -2.9;
+		this.ankleLeft.tilt = this.ankleRight.tilt = 2.9;
+		this.ankleLeft.bend = this.ankleRight.bend = 3;
 
 	} // Woman.constructor
 
@@ -1106,14 +1086,7 @@ class Child extends Disfigure {
 
 		this.position.y = this.dims.height/2 - 0.005;
 
-		this.ankleLeft.bend = 3;
-		this.ankleRight.bend = 3;
-
-		this.armLeft.straddle = 65;
-		this.armRight.straddle = 65;
-
-		this.elbowLeft.bend = 20;
-		this.elbowRight.bend = 20;
+		this.ankleLeft.bend = this.ankleRight.bend = 3;
 
 	} // Child.constructor
 

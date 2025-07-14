@@ -164,7 +164,8 @@ class Disfigure extends Group {
 		// create the space around the model
 		this.space = new Space( this.dims, space );
 
-		this.waist = new Joint( this, false, null, this.space.waist );
+		this.torso = new Joint( this, false, null, this.space.torso );
+		this.waist = new Joint( this, false, this.torso, this.space.waist );
 		this.chest = new Joint( this, false, this.waist, this.space.chest );
 		this.head = new Joint( this, false, this.chest, this.space.head );
 
@@ -206,13 +207,15 @@ class Disfigure extends Group {
 		model.receiveShadow = true;
 
 		this.model = model;
-		this.torso = model;
+//		this.torso = model;
 		this.add( model );
 
 		// register the model
 		everybody.push( this );
 		if ( scene ) scene.add( this );
 
+		this.armLeft.straddle = this.armRight.straddle = 65;
+		this.elbowLeft.bend = this.elbowRight.bend = 20;
 
 	} // Disfigure.constructor
 
@@ -230,6 +233,7 @@ class Disfigure extends Group {
 		anglesToMatrix( this.space.head.matrix, this.space.head.angle, -1, -1, 1, 'YZX' );
 		anglesToMatrix( this.space.chest.matrix, this.space.chest.angle, -1, -1, 1, 'YZX' );
 		anglesToMatrix( this.space.waist.matrix, this.space.waist.angle, -1, 1, 1, 'YZX' );
+		anglesToMatrix( this.space.torso.matrix, this.space.torso.angle, -1, -1, 1, 'YZX' );
 
 		anglesToMatrix( this.space.elbowLeft.matrix, this.space.elbowLeft.angle, 0, 1, 0, 'YZX' );
 		anglesToMatrix( this.space.elbowRight.matrix, this.space.elbowRight.angle, 0, -1, 0, 'YZX' );
@@ -285,7 +289,7 @@ class Disfigure extends Group {
 
 		}
 
-	}
+	} // Disfigure.update
 
 } // Disfigure
 
@@ -299,22 +303,11 @@ class Man extends Disfigure {
 
 		this.url = MODEL_PATH + MAN.URL;
 
-		this.position.y = this.dims.height/2 - 0.01;
+		this.position.y = this.dims.height/2 - 0.015;
 
-		this.legLeft.straddle = 5;
-		this.legRight.straddle = 5;
-
-		this.ankleLeft.tilt = -5;
-		this.ankleRight.tilt = -5;
-
-		this.ankleLeft.bend = 3;
-		this.ankleRight.bend = 3;
-
-		this.armLeft.straddle = 65;
-		this.armRight.straddle = 65;
-
-		this.elbowLeft.bend = 20;
-		this.elbowRight.bend = 20;
+		this.legLeft.straddle = this.legRight.straddle = 5;
+		this.ankleLeft.tilt = this.ankleRight.tilt = -5;
+		this.ankleLeft.bend = this.ankleRight.bend = 3;
 
 	} // Man.constructor
 
@@ -332,20 +325,9 @@ class Woman extends Disfigure {
 
 		this.position.y = this.dims.height/2 - 0.005;
 
-		this.legLeft.straddle = -2.9;
-		this.legRight.straddle = -2.9;
-
-		this.ankleLeft.tilt = 2.9;
-		this.ankleRight.tilt = 2.9;
-
-		this.ankleLeft.bend = 3;
-		this.ankleRight.bend = 3;
-
-		this.armLeft.straddle = 65;
-		this.armRight.straddle = 65;
-
-		this.elbowLeft.bend = 20;
-		this.elbowRight.bend = 20;
+		this.legLeft.straddle = this.legRight.straddle = -2.9;
+		this.ankleLeft.tilt = this.ankleRight.tilt = 2.9;
+		this.ankleLeft.bend = this.ankleRight.bend = 3;
 
 	} // Woman.constructor
 
@@ -363,14 +345,7 @@ class Child extends Disfigure {
 
 		this.position.y = this.dims.height/2 - 0.005;
 
-		this.ankleLeft.bend = 3;
-		this.ankleRight.bend = 3;
-
-		this.armLeft.straddle = 65;
-		this.armRight.straddle = 65;
-
-		this.elbowLeft.bend = 20;
-		this.elbowRight.bend = 20;
+		this.ankleLeft.bend = this.ankleRight.bend = 3;
 
 	} // Child.constructor
 

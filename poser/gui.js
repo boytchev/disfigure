@@ -248,6 +248,10 @@ function createGui( ) {
 	folder = gui.addFolder( 'TORSO' );//.close();
 	{
 
+		folder.add( model.torso, 'bend', -200, 200 ).name( html( 'Torso', 'bend' ) );
+		folder.add( model.torso, 'turn', -200, 200 ).name( html( '', 'turn' ) );
+		folder.add( model.torso, 'tilt', -200, 200 ).name( html( '', 'tilt' ) );
+
 		folder.add( model.head, 'bend', -60, 40 ).name( html( 'Head', 'bend' ) );
 		folder.add( model.head, 'turn', -60, 60 ).name( html( '', 'turn' ) );
 		folder.add( model.head, 'tilt', -35, 35 ).name( html( '', 'tilt' ) );

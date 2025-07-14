@@ -64,11 +64,11 @@ function regular( time, offset=0, min=-1, max=1 ) {
 
 
 
-export
-{
-
+export {
+	
 	smoother,
 	centerModel,
 	chaotic,
 	regular,
+	
 };

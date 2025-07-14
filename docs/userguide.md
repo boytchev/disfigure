@@ -15,32 +15,25 @@
 - **[Other functions](#other-functions)** (<small>[Colors](#custom-colors) | [Body modification](#body-modification) | [Positioning](#global-position)</small>)
 - **[Using Mannequin.js](#using-mannequinjs)** (<small>[CDN](#running-from-a-cdn) | [local web server](#running-via-a-local-web-server) | [Nodes.js](#running-via-nodesjs) | [API](#api)</small>) 
 -->
+
 Disfigure is a library for animating human figures by modifying a matrix field
-of the space around them. Here is an absurdly minimal [live example](../examples/minimal-cdn.html).
+of the space around them. Here is an absurdly minimal [live example](minimal-cdn.html).
 
-```html
-<!DOCTYPE html>
-
-<script src="importmap.js"></script>
-<script type="module">
-
-	import * as Happy from 'disfigure'
+```js
+import * as Happy from 'disfigure'
 	
-	new Happy.World
-	new Happy.Man
-
-</script>
+new Happy.World
+new Happy.Man
 ```
 
 <!--
-# Body parts
+# Bodies
 
-### Figure types
+### Body shapes
 
-Mannequin figures are created as instances of classes `Male(height)`, `Female(height)`
-or `Child(height)`, where the optional *height* is the size of the figure in meters.
-By default `Male` has height 1.80, `Female` has height 1.65 and `Child` has height
-1.15 ([live example](example-figure-types.html)):
+Disfigure defines classes `Male(height)`, `Female(height)` and `Child(height)`,
+where the optional *height* is the height of the human body in meters
+ ([live example](example-figure-types.html)):
 
 [<img src="snapshots/example-figure-types.jpg">](example-figure-types.html)
 

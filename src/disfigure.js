@@ -6,7 +6,7 @@
 
 
 
-console.log( '%c\n\u22EE\u22EE\u22EE%cDISFIGURE\n\n', 'font-size:200%', 'font-size:150%; display:inline-block; padding:0.15em;' );
+console.log( '%c\u22EE\u22EE\u22EE DISFIGURE v0', 'display: block; padding:0.5em; font-size:150%; color: crimson;' );
 
 
 

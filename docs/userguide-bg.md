@@ -17,21 +17,13 @@
 -->
 
 Disfigure е библиотека за движение на фигури чрез промяна на матричното поле на
-пространството около тях. Ето абсурдно минимален 
-[пример на живо](../examples/minimal-cdn.html).
+пространството около тях. Ето абсурдно минимален [пример на живо](minimal-cdn.html).
 
-```html
-<!DOCTYPE html>
-
-<script src="importmap.js"></script>
-<script type="module">
-
-	import * as Happy from 'disfigure'
+```js
+import * as Happy from 'disfigure'
 	
-	new Happy.World
-	new Happy.Man
-
-</script>
+new Happy.World
+new Happy.Man
 ```
 
 

@@ -1,7 +1,7 @@
 ﻿
 // disfigure
 //
-// Functions to generate motion by bending a body as if it has joints and muscles
+// Functions to bend a body and the space it is in
 
 
 
@@ -47,7 +47,7 @@ function tslNormalNode( options ) {
 	options.vertex = normalGeometry;
 	options.fn = jointNormalMat;
 
-	return transformNormalToView( disfigure( options ) ).xyz;
+	return transformNormalToView( disfigure( options ) );
 
 }
 
@@ -85,14 +85,6 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 
 
-	// CENTRAL BODY AXIS
-
-	p.assign( fn( p, space.head ) );
-	p.assign( fn( p, space.chest ) );
-	p.assign( fn( p, space.waist ) );
-
-
-
 	// LEFT-LOWER BODY
 
 	If( space.legLeft.locus( ), ()=>{
@@ -120,6 +112,16 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 		p.assign( fn( p, space.legRight ) );
 
 	} );
+
+
+
+
+	// CENTRAL BODY AXIS
+
+	p.assign( fn( p, space.head ) );
+	p.assign( fn( p, space.chest ) );
+	p.assign( fn( p, space.waist ) );
+	p.assign( fn( p, space.torso ) );
 
 	return p;
 
