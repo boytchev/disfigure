@@ -35,32 +35,17 @@ new Happy.Man
 
 
 Disfigure дефинира класовете `Man(height)`, `Woman(height)`
-и `Child(height)`, където незадължителният параметър *height*
-е височината на човешкото тяло в метри. Телата се създават
-като инстанции на тези класове: ([пример на живо](body-shapes.html))
+и `Child(height)`, а телата се създават като инстанции на
+тези класове ([пример на живо](body-shapes.html)).
+Незадължителният параметър *height* определя височината на
+тялото в метри ([live example](body-heights.html)). По подразбиране
+мъж е висок 1.80м, жена е 1.70м и дете е 1.35м.
 
-[<img src="snapshots/body-shapes.jpg">](body-shapes.html)
+[<img src="snapshots/body-shapes.jpg" width="49%">](body-shapes.html)
+[<img src="snapshots/body-heights.jpg" width="49%">](body-heights.html)
 
-``` javascript
-var man = new Male();
- 
-var woman = new Female();
- 
-var kid = new Child();
-```
 
 <!--
-Тези три класа има общ родител &ndash; `Mannequin(feminine,height)`,
-в който булевият параметър *feminine* определя дали формата е женствена
-или мъжествена ([пример на живо](example-height.html)):
-
-[<img src="snapshots/example-height.jpg">](example-height.html)
-
-Разликата между използването на различните класове за фигури е в това, че
-`Mannequin` придава подразбираща се неутрална поза на фигурата, докато
-`Male` и `Female` придават мъжествена и женствена поза.
-
-
 
 Всички видове фигури имат една и съща структура. Например, дясната ръка
 в кръстена `r_arm`. За някои части на тялото mannequin.js използва името

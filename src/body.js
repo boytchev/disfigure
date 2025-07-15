@@ -167,6 +167,7 @@ class Disfigure extends Group {
 		// rescale the model to the desired height (optional)
 		this.height = height ?? modelHeight;
 		model.scale.setScalar( this.height / modelHeight );
+		model.position.y = 0;
 
 		model.castShadow = true;
 		model.receiveShadow = true;
@@ -293,7 +294,7 @@ class Man extends Disfigure {
 
 		this.url = MODEL_PATH + Man.URL;
 
-		this.position.y = this.height/2 - 0.015;
+		//this.position.y = this.height/2 - 0.015;
 
 		this.l_leg.straddle = this.r_leg.straddle = 5;
 		this.l_ankle.tilt = this.r_ankle.tilt = -5;
@@ -338,7 +339,7 @@ class Woman extends Disfigure {
 
 		this.url = MODEL_PATH + Woman.URL;
 
-		this.position.y = this.height/2 - 0.005;
+		//this.position.y = this.height/2 - 0.005;
 
 		this.l_leg.straddle = this.r_leg.straddle = -2.9;
 		this.l_ankle.tilt = this.r_ankle.tilt = 2.9;
@@ -383,7 +384,7 @@ class Child extends Disfigure {
 
 		this.url = MODEL_PATH + Child.URL;
 
-		this.position.y = this.height/2 - 0.005;
+		//this.position.y = this.height/2 - 0.005;
 
 		this.l_ankle.bend = this.r_ankle.bend = 3;
 

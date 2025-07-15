@@ -31,29 +31,19 @@ new Happy.Man
 
 ### Body shapes
 
-Disfigure defines classes `Male`, `Female` and `Child`,
-and bodies are created as instances of these classes:
-([live example](body-shapes.html))
+Disfigure defines classes `Male(height)`, `Female(height)`
+and `Child(height)`, and bodies are created as instances of
+these classes ([live example](body-shapes.html)). The optional
+parameter *height* defines the height of the body in meters
+ ([live example](body-heights.html)). By default a man is
+tall 1.80m, a woman is 1.70m and a child is 1.35m.
 
-[<img src="snapshots/body-shapes.jpg">](body-shapes.html)
+[<img src="snapshots/body-shapes.jpg" width="49%">](body-shapes.html)
+[<img src="snapshots/body-heights.jpg" width="49%">](body-heights.html)
 
-``` javascript
-var man = new Male();
- 
-var woman = new Female();
- 
-var kid = new Child();
-```
+
 
 <!--
-These three classes have a common predecessor &ndash; `Mannequin(feminine,height)`, where the boolean paremeter *feminine* defines whether the shape is feminine or masculine
- ([live example](example-height.html)):
-
-[<img src="snapshots/example-height.jpg">](example-height.html)
-
-The difference between using different figure classes is that `Mannequin` sets
-a default neutral posture of the figure, while `Male` and `Female` set a default
-male and female posture.
 
 All types of figures have the same structure. For example, the right arm of a figure is named `r_arm`. For some body parts mannequin.js uses the name of the joint &ndash; e.g. the left forearm is named `l_elbow`. Left and right body parts are always in respect to the figure, not to the viewer ([live example](example-body-parts.html)):
 

@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Custom heights for bodies</h3></br>
+	</header>
+
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		import * as Red from 'label';
+
+		new Happy.World();
+
+		for( var i=0; i<10; i++ )
+		{
+			var man = new Happy.Man( 1 + Math.random() );
+			
+			var a = i/10 * 2*Math.PI;
+			
+			man.position.set( 1.5*Math.cos(a), 0, 1.5*Math.sin(a) );
+			man.rotation.y = -Math.PI/2-a;
+			
+			var label = new Red.Label(man.height.toFixed(2), 1 );
+			label.position.set( 0, 0.3, 0 );
+			
+			man.head.attach( label );
+		}
+		
+	</script>
+</body>
+</html>
