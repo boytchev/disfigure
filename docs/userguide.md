@@ -50,7 +50,7 @@ always in respect to the figure. Their names have prefixes
 `l_` for left and `r_` for right, like `l_arm` and `r_arm`,
 ([live example](body-parts.html)):
 
-[<img src="snapshots/body-parts.jpg" width="49%">](body-parts.html)
+[<img src="snapshots/body-parts.jpg">](body-parts.html)
 
 <!--
 
