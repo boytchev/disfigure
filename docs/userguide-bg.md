@@ -31,7 +31,7 @@ new Happy.Man
 
 # Тела
 
-### Форми на тяло
+### Форми
 
 
 Disfigure дефинира класовете `Man(height)`, `Woman(height)`
@@ -45,13 +45,17 @@ Disfigure дефинира класовете `Man(height)`, `Woman(height)`
 [<img src="snapshots/body-heights.jpg" width="49%">](body-heights.html)
 
 
+Структура
+
+Всички видове тела имат една и съща структура, например главата
+е `head`. Левите и десните части на тялото са винаги спрямо
+тялото. Техните имена имат префикси `l_` за ляво и `r_` за
+дясно, например `l_arm` и `r_arm`, ([пример на живо](body-parts.html)):
+
+[<img src="snapshots/body-parts.jpg width="49%"">](body-parts.html)
+
 <!--
 
-Всички видове фигури имат една и съща структура. Например, дясната ръка
-в кръстена `r_arm`. За някои части на тялото mannequin.js използва името
-на ставата &ndash; напр. лявата предмишница е кръстена на лакъта `l_elbow`.
-Левите и десните части на тялото са винаги спрямо фигурата, а не спрямо
-потребителя ([пример на живо](example-body-parts.html)):
 
 
 [<img src="snapshots/example-body-parts.jpg">](example-body-parts.html)

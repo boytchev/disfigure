@@ -29,7 +29,7 @@ new Happy.Man
 
 # Bodies
 
-### Body shapes
+### Shapes
 
 Disfigure defines classes `Male(height)`, `Female(height)`
 and `Child(height)`, and bodies are created as instances of
@@ -42,14 +42,17 @@ tall 1.80m, a woman is 1.70m and a child is 1.35m.
 [<img src="snapshots/body-heights.jpg" width="49%">](body-heights.html)
 
 
+### Structure
+
+All types of bodies have the same structure, for example,
+the head is called `head`. Left and right body parts are
+always in respect to the figure. Their names have prefixes
+`l_` for left and `r_` for right, like `l_arm` and `r_arm`,
+([live example](body-parts.html)):
+
+[<img src="snapshots/body-parts.jpg" width="49%">](body-parts.html)
 
 <!--
-
-All types of figures have the same structure. For example, the right arm of a figure is named `r_arm`. For some body parts mannequin.js uses the name of the joint &ndash; e.g. the left forearm is named `l_elbow`. Left and right body parts are always in respect to the figure, not to the viewer ([live example](example-body-parts.html)):
-
-
-[<img src="snapshots/example-body-parts.jpg">](example-body-parts.html)
-
 
 Each body part has rotational properties that define its position. The values of the rotation properties are angles of rotation in degrees, so 180 is half turn and 360 is full turn. Negative angles are allowed and they represent rotations in the opposite directions. 
 

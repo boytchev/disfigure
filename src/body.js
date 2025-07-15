@@ -137,12 +137,12 @@ class Disfigure extends Group {
 		this.chest = new Joint( this, this.waist, this.space.chest );
 		this.head = new Joint( this, this.chest, this.space.head );
 
-		this.l_leg = new Joint( this, this.waist, this.space.l_leg, this.space.l_leg2 );
+		this.l_leg = new Joint( this, this.torso, this.space.l_leg, this.space.l_leg2 );
 		this.l_knee = new Joint( this, this.l_leg, this.space.l_knee );
 		this.l_ankle = new Joint( this, this.l_knee, this.space.l_ankle, this.space.l_ankle2 );
 		this.l_foot = new Joint( this, this.l_ankle, this.space.l_foot );
 
-		this.r_leg = new Joint( this, this.waist, this.space.r_leg, this.space.r_leg2 );
+		this.r_leg = new Joint( this, this.torso, this.space.r_leg, this.space.r_leg2 );
 		this.r_knee = new Joint( this, this.r_leg, this.space.r_knee );
 		this.r_ankle = new Joint( this, this.r_knee, this.space.r_ankle, this.space.r_ankle2 );
 		this.r_foot = new Joint( this, this.r_ankle, this.space.r_foot );
