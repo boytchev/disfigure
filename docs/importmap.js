@@ -8,7 +8,7 @@ var CDN = 'https://cdn.jsdelivr.net/npm';
 // add favicon
 var favicon = document.createElement( 'link' );
 favicon.setAttribute( 'rel', 'shortcut icon' );
-favicon.href = '../../assets/logo/favicon.ico';
+favicon.href = '../assets/logo/favicon.ico';
 
 document.querySelector( 'head' ).appendChild( favicon );
 
@@ -17,7 +17,7 @@ document.querySelector( 'head' ).appendChild( favicon );
 var css = document.createElement( 'link' );
 css.type = 'text/css';
 css.rel = 'stylesheet';
-css.href = '../../poser/styles.css';
+css.href = '../poser/styles.css';
 
 document.head.appendChild( css );
 
