@@ -8,7 +8,7 @@
 import * as THREE from "three";
 import * as lil from "three/addons/libs/lil-gui.module.min.js";
 import { float, Fn, If, mix, select, uniform, vec3 } from "three/tsl";
-import { decode, encode, LocusT, LocusX } from "../src/space.js";
+import { LocusT, LocusX } from "../src/space.js";
 import { scene, setAnimationLoop, World } from "../src/world.js";
 import { chaotic } from "../src/utils.js";
 import { Man } from "../src/body.js";
@@ -123,10 +123,10 @@ planes.visible = debug.showPlanes;
 
 function addCuttingPlanes( dims, model ) {
 
-	var grid = new THREE.GridHelper( dims.scale, 10, 'white', 'white' );
+	var grid = new THREE.GridHelper( 2, 10, 'white', 'white' );
 	grid.rotation.x = Math.PI/2;
 
-	var geo = new THREE.PlaneGeometry( dims.scale, dims.scale );
+	var geo = new THREE.PlaneGeometry( 2, 2 );
 	var mat = new THREE.MeshBasicMaterial( {
 		color: 'royalblue',
 		opacity: 0.5,
@@ -159,9 +159,9 @@ function addCuttingPlanes( dims, model ) {
 	p.add( grid.clone() );
 	planes.add( p );
 
-	planes.position.x = dims.x;
-	planes.position.y = dims.y+0.5*dims.scale;
-	planes.position.z = dims.z;
+	planes.position.x = 0;
+	planes.position.y = 0;
+	planes.position.z = 0;
 	model.add( planes );
 
 }
@@ -174,19 +174,19 @@ function updateDebug() {
 
 	if ( debugSpace instanceof LocusX && !( debugSpace instanceof LocusT ) ) {
 
-		debug.minY = encode( debugSpace.minX.value, dims.scale, dims.x );
-		debug.maxY = encode( debugSpace.maxX.value, dims.scale, dims.x );
+		debug.minY = debugSpace.minX.value;
+		debug.maxY = debugSpace.maxX.value;
 
 	} else {
 
-		debug.minY = encode( debugSpace.minY.value, dims.scale, dims.y );
-		debug.maxY = encode( debugSpace.maxY.value, dims.scale, dims.y );
+		debug.minY = debugSpace.minY.value;
+		debug.maxY = debugSpace.maxY.value;
 
 	}
 
-	debug.x = encode( debugSpace.pivot.value.x, dims.scale, dims.x );
-	debug.y = encode( debugSpace.pivot.value.y, dims.scale, dims.y );
-	debug.z = encode( debugSpace.pivot.value.z, dims.scale, dims.z );
+	debug.x = debugSpace.pivot.value.x;
+	debug.y = debugSpace.pivot.value.y;
+	debug.z = debugSpace.pivot.value.z;
 
 }
 
@@ -224,12 +224,12 @@ function createGui( ) {
 		//mfolder.add( debug, 'y', -100, 1100 ).step( 1 ).onChange( ( n )=>planes.children[ 1 ].position.y = (n-500)/1000*dims.scale ).name( html( 'Green', '' ) );
 		//mfolder.add( debug, 'z', -500, 500 ).step( 1 ).name( html( 'Blue', '' ) ).onChange( ( n )=>planes.children[ 0 ].position.z = n/1000*dims.scale );
 
-		folder.add( debug, 'x', -500, 500 ).name( html( 'Pivot', 'x' ) ).step( 1 ).onChange( changePivotPoint );
-		folder.add( debug, 'y', -100, 1100 ).name( html( '', 'y' ) ).step( 1 ).onChange( changePivotPoint );
-		folder.add( debug, 'z', -100, 100 ).name( html( '', 'z' ) ).step( 1 ).onChange( changePivotPoint );
+		folder.add( debug, 'x', -2, 2 ).name( html( 'Pivot', 'x' ) ).onChange( changePivotPoint );
+		folder.add( debug, 'y', -1, 2 ).name( html( '', 'y' ) ).onChange( changePivotPoint );
+		folder.add( debug, 'z', -1, 1 ).name( html( '', 'z' ) ).onChange( changePivotPoint );
 
-		folder.add( debug, 'minY', -200, 1200 ).name( html( 'Range', 'min' ) ).step( 1 ).onChange( changePivotPoint );
-		folder.add( debug, 'maxY', -200, 1200 ).name( html( '', 'max' ) ).step( 1 ).onChange( changePivotPoint );
+		folder.add( debug, 'minY', -2, 3 ).name( html( 'Range', 'min' ) ).onChange( changePivotPoint );
+		folder.add( debug, 'maxY', -2, 3 ).name( html( '', 'max' ) ).onChange( changePivotPoint );
 
 	}
 
@@ -524,21 +524,21 @@ function changePivotPoint( ) {
 	var space = model.space[ DEBUG_NAME ],
 		dims = model.dims;
 
-	space.pivot.value.x = decode( debug.x, dims.scale, dims.x );
-	space.pivot.value.y = decode( debug.y, dims.scale, dims.y );
-	space.pivot.value.z = decode( debug.z, dims.scale, dims.z );
+	space.pivot.value.x = debug.x;
+	space.pivot.value.y = debug.y;
+	space.pivot.value.z = debug.z;
 
 	axis1.position.copy( space.pivot.value );
 
 	if ( space instanceof LocusX && !( space instanceof LocusT ) ) {
 
-		space.minX.value = decode( debug.minY, dims.scale, dims.x );
-		space.maxX.value = decode( debug.maxY, dims.scale, dims.x );
+		space.minX.value = debug.minY;
+		space.maxX.value = debug.maxY;
 
 	} else {
 
-		space.minY.value = decode( debug.minY, dims.scale, dims.y );
-		space.maxY.value = decode( debug.maxY, dims.scale, dims.y );
+		space.minY.value = debug.minY;
+		space.maxY.value = debug.maxY;
 
 	}
 
