@@ -29,7 +29,7 @@ new Happy.Man
 
 # Bodies
 
-### Shapes
+## Body shapes
 
 Disfigure defines classes `Male(height)`, `Female(height)`
 and `Child(height)`, and bodies are created as instances of
@@ -40,9 +40,6 @@ tall 1.80m, a woman is 1.70m and a child is 1.35m.
 
 [<img src="snapshots/body-shapes.jpg" width="49%">](body-shapes.html)
 [<img src="snapshots/body-heights.jpg" width="49%">](body-heights.html)
-
-
-### Structure
 
 All types of bodies have the same structure, for example,
 the head is called `head`. Left and right body parts are
@@ -647,9 +644,9 @@ know how to fix it, please get in touch.
 
 # API
 
-### Classes
+## API classes
 
-#### new **World**( )<br>new **World**( *features* )
+### new **World**( )<br>new **World**( *features* )
 
 Creates a predefined default 3D world with all basic attributes,
 like camera, lights, ground, user navigations and so on. The
@@ -667,9 +664,9 @@ new World( {ground: false, stats: true} );
 ```
 
 
-### Functions
+## API functions
 
-#### userAnimationLoop( animate )
+### userAnimationLoop( animate )
 
 Sets the user-defined function *animate* to be called from the main
 animation loop at every frame. This function has one parameter
@@ -683,7 +680,7 @@ setAnimationLoop( animate );
 ```
 
 
-### Variables
+## API variables
 
 The following variables export properties of the default world that
 can be used to modify the world. A property may be undefined or

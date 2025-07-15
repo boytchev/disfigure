@@ -29,6 +29,7 @@ export {
 	light,
 	cameraLight,
 	controls,
+	ground,
 	everybody,
 	setAnimationLoop,
 

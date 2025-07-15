@@ -31,7 +31,7 @@ new Happy.Man
 
 # Тела
 
-### Форми
+## Форми на телата
 
 
 Disfigure дефинира класовете `Man(height)`, `Woman(height)`
@@ -43,9 +43,6 @@ Disfigure дефинира класовете `Man(height)`, `Woman(height)`
 
 [<img src="snapshots/body-shapes.jpg" width="49%">](body-shapes.html)
 [<img src="snapshots/body-heights.jpg" width="49%">](body-heights.html)
-
-
-Структура
 
 Всички видове тела имат една и съща структура, например главата
 е `head`. Левите и десните части на тялото са винаги спрямо
@@ -729,9 +726,9 @@ Three.js, така и на mannequin.js.
 
 # АПИ
 
-### Класове
+## АПИ класове
 
-#### new **World**( )<br>new **World**( *features* )
+### new **World**( )<br>new **World**( *features* )
 
 Създава предефиниран Three.js 3D свят с всички основни атрибути,
 като камера, светлини, земя, навигация и т.н. Незадължителният
@@ -749,9 +746,9 @@ new World( {ground: false, stats: true} );
 ```
 
 
-### Функции
+## АПИ функции
 
-#### userAnimationLoop( animate )
+### userAnimationLoop( animate )
 
 Задава потребителска функция *animate*, която се извиква на всеки кадър
 от главния снимационен цикъл. Тази потребителска функция е с-пози
@@ -765,7 +762,7 @@ setAnimationLoop( animate );
 ```
 
 
-### Променливи
+## АПИ променливи
 
 Следващите  променливи извеждат някои от свойствата на света,
 които могат да се ползват, за да се променят настройките по
