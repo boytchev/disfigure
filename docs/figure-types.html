@@ -8,83 +8,65 @@
 <body>
 	<script src="importmap.js"></script>
 	<script type="module">
-	
-		import * as Happy from 'disfigure'
-		
-		new Happy.World
-		
-		var man = new Happy.Man();
-		
-		man.position.x = 0.6;
 
-		man.torso.turn = -30;
+import * as Happy from 'disfigure';
 
-		man.head.bend = 40;
-		man.head.turn = -50;
+new Happy.World();
 
-		man.ankleLeft.turn = 20;
-		man.ankleRight.turn = 20;
-		
-		man.armLeft.straddle = 85;
-/*
-		man.r_elbow.bend = 26;
-		man.r_wrist.bend = -45;
-		man.r_wrist.turn = -135;
-		man.r_wrist.tilt = 30;
-*/
-	//
+var man = new Happy.Man();
 
-		var woman = new Happy.Woman();
-		
-		woman.position.x = -0.55;
+man.position.x = 0.6;
 
-		woman.torso.turn = 30;
+man.torso.turn = -30;
 
-		woman.head.bend = 40;
-		woman.head.turn = 50;
-/*
-		woman.l_arm.raise = 15;
-		woman.l_arm.straddle = 25;
-		woman.l_elbow.bend = 10;
-		woman.l_wrist.bend = -15;
-		woman.l_wrist.turn = -80;
-		woman.l_wrist.tilt = -30;
-		woman.l_fingers.bend = 110;
-*/
+man.head.bend = 15;
+man.head.turn = -50;
 
-		woman.armRight.straddle = 85;
-		/*
-		woman.r_arm.turn = -45;
-		woman.r_elbow.bend = 10;
-		woman.r_wrist.bend = -45;
-*/
-		//
+man.l_ankle.turn = 20;
+man.r_ankle.turn = 20;
 
-		var child = new Happy.Child();
-		
-		child.position.z = -0.18;
-		
-		child.elbowLeft.bend = 100;
-		child.wristLeft.turn = -30;
+man.l_arm.straddle = 85;
 
-		child.elbowRight.bend = 100;
-		child.wristRight.turn = -30;
-/*
-		kid.l_arm.turn = 55+10;
-		kid.l_arm.straddle = 15;
-		kid.l_elbow.bend = 115+20;
-		kid.l_wrist.turn = 90;
-		kid.l_wrist.bend = -20;
-		kid.l_fingers.bend = 50;
+man.r_arm.straddle = 62;
+man.r_arm.raise = 10;
+man.r_elbow.bend = 50;
+man.r_wrist.bend = 20;
+man.r_wrist.tilt = -20;
+man.r_wrist.turn = -10;
 
-		kid.r_arm.turn = 41;
-		kid.r_arm.straddle = 10;
-		kid.r_arm.raise += 5;
-		kid.r_elbow.bend = 110;
-		kid.r_wrist.turn = -90;
-		kid.r_wrist.bend = -20;
-		kid.r_fingers.bend = 50;
-*/
+//
+
+var woman = new Happy.Woman();
+
+woman.position.x = -0.55;
+
+woman.torso.turn = 30;
+
+woman.head.bend = 40;
+woman.head.turn = 50;
+
+woman.l_elbow.bend = 55;
+woman.r_arm.straddle = 80;
+
+//
+
+var child = new Happy.Child();
+
+child.position.z = -0.18;
+
+child.head.tilt = -10;
+
+child.l_elbow.bend = 100;
+child.l_wrist.turn = -30;
+
+child.r_elbow.bend = 115;
+child.r_wrist.turn = -50;
+child.r_wrist.bend = -10;
+child.l_wrist.tilt = 20;
+child.l_arm.straddle = 60;
+child.r_arm.foreward = -10;
+child.r_arm.turn = 10;
+
 	</script>
 </body>
 </html>

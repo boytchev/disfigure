@@ -269,64 +269,64 @@ function createGui( ) {
 	folder = gui.addFolder( 'LEFT LEG' ).close();
 	{
 
-		folder.add( model.legLeft, 'foreward', -40, 120 ).name( html( 'Leg', 'foreward' ) );
-		folder.add( model.legLeft, 'straddle', -10, 90 ).name( html( '', 'straddle' ) );
-		folder.add( model.legLeft, 'turn', -40, 80 ).name( html( '', 'turn' ) );
+		folder.add( model.l_leg, 'foreward', -40, 120 ).name( html( 'Leg', 'foreward' ) );
+		folder.add( model.l_leg, 'straddle', -10, 90 ).name( html( '', 'straddle' ) );
+		folder.add( model.l_leg, 'turn', -40, 80 ).name( html( '', 'turn' ) );
 
-		folder.add( model.kneeLeft, 'bend', 0, 140 ).name( html( 'Knee', 'bend', 'border' ) );
+		folder.add( model.l_knee, 'bend', 0, 140 ).name( html( 'Knee', 'bend', 'border' ) );
 
-		folder.add( model.ankleLeft, 'bend', -40, 70 ).name( html( 'Ankle', 'bend', 'border' ) );
-		folder.add( model.ankleLeft, 'turn', -60, 60 ).name( html( '', 'turn' ) );
-		folder.add( model.ankleLeft, 'tilt', -40, 40 ).name( html( '', 'tilt' ) );
+		folder.add( model.l_ankle, 'bend', -40, 70 ).name( html( 'Ankle', 'bend', 'border' ) );
+		folder.add( model.l_ankle, 'turn', -60, 60 ).name( html( '', 'turn' ) );
+		folder.add( model.l_ankle, 'tilt', -40, 40 ).name( html( '', 'tilt' ) );
 
-		folder.add( model.footLeft, 'bend', -40, 40 ).name( html( 'Foot', 'bend', 'border' ) );
+		folder.add( model.l_foot, 'bend', -40, 40 ).name( html( 'Foot', 'bend', 'border' ) );
 
 	}
 
 	folder = gui.addFolder( 'RIGHT LEG' ).close();
 	{
 
-		folder.add( model.legRight, 'foreward', -40, 120 ).name( html( 'Leg', 'foreward' ) );
-		folder.add( model.legRight, 'straddle', -10, 90 ).name( html( '', 'straddle' ) );
-		folder.add( model.legRight, 'turn', -40, 80 ).name( html( '', 'turn' ) );
+		folder.add( model.r_leg, 'foreward', -40, 120 ).name( html( 'Leg', 'foreward' ) );
+		folder.add( model.r_leg, 'straddle', -10, 90 ).name( html( '', 'straddle' ) );
+		folder.add( model.r_leg, 'turn', -40, 80 ).name( html( '', 'turn' ) );
 
-		folder.add( model.kneeRight, 'bend', 0, 140 ).name( html( 'Knee', 'bend', 'border' ) );
+		folder.add( model.r_knee, 'bend', 0, 140 ).name( html( 'Knee', 'bend', 'border' ) );
 
-		folder.add( model.ankleRight, 'bend', -40, 70 ).name( html( 'Ankle', 'bend', 'border' ) );
-		folder.add( model.ankleRight, 'turn', -60, 60 ).name( html( '', 'turn' ) );
-		folder.add( model.ankleRight, 'tilt', -40, 40 ).name( html( '', 'tilt' ) );
+		folder.add( model.r_ankle, 'bend', -40, 70 ).name( html( 'Ankle', 'bend', 'border' ) );
+		folder.add( model.r_ankle, 'turn', -60, 60 ).name( html( '', 'turn' ) );
+		folder.add( model.r_ankle, 'tilt', -40, 40 ).name( html( '', 'tilt' ) );
 
-		folder.add( model.footRight, 'bend', -40, 40 ).name( html( 'Foot', 'bend', 'border' ) );
+		folder.add( model.r_foot, 'bend', -40, 40 ).name( html( 'Foot', 'bend', 'border' ) );
 
 	}
 
 	folder = gui.addFolder( 'LEFT ARM' ).close();
 	{
 
-		folder.add( model.armLeft, 'straddle', -45, 80 ).name( html( 'Arm', 'straddle' ) );
-		folder.add( model.armLeft, 'turn', -40, 40 ).name( html( '', 'turn' ) );
-		folder.add( model.armLeft, 'foreward', -30, 80 ).name( html( '', 'foreward' ) );
+		folder.add( model.l_arm, 'straddle', -45, 80 ).name( html( 'Arm', 'straddle' ) );
+		folder.add( model.l_arm, 'turn', -40, 40 ).name( html( '', 'turn' ) );
+		folder.add( model.l_arm, 'foreward', -30, 80 ).name( html( '', 'foreward' ) );
 
-		folder.add( model.elbowLeft, 'bend', 0, 140 ).name( html( 'Elbow', 'bend', 'border' ) );
+		folder.add( model.l_elbow, 'bend', 0, 140 ).name( html( 'Elbow', 'bend', 'border' ) );
 
-		folder.add( model.wristLeft, 'bend', -90, 90 ).name( html( 'Wrist', 'bend', 'border' ) );
-		folder.add( model.wristLeft, 'turn', -60, 60 ).name( html( '', 'turn' ) );
-		folder.add( model.wristLeft, 'tilt', -45, 45 ).name( html( '', 'tilt' ) );
+		folder.add( model.l_wrist, 'bend', -90, 90 ).name( html( 'Wrist', 'bend', 'border' ) );
+		folder.add( model.l_wrist, 'turn', -60, 60 ).name( html( '', 'turn' ) );
+		folder.add( model.l_wrist, 'tilt', -45, 45 ).name( html( '', 'tilt' ) );
 
 	}
 
 	folder = gui.addFolder( 'RIGHT ARM' ).close();
 	{
 
-		folder.add( model.armRight, 'straddle', -45, 80 ).name( html( 'Arm', 'straddle' ) );
-		folder.add( model.armRight, 'turn', -40, 40 ).name( html( '', 'turn' ) );
-		folder.add( model.armRight, 'foreward', -30, 80 ).name( html( '', 'foreward' ) );
+		folder.add( model.r_arm, 'straddle', -45, 80 ).name( html( 'Arm', 'straddle' ) );
+		folder.add( model.r_arm, 'turn', -40, 40 ).name( html( '', 'turn' ) );
+		folder.add( model.r_arm, 'foreward', -30, 80 ).name( html( '', 'foreward' ) );
 
-		folder.add( model.elbowRight, 'bend', 0, 140 ).name( html( 'Elbow', 'bend', 'border' ) );
+		folder.add( model.r_elbow, 'bend', 0, 140 ).name( html( 'Elbow', 'bend', 'border' ) );
 
-		folder.add( model.wristRight, 'bend', -90, 90 ).name( html( 'Wrist', 'bend', 'border' ) );
-		folder.add( model.wristRight, 'turn', -60, 60 ).name( html( '', 'turn' ) );
-		folder.add( model.wristRight, 'tilt', -45, 45 ).name( html( '', 'tilt' ) );
+		folder.add( model.r_wrist, 'bend', -90, 90 ).name( html( 'Wrist', 'bend', 'border' ) );
+		folder.add( model.r_wrist, 'turn', -60, 60 ).name( html( '', 'turn' ) );
+		folder.add( model.r_wrist, 'tilt', -45, 45 ).name( html( '', 'tilt' ) );
 
 	}
 
@@ -354,48 +354,48 @@ function rigModel( t ) {
 
 
 
-	model.elbowLeft.bend = chaotic( t, 9, 0, 140 );
-	model.elbowRight.bend = chaotic( t, 7, 0, 140 );
+	model.l_elbow.bend = chaotic( t, 9, 0, 140 );
+	model.r_elbow.bend = chaotic( t, 7, 0, 140 );
 
-	model.wristLeft.bend = chaotic( t, -2, -60, 60 );
-	model.wristLeft.turn = chaotic( t, -3, -45, 45 );
-	model.wristLeft.tilt = chaotic( t, -2, -40, 40 );
+	model.l_wrist.bend = chaotic( t, -2, -60, 60 );
+	model.l_wrist.turn = chaotic( t, -3, -45, 45 );
+	model.l_wrist.tilt = chaotic( t, -2, -40, 40 );
 
-	model.wristRight.bend = chaotic( t, -1, -60, 60 );
-	model.wristRight.turn = chaotic( t, -4, -45, 45 );
-	model.wristRight.tilt = chaotic( t, -1, -40, 40 );
+	model.r_wrist.bend = chaotic( t, -1, -60, 60 );
+	model.r_wrist.turn = chaotic( t, -4, -45, 45 );
+	model.r_wrist.tilt = chaotic( t, -1, -40, 40 );
 
-	model.armLeft.straddle = chaotic( t, 5, -50, 40 );
-	model.armLeft.turn = chaotic( t, 6, -20, 20 );
-	model.armLeft.foreward = chaotic( t, 7, -20, 80 );
+	model.l_arm.straddle = chaotic( t, 5, -50, 40 );
+	model.l_arm.turn = chaotic( t, 6, -20, 20 );
+	model.l_arm.foreward = chaotic( t, 7, -20, 80 );
 
-	model.armRight.straddle = chaotic( t, -5, -50, 40 );
-	model.armRight.turn = chaotic( t, -6, -20, 20 );
-	model.armRight.foreward = chaotic( t, -7, -20, 80 );
+	model.r_arm.straddle = chaotic( t, -5, -50, 40 );
+	model.r_arm.turn = chaotic( t, -6, -20, 20 );
+	model.r_arm.foreward = chaotic( t, -7, -20, 80 );
 
 
 
-	model.kneeLeft.bend = chaotic( t, 6, 0, 140 );
-	model.kneeRight.bend = chaotic( t, 0, 0, 140 );
+	model.l_knee.bend = chaotic( t, 6, 0, 140 );
+	model.r_knee.bend = chaotic( t, 0, 0, 140 );
 
-	model.footLeft.bend = chaotic( t, 7, -40, 40 );
-	model.footRight.bend = chaotic( t, 5, -40, 40 );
+	model.l_foot.bend = chaotic( t, 7, -40, 40 );
+	model.r_foot.bend = chaotic( t, 5, -40, 40 );
+		
+	model.l_ankle.bend = chaotic( t, -31, -40, 70 );
+	model.l_ankle.turn = chaotic( t, 22, 0, 70 );
+	model.l_ankle.tilt = chaotic( t, -2, -40, 40 );
 
-	model.ankleLeft.bend = chaotic( t, -31, -40, 70 );
-	model.ankleLeft.turn = chaotic( t, 22, 0, 70 );
-	model.ankleLeft.tilt = chaotic( t, -2, -40, 40 );
+	model.r_ankle.bend = chaotic( t, 1, -40, 70 );
+	model.r_ankle.turn = chaotic( t, -11, 0, 70 );
+	model.r_ankle.tilt = chaotic( t, -13, -40, 40 );
 
-	model.ankleRight.bend = chaotic( t, 1, -40, 70 );
-	model.ankleRight.turn = chaotic( t, -11, 0, 70 );
-	model.ankleRight.tilt = chaotic( t, -13, -40, 40 );
+	model.l_leg.turn = chaotic( t, 8, -40, 80 );
+	model.l_leg.straddle = chaotic( t, -8, 0, 40 );
+	model.l_leg.foreward = chaotic( t, -2, -40, 80 );
 
-	model.legLeft.turn = chaotic( t, 8, -40, 80 );
-	model.legLeft.straddle = chaotic( t, -8, 0, 40 );
-	model.legLeft.foreward = chaotic( t, -2, -40, 80 );
-
-	model.legRight.turn = chaotic( t, -1, -40, 80 );
-	model.legRight.straddle = chaotic( t, -3, 0, 40 );
-	model.legRight.foreward = chaotic( t, 4, -40, 80 );
+	model.r_leg.turn = chaotic( t, -1, -40, 80 );
+	model.r_leg.straddle = chaotic( t, -3, 0, 40 );
+	model.r_leg.foreward = chaotic( t, 4, -40, 80 );
 
 	updateGUI( );
 
@@ -466,28 +466,47 @@ function showPivotPoint( index ) {
 			axis1.position.copy( space.waist.pivot.value );
 			break;
 
-		case 11:axis1.position.copy( space.legLeft.pivot.value );
-			axis2.position.copy( space.legRight.pivot.value ); break;
-		case 12:axis1.position.copy( space.legLongLeft.pivot.value );
-			axis2.position.copy( space.legLongRight.pivot.value ); break;
-		case 14:axis1.position.copy( space.ankleLongLeft.pivot.value );
-			axis2.position.copy( space.ankleLongRight.pivot.value ); break;
-		case 13:axis1.position.copy( space.kneeLeft.pivot.value );
-			axis2.position.copy( space.kneeRight.pivot.value ); break;
-		case 15:axis1.position.copy( space.ankleLeft.pivot.value );
-			axis2.position.copy( space.ankleRight.pivot.value ); break;
-		case 16:axis1.position.copy( space.footLeft.pivot.value );
-			axis2.position.copy( space.footRight.pivot.value ); break;
-
-		case 21:axis1.position.copy( space.armLeft.pivot.value );
-			axis2.position.copy( space.armRight.pivot.value ); break;
-		case 22:axis1.position.copy( space.elbowLeft.pivot.value );
-			axis2.position.copy( space.elbowRight.pivot.value );
+		case 11:
+		axis1.position.copy( space.l_leg.pivot.value );
+			axis2.position.copy( space.r_leg.pivot.value );
 			break;
-		case 23:axis1.position.copy( space.forearmLeft.pivot.value );
-			axis2.position.copy( space.forearmRight.pivot.value ); break;
-		case 24:axis1.position.copy( space.wristLeft.pivot.value );
-			axis2.position.copy( space.wristRight.pivot.value ); break;
+		case 12:
+		axis1.position.copy( space.l_legLong.pivot.value );
+			axis2.position.copy( space.r_legLong.pivot.value );
+			break;
+		case 14:
+		axis1.position.copy( space.l_ankleLong.pivot.value );
+			axis2.position.copy( space.r_ankleLong.pivot.value );
+			break;
+		case 13:
+		axis1.position.copy( space.l_knee.pivot.value );
+			axis2.position.copy( space.r_knee.pivot.value );
+			break;
+		case 15:
+		axis1.position.copy( space.l_ankle.pivot.value );
+			axis2.position.copy( space.r_ankle.pivot.value );
+			break;
+		case 16:
+		axis1.position.copy( space.l_foot.pivot.value );
+			axis2.position.copy( space.r_foot.pivot.value );
+			break;
+
+		case 21:
+		axis1.position.copy( space.l_arm.pivot.value );
+			axis2.position.copy( space.r_arm.pivot.value ); 
+			break;
+		case 22:
+		axis1.position.copy( space.l_elbow.pivot.value );
+			axis2.position.copy( space.r_elbow.pivot.value );
+			break;
+		case 23:
+		axis1.position.copy( space.l_forearm.pivot.value );
+			axis2.position.copy( space.r_forearm.pivot.value ); 
+			break;
+		case 24:
+		axis1.position.copy( space.l_wrist.pivot.value );
+			axis2.position.copy( space.r_wrist.pivot.value ); 
+			break;
 
 		default: model.remove( axis1 ); model.remove( axis2 );
 
@@ -578,35 +597,35 @@ var tslSelectionNode = Fn( ( { space } )=>{
 		.add( space.chest.locus( ).mul( select( s.equal( 2 ), 1, 0 ) ) )
 		.add( space.waist.locus( ).mul( select( s.equal( 3 ), 1, 0 ) ) )
 
-		.add( space.legLeft.locus( ).mul( select( s.equal( 11 ), 1, 0 ) ) )
-		.add( space.legRight.locus( ).mul( select( s.equal( 11 ), 1, 0 ) ) )
+		.add( space.l_leg.locus( ).mul( select( s.equal( 11 ), 1, 0 ) ) )
+		.add( space.r_leg.locus( ).mul( select( s.equal( 11 ), 1, 0 ) ) )
 
-		.add( space.ankleLongLeft.locus( ).mul( select( s.equal( 14 ), 1, 0 ) ) )
-		.add( space.ankleLongRight.locus( ).mul( select( s.equal( 14 ), 1, 0 ) ) )
+		.add( space.l_ankle2.locus( ).mul( select( s.equal( 14 ), 1, 0 ) ) )
+		.add( space.r_ankle2.locus( ).mul( select( s.equal( 14 ), 1, 0 ) ) )
 
-		.add( space.kneeLeft.locus( ).mul( select( s.equal( 13 ), 1, 0 ) ) )
-		.add( space.kneeRight.locus( ).mul( select( s.equal( 13 ), 1, 0 ) ) )
+		.add( space.l_knee.locus( ).mul( select( s.equal( 13 ), 1, 0 ) ) )
+		.add( space.r_knee.locus( ).mul( select( s.equal( 13 ), 1, 0 ) ) )
 
-		.add( space.ankleLeft.locus( ).mul( select( s.equal( 15 ), 1, 0 ) ) )
-		.add( space.ankleRight.locus( ).mul( select( s.equal( 15 ), 1, 0 ) ) )
+		.add( space.l_ankle.locus( ).mul( select( s.equal( 15 ), 1, 0 ) ) )
+		.add( space.r_ankle.locus( ).mul( select( s.equal( 15 ), 1, 0 ) ) )
 
-		.add( space.footLeft.locus( ).mul( select( s.equal( 16 ), 1, 0 ) ) )
-		.add( space.footRight.locus( ).mul( select( s.equal( 16 ), 1, 0 ) ) )
+		.add( space.l_foot.locus( ).mul( select( s.equal( 16 ), 1, 0 ) ) )
+		.add( space.r_foot.locus( ).mul( select( s.equal( 16 ), 1, 0 ) ) )
 
-		.add( space.legLongLeft.locus( ).mul( select( s.equal( 12 ), 1, 0 ) ) )
-		.add( space.legLongRight.locus( ).mul( select( s.equal( 12 ), 1, 0 ) ) )
+		.add( space.l_leg2.locus( ).mul( select( s.equal( 12 ), 1, 0 ) ) )
+		.add( space.r_leg2.locus( ).mul( select( s.equal( 12 ), 1, 0 ) ) )
 
-		.add( space.armLeft.locus( ).mul( select( s.equal( 21 ), 1, 0 ) ) )
-		.add( space.armRight.locus( ).mul( select( s.equal( 21 ), 1, 0 ) ) )
+		.add( space.l_arm.locus( ).mul( select( s.equal( 21 ), 1, 0 ) ) )
+		.add( space.r_arm.locus( ).mul( select( s.equal( 21 ), 1, 0 ) ) )
 
-		.add( space.elbowLeft.locus( ).mul( select( s.equal( 22 ), 1, 0 ) ) )
-		.add( space.elbowRight.locus( ).mul( select( s.equal( 22 ), 1, 0 ) ) )
+		.add( space.l_elbow.locus( ).mul( select( s.equal( 22 ), 1, 0 ) ) )
+		.add( space.r_elbow.locus( ).mul( select( s.equal( 22 ), 1, 0 ) ) )
 
-		.add( space.forearmLeft.locus( ).mul( select( s.equal( 23 ), 1, 0 ) ) )
-		.add( space.forearmRight.locus( ).mul( select( s.equal( 23 ), 1, 0 ) ) )
+		.add( space.l_wrist2.locus( ).mul( select( s.equal( 23 ), 1, 0 ) ) )
+		.add( space.r_wrist2.locus( ).mul( select( s.equal( 23 ), 1, 0 ) ) )
 
-		.add( space.wristLeft.locus( ).mul( select( s.equal( 24 ), 1, 0 ) ) )
-		.add( space.wristRight.locus( ).mul( select( s.equal( 24 ), 1, 0 ) ) )
+		.add( space.l_wrist.locus( ).mul( select( s.equal( 24 ), 1, 0 ) ) )
+		.add( space.r_wrist.locus( ).mul( select( s.equal( 24 ), 1, 0 ) ) )
 
 		.clamp( 0, 1 )
 		.toVar( );

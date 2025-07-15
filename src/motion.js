@@ -61,12 +61,12 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 	// LEFT-UPPER BODY
 
-	If( space.armLeft.locus( ), ()=>{
+	If( space.l_arm.locus( ), ()=>{
 
-		p.assign( fn( p, space.wristLeft ) );
-		p.assign( fn( p, space.forearmLeft ) );
-		p.assign( fn( p, space.elbowLeft ) );
-		p.assign( fn( p, space.armLeft ) );
+		p.assign( fn( p, space.l_wrist ) );
+		p.assign( fn( p, space.l_wrist2 ) );
+		p.assign( fn( p, space.l_elbow ) );
+		p.assign( fn( p, space.l_arm ) );
 
 	} );
 
@@ -74,12 +74,12 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 	// RIGHT-UPPER BODY
 
-	If( space.armRight.locus( ), ()=>{
+	If( space.r_arm.locus( ), ()=>{
 
-		p.assign( fn( p, space.wristRight ) );
-		p.assign( fn( p, space.forearmRight ) );
-		p.assign( fn( p, space.elbowRight ) );
-		p.assign( fn( p, space.armRight ) );
+		p.assign( fn( p, space.r_wrist ) );
+		p.assign( fn( p, space.r_wrist2 ) );
+		p.assign( fn( p, space.r_elbow ) );
+		p.assign( fn( p, space.r_arm ) );
 
 	} );
 
@@ -87,14 +87,14 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 	// LEFT-LOWER BODY
 
-	If( space.legLeft.locus( ), ()=>{
+	If( space.l_leg.locus( ), ()=>{
 
-		p.assign( fn( p, space.footLeft ) );
-		p.assign( fn( p, space.ankleLeft ) );
-		p.assign( fn( p, space.ankleLongLeft ) );
-		p.assign( fn( p, space.kneeLeft ) );
-		p.assign( fn( p, space.legLongLeft ) );
-		p.assign( fn( p, space.legLeft ) );
+		p.assign( fn( p, space.l_foot ) );
+		p.assign( fn( p, space.l_ankle ) );
+		p.assign( fn( p, space.l_ankle2 ) );
+		p.assign( fn( p, space.l_knee ) );
+		p.assign( fn( p, space.l_leg2 ) );
+		p.assign( fn( p, space.l_leg ) );
 
 	} );
 
@@ -102,14 +102,14 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 	// RIGHT-LOWER BODY
 
-	If( space.legRight.locus( ), ()=>{
+	If( space.r_leg.locus( ), ()=>{
 
-		p.assign( fn( p, space.footRight ) );
-		p.assign( fn( p, space.ankleRight ) );
-		p.assign( fn( p, space.ankleLongRight ) );
-		p.assign( fn( p, space.kneeRight ) );
-		p.assign( fn( p, space.legLongRight ) );
-		p.assign( fn( p, space.legRight ) );
+		p.assign( fn( p, space.r_foot ) );
+		p.assign( fn( p, space.r_ankle ) );
+		p.assign( fn( p, space.r_ankle2 ) );
+		p.assign( fn( p, space.r_knee ) );
+		p.assign( fn( p, space.r_leg2 ) );
+		p.assign( fn( p, space.r_leg ) );
 
 	} );
 

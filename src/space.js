@@ -139,14 +139,12 @@ class LocusY extends Locus {
 // horizontally from minX to maxX
 class LocusX extends Locus {
 
-	constructor( dims, pivot, rangeX, angle=0 ) {
+	constructor( dims, pivot, rangeX ) {
 
 		super( dims, pivot );
 
 		this.minX = decode( rangeX[ 0 ], dims.scale, dims.x );
 		this.maxX = decode( rangeX[ 1 ], dims.scale, dims.x );
-
-		this.slope = Math.tan( ( 90-angle ) * Math.PI/180 );
 
 	} // constructor
 
@@ -164,20 +162,8 @@ class LocusX extends Locus {
 	locus( pos = positionGeometry ) {
 
 		var x = pos.x;
-		var z = pos.z;
 
-		var min = float( this.minX );
-		var max = float( this.maxX );
-
-		if ( this.angle!=0 ) {
-
-			var dz = z.sub( this.pivot.z ).div( this.slope ).max( 0.01 ).mul( x.sign() );
-			min = min.sub( dz );
-			max = max.add( dz );
-
-		}
-
-		return smoother( min, max, x );
+		return smoother( this.minX, this.maxX, x );
 
 	} // locus
 
@@ -269,17 +255,15 @@ class Space {
 
 		const classes = { LocusT: LocusT, LocusX: LocusX, LocusXY: LocusXY, LocusY: LocusY/*, LocusBox:LocusBox*/ };
 
-		// bodyPartsDef = { _:[[rot]], name:[LocusClassName, data], ... }
+		// bodyPartsDef = { name:[LocusClassName, data], ... }
 		var bodyParts = { };
-		for ( var name in bodyPartsDef ) if ( name != '_' ) {
+		for ( var name in bodyPartsDef ) {
 
 			var partClass = classes[ bodyPartsDef[ name ][ 0 ] ];
 			bodyParts[ name ] = new partClass( dims, ... bodyPartsDef[ name ].slice( 1 ) );
 
 		}
-
 		// bodyParts = { name:LocusInstance, ... }
-		this._ = bodyPartsDef._;
 
 		// torso
 		this.head = bodyParts.head;
@@ -288,36 +272,36 @@ class Space {
 		this.torso = bodyParts.torso;
 
 		// legs
-		this.kneeLeft = bodyParts?.kneeLeft ?? bodyParts.knee;
-		this.kneeRight = bodyParts?.kneeRight ?? bodyParts.knee.mirror();
+		this.l_knee = bodyParts.knee;
+		this.r_knee = bodyParts.knee.mirror();
 
-		this.ankleLeft = bodyParts?.ankleLeft ?? bodyParts.ankle;
-		this.ankleRight = bodyParts?.ankleRight ?? bodyParts.ankle.mirror();
+		this.l_ankle = bodyParts.ankle;
+		this.r_ankle = bodyParts.ankle.mirror();
 
-		this.ankleLongLeft = bodyParts?.ankleLongLeft ?? bodyParts.ankleLong;
-		this.ankleLongRight = bodyParts?.ankleLongRight ?? bodyParts.ankleLong.mirror();
+		this.l_ankle2 = bodyParts.ankleLong;
+		this.r_ankle2 = bodyParts.ankleLong.mirror();
 
-		this.legLongLeft = bodyParts?.legLongLeft ?? bodyParts.legLong;
-		this.legLongRight = bodyParts?.legLongRight ?? bodyParts.legLong.mirror();
+		this.l_leg2 = bodyParts.legLong;
+		this.r_leg2 = bodyParts.legLong.mirror();
 
-		this.footLeft = bodyParts?.footLeft ?? bodyParts.foot;
-		this.footRight = bodyParts?.footRight ?? bodyParts.foot.mirror();
+		this.l_foot = bodyParts.foot;
+		this.r_foot = bodyParts.foot.mirror();
 
-		this.legLeft = bodyParts?.legLeft ?? bodyParts.leg;
-		this.legRight = bodyParts?.legRight ?? bodyParts.leg.mirror();
+		this.l_leg = bodyParts.leg;
+		this.r_leg = bodyParts.leg.mirror();
 
 		// arms
-		this.elbowLeft = bodyParts?.elbowLeft ?? bodyParts.elbow;
-		this.elbowRight = bodyParts?.elbowRight ?? bodyParts.elbow.mirror();
+		this.l_elbow = bodyParts.elbow;
+		this.r_elbow = bodyParts.elbow.mirror();
 
-		this.forearmLeft = bodyParts?.forearmLeft ?? bodyParts.forearm;
-		this.forearmRight = bodyParts?.forearmRight ?? bodyParts.forearm.mirror();
+		this.l_wrist2 = bodyParts.forearm;
+		this.r_wrist2 = bodyParts.forearm.mirror();
 
-		this.wristLeft = bodyParts?.wristLeft ?? bodyParts.wrist;
-		this.wristRight = bodyParts?.wristRight ?? bodyParts.wrist.mirror();
+		this.l_wrist = bodyParts.wrist;
+		this.r_wrist = bodyParts.wrist.mirror();
 
-		this.armLeft = bodyParts?.armLeft ?? bodyParts.arm;
-		this.armRight = bodyParts?.armRight ?? bodyParts.arm.mirror();
+		this.l_arm = bodyParts.arm;
+		this.r_arm = bodyParts.arm.mirror();
 
 	} // Space.constructor
 
