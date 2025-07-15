@@ -380,7 +380,7 @@ function rigModel( t ) {
 
 	model.l_foot.bend = chaotic( t, 7, -40, 40 );
 	model.r_foot.bend = chaotic( t, 5, -40, 40 );
-		
+
 	model.l_ankle.bend = chaotic( t, -31, -40, 70 );
 	model.l_ankle.turn = chaotic( t, 22, 0, 70 );
 	model.l_ankle.tilt = chaotic( t, -2, -40, 40 );
@@ -467,45 +467,45 @@ function showPivotPoint( index ) {
 			break;
 
 		case 11:
-		axis1.position.copy( space.l_leg.pivot.value );
+			axis1.position.copy( space.l_leg.pivot.value );
 			axis2.position.copy( space.r_leg.pivot.value );
 			break;
 		case 12:
-		axis1.position.copy( space.l_legLong.pivot.value );
+			axis1.position.copy( space.l_legLong.pivot.value );
 			axis2.position.copy( space.r_legLong.pivot.value );
 			break;
 		case 14:
-		axis1.position.copy( space.l_ankleLong.pivot.value );
+			axis1.position.copy( space.l_ankleLong.pivot.value );
 			axis2.position.copy( space.r_ankleLong.pivot.value );
 			break;
 		case 13:
-		axis1.position.copy( space.l_knee.pivot.value );
+			axis1.position.copy( space.l_knee.pivot.value );
 			axis2.position.copy( space.r_knee.pivot.value );
 			break;
 		case 15:
-		axis1.position.copy( space.l_ankle.pivot.value );
+			axis1.position.copy( space.l_ankle.pivot.value );
 			axis2.position.copy( space.r_ankle.pivot.value );
 			break;
 		case 16:
-		axis1.position.copy( space.l_foot.pivot.value );
+			axis1.position.copy( space.l_foot.pivot.value );
 			axis2.position.copy( space.r_foot.pivot.value );
 			break;
 
 		case 21:
-		axis1.position.copy( space.l_arm.pivot.value );
-			axis2.position.copy( space.r_arm.pivot.value ); 
+			axis1.position.copy( space.l_arm.pivot.value );
+			axis2.position.copy( space.r_arm.pivot.value );
 			break;
 		case 22:
-		axis1.position.copy( space.l_elbow.pivot.value );
+			axis1.position.copy( space.l_elbow.pivot.value );
 			axis2.position.copy( space.r_elbow.pivot.value );
 			break;
 		case 23:
-		axis1.position.copy( space.l_forearm.pivot.value );
-			axis2.position.copy( space.r_forearm.pivot.value ); 
+			axis1.position.copy( space.l_forearm.pivot.value );
+			axis2.position.copy( space.r_forearm.pivot.value );
 			break;
 		case 24:
-		axis1.position.copy( space.l_wrist.pivot.value );
-			axis2.position.copy( space.r_wrist.pivot.value ); 
+			axis1.position.copy( space.l_wrist.pivot.value );
+			axis2.position.copy( space.r_wrist.pivot.value );
 			break;
 
 		default: model.remove( axis1 ); model.remove( axis2 );

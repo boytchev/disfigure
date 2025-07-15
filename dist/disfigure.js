@@ -125,23 +125,16 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 } ); // disfigure
 
-// center model and get it dimensions
-function centerModel( model, dims ) {
+// center model and get it height
+function centerModel( model ) {
 
-	var v = new Vector3();
-
-	var box = new Box3().setFromObject( model, true );
+	var v = new Vector3(),
+		box = new Box3().setFromObject( model, true );
 
 	box.getCenter( v );
 	model.position.sub( v );
 
-	dims.x = v.x;
-	dims.y = box.min.y;
-	dims.z = v.z;
-
-	box.getSize( v );
-	dims.scale = Math.max( ...v );
-	dims.height = v.y;
+	return box.max.y-box.min.y;
 
 }
 
@@ -176,17 +169,6 @@ function regular( time, offset=0, min=-1, max=1 ) {
 
 }
 
-// calculate actual value from normalized value - the space definition assumes
-// overall body sizes are within [0,1000] range, decoding calculates the actual
-// value scaled to the actual size
-function decode( value, scale, offset=0 ) {
-
-	return scale*value/1000 + offset;
-
-}
-
-
-
 // clone an object and flip its pivot horizontally - this is used for all spaces
 // that represent left-right symmetry in human body (e.g. left arm and right arm)
 function clone( instance ) {
@@ -204,15 +186,10 @@ function clone( instance ) {
 
 class Locus {
 
-	constructor( dims, pivot ) {
+	constructor( pivot ) {
 
 		// calculate a pivot vector with actual coordinates
-		this.pivot = new Vector3(
-			decode( pivot[ 0 ], dims.scale, dims.x ),
-			decode( pivot[ 1 ], dims.scale, dims.y ),
-			decode( pivot[ 2 ], dims.scale, dims.z ),
-		);
-
+		this.pivot = new Vector3( ...pivot );
 		this.angle = new Vector3();
 		this.matrix = uniform( mat3() );
 
@@ -227,17 +204,17 @@ class Locus {
 // infinite; areas outside rangeX are consider inside the locus
 class LocusY extends Locus {
 
-	constructor( dims, pivot, rangeY, angle=0, rangeX ) {
+	constructor( pivot, rangeY, angle=0, rangeX ) {
 
-		super( dims, pivot );
+		super( pivot );
 
-		this.minY = decode( rangeY[ 0 ], dims.scale, dims.y );
-		this.maxY = decode( rangeY[ 1 ], dims.scale, dims.y );
+		this.minY = rangeY[ 0 ];
+		this.maxY = rangeY[ 1 ];
 
 		if ( rangeX ) {
 
-			this.minX = decode( rangeX[ 0 ], dims.scale, dims.x );
-			this.maxX = decode( rangeX[ 1 ], dims.scale, dims.x );
+			this.minX = rangeX[ 0 ];
+			this.maxX = rangeX[ 1 ];
 
 		}
 
@@ -293,12 +270,12 @@ class LocusY extends Locus {
 // horizontally from minX to maxX
 class LocusX extends Locus {
 
-	constructor( dims, pivot, rangeX ) {
+	constructor( pivot, rangeX ) {
 
-		super( dims, pivot );
+		super( pivot );
 
-		this.minX = decode( rangeX[ 0 ], dims.scale, dims.x );
-		this.maxX = decode( rangeX[ 1 ], dims.scale, dims.x );
+		this.minX = rangeX[ 0 ];
+		this.maxX = rangeX[ 1 ];
 
 	} // constructor
 
@@ -328,12 +305,12 @@ class LocusX extends Locus {
 // define a rectangular locus, from minX to maxX, from minY to maxY, but infinite along Z
 class LocusXY extends LocusX {
 
-	constructor( dims, pivot, rangeX, rangeY ) {
+	constructor( pivot, rangeX, rangeY ) {
 
-		super( dims, pivot, rangeX );
+		super( pivot, rangeX );
 
-		this.minY = decode( rangeY[ 0 ], dims.scale, dims.y );
-		this.maxY = decode( rangeY[ 1 ], dims.scale, dims.y );
+		this.minY = rangeY[ 0 ];
+		this.maxY = rangeY[ 1 ];
 
 	} // constructor
 
@@ -363,9 +340,9 @@ class LocusXY extends LocusX {
 // define custom locus specifically for hips
 class LocusT extends LocusXY {
 
-	constructor( dims, pivot, rangeX, rangeY, grown=0 ) {
+	constructor( pivot, rangeX, rangeY, grown=0 ) {
 
-		super( dims, pivot, rangeX, rangeY );
+		super( pivot, rangeX, rangeY );
 
 		this.grown = grown;
 
@@ -405,16 +382,16 @@ class LocusT extends LocusXY {
 // subspaces that simulate joints
 class Space {
 
-	constructor( dims, bodyPartsDef ) {
+	constructor( bodyPartsDef ) {
 
-		const classes = { LocusT: LocusT, LocusX: LocusX, LocusXY: LocusXY, LocusY: LocusY/*, LocusBox:LocusBox*/ };
+		const classes = { LocusT: LocusT, LocusX: LocusX, LocusXY: LocusXY, LocusY: LocusY };
 
 		// bodyPartsDef = { name:[LocusClassName, data], ... }
 		var bodyParts = { };
 		for ( var name in bodyPartsDef ) {
 
 			var partClass = classes[ bodyPartsDef[ name ][ 0 ] ];
-			bodyParts[ name ] = new partClass( dims, ... bodyPartsDef[ name ].slice( 1 ) );
+			bodyParts[ name ] = new partClass( ... bodyPartsDef[ name ].slice( 1 ) );
 
 		}
 		// bodyParts = { name:LocusInstance, ... }
@@ -432,11 +409,11 @@ class Space {
 		this.l_ankle = bodyParts.ankle;
 		this.r_ankle = bodyParts.ankle.mirror();
 
-		this.l_ankle2 = bodyParts.ankleLong;
-		this.r_ankle2 = bodyParts.ankleLong.mirror();
+		this.l_ankle2 = bodyParts.ankle2;
+		this.r_ankle2 = bodyParts.ankle2.mirror();
 
-		this.l_leg2 = bodyParts.legLong;
-		this.r_leg2 = bodyParts.legLong.mirror();
+		this.l_leg2 = bodyParts.leg2;
+		this.r_leg2 = bodyParts.leg2.mirror();
 
 		this.l_foot = bodyParts.foot;
 		this.r_foot = bodyParts.foot.mirror();
@@ -448,8 +425,8 @@ class Space {
 		this.l_elbow = bodyParts.elbow;
 		this.r_elbow = bodyParts.elbow.mirror();
 
-		this.l_wrist2 = bodyParts.forearm;
-		this.r_wrist2 = bodyParts.forearm.mirror();
+		this.l_wrist2 = bodyParts.wrist2;
+		this.r_wrist2 = bodyParts.wrist2.mirror();
 
 		this.l_wrist = bodyParts.wrist;
 		this.r_wrist = bodyParts.wrist.mirror();
@@ -682,12 +659,11 @@ function getset( object, name, xyz, angle='angle' ) {
 
 class Joint extends Group {
 
-	constructor( model, isRight, parent, space, spaceAux=space, axes='xyz' ) {
+	constructor( model, parent, space, spaceAux=space, axes='xyz' ) {
 
 		super();
 
 		this.model = model;
-		this.isRight = isRight;
 		this.parent = parent;
 		this.pivot = space.pivot;
 		this.angle = space.angle;
@@ -755,41 +731,39 @@ class Disfigure extends Group {
 
 		this.accessories = [];
 
-		// dimensions of the body, including its height
-		this.dims = {};
 		this.space = {};
 
 		// reduce the hierarchy of the model
 		var model = new Mesh( gltf.scene.children[ 0 ].geometry );
 
 		// center the model and get its dimensions
-		centerModel( model, this.dims );
+		var modelHeight = centerModel( model );
 
 		// create the space around the model
-		this.space = new Space( this.dims, space );
+		this.space = new Space( space );
 
-		this.torso = new Joint( this, false, null, this.space.torso );
-		this.waist = new Joint( this, false, this.torso, this.space.waist );
-		this.chest = new Joint( this, false, this.waist, this.space.chest );
-		this.head = new Joint( this, false, this.chest, this.space.head );
+		this.torso = new Joint( this, null, this.space.torso );
+		this.waist = new Joint( this, this.torso, this.space.waist );
+		this.chest = new Joint( this, this.waist, this.space.chest );
+		this.head = new Joint( this, this.chest, this.space.head );
 
-		this.l_leg = new Joint( this, false, this.waist, this.space.l_leg, this.space.l_leg2 );
-		this.l_knee = new Joint( this, false, this.l_leg, this.space.l_knee );
-		this.l_ankle = new Joint( this, false, this.l_knee, this.space.l_ankle, this.space.l_ankle2 );
-		this.l_foot = new Joint( this, false, this.l_ankle, this.space.l_foot );
+		this.l_leg = new Joint( this, this.waist, this.space.l_leg, this.space.l_leg2 );
+		this.l_knee = new Joint( this, this.l_leg, this.space.l_knee );
+		this.l_ankle = new Joint( this, this.l_knee, this.space.l_ankle, this.space.l_ankle2 );
+		this.l_foot = new Joint( this, this.l_ankle, this.space.l_foot );
 
-		this.r_leg = new Joint( this, true, this.waist, this.space.r_leg, this.space.r_leg2 );
-		this.r_knee = new Joint( this, true, this.r_leg, this.space.r_knee );
-		this.r_ankle = new Joint( this, true, this.r_knee, this.space.r_ankle, this.space.r_ankle2 );
-		this.r_foot = new Joint( this, true, this.r_ankle, this.space.r_foot );
+		this.r_leg = new Joint( this, this.waist, this.space.r_leg, this.space.r_leg2 );
+		this.r_knee = new Joint( this, this.r_leg, this.space.r_knee );
+		this.r_ankle = new Joint( this, this.r_knee, this.space.r_ankle, this.space.r_ankle2 );
+		this.r_foot = new Joint( this, this.r_ankle, this.space.r_foot );
 
-		this.l_arm = new Joint( this, false, this.chest, this.space.l_arm, this.space.l_arm, 'yxz' );
-		this.l_elbow = new Joint( this, false, this.l_arm, this.space.l_elbow, this.space.l_elbow, 'yxz' );
-		this.l_wrist = new Joint( this, false, this.l_elbow, this.space.l_wrist, this.space.l_wrist2, 'zxy' );
+		this.l_arm = new Joint( this, this.chest, this.space.l_arm, this.space.l_arm, 'yxz' );
+		this.l_elbow = new Joint( this, this.l_arm, this.space.l_elbow, this.space.l_elbow, 'yxz' );
+		this.l_wrist = new Joint( this, this.l_elbow, this.space.l_wrist, this.space.l_wrist2, 'zxy' );
 
-		this.r_arm = new Joint( this, true, this.chest, this.space.r_arm, this.space.r_arm, 'yxz' );
-		this.r_elbow = new Joint( this, true, this.r_arm, this.space.r_elbow, this.space.r_elbow, 'yxz' );
-		this.r_wrist = new Joint( this, true, this.r_elbow, this.space.r_wrist, this.space.r_wrist2, 'zxy' );
+		this.r_arm = new Joint( this, this.chest, this.space.r_arm, this.space.r_arm, 'yxz' );
+		this.r_elbow = new Joint( this, this.r_arm, this.space.r_elbow, this.space.r_elbow, 'yxz' );
+		this.r_wrist = new Joint( this, this.r_elbow, this.space.r_wrist, this.space.r_wrist2, 'zxy' );
 
 		// sets the materials of the model hooking them to TSL functions
 		model.material = new MeshPhysicalNodeMaterial( {
@@ -801,11 +775,8 @@ class Disfigure extends Group {
 		} );
 
 		// rescale the model to the desired height (optional)
-		if ( height ) {
-
-			model.scale.setScalar( height / this.dims.height );
-
-		}
+		this.height = height ?? modelHeight;
+		model.scale.setScalar( this.height / modelHeight );
 
 		model.castShadow = true;
 		model.receiveShadow = true;
@@ -905,24 +876,24 @@ class Man extends Disfigure {
 	static SPACE = {
 
 		// TORSO
-		head: [ 'LocusY', [ 0, 878, -37 ], [ 838, 923 ], 30 ],
-		chest: [ 'LocusY', [ 0, 661, -8 ], [ 438, 929 ], 0, [ 40, 300 ]],
-		waist: [ 'LocusY', [ 0, 570, -9 ], [ 310, 840 ]],
-		torso: [ 'LocusY', [ 0, 570, -9 ], [ -1001, -1e3 ]],
+		head: [ 'LocusY', [ 0, 1.566, -0.066 ], [ 1.495, 1.647 ], 30 ],
+		chest: [ 'LocusY', [ 0, 1.177, -0.014 ], [ 0.777, 1.658 ], 0, [ 0.072, 0.538 ]],
+		waist: [ 'LocusY', [ 0, 1.014, -0.016 ], [ 0.547, 1.498 ]],
+		torso: [ 'LocusY', [ 0, 1.014, -0.016 ], [ -3, -2 ]],
 
 		// LEGS
-		leg: [ 'LocusT', [ 41, 546, -19 ], [ -2, 2 ], [ 690, 441 ]],
-		legLong: [ 'LocusY', [ 39, 0, -19 ], [ 700, 140 ]],
-		knee: [ 'LocusY', [ 50, 286, -23 ], [ 341, 218 ], 20 ],
-		ankle: [ 'LocusY', [ 41, 51, -1 ], [ 97, 10 ], -10 ],
-		ankleLong: [ 'LocusY', [ 51, 206, -29 ], [ 430, -10 ]],
-		foot: [ 'LocusY', [ 0, 20, 12 ], [ 111, -185 ], 120 ],
+		leg: [ 'LocusT', [ 0.074, 0.970, -0.034 ], [ -4e-3, 0.004 ], [ 1.229, 0.782 ]],
+		leg2: [ 'LocusY', [ 0.070, -9e-3, -0.034 ], [ 1.247, 0.242 ]],
+		knee: [ 'LocusY', [ 0.090, 0.504, -0.041 ], [ 0.603, 0.382 ], 20 ],
+		ankle: [ 'LocusY', [ 0.074, 0.082, -2e-3 ], [ 0.165, 0.008 ], -10 ],
+		ankle2: [ 'LocusY', [ 0.092, 0.360, -0.052 ], [ 0.762, -0.027 ]],
+		foot: [ 'LocusY', [ 0, 0.026, 0.022 ], [ 0.190, -0.342 ], 120 ],
 
 		// ARMS
-		elbow: [ 'LocusX', [ 238, 815, -40 ], [ 230, 260 ], 0 ],
-		forearm: [ 'LocusX', [ 170, 815, -38 ], [ 46, 490 ]],
-		wrist: [ 'LocusX', [ 375, 820, -40 ], [ 354, 402 ]],
-		arm: [ 'LocusXY', [ 70+15, 810-20, -40 ], [ 30, 150 ], [ 600, 900 ]],
+		elbow: [ 'LocusX', [ 0.427, 1.453, -0.072 ], [ 0.413, 0.467 ]],
+		wrist2: [ 'LocusX', [ 0.305, 1.453, -0.068 ], [ 0.083, 0.879 ]],
+		wrist: [ 'LocusX', [ 0.673, 1.462, -0.072 ], [ 0.635, 0.722 ]],
+		arm: [ 'LocusXY', [ 0.153, 1.408, -0.072 ], [ 0.054, 0.269 ], [ 1.067, 1.606 ]],
 
 	};
 
@@ -932,7 +903,7 @@ class Man extends Disfigure {
 
 		this.url = MODEL_PATH + Man.URL;
 
-		this.position.y = this.dims.height/2 - 0.015;
+		this.position.y = this.height/2 - 0.015;
 
 		this.l_leg.straddle = this.r_leg.straddle = 5;
 		this.l_ankle.tilt = this.r_ankle.tilt = -5;
@@ -950,24 +921,24 @@ class Woman extends Disfigure {
 	static SPACE = {
 
 		// TORSO
-		head: [ 'LocusY', [ 0, 872, -30 ], [ 827, 919 ], 30 ],
-		chest: [ 'LocusY', [ 0, 661, -8 ], [ 438, 929 ], 0, [ 40, 300 ]],
-		waist: [ 'LocusY', [ 0, 570, -9 ], [ 350, 840 ]],
-		torso: [ 'LocusY', [ 0, 570, -9 ], [ -1001, -1e3 ]],
+		head: [ 'LocusY', [ 0.001, 1.471, -0.049 ], [ 1.395, 1.551 ], 30 ],
+		chest: [ 'LocusY', [ 0.001, 1.114, -0.012 ], [ 0.737, 1.568 ], 0, [ 0.069, 0.509 ]],
+		waist: [ 'LocusY', [ 0.001, 0.961, -0.014 ], [ 0.589, 1.417 ]],
+		torso: [ 'LocusY', [ 0.001, 0.961, -0.014 ], [ -1.696, -1.694 ]],
 
 		// LEGS
-		leg: [ 'LocusT', [ 41, 546, -19 ], [ -2, 2 ], [ 690, 441 ]],
-		legLong: [ 'LocusY', [ 44, 0, -19 ], [ 700, 140 ]],
-		knee: [ 'LocusY', [ 50, 286, -23 ], [ 341, 218 ], 20 ],
-		ankle: [ 'LocusY', [ 44, 51, -4 ], [ 97, 10 ], -10 ],
-		ankleLong: [ 'LocusY', [ 51, 201, -29 ], [ 430, -33 ]],
-		foot: [ 'LocusY', [ 0, 20, 12 ], [ 111, -185 ], 120 ],
+		leg: [ 'LocusT', [ 0.071, 0.920, -0.031 ], [ -2e-3, 0.005 ], [ 1.163, 0.742 ]],
+		leg2: [ 'LocusY', [ 0.076, -3e-3, -0.031 ], [ 1.180, 0.233 ]],
+		knee: [ 'LocusY', [ 0.086, 0.480, -0.037 ], [ 0.573, 0.365 ], 20 ],
+		ankle: [ 'LocusY', [ 0.076, 0.083, -5e-3 ], [ 0.161, 0.014 ], -10 ],
+		ankle2: [ 'LocusY', [ 0.088, 0.337, -0.047 ], [ 0.724, -0.059 ]],
+		foot: [ 'LocusY', [ 0.001, 0.031, 0.022 ], [ 0.184, -0.316 ], 120 ],
 
 		// ARMS
-		elbow: [ 'LocusX', [ 238, 815, -40 ], [ 230, 260 ], 0 ],
-		forearm: [ 'LocusX', [ 170, 815, -38 ], [ 54, 475 ]],
-		wrist: [ 'LocusX', [ 359, 815, -34 ], [ 343, 380 ]],
-		arm: [ 'LocusXY', [ 80, 793, -40 ], [ 30, 137 ], [ 600, 900 ]],
+		elbow: [ 'LocusX', [ 0.404, 1.375, -0.066 ], [ 0.390, 0.441 ]],
+		wrist2: [ 'LocusX', [ 0.289, 1.375, -0.063 ], [ 0.093, 0.805 ]],
+		wrist: [ 'LocusX', [ 0.608, 1.375, -0.056 ], [ 0.581, 0.644 ]],
+		arm: [ 'LocusXY', [ 0.137, 1.338, -0.066 ], [ 0.052, 0.233 ], [ 1.011, 1.519 ]],
 
 	};
 
@@ -977,7 +948,7 @@ class Woman extends Disfigure {
 
 		this.url = MODEL_PATH + Woman.URL;
 
-		this.position.y = this.dims.height/2 - 0.005;
+		this.position.y = this.height/2 - 0.005;
 
 		this.l_leg.straddle = this.r_leg.straddle = -2.9;
 		this.l_ankle.tilt = this.r_ankle.tilt = 2.9;
@@ -995,24 +966,24 @@ class Child extends Disfigure {
 	static SPACE = {
 
 		// TORSO
-		head: [ 'LocusY', [ 0, 850, -32 ], [ 807, 894 ], 30 ],
-		chest: [ 'LocusY', [ 0, 640, 1 ], [ 419, 914 ], 0, [ 40, 300 ]],
-		waist: [ 'LocusY', [ 0, 530, -7 ], [ 285, 836 ]],
-		torso: [ 'LocusY', [ 0, 530, -7 ], [ -1001, -1e3 ]],
+		head: [ 'LocusY', [ 0, 1.149, -0.058 ], [ 1.091, 1.209 ], 30 ],
+		chest: [ 'LocusY', [ 0, 0.865, -0.013 ], [ 0.566, 1.236 ], 0, [ 0.054, 0.406 ]],
+		waist: [ 'LocusY', [ 0, 0.717, -0.024 ], [ 0.385, 1.130 ]],
+		torso: [ 'LocusY', [ 0, 0.717, -0.024 ], [ -1.354, -1.353 ]],
 
 		// LEGS
-		leg: [ 'LocusT', [ 40, 521, -9 ], [ -1, 1 ], [ 625, 430 ], 1 ],
-		legLong: [ 'LocusY', [ 46, 0, -5 ], [ 700, 140 ]],
-		knee: [ 'LocusY', [ 50, 288, -12 ], [ 346, 221 ], 20 ],
-		ankle: [ 'LocusY', [ 54, 48, -14 ], [ 81, 33 ], -10 ],
-		ankleLong: [ 'LocusY', [ 51, 201, -25 ], [ 430, -33 ]],
-		foot: [ 'LocusY', [ 0, 20, 6 ], [ 83, -200 ], 120 ],
+		leg: [ 'LocusT', [ 0.054, 0.704, -0.027 ], [ -1e-3, 0.001 ], [ 0.845, 0.581 ], 1 ],
+		leg2: [ 'LocusY', [ 0.062, -0, -0.021 ], [ 0.946, 0.189 ]],
+		knee: [ 'LocusY', [ 0.068, 0.389, -0.031 ], [ 0.468, 0.299 ], 20 ],
+		ankle: [ 'LocusY', [ 0.073, 0.065, -0.033 ], [ 0.109, 0.044 ], -10 ],
+		ankle2: [ 'LocusY', [ 0.069, 0.272, -0.048 ], [ 0.581, -0.045 ]],
+		foot: [ 'LocusY', [ 0, 0.027, -6e-3 ], [ 0.112, -0.271 ], 120 ],
 
 		// ARMS
-		elbow: [ 'LocusX', [ 249, 793, -56 ], [ 230, 273 ], 0 ],
-		forearm: [ 'LocusX', [ 170, 794, -59 ], [ 54, 475 ]],
-		wrist: [ 'LocusX', [ 398, 802, -57 ], [ 384, 409 ]],
-		arm: [ 'LocusXY', [ 80, 793, -40 ], [ 30, 137 ], [ 600, 900 ]],
+		elbow: [ 'LocusX', [ 0.337, 1.072, -0.09 ], [ 0.311, 0.369 ]],
+		wrist2: [ 'LocusX', [ 0.230, 1.074, -0.094 ], [ 0.073, 0.642 ]],
+		wrist: [ 'LocusX', [ 0.538, 1.084, -0.091 ], [ 0.519, 0.553 ]],
+		arm: [ 'LocusXY', [ 0.108, 1.072, -0.068 ], [ 0.041, 0.185 ], [ 0.811, 1.217 ]],
 
 	};
 
@@ -1022,7 +993,7 @@ class Child extends Disfigure {
 
 		this.url = MODEL_PATH + Child.URL;
 
-		this.position.y = this.dims.height/2 - 0.005;
+		this.position.y = this.height/2 - 0.005;
 
 		this.l_ankle.bend = this.r_ankle.bend = 3;
 
@@ -1049,6 +1020,6 @@ var [ gltf_man, gltf_woman, gltf_child ] = await Promise.all(
 
 
 
-console.log( '%c\u22EE\u22EE\u22EE DISFIGURE v0', 'display: block; padding:0.5em; font-size:150%; color: crimson;' );
+console.log( '\n%c\u22EE\u22EE\u22EE Disfigure\n%chttps://boytchev.github.io/disfigure/\n', 'color: navy', 'font-size:60%' );
 
 export { Child, Man, Woman, World, camera, cameraLight, chaotic, controls, everybody, light, regular, renderer, scene, setAnimationLoop };

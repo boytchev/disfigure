@@ -11,23 +11,16 @@ import { SimplexNoise } from "three/addons/math/SimplexNoise.js";
 
 
 
-// center model and get it dimensions
-function centerModel( model, dims ) {
+// center model and get it height
+function centerModel( model ) {
 
-	var v = new Vector3();
-
-	var box = new Box3().setFromObject( model, true );
+	var v = new Vector3(),
+		box = new Box3().setFromObject( model, true );
 
 	box.getCenter( v );
 	model.position.sub( v );
 
-	dims.x = v.x;
-	dims.y = box.min.y;
-	dims.z = v.z;
-
-	box.getSize( v );
-	dims.scale = Math.max( ...v );
-	dims.height = v.y;
+	return box.max.y-box.min.y;
 
 }
 

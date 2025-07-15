@@ -13,6 +13,14 @@ favicon.href = '../../assets/logo/favicon.ico';
 document.querySelector( 'head' ).appendChild( favicon );
 
 
+// add CSS
+var css = document.createElement( 'link' );
+css.type = 'text/css';
+css.rel = 'stylesheet';
+css.href = '../../poser/styles.css';
+
+document.head.appendChild( css );
+
 
 // import maps
 // https://www.baldurbjarnason.com/2023/dynamic-import-map/

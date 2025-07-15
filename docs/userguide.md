@@ -16,8 +16,9 @@
 - **[Using Mannequin.js](#using-mannequinjs)** (<small>[CDN](#running-from-a-cdn) | [local web server](#running-via-a-local-web-server) | [Nodes.js](#running-via-nodesjs) | [API](#api)</small>) 
 -->
 
-Disfigure is a library for animating human figures by modifying a matrix field
-of the space around them. Here is an absurdly minimal [live example](minimal-cdn.html).
+Disfigure is a library for animating human figures by modifying
+a matrix field of the space around them. Here is an absurdly
+minimal [live example](minimal-cdn.html).
 
 ```js
 import * as Happy from 'disfigure'
@@ -26,31 +27,25 @@ new Happy.World
 new Happy.Man
 ```
 
-<!--
 # Bodies
 
 ### Body shapes
 
-Disfigure defines classes `Male(height)`, `Female(height)` and `Child(height)`,
-where the optional *height* is the height of the human body in meters
- ([live example](example-figure-types.html)):
+Disfigure defines classes `Male`, `Female` and `Child`,
+and bodies are created as instances of these classes:
+([live example](body-shapes.html))
 
-[<img src="snapshots/example-figure-types.jpg">](example-figure-types.html)
+[<img src="snapshots/body-shapes.jpg">](body-shapes.html)
 
 ``` javascript
 var man = new Male();
-    man.position.x = 0.6;
-    man.turn = -120;
-:
+ 
 var woman = new Female();
-    woman.position.x = -0.65;
-    woman.turn = -60;
-:
+ 
 var kid = new Child();
-    kid.position.z = -0.18;
-:
 ```
 
+<!--
 These three classes have a common predecessor &ndash; `Mannequin(feminine,height)`, where the boolean paremeter *feminine* defines whether the shape is feminine or masculine
  ([live example](example-height.html)):
 

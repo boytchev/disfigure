@@ -16,8 +16,9 @@
 - **[Използване на Mannequin.js](#използване-на-mannequinjs)** (<small>[CDN](#пускане-от-cdn) | [локален уеб сървър](#пускане-през-локален-уеб-сървър) | [Nodes.js](#пускане-през-nodesjs) | [АПИ](#апи)</small>)
 -->
 
-Disfigure е библиотека за движение на фигури чрез промяна на матричното поле на
-пространството около тях. Ето абсурдно минимален [пример на живо](minimal-cdn.html).
+Disfigure е библиотека за движение на фигури чрез промяна на
+матричното поле на пространството около тях. Ето абсурдно
+минимален [пример на живо](minimal-cdn.html).
 
 ```js
 import * as Happy from 'disfigure'
@@ -28,32 +29,27 @@ new Happy.Man
 
 
 
-<!--
-# Части на тялото
+# Тела
 
-### Видове фигури
+### Форми на тяло
 
-Фигурите в библиотеката се създават като инстанции на класовете `Male(height)`,
-`Female(height)` или `Child(height)`, където незадължителният параметър *height*
-е размер на височината е метри. По подразбиране `Male` има височина 1.80,
-`Female` има височина 1.65 и `Child` има височина 1.15 ([пример на живо](example-figure-types.html)):
 
-[<img src="snapshots/example-figure-types.jpg">](example-figure-types.html)
+Disfigure дефинира класовете `Man(height)`, `Woman(height)`
+и `Child(height)`, където незадължителният параметър *height*
+е височината на човешкото тяло в метри. Телата се създават
+като инстанции на тези класове: ([пример на живо](body-shapes.html))
+
+[<img src="snapshots/body-shapes.jpg">](body-shapes.html)
 
 ``` javascript
 var man = new Male();
-    man.position.x = 0.6;
-    man.turn = -120;
-:
+ 
 var woman = new Female();
-    woman.position.x = -0.65;
-    woman.turn = -60;
-:
+ 
 var kid = new Child();
-    kid.position.z = -0.18;
-:
 ```
 
+<!--
 Тези три класа има общ родител &ndash; `Mannequin(feminine,height)`,
 в който булевият параметър *feminine* определя дали формата е женствена
 или мъжествена ([пример на живо](example-height.html)):

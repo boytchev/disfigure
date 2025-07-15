@@ -1,6 +1,7 @@
 v0.0.18
   - simplified LocusX
   - renamed *Left and *Right to l_* and r_*
+  - removed src\models\*.js
   - added torso with bend, turn, tilt
 
 v0.0.17

@@ -6,7 +6,7 @@
 
 
 
-console.log( '%c\u22EE\u22EE\u22EE DISFIGURE v0', 'display: block; padding:0.5em; font-size:150%; color: crimson;' );
+console.log( '\n%c\u22EE\u22EE\u22EE Disfigure\n%chttps://boytchev.github.io/disfigure/\n', 'color: navy', 'font-size:60%' );
 
 
 

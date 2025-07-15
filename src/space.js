@@ -13,26 +13,6 @@ import { smoother } from "./utils.js";
 
 
 
-// calculate actual value from normalized value - the space definition assumes
-// overall body sizes are within [0,1000] range, decoding calculates the actual
-// value scaled to the actual size
-function decode( value, scale, offset=0 ) {
-
-	return scale*value/1000 + offset;
-
-}
-
-
-
-// calculate normalized value from actual value
-function encode( value, scale, offset=0 ) {
-
-	return ( value-offset )*1000/scale;
-
-}
-
-
-
 // clone an object and flip its pivot horizontally - this is used for all spaces
 // that represent left-right symmetry in human body (e.g. left arm and right arm)
 function clone( instance ) {
@@ -50,15 +30,10 @@ function clone( instance ) {
 
 class Locus {
 
-	constructor( dims, pivot ) {
+	constructor( pivot ) {
 
 		// calculate a pivot vector with actual coordinates
-		this.pivot = new Vector3(
-			decode( pivot[ 0 ], dims.scale, dims.x ),
-			decode( pivot[ 1 ], dims.scale, dims.y ),
-			decode( pivot[ 2 ], dims.scale, dims.z ),
-		);
-
+		this.pivot = new Vector3( ...pivot );
 		this.angle = new Vector3();
 		this.matrix = uniform( mat3() );
 
@@ -73,17 +48,17 @@ class Locus {
 // infinite; areas outside rangeX are consider inside the locus
 class LocusY extends Locus {
 
-	constructor( dims, pivot, rangeY, angle=0, rangeX ) {
+	constructor( pivot, rangeY, angle=0, rangeX ) {
 
-		super( dims, pivot );
+		super( pivot );
 
-		this.minY = decode( rangeY[ 0 ], dims.scale, dims.y );
-		this.maxY = decode( rangeY[ 1 ], dims.scale, dims.y );
+		this.minY = rangeY[ 0 ];
+		this.maxY = rangeY[ 1 ];
 
 		if ( rangeX ) {
 
-			this.minX = decode( rangeX[ 0 ], dims.scale, dims.x );
-			this.maxX = decode( rangeX[ 1 ], dims.scale, dims.x );
+			this.minX = rangeX[ 0 ];
+			this.maxX = rangeX[ 1 ];
 
 		}
 
@@ -139,12 +114,12 @@ class LocusY extends Locus {
 // horizontally from minX to maxX
 class LocusX extends Locus {
 
-	constructor( dims, pivot, rangeX ) {
+	constructor( pivot, rangeX ) {
 
-		super( dims, pivot );
+		super( pivot );
 
-		this.minX = decode( rangeX[ 0 ], dims.scale, dims.x );
-		this.maxX = decode( rangeX[ 1 ], dims.scale, dims.x );
+		this.minX = rangeX[ 0 ];
+		this.maxX = rangeX[ 1 ];
 
 	} // constructor
 
@@ -174,12 +149,12 @@ class LocusX extends Locus {
 // define a rectangular locus, from minX to maxX, from minY to maxY, but infinite along Z
 class LocusXY extends LocusX {
 
-	constructor( dims, pivot, rangeX, rangeY ) {
+	constructor( pivot, rangeX, rangeY ) {
 
-		super( dims, pivot, rangeX );
+		super( pivot, rangeX );
 
-		this.minY = decode( rangeY[ 0 ], dims.scale, dims.y );
-		this.maxY = decode( rangeY[ 1 ], dims.scale, dims.y );
+		this.minY = rangeY[ 0 ];
+		this.maxY = rangeY[ 1 ];
 
 	} // constructor
 
@@ -209,9 +184,9 @@ class LocusXY extends LocusX {
 // define custom locus specifically for hips
 class LocusT extends LocusXY {
 
-	constructor( dims, pivot, rangeX, rangeY, grown=0 ) {
+	constructor( pivot, rangeX, rangeY, grown=0 ) {
 
-		super( dims, pivot, rangeX, rangeY );
+		super( pivot, rangeX, rangeY );
 
 		this.grown = grown;
 
@@ -251,16 +226,16 @@ class LocusT extends LocusXY {
 // subspaces that simulate joints
 class Space {
 
-	constructor( dims, bodyPartsDef ) {
+	constructor( bodyPartsDef ) {
 
-		const classes = { LocusT: LocusT, LocusX: LocusX, LocusXY: LocusXY, LocusY: LocusY/*, LocusBox:LocusBox*/ };
+		const classes = { LocusT: LocusT, LocusX: LocusX, LocusXY: LocusXY, LocusY: LocusY };
 
 		// bodyPartsDef = { name:[LocusClassName, data], ... }
 		var bodyParts = { };
 		for ( var name in bodyPartsDef ) {
 
 			var partClass = classes[ bodyPartsDef[ name ][ 0 ] ];
-			bodyParts[ name ] = new partClass( dims, ... bodyPartsDef[ name ].slice( 1 ) );
+			bodyParts[ name ] = new partClass( ... bodyPartsDef[ name ].slice( 1 ) );
 
 		}
 		// bodyParts = { name:LocusInstance, ... }
@@ -278,11 +253,11 @@ class Space {
 		this.l_ankle = bodyParts.ankle;
 		this.r_ankle = bodyParts.ankle.mirror();
 
-		this.l_ankle2 = bodyParts.ankleLong;
-		this.r_ankle2 = bodyParts.ankleLong.mirror();
+		this.l_ankle2 = bodyParts.ankle2;
+		this.r_ankle2 = bodyParts.ankle2.mirror();
 
-		this.l_leg2 = bodyParts.legLong;
-		this.r_leg2 = bodyParts.legLong.mirror();
+		this.l_leg2 = bodyParts.leg2;
+		this.r_leg2 = bodyParts.leg2.mirror();
 
 		this.l_foot = bodyParts.foot;
 		this.r_foot = bodyParts.foot.mirror();
@@ -294,8 +269,8 @@ class Space {
 		this.l_elbow = bodyParts.elbow;
 		this.r_elbow = bodyParts.elbow.mirror();
 
-		this.l_wrist2 = bodyParts.forearm;
-		this.r_wrist2 = bodyParts.forearm.mirror();
+		this.l_wrist2 = bodyParts.wrist2;
+		this.r_wrist2 = bodyParts.wrist2.mirror();
 
 		this.l_wrist = bodyParts.wrist;
 		this.r_wrist = bodyParts.wrist.mirror();
@@ -309,4 +284,4 @@ class Space {
 
 
 
-export { Space, decode, encode, LocusX, LocusT };
+export { Space, LocusX, LocusT };
