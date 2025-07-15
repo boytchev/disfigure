@@ -12,7 +12,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import Stats from 'three/addons/libs/stats.module.js';
 
 
-var renderer, scene, camera, light, cameraLight, controls, userAnimationLoop, stats, everybody = [];
+var renderer, scene, camera, light, cameraLight, controls, ground, userAnimationLoop, stats, everybody = [];
 
 
 
@@ -105,7 +105,7 @@ class World {
 			context.arc( 64, 64, 38, 0, 2*Math.PI );
 			context.fill();
 
-			var ground = new Mesh(
+			ground = new Mesh(
 				new CircleGeometry( 50 ),
 				new MeshLambertMaterial(
 					{
@@ -200,4 +200,4 @@ function setAnimationLoop( animationLoop ) {
 
 
 
-export { World, renderer, scene, camera, light, cameraLight, controls, everybody, setAnimationLoop };
+export { World, renderer, scene, camera, light, cameraLight, controls, ground, everybody, setAnimationLoop };

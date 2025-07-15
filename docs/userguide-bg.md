@@ -725,21 +725,65 @@ Three.js, така и на mannequin.js.
 Забележка: Този подход не е тестван. Ако установите, че не работи, но знаете
 какво трябва да се коригира, за да проработи, моля, свържете се с нас.
 
+-->
 
-### АПИ
+# АПИ
 
-Библиотеката mannequin.js дефинира следните фукции и класове:
+### Класове
 
-* `createStage(animationLoop)` &ndash; функция, създава сцена със земя и светлини
-* `getStage()` &ndash; функция, текущата сцена*
-* `getVersion()` &ndash; функция, текущата версия на mannequin.js като число; напр. 5.2
-* `getPostureVersion()` &ndash; функция, текущата версия на формата на данните, описващи поза
-* `getGroundLevel()` &ndash; функция, вертикалното положение на земята в метри
-* `blend(p,q,k)` &ndash; функция, смесена поза на пози *p* и *q* с коефициент *k*
-* `Mannequin(feminine,height)` &ndash; клас, най-обща фигура
-* `Male(height)` &ndash; клас, мъжка фигура
-* `Female(height)` &ndash; клас, женска фигура
-* `Child(height)` &ndash; клас, детска фигура
+* new **World**(*options*) &ndash; клас, реализира подразбиращият се Three.js свят.
+Незадължителният параметър *options* е ножество от именувани флагове. По подразбиране
+опциите са `{lights: true, controls: true, ground: true, shadows: true, stats: false}`:<ul>
+*lights* &ndash; булева стойност; ако е true, създават се светлини<br>
+*controls* &ndash; булева стойност; ако е true, създава се орбитална навигация<br>
+*ground* &ndash; булева стойност; ако е true, създава се земя<br>
+*shadows* &ndash; булева стойност; ако е true, създават се сенки<br>
+*stats* &ndash; булева стойност; ако е true, създава се панел със статистика
+</ul>
+
+### Функции
+
+* **userAnimationLoop**(*потреб_функция*) &ndash; функция, задава потребителска функция,
+която се извиква на всеки кадър от главния снимационен цикъл; тази функция има единични
+параметър *time* измерващ изминалото време в милисекунди (1 секунда е 1000 милисекунди).
+
+
+### Променливи
+
+Следващите  променливи извеждат някои от свойствата на света, които могат да се
+ползват, за да се променят настройките по подразбиране. Свойство може да евентуална
+недефинирано или недодефинирано, ако съответната опция при създаването на света
+не е била включена.
+
+* **renderer**  &ndash; `THREE.WebGPURenderer`, рендерерът по подразбиране
+
+* **scene**  &ndash; [`THREE.Scene`](https://threejs.org/docs/#api/en/scenes/Scene),
+сцената, в която живеят всички 3D форми.
+
+* **camera**  &ndash; [`THREE.PerspectiveCamera`](https://threejs.org/docs/#api/en/cameras/PerspectiveCamera),
+перспецкивна камера.
+
+* **light**  &ndash; [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight),
+насочена статична светлина, която прави сенки.
+
+* **cameraLight**  &ndash; [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight),
+втора насочена светлина, която е прикрепена към камерата.
+
+* **controls**  &ndash; [`OrbitControls`](https://threejs.org/docs/#examples/en/controls/OrbitControls),
+инстанция на орбитални контроли за манипулиране на камерата.
+
+* **ground**  &ndash; [`THREE.Mesh`](https://threejs.org/docs/?q=mesh#api/en/objects/Mesh)
+с форма на [`PlaneGeometry`](https://threejs.org/docs/#api/en/geometries/PlaneGeometry)
+, която служи за земя.
+
+* **stats**  &ndash; [`Stats`](https://mrdoob.github.io/stats.js/), панел за следене
+на скоростта на анимация.
+
+* **everybody** &ndash; масив, съдържа всички създадени тела, инстанции на `Man`,
+`Woman` или `Child`.
+
+
+<!--
 
 Всички фигури (инстанции на `Mannequin`, `Male`, `Female` и `Child`) имат еднакъв
 набор от свойства и методи.

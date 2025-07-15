@@ -642,23 +642,64 @@ The main disadvantages of using using nodes.js:
 Note: This approach is not tested. If you find that it is not working and you
 know how to fix it, please get in touch.
 
+-->
 
 
+# API
 
-### API
+### Classes
 
-The library mannequin.js defines the following functions and classes:
+* new **World**(*options*) &ndash; class, represents a default Three.js world.
+The optional parameter *options* is a set of flags. The default options are
+`{lights: true, controls: true, ground: true, shadows: true, stats: false}`:<ul>
+*lights* &ndash; boolean; if true, lights are created<br>
+*controls* &ndash; boolean, if true, orbit controls is created<br>
+*ground* &ndash; boolean, if true, ground is created<br>
+*shadows* &ndash; boolean, if true, shadows are created<br>
+*stats* &ndash; boolean, if true, stats panel is created
+</ul>
 
-* `createStage(animationLoop)` &ndash; function, create a stage with ground and lights
-* `getStage()` &ndash; function, current stage
-* `getVersion()` &ndash; function, current version of mannequin.js as a number; e.g. 5.2
-* `getPostureVersion()` &ndash; function, current version of posture data format
-* `getGroundLevel()` &ndash; function, vertical position of the ground in meters
-* `blend(p,q,k)` &ndash; function, blended posture of postures *p* and *q* with coefficient *k*
-* `Mannequin(feminine,height)` &ndash; class, a general figure
-* `Male(height)` &ndash; class, a male figure
-* `Female(height)` &ndash; class, a female figure
-* `Child(height)` &ndash; class, a child figure
+### Functions
+
+* **userAnimationLoop**(*user_function*) &ndash; function, sets a user-defined function
+to be called from the main animation loop at every frame; this function has one
+parameter *time* measured in milliseconds (one second is 1000 milliseconds).
+
+
+### Variables
+
+The following variables export properties of the default world that can be used
+to modify the world. A property may be undefined or ill-defined if a world is not
+created or if the corresponding option is not set.
+
+* **renderer**  &ndash; `THREE.WebGPURenderer`, the default renderer
+
+* **scene**  &ndash; [`THREE.Scene`](https://threejs.org/docs/#api/en/scenes/Scene),
+the default scene where all 3D shapes live.
+
+* **camera**  &ndash; [`THREE.PerspectiveCamera`](https://threejs.org/docs/#api/en/cameras/PerspectiveCamera),
+the default perspective camera.
+
+* **light**  &ndash; [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight),
+the default static directional light that makes shadows.
+
+* **cameraLight**  &ndash; [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight),
+the default secondary directional light, attached to the camera.
+
+* **controls**  &ndash; [`OrbitControls`](https://threejs.org/docs/#examples/en/controls/OrbitControls),
+the instance of Orbit controls for user manipulation of the camera.
+
+* **ground**  &ndash; [`THREE.Mesh`](https://threejs.org/docs/?q=mesh#api/en/objects/Mesh)
+with [`PlaneGeometry`](https://threejs.org/docs/#api/en/geometries/PlaneGeometry)
+shape that acts as a ground.
+
+* **stats**  &ndash; [`Stats`](https://mrdoob.github.io/stats.js/), the performance monitoring
+panel.
+
+* **everybody** &ndash; array, contains all created bodies, instances of `Man`,
+`Woman` or `Child`.
+
+<!--
 
 All figures (instances of `Mannequin`, `Male`, `Female` and `Child`) have the
 same set of properties and methods.
