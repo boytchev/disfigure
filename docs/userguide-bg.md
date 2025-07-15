@@ -52,7 +52,7 @@ Disfigure дефинира класовете `Man(height)`, `Woman(height)`
 тялото. Техните имена имат префикси `l_` за ляво и `r_` за
 дясно, например `l_arm` и `r_arm`, ([пример на живо](body-parts.html)):
 
-[<img src="snapshots/body-parts.jpg width="49%"">](body-parts.html)
+[<img src="snapshots/body-parts.jpg width="49%">](body-parts.html)
 
 <!--
 
