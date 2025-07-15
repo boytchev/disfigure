@@ -649,55 +649,58 @@ know how to fix it, please get in touch.
 
 ### Classes
 
-* new **World**(*options*) &ndash; class, represents a default Three.js world.
-The optional parameter *options* is a set of flags. The default options are
-`{lights: true, controls: true, ground: true, shadows: true, stats: false}`:<ul>
-*lights* &ndash; boolean; if true, lights are created<br>
-*controls* &ndash; boolean, if true, orbit controls is created<br>
-*ground* &ndash; boolean, if true, ground is created<br>
-*shadows* &ndash; boolean, if true, shadows are created<br>
-*stats* &ndash; boolean, if true, stats panel is created
-</ul>
+#### new **World**( )<br>new **World**( *features* )
+
+Creates a predefined default 3D world with all basic attributes,
+like camera, lights, ground, user navigations and so on. The
+optional parameter *features* defines what attribute to create. 
+It is a set of the following options:
+
+- *lights* &ndash; boolean; if true, lights are created
+- *controls* &ndash; boolean, if true, orbit controls is created
+- *ground* &ndash; boolean, if true, ground is created
+- *shadows* &ndash; boolean, if true, shadows are created
+- *stats* &ndash; boolean, if true, stats panel is created
+
+```js
+new World( {ground: false, stats: true} );
+```
+
 
 ### Functions
 
-* **userAnimationLoop**(*user_function*) &ndash; function, sets a user-defined function
-to be called from the main animation loop at every frame; this function has one
-parameter *time* measured in milliseconds (one second is 1000 milliseconds).
+#### userAnimationLoop( animate )
+
+Sets the user-defined function *animate* to be called from the main
+animation loop at every frame. This function has one parameter
+of the elapsed time, measured in milliseconds (one second is
+1000 milliseconds).
+
+```js
+function animate( ms ) {...}
+
+setAnimationLoop( animate );
+```
 
 
 ### Variables
 
-The following variables export properties of the default world that can be used
-to modify the world. A property may be undefined or ill-defined if a world is not
-created or if the corresponding option is not set.
+The following variables export properties of the default world that
+can be used to modify the world. A property may be undefined or
+ill-defined if a world is not created or if the corresponding option
+is not set.
 
-* **renderer**  &ndash; `THREE.WebGPURenderer`, the default renderer
-
-* **scene**  &ndash; [`THREE.Scene`](https://threejs.org/docs/#api/en/scenes/Scene),
-the default scene where all 3D shapes live.
-
-* **camera**  &ndash; [`THREE.PerspectiveCamera`](https://threejs.org/docs/#api/en/cameras/PerspectiveCamera),
-the default perspective camera.
-
-* **light**  &ndash; [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight),
-the default static directional light that makes shadows.
-
-* **cameraLight**  &ndash; [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight),
-the default secondary directional light, attached to the camera.
-
-* **controls**  &ndash; [`OrbitControls`](https://threejs.org/docs/#examples/en/controls/OrbitControls),
-the instance of Orbit controls for user manipulation of the camera.
-
-* **ground**  &ndash; [`THREE.Mesh`](https://threejs.org/docs/?q=mesh#api/en/objects/Mesh)
-with [`PlaneGeometry`](https://threejs.org/docs/#api/en/geometries/PlaneGeometry)
-shape that acts as a ground.
-
-* **stats**  &ndash; [`Stats`](https://mrdoob.github.io/stats.js/), the performance monitoring
-panel.
-
-* **everybody** &ndash; array, contains all created bodies, instances of `Man`,
-`Woman` or `Child`.
+| Variable | Description |
+| :--- | :--- |
+| **renderer** | The default renderer, an instance of `THREE.WebGPURenderer`. |
+| **scene** | The default scene, an instance of [`THREE.Scene`](https://threejs.org/docs/#api/en/scenes/Scene). It is a container of all 3D elements of the world, incusind the bodies. |
+| **camera** | The default camera, an instance of [`THREE.PerspectiveCamera`](https://threejs.org/docs/#api/en/cameras/PerspectiveCamera). It is used to define the viewing position. |
+| **light** | The primary light, an instance of [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight). It is a static light that casts shadows. |
+| **cameraLight** | The secondary light, an instance of [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight). It is attached to the camera, so that models are lit even when the camera looks at their backs. |
+| **controls** | The navigation controls, an instance of [`OrbitControls`](https://threejs.org/docs/#examples/en/controls/OrbitControls). It allows the user to rotate and move the camera within the world. |
+| **ground** | The ground of the world, an instance of [`THREE.Mesh`](https://threejs.org/docs/?q=mesh#api/en/objects/Mesh) with shape of [`PlaneGeometry`](https://threejs.org/docs/#api/en/geometries/PlaneGeometry). It creates the illusion of solid surface. |
+| **stats** | A statistics panel, instance of [`Stats`](https://mrdoob.github.io/stats.js/). It is used to show the current the performance. |
+| **everybody** | An array of bodies. It contains all created bodies, instances of `Man`, `Woman` or `Child`. |
 
 <!--
 

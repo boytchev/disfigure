@@ -438,7 +438,7 @@ class Space {
 
 } // Space
 
-var renderer, scene, camera, light, cameraLight, controls, userAnimationLoop, stats, everybody = [];
+var renderer, scene, camera, light, cameraLight, controls, ground, userAnimationLoop, stats, everybody = [];
 
 
 
@@ -531,7 +531,7 @@ class World {
 			context.arc( 64, 64, 38, 0, 2*Math.PI );
 			context.fill();
 
-			var ground = new Mesh(
+			ground = new Mesh(
 				new CircleGeometry( 50 ),
 				new MeshLambertMaterial(
 					{
@@ -670,8 +670,6 @@ class Joint extends Group {
 		this.matrix = space.matrix;
 		this.angleAux = spaceAux.angle;
 
-		this.nameY = axes[ 1 ];
-
 		this.position.copy( space.pivot );
 
 		getset( this, 'bend', axes[ 0 ]);
@@ -747,12 +745,12 @@ class Disfigure extends Group {
 		this.chest = new Joint( this, this.waist, this.space.chest );
 		this.head = new Joint( this, this.chest, this.space.head );
 
-		this.l_leg = new Joint( this, this.waist, this.space.l_leg, this.space.l_leg2 );
+		this.l_leg = new Joint( this, this.torso, this.space.l_leg, this.space.l_leg2 );
 		this.l_knee = new Joint( this, this.l_leg, this.space.l_knee );
 		this.l_ankle = new Joint( this, this.l_knee, this.space.l_ankle, this.space.l_ankle2 );
 		this.l_foot = new Joint( this, this.l_ankle, this.space.l_foot );
 
-		this.r_leg = new Joint( this, this.waist, this.space.r_leg, this.space.r_leg2 );
+		this.r_leg = new Joint( this, this.torso, this.space.r_leg, this.space.r_leg2 );
 		this.r_knee = new Joint( this, this.r_leg, this.space.r_knee );
 		this.r_ankle = new Joint( this, this.r_knee, this.space.r_ankle, this.space.r_ankle2 );
 		this.r_foot = new Joint( this, this.r_ankle, this.space.r_foot );
@@ -777,6 +775,7 @@ class Disfigure extends Group {
 		// rescale the model to the desired height (optional)
 		this.height = height ?? modelHeight;
 		model.scale.setScalar( this.height / modelHeight );
+		model.position.y = 0;
 
 		model.castShadow = true;
 		model.receiveShadow = true;
@@ -903,7 +902,7 @@ class Man extends Disfigure {
 
 		this.url = MODEL_PATH + Man.URL;
 
-		this.position.y = this.height/2 - 0.015;
+		//this.position.y = this.height/2 - 0.015;
 
 		this.l_leg.straddle = this.r_leg.straddle = 5;
 		this.l_ankle.tilt = this.r_ankle.tilt = -5;
@@ -948,7 +947,7 @@ class Woman extends Disfigure {
 
 		this.url = MODEL_PATH + Woman.URL;
 
-		this.position.y = this.height/2 - 0.005;
+		//this.position.y = this.height/2 - 0.005;
 
 		this.l_leg.straddle = this.r_leg.straddle = -2.9;
 		this.l_ankle.tilt = this.r_ankle.tilt = 2.9;
@@ -993,7 +992,7 @@ class Child extends Disfigure {
 
 		this.url = MODEL_PATH + Child.URL;
 
-		this.position.y = this.height/2 - 0.005;
+		//this.position.y = this.height/2 - 0.005;
 
 		this.l_ankle.bend = this.r_ankle.bend = 3;
 
@@ -1020,6 +1019,6 @@ var [ gltf_man, gltf_woman, gltf_child ] = await Promise.all(
 
 
 
-console.log( '\n%c\u22EE\u22EE\u22EE Disfigure\n%chttps://boytchev.github.io/disfigure/\n', 'color: navy', 'font-size:60%' );
+console.log( '\n%c\u22EE\u22EE\u22EE Disfigure\n%chttps://boytchev.github.io/disfigure/\n', 'color: navy', 'font-size:80%' );
 
 export { Child, Man, Woman, World, camera, cameraLight, chaotic, controls, everybody, light, regular, renderer, scene, setAnimationLoop };

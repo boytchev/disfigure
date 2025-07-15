@@ -731,56 +731,58 @@ Three.js, така и на mannequin.js.
 
 ### Класове
 
-* new **World**(*options*) &ndash; клас, реализира подразбиращият се Three.js свят.
-Незадължителният параметър *options* е ножество от именувани флагове. По подразбиране
-опциите са `{lights: true, controls: true, ground: true, shadows: true, stats: false}`:<ul>
-*lights* &ndash; булева стойност; ако е true, създават се светлини<br>
-*controls* &ndash; булева стойност; ако е true, създава се орбитална навигация<br>
-*ground* &ndash; булева стойност; ако е true, създава се земя<br>
-*shadows* &ndash; булева стойност; ако е true, създават се сенки<br>
-*stats* &ndash; булева стойност; ако е true, създава се панел със статистика
-</ul>
+#### new **World**( )<br>new **World**( *features* )
+
+Създава предефиниран Three.js 3D свят с всички основни атрибути,
+като камера, светлини, земя, навигация и т.н. Незадължителният
+параметър *features* определя кои атрибути да се създадат.
+Стойността му е множество от следните флагове:
+
+- *lights* &ndash; булева стойност; ако е true, създават се светлини
+- *controls* &ndash; булева стойност; ако е true, създава се орбитална навигация
+- *ground* &ndash; булева стойност; ако е true, създава се земя
+- *shadows* &ndash; булева стойност; ако е true, създават се сенки
+- *stats* &ndash; булева стойност; ако е true, създава се панел със статистика
+
+```js
+new World( {ground: false, stats: true} );
+```
+
 
 ### Функции
 
-* **userAnimationLoop**(*потреб_функция*) &ndash; функция, задава потребителска функция,
-която се извиква на всеки кадър от главния снимационен цикъл; тази функция има единични
-параметър *time* измерващ изминалото време в милисекунди (1 секунда е 1000 милисекунди).
+#### userAnimationLoop( animate )
+
+Задава потребителска функция *animate*, която се извиква на всеки кадър
+от главния снимационен цикъл. Тази потребителска функция е с-пози
+параметър за изминалото време, измерено в милисекунди (1 секунда
+е 1000 милисекунди).
+
+```js
+function animate( ms ) {...}
+
+setAnimationLoop( animate );
+```
 
 
 ### Променливи
 
-Следващите  променливи извеждат някои от свойствата на света, които могат да се
-ползват, за да се променят настройките по подразбиране. Свойство може да евентуална
-недефинирано или недодефинирано, ако съответната опция при създаването на света
-не е била включена.
+Следващите  променливи извеждат някои от свойствата на света,
+които могат да се ползват, за да се променят настройките по
+подразбиране. Свойство може да е недефинирано или недодефинирано,
+ако съответната опция при създаването на света не е била включена.
 
-* **renderer**  &ndash; `THREE.WebGPURenderer`, рендерерът по подразбиране
-
-* **scene**  &ndash; [`THREE.Scene`](https://threejs.org/docs/#api/en/scenes/Scene),
-сцената, в която живеят всички 3D форми.
-
-* **camera**  &ndash; [`THREE.PerspectiveCamera`](https://threejs.org/docs/#api/en/cameras/PerspectiveCamera),
-перспецкивна камера.
-
-* **light**  &ndash; [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight),
-насочена статична светлина, която прави сенки.
-
-* **cameraLight**  &ndash; [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight),
-втора насочена светлина, която е прикрепена към камерата.
-
-* **controls**  &ndash; [`OrbitControls`](https://threejs.org/docs/#examples/en/controls/OrbitControls),
-инстанция на орбитални контроли за манипулиране на камерата.
-
-* **ground**  &ndash; [`THREE.Mesh`](https://threejs.org/docs/?q=mesh#api/en/objects/Mesh)
-с форма на [`PlaneGeometry`](https://threejs.org/docs/#api/en/geometries/PlaneGeometry)
-, която служи за земя.
-
-* **stats**  &ndash; [`Stats`](https://mrdoob.github.io/stats.js/), панел за следене
-на скоростта на анимация.
-
-* **everybody** &ndash; масив, съдържа всички създадени тела, инстанции на `Man`,
-`Woman` или `Child`.
+| Променлива | Описание |
+| :--- | :--- |
+| **renderer** | Рендерерът по подразбиране, инстация на `THREE.WebGPURenderer`. |
+| **scene** | Сцена по подразбиране, инстанция на [`THREE.Scene`](https://threejs.org/docs/#api/en/scenes/Scene). Тя съдържа всички 3D елементи на света, включително и телата. |
+| **camera** | Камера по подразбиране, инстанция на [`THREE.PerspectiveCamera`](https://threejs.org/docs/#api/en/cameras/PerspectiveCamera). Използва се за управление на гледната точка. |
+| **light** | Главна светлина, инстанция на [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight). Тя е статична светлина, която генерира сенки. |
+| **cameraLight** | Вторична светлина, инстанция на [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight). Тя е прикрепена към камерата, така че моделите са осветени, дори и когато камерата гледа към гърбовете им. |
+| **controls** | Контроли за навигация, инстанция на [`OrbitControls`](https://threejs.org/docs/#examples/en/controls/OrbitControls). Те позволяват на потребителя да върти и премества камерата из света. |
+| **ground** | Земя, инстанция на [`THREE.Mesh`](https://threejs.org/docs/?q=mesh#api/en/objects/Mesh) с форма на [`PlaneGeometry`](https://threejs.org/docs/#api/en/geometries/PlaneGeometry). Тя създава илюзията за твърда повърхност. |
+| **stats** | Панел за статистика, инстанция на [`Stats`](https://mrdoob.github.io/stats.js/). Използва се за визуализиране на текущата скорост. |
+| **everybody** | Масив от тела. Съдържа всички създадени тела, инстанции на `Man`, `Woman` или `Child`. |
 
 
 <!--
