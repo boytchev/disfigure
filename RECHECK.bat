@@ -9,9 +9,6 @@ echo Eslinting poser
 call npx eslint --fix poser/*.js
 call npx eslint --fix poser/*.html
 
-echo Eslinting examples
-call npx eslint --fix examples/*.js
-
 echo Eslinting docs
 call npx eslint --fix docs/*.html
 

@@ -666,7 +666,7 @@ new World( {ground: false, stats: true} );
 
 ## API functions
 
-### userAnimationLoop( animate )
+### userAnimationLoop( *animate* )
 
 Sets the user-defined function *animate* to be called from the main
 animation loop at every frame. This function has one parameter
@@ -678,6 +678,49 @@ function animate( ms ) {...}
 
 setAnimationLoop( animate );
 ```
+
+
+---
+### random( )<br>random( *min*, *max* )
+
+
+Generates uniformly distributed random numbers in the interval [*min*,*max*) &ndash; [live example](number-generators.html).
+By default *min*=-1 and *max*=1. Internally uses a
+pseudo-random function.
+
+```js
+man.head.turn = random( -60, 60 );
+```
+
+
+---
+### regular( *time* )<br>regular( *time*, *offset* )<br>regular( *time*, *offset*, *min*, *max* )
+
+Generates an oscilating sequence of numbers in the interval [*min*,*max*] &ndash; [live example](number-generators.html).
+By default *offset*=0, *min*=-1 and *max*=1. Internally uses
+the sine function. Parameter *offset* shifts the oscillation
+foreward or backward in time.
+
+```js
+man.head.turn = regular( time, 0, -60, 60 );
+```
+
+---
+### chaotic( *time* )<br>chaotic( *time*, *offset* )<br>chaotic( *time*, *offset*, *min*, *max* )
+
+Generates a chaotic (random, but gradually changing) sequence
+of numbers in the interval [*min*,*max*] &ndash;
+[live example](number-generators.html). By default *offset*=0,
+*min*=-1 and *max*=1. Internally uses a simplex noise function.
+Parameter *offset* shifts the sequence across the time, i.e. two
+generators with different offsets produce different sequences.
+
+```js
+man.head.turn = chaotic( time, 0, -60, 60 );
+```
+
+
+
 
 
 ## API variables

@@ -57,11 +57,21 @@ function regular( time, offset=0, min=-1, max=1 ) {
 
 
 
+// generate random sequence of numbers in [min.max]
+function random( min=-1, max=1 ) {
+
+	return min + ( max-min )*Math.random( );
+
+}
+
+
+
 export {
 
 	smoother,
 	centerModel,
 	chaotic,
 	regular,
+	random,
 
 };

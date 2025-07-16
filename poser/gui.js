@@ -11,7 +11,7 @@ import { float, Fn, If, mix, select, uniform, vec3 } from "three/tsl";
 import { LocusT, LocusX } from "../src/space.js";
 import { scene, setAnimationLoop, World } from "../src/world.js";
 import { chaotic } from "../src/utils.js";
-import { Man, Joint } from "../src/body.js";
+import { Joint, Man } from "../src/body.js";
 import { DEBUG, DEBUG_JOINT, DEBUG_NAME } from "./debug.js";
 
 
@@ -412,6 +412,7 @@ function rigRandomModel( ) {
 	model.rotation.y += Math.random( )-0.2;
 
 	for ( var name of Object.keys( model ) ) {
+
 		if ( model[ name ] instanceof Joint ) {
 
 			model[ name ].bend = Math.round( model[ name ].bend );
@@ -533,8 +534,7 @@ function showPivotPoint( index ) {
 
 function changePivotPoint( ) {
 
-	var space = model.space[ DEBUG_NAME ],
-		dims = model.dims;
+	var space = model.space[ DEBUG_NAME ];
 
 	space.pivot.value.x = debug.x;
 	space.pivot.value.y = debug.y;

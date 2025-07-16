@@ -169,6 +169,15 @@ function regular( time, offset=0, min=-1, max=1 ) {
 
 }
 
+
+
+// generate random sequence of numbers in [min.max]
+function random( min=-1, max=1 ) {
+
+	return min + ( max-min )*Math.random( );
+
+}
+
 // clone an object and flip its pivot horizontally - this is used for all spaces
 // that represent left-right symmetry in human body (e.g. left arm and right arm)
 function clone( instance ) {
@@ -444,12 +453,11 @@ var renderer, scene, camera, light, cameraLight, controls, ground, userAnimation
 
 // creates a default world with all its primary attributes the options parameters
 // is a collection of flags that turn on/off specific features:
-//
-// options.lights		true, whether lights are created
-// options.controls		true, whether OrbitControls is created
-// options.ground		true, whether ground is created
-// options.shadows		true, whether shadows are enabled
-// options.stats		false, whether to create stats panel
+//    lights	true, create lights
+//    controls	true, create OrbitControls
+//    ground	true, create ground
+//    shadows	true, create shadows
+//	  stats		false, create stats panel
 
 class World {
 
@@ -481,14 +489,13 @@ class World {
 		if ( options?.lights ?? true ) {
 
 			light = new DirectionalLight( 'white', 1.5 );
-			light.decay = 0;
 			light.position.set( 0, 14, 7 );
 			if ( options?.shadows ?? true ) {
 
 				light.shadow.mapSize.width = 2048;
 				light.shadow.mapSize.height = light.shadow.mapSize.width;
-				light.shadow.camera.near = 1;//13;
-				light.shadow.camera.far = 50;//18.5;
+				light.shadow.camera.near = 1;
+				light.shadow.camera.far = 50;
 				light.shadow.camera.left = -5;
 				light.shadow.camera.right = 5;
 				light.shadow.camera.top = 5;
@@ -502,7 +509,6 @@ class World {
 			scene.add( light );
 
 			cameraLight = new DirectionalLight( 'white', 1.5 );
-			cameraLight.decay = 0;
 			cameraLight.target = scene;
 			camera.add( cameraLight );
 			scene.add( camera );
@@ -533,12 +539,11 @@ class World {
 
 			ground = new Mesh(
 				new CircleGeometry( 50 ),
-				new MeshLambertMaterial(
-					{
-						color: 'antiquewhite',
-						transparent: true,
-						map: new CanvasTexture( canvas )
-					} )
+				new MeshLambertMaterial( {
+					color: 'antiquewhite',
+					transparent: true,
+					map: new CanvasTexture( canvas )
+				} )
 			);
 			ground.receiveShadow = true;
 			ground.rotation.x = -Math.PI / 2;
@@ -584,7 +589,7 @@ class AnimateEvent extends Event {
 
 }
 
-var animateEvent = new AnimateEvent( 'animate' );
+var animateEvent = new AnimateEvent( );
 
 
 
@@ -1021,4 +1026,4 @@ var [ gltf_man, gltf_woman, gltf_child ] = await Promise.all(
 
 console.log( '\n%c\u22EE\u22EE\u22EE Disfigure\n%chttps://boytchev.github.io/disfigure/\n', 'color: navy', 'font-size:80%' );
 
-export { Child, Man, Woman, World, camera, cameraLight, chaotic, controls, everybody, light, regular, renderer, scene, setAnimationLoop };
+export { Child, Man, Woman, World, camera, cameraLight, chaotic, controls, everybody, ground, light, random, regular, renderer, scene, setAnimationLoop };

@@ -748,7 +748,7 @@ new World( {ground: false, stats: true} );
 
 ## АПИ функции
 
-### userAnimationLoop( animate )
+### userAnimationLoop( *animate* )
 
 Задава потребителска функция *animate*, която се извиква на всеки кадър
 от главния снимационен цикъл. Тази потребителска функция е с-пози
@@ -760,6 +760,51 @@ function animate( ms ) {...}
 
 setAnimationLoop( animate );
 ```
+
+
+---
+### random( )<br>random( *min*, *max* )
+
+Генерира равномерно разпределени случайни числа в интервала
+[*min*,*max*) &ndash; [пример наживо](number-generators.html).
+По подразбиране *min*=-1 и *max*=1. Вътрешно използва генератор
+на псевдослучайни числа.
+
+```js
+man.head.turn = random( -60, 60 );
+```
+
+
+---
+### regular( *time* )<br>regular( *time*, *offset* )<br>regular( *time*, *offset*, *min*, *max* )
+
+Генерира осцилираща поредица от числа в интервала [*min*,*max*]
+&ndash; [пример наживо](number-generators.html). По подразбиране
+*offset*=0, *min*=-1 и *max*=1. Вътрешно използва функцията
+синус. Параметърът *offset* премества осцилацията напред
+или назад във времето.
+
+```js
+man.head.turn = regular( time, 0, -60, 60 );
+```
+
+---
+### chaotic( *time* )<br>chaotic( *time*, *offset* )<br>chaotic( *time*, *offset*, *min*, *max* )
+
+Генерира хаотична (случайна, но плавно променяща се) поредица
+от числа в интервала [*min*,*max*] &ndash; [пример наживо](number-generators.html).
+По подразбиране *offset=0, *min*=-1 и *max*=1. Вътрешно използва
+функция за симплекс шум. Параметърът *offset* премества поредицата
+напреки времето, т.е. два генератора с различни отмествания
+генерират различни поредици.
+
+```js
+man.head.turn = chaotic( time, 0, -60, 60 );
+```
+
+
+
+
 
 
 ## АПИ променливи
