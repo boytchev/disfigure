@@ -34,6 +34,8 @@ class Locus {
 
 	mirror( ) {
 
+		this.isRight = true;
+		
 		this.pivot.x *= -1;
 
 		if ( this.minX ) this.minX *= -1;

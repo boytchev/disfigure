@@ -61,6 +61,7 @@ class Joint extends Group {
 		this.angle = space.angle;
 		this.matrix = space.matrix;
 		this.angleAux = spaceAux.angle;
+		this.isRight = space.isRight;
 
 		this.position.copy( space.pivot );
 
@@ -83,8 +84,8 @@ class Joint extends Group {
 
 		wrapper.add( subwrapper );
 		subwrapper.add( mesh );
-		subwrapper.rotation.z = this.isRight ? Math.PI : 0;
-		mesh.position.y *= this.isRight ? -1 : 1;
+		subwrapper.rotation.y = this.isRight ? Math.PI : 0;
+		//mesh.position.y *= this.isRight ? -1 : 1;
 		wrapper.matrixAutoUpdate = false;
 		wrapper.joint = this;
 
