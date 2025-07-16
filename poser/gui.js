@@ -11,13 +11,14 @@ import { float, Fn, If, mix, select, uniform, vec3 } from "three/tsl";
 import { LocusT, LocusX } from "../src/space.js";
 import { scene, setAnimationLoop, World } from "../src/world.js";
 import { chaotic } from "../src/utils.js";
-import { Man } from "../src/body.js";
+import { Man, Joint } from "../src/body.js";
 import { DEBUG, DEBUG_JOINT, DEBUG_NAME } from "./debug.js";
 
 
 
 new World();
 var model = new Man();
+
 var debugSpace;
 
 
@@ -170,17 +171,15 @@ function addCuttingPlanes( dims, model ) {
 
 function updateDebug() {
 
-	var dims = model.dims;
-
 	if ( debugSpace instanceof LocusX && !( debugSpace instanceof LocusT ) ) {
 
-		debug.minY = debugSpace.minX.value;
-		debug.maxY = debugSpace.maxX.value;
+		debug.minY = debugSpace.minX.value ?? debugSpace.minX;
+		debug.maxY = debugSpace.maxX.value ?? debugSpace.maxX;
 
 	} else {
 
-		debug.minY = debugSpace.minY.value;
-		debug.maxY = debugSpace.maxY.value;
+		debug.minY = debugSpace.minY.value ?? debugSpace.minY;
+		debug.maxY = debugSpace.maxY.value ?? debugSpace.maxY;
 
 	}
 
@@ -338,7 +337,11 @@ function createGui( ) {
 
 function rigModel( t ) {
 
-	t = t/1500;
+	t = t/2000;
+
+	model.torso.bend = chaotic( t/3, 111, -120, 120 );
+	model.torso.turn = chaotic( t/3, -24, -180, 180 );
+	model.torso.tilt = chaotic( t/3, 72, -120, 120 );
 
 	model.head.bend = chaotic( t, 0, -60, 40 );
 	model.head.turn = chaotic( t, 4, -60, 60 );
@@ -409,8 +412,7 @@ function rigRandomModel( ) {
 	model.rotation.y += Math.random( )-0.2;
 
 	for ( var name of Object.keys( model ) ) {
-
-		if ( model[ name ]?.bend ) {
+		if ( model[ name ] instanceof Joint ) {
 
 			model[ name ].bend = Math.round( model[ name ].bend );
 			model[ name ].turn = Math.round( model[ name ].turn );
@@ -467,43 +469,53 @@ function showPivotPoint( index ) {
 			break;
 
 		case 11:
+			debugSpace = space.l_leg;
 			axis1.position.copy( space.l_leg.pivot.value );
 			axis2.position.copy( space.r_leg.pivot.value );
 			break;
 		case 12:
-			axis1.position.copy( space.l_legLong.pivot.value );
-			axis2.position.copy( space.r_legLong.pivot.value );
+			debugSpace = space.l_leg2;
+			axis1.position.copy( space.l_leg2.pivot.value );
+			axis2.position.copy( space.r_leg2.pivot.value );
 			break;
 		case 14:
-			axis1.position.copy( space.l_ankleLong.pivot.value );
-			axis2.position.copy( space.r_ankleLong.pivot.value );
+			debugSpace = space.l_ankle2;
+			axis1.position.copy( space.l_ankle2.pivot.value );
+			axis2.position.copy( space.r_ankle2.pivot.value );
 			break;
 		case 13:
+			debugSpace = space.l_knee;
 			axis1.position.copy( space.l_knee.pivot.value );
 			axis2.position.copy( space.r_knee.pivot.value );
 			break;
 		case 15:
+			debugSpace = space.l_ankle;
 			axis1.position.copy( space.l_ankle.pivot.value );
 			axis2.position.copy( space.r_ankle.pivot.value );
 			break;
 		case 16:
+			debugSpace = space.l_foot;
 			axis1.position.copy( space.l_foot.pivot.value );
 			axis2.position.copy( space.r_foot.pivot.value );
 			break;
 
 		case 21:
+			debugSpace = space.l_arm;
 			axis1.position.copy( space.l_arm.pivot.value );
 			axis2.position.copy( space.r_arm.pivot.value );
 			break;
 		case 22:
+			debugSpace = space.l_elbow;
 			axis1.position.copy( space.l_elbow.pivot.value );
 			axis2.position.copy( space.r_elbow.pivot.value );
 			break;
 		case 23:
-			axis1.position.copy( space.l_forearm.pivot.value );
-			axis2.position.copy( space.r_forearm.pivot.value );
+			debugSpace = space.l_wrist2;
+			axis1.position.copy( space.l_wrist2.pivot.value );
+			axis2.position.copy( space.r_wrist2.pivot.value );
 			break;
 		case 24:
+			debugSpace = space.l_wrist;
 			axis1.position.copy( space.l_wrist.pivot.value );
 			axis2.position.copy( space.r_wrist.pivot.value );
 			break;

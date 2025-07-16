@@ -406,4 +406,4 @@ var [ gltf_man, gltf_woman, gltf_child ] = await Promise.all(
 
 
 
-export { Man, Woman, Child };
+export { Man, Woman, Child, Joint };
