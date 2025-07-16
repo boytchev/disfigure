@@ -748,7 +748,7 @@ new World( {ground: false, stats: true} );
 
 ## АПИ функции
 
-### userAnimationLoop( *animate* )
+### **userAnimationLoop**( *animate* )
 
 Задава потребителска функция *animate*, която се извиква на всеки кадър
 от главния снимационен цикъл. Тази потребителска функция е с-пози
@@ -763,7 +763,7 @@ setAnimationLoop( animate );
 
 
 
-### random( )<br>random( *min*, *max* )
+### **random**( )<br>**random**( *min*, *max* )
 
 Генерира равномерно разпределени случайни числа в интервала
 [*min*,*max*) &ndash; [пример наживо](number-generators.html).
@@ -776,7 +776,7 @@ man.head.turn = random( -60, 60 );
 
 
 
-### regular( *time* )<br>regular( *time*, *offset* )<br>regular( *time*, *offset*, *min*, *max* )
+### **regular**( *time* )<br>**regular**( *time*, *offset* )<br>**regular**( *time*, *offset*, *min*, *max* )
 
 Генерира осцилираща поредица от числа в интервала [*min*,*max*]
 &ndash; [пример наживо](number-generators.html). По подразбиране
@@ -789,7 +789,7 @@ man.head.turn = regular( time, 0, -60, 60 );
 ```
 
 
-### chaotic( *time* )<br>chaotic( *time*, *offset* )<br>chaotic( *time*, *offset*, *min*, *max* )
+### **chaotic**( *time* )<br>**chaotic**( *time*, *offset* )<br>**chaotic**( *time*, *offset*, *min*, *max* )
 
 Генерира хаотична (случайна, но плавно променяща се) поредица
 от числа в интервала [*min*,*max*] &ndash; [пример наживо](number-generators.html).

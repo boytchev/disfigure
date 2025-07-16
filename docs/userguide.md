@@ -666,7 +666,7 @@ new World( {ground: false, stats: true} );
 
 ## API functions
 
-### userAnimationLoop( *animate* )
+### **userAnimationLoop**( *animate* )
 
 Sets the user-defined function *animate* to be called from the main
 animation loop at every frame. This function has one parameter
@@ -681,7 +681,7 @@ setAnimationLoop( animate );
 
 
 
-### random( )<br>random( *min*, *max* )
+### **random**( )<br>**random**( *min*, *max* )
 
 
 Generates uniformly distributed random numbers in the interval [*min*,*max*) &ndash; [live example](number-generators.html).
@@ -694,7 +694,7 @@ man.head.turn = random( -60, 60 );
 
 
 
-### regular( *time* )<br>regular( *time*, *offset* )<br>regular( *time*, *offset*, *min*, *max* )
+### **regular**( *time* )<br>**regular**( *time*, *offset* )<br>**regular**( *time*, *offset*, *min*, *max* )
 
 Generates an oscilating sequence of numbers in the interval [*min*,*max*] &ndash; [live example](number-generators.html).
 By default *offset*=0, *min*=-1 and *max*=1. Internally uses
@@ -707,7 +707,7 @@ man.head.turn = regular( time, 0, -60, 60 );
 
 
 
-### chaotic( *time* )<br>chaotic( *time*, *offset* )<br>chaotic( *time*, *offset*, *min*, *max* )
+### **chaotic**( *time* )<br>**chaotic**( *time*, *offset* )<br>**chaotic**( *time*, *offset*, *min*, *max* )
 
 Generates a chaotic (random, but gradually changing) sequence
 of numbers in the interval [*min*,*max*] &ndash;
