@@ -51,29 +51,6 @@ always in respect to the figure. Their names have prefixes
 
 <!--
 
-Each body part has rotational properties that define its position. The values of the rotation properties are angles of rotation in degrees, so 180 is half turn and 360 is full turn. Negative angles are allowed and they represent rotations in the opposite directions. 
-
-Mannequin.js has two ways of setting rotations &ndash; *absolute* and *relative*. When a rotation property is set to a specific value, this produces absolute rotation. The following code will set the forward bend angle of the torso to 45&deg;:
-
-``` javascript
-man.torso.bend = 45;
-```
-
-**Absolute rotations** are considered by some people as counterintuitive. Some joints, like wrists, have three rotational properties (*triplets*). Due to the nature of rotations in 3D space, rotations in a triplet are interconnected &ndash; modifying one property in a triplet often affects the other two. The following code demonstrates how seting the *turn* property modifies the *bend* property.
-
-``` javascript
-man.torso.bend = 45; // bend=45
-man.torso.turn = 45; // turn=45, but now bend≈35.3
-```
-
-
-**Relative rotations** are set in respect to the current rotation value of the property. Modifications are much safer, as they do not rely on fixed values. The following code will bend the torso 45&deg; from its current position, and then turn it 45&deg;:
-
-``` javascript
-man.torso.bend += 45;
-man.torso.turn += 45;
-```
-
 ### Central body parts
 
 The central body parts are the ones which have single instances &ndash; *head*, *neck*, *torso*, *pelvis* and the whole body as *body*. To rotate the **whole body** use properties `bend`, `turn` and `tilt` of the figure's `body` or the figure itself ([live example](example-body.html)):
@@ -106,7 +83,6 @@ figure.torso.turn = angle;
 figure.torso.tilt = angle;
 ```
 
-Although the **neck** is a separate part of the body, it is not controlled individually. Instead, half of the head rotation is distributed over the neck. Similarly, the **pelvis** is not controlled individually. Instead, the whole body is controlled by bending, turning and tilting.
 
 
 ### Upper limbs
