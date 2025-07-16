@@ -6,7 +6,6 @@
 
 
 import { Box3, Vector3 } from 'three';
-import { Fn } from 'three/tsl';
 import { SimplexNoise } from "three/addons/math/SimplexNoise.js";
 
 
@@ -23,15 +22,6 @@ function centerModel( model ) {
 	return box.max.y-box.min.y;
 
 }
-
-
-
-// generate oversmooth function
-const smoother = Fn( ([ edgeFrom, edgeTo, value ])=>{
-
-	return value.smoothstep( edgeFrom, edgeTo ).smoothstep( 0, 1 ).smoothstep( 0, 1 );
-
-}, { edgeFrom: 'float', edgeTo: 'float', value: 'float', return: 'float' } );
 
 
 
@@ -68,7 +58,6 @@ function random( min=-1, max=1 ) {
 
 export {
 
-	smoother,
 	centerModel,
 	chaotic,
 	regular,

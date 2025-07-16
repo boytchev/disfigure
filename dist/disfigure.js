@@ -2,7 +2,7 @@
 
 import { Vector3, Box3, WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Matrix3, Matrix4, Euler, Group, MeshPhysicalNodeMaterial } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { Fn, mix, If, normalGeometry, transformNormalToView, positionGeometry, float, min, vec3, uniform, mat3 } from 'three/tsl';
+import { Fn, mix, If, normalGeometry, transformNormalToView, positionGeometry, vec3, float, min, uniform, mat3 } from 'three/tsl';
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
@@ -140,15 +140,6 @@ function centerModel( model ) {
 
 
 
-// generate oversmooth function
-const smoother = Fn( ([ edgeFrom, edgeTo, value ])=>{
-
-	return value.smoothstep( edgeFrom, edgeTo ).smoothstep( 0, 1 ).smoothstep( 0, 1 );
-
-}, { edgeFrom: 'float', edgeTo: 'float', value: 'float', return: 'float' } );
-
-
-
 // number generators
 
 var simplex = new SimplexNoise( );
@@ -178,18 +169,12 @@ function random( min=-1, max=1 ) {
 
 }
 
-// clone an object and flip its pivot horizontally - this is used for all spaces
-// that represent left-right symmetry in human body (e.g. left arm and right arm)
-function clone( instance ) {
+// generate oversmooth function
+const smoother = Fn( ([ edgeFrom, edgeTo, value ])=>{
 
-	var obj = Object.assign( Object.create( instance ), instance );
-	obj.pivot = obj.pivot.clone();
-	obj.pivot.x *= -1;
-	obj.angle = new Vector3();
-	obj.matrix = uniform( mat3() );
-	return obj;
+	return value.smoothstep( edgeFrom, edgeTo ).smoothstep( 0, 1 ).smoothstep( 0, 1 );
 
-}
+}/*, { edgeFrom: 'float', edgeTo: 'float', value: 'float', return: 'float' } */ );
 
 
 
@@ -204,6 +189,17 @@ class Locus {
 
 	} // Locus.constructor
 
+	mirror( ) {
+
+		this.pivot.x *= -1;
+
+		if ( this.minX ) this.minX *= -1;
+		if ( this.maxX ) this.maxX *= -1;
+
+		return this;
+
+	} // Locus.mirror
+
 } // Locus
 
 
@@ -217,39 +213,16 @@ class LocusY extends Locus {
 
 		super( pivot );
 
-		this.minY = rangeY[ 0 ];
-		this.maxY = rangeY[ 1 ];
-
-		if ( rangeX ) {
-
-			this.minX = rangeX[ 0 ];
-			this.maxX = rangeX[ 1 ];
-
-		}
+		[ this.minY, this.maxY ] = rangeY;
+		if ( rangeX ) [ this.minX, this.maxX ] = rangeX;
 
 		this.slope = Math.tan( ( 90-angle ) * Math.PI/180 );
 
 	} // constructor
 
-	mirror( ) {
+	locus( ) {
 
-		var obj = clone( this );
-		if ( 'minX' in obj ) {
-
-			obj.minX *= -1;
-			obj.maxX *= -1;
-
-		}
-
-		return obj;
-
-	} // mirror
-
-	locus( pos = positionGeometry ) {
-
-		var x = pos.x;
-		var y = pos.y;
-		var z = pos.z;
+		var { x, y, z } = positionGeometry;
 
 		if ( this.angle!=0 ) {
 
@@ -283,25 +256,13 @@ class LocusX extends Locus {
 
 		super( pivot );
 
-		this.minX = rangeX[ 0 ];
-		this.maxX = rangeX[ 1 ];
+		[ this.minX, this.maxX ] = rangeX;
 
 	} // constructor
 
-	mirror( ) {
+	locus( ) {
 
-		var obj = clone( this );
-
-		obj.minX *= -1;
-		obj.maxX *= -1;
-
-		return obj;
-
-	} // mirror
-
-	locus( pos = positionGeometry ) {
-
-		var x = pos.x;
+		var x = positionGeometry.x;
 
 		return smoother( this.minX, this.maxX, x );
 
@@ -318,25 +279,20 @@ class LocusXY extends LocusX {
 
 		super( pivot, rangeX );
 
-		this.minY = rangeY[ 0 ];
-		this.maxY = rangeY[ 1 ];
+		[ this.minY, this.maxY ] = rangeY;
 
 	} // constructor
 
-	locus( pos = positionGeometry ) {
+	locus( ) {
 
-		var x = pos.x;
-		var y = pos.y;
+		var { x, y } = positionGeometry;
 
-		var dx = pos.y.sub( this.pivot.y ).div( 4, x.sign() );
+		var dx = y.sub( this.pivot.y ).div( 4, x.sign() );
 
-		var k = 0.8;
-
-		return float( 1 )
-			.mul( smoother( float( this.minX ).sub( dx ), float( this.maxX ).sub( dx ), x ) )
+		return smoother( float( this.minX ).sub( dx ), float( this.maxX ).sub( dx ), x )
 			.mul( min(
-				smoother( this.minY, this.minY*k+( 1-k )*this.maxY, y ),
-				smoother( this.maxY, this.maxY*k+( 1-k )*this.minY, y ),
+				smoother( this.minY, this.minY*0.8+0.2*this.maxY, y ),
+				smoother( this.maxY, this.maxY*0.8+0.2*this.minY, y ),
 			) )
 			.pow( 2 );
 
@@ -357,28 +313,27 @@ class LocusT extends LocusXY {
 
 	} // constructor
 
-	locus( pos = positionGeometry ) {
+	locus( ) {
 
-		var x = pos.x;
-		var z = pos.z;
+		var { x, y, z } = positionGeometry;
 
-		if ( this.grown==0 ) {
+		var s = vec3( x.mul( 2.0 ), y, z.min( 0 ) )
+			.sub( vec3( 0, this.pivot.y, 0 ) )
+			.length()
+			.smoothstep( 0, 0.13/( this.grown+1 ) )
+			.pow( 10 );
 
-			var y = pos.y.sub( x.abs().mul( 1/5 ) ).add( z.mul( 1/6 ) );
-			var s = vec3( pos.x.mul( 2.0 ), pos.y, pos.z.min( 0 ) ).sub( vec3( 0, this.pivot.y, 0 ) ).length().smoothstep( 0, 0.13 ).pow( 10 );
+		var yy = y.sub( x.abs().mul( 1/5 ) );
 
+		if ( this.grown==0 )
+			yy = yy.add( z.abs().mul( 1/6 ) );
+		else
+			yy = yy.add( z.abs().mul( 1/2 ) );
 
-		} else {
-
-			var y = pos.y.sub( x.abs().mul( 1/5 ) ).add( z.abs().mul( 1/2 ) );
-			var s = vec3( pos.x.mul( 2.0 ), pos.y, pos.z.min( 0 ) ).sub( vec3( 0, this.pivot.y, 0 ) ).length().smoothstep( 0, 0.065 ).pow( 10 );
-
-		}
-
-		return float( s )
+		return s
 			.mul(
 				x.smoothstep( this.minX, this.maxX ),
-				smoother( this.minY, this.maxY, y ).pow( 2 ),
+				smoother( this.minY, this.maxY, yy ).pow( 2 ),
 			);
 
 	} // locus
@@ -393,55 +348,43 @@ class Space {
 
 	constructor( bodyPartsDef ) {
 
-		const classes = { LocusT: LocusT, LocusX: LocusX, LocusXY: LocusXY, LocusY: LocusY };
-
-		// bodyPartsDef = { name:[LocusClassName, data], ... }
-		var bodyParts = { };
-		for ( var name in bodyPartsDef ) {
-
-			var partClass = classes[ bodyPartsDef[ name ][ 0 ] ];
-			bodyParts[ name ] = new partClass( ... bodyPartsDef[ name ].slice( 1 ) );
-
-		}
-		// bodyParts = { name:LocusInstance, ... }
-
 		// torso
-		this.head = bodyParts.head;
-		this.chest = bodyParts.chest;
-		this.waist = bodyParts.waist;
-		this.torso = bodyParts.torso;
+		this.head = new LocusY( ...bodyPartsDef.head );
+		this.chest = new LocusY( ...bodyPartsDef.chest );
+		this.waist = new LocusY( ...bodyPartsDef.waist );
+		this.torso = new LocusY( ...bodyPartsDef.torso );
 
 		// legs
-		this.l_knee = bodyParts.knee;
-		this.r_knee = bodyParts.knee.mirror();
+		this.l_knee = new LocusY( ...bodyPartsDef.knee );
+		this.r_knee = new LocusY( ...bodyPartsDef.knee ).mirror();
 
-		this.l_ankle = bodyParts.ankle;
-		this.r_ankle = bodyParts.ankle.mirror();
+		this.l_ankle = new LocusY( ...bodyPartsDef.ankle );
+		this.r_ankle = new LocusY( ...bodyPartsDef.ankle ).mirror();
 
-		this.l_ankle2 = bodyParts.ankle2;
-		this.r_ankle2 = bodyParts.ankle2.mirror();
+		this.l_ankle2 = new LocusY( ...bodyPartsDef.ankle2 );
+		this.r_ankle2 = new LocusY( ...bodyPartsDef.ankle2 ).mirror();
 
-		this.l_leg2 = bodyParts.leg2;
-		this.r_leg2 = bodyParts.leg2.mirror();
+		this.l_leg2 = new LocusY( ...bodyPartsDef.leg2 );
+		this.r_leg2 = new LocusY( ...bodyPartsDef.leg2 ).mirror();
 
-		this.l_foot = bodyParts.foot;
-		this.r_foot = bodyParts.foot.mirror();
+		this.l_foot = new LocusY( ...bodyPartsDef.foot );
+		this.r_foot = new LocusY( ...bodyPartsDef.foot ).mirror();
 
-		this.l_leg = bodyParts.leg;
-		this.r_leg = bodyParts.leg.mirror();
+		this.l_leg = new LocusT( ...bodyPartsDef.leg );
+		this.r_leg = new LocusT( ...bodyPartsDef.leg ).mirror();
 
 		// arms
-		this.l_elbow = bodyParts.elbow;
-		this.r_elbow = bodyParts.elbow.mirror();
+		this.l_elbow = new LocusX( ...bodyPartsDef.elbow );
+		this.r_elbow = new LocusX( ...bodyPartsDef.elbow ).mirror();
 
-		this.l_wrist2 = bodyParts.wrist2;
-		this.r_wrist2 = bodyParts.wrist2.mirror();
+		this.l_wrist2 = new LocusX( ...bodyPartsDef.wrist2 );
+		this.r_wrist2 = new LocusX( ...bodyPartsDef.wrist2 ).mirror();
 
-		this.l_wrist = bodyParts.wrist;
-		this.r_wrist = bodyParts.wrist.mirror();
+		this.l_wrist = new LocusX( ...bodyPartsDef.wrist );
+		this.r_wrist = new LocusX( ...bodyPartsDef.wrist ).mirror();
 
-		this.l_arm = bodyParts.arm;
-		this.r_arm = bodyParts.arm.mirror();
+		this.l_arm = new LocusXY( ...bodyPartsDef.arm );
+		this.r_arm = new LocusXY( ...bodyPartsDef.arm ).mirror();
 
 	} // Space.constructor
 
@@ -880,24 +823,24 @@ class Man extends Disfigure {
 	static SPACE = {
 
 		// TORSO
-		head: [ 'LocusY', [ 0, 1.566, -0.066 ], [ 1.495, 1.647 ], 30 ],
-		chest: [ 'LocusY', [ 0, 1.177, -0.014 ], [ 0.777, 1.658 ], 0, [ 0.072, 0.538 ]],
-		waist: [ 'LocusY', [ 0, 1.014, -0.016 ], [ 0.547, 1.498 ]],
-		torso: [ 'LocusY', [ 0, 1.014, -0.016 ], [ -3, -2 ]],
+		head: [[ 0, 1.566, -0.066 ], [ 1.495, 1.647 ], 30 ],
+		chest: [[ 0, 1.177, -0.014 ], [ 0.777, 1.658 ], 0, [ 0.072, 0.538 ]],
+		waist: [[ 0, 1.014, -0.016 ], [ 0.547, 1.498 ]],
+		torso: [[ 0, 1.014, -0.016 ], [ -3, -2 ]],
 
 		// LEGS
-		leg: [ 'LocusT', [ 0.074, 0.970, -0.034 ], [ -4e-3, 0.004 ], [ 1.229, 0.782 ]],
-		leg2: [ 'LocusY', [ 0.070, -9e-3, -0.034 ], [ 1.247, 0.242 ]],
-		knee: [ 'LocusY', [ 0.090, 0.504, -0.041 ], [ 0.603, 0.382 ], 20 ],
-		ankle: [ 'LocusY', [ 0.074, 0.082, -2e-3 ], [ 0.165, 0.008 ], -10 ],
-		ankle2: [ 'LocusY', [ 0.092, 0.360, -0.052 ], [ 0.762, -0.027 ]],
-		foot: [ 'LocusY', [ 0, 0.026, 0.022 ], [ 0.190, -0.342 ], 120 ],
+		leg: [[ 0.074, 0.970, -0.034 ], [ -4e-3, 0.004 ], [ 1.229, 0.782 ]],
+		leg2: [[ 0.070, -9e-3, -0.034 ], [ 1.247, 0.242 ]],
+		knee: [[ 0.090, 0.504, -0.041 ], [ 0.603, 0.382 ], 20 ],
+		ankle: [[ 0.074, 0.082, -2e-3 ], [ 0.165, 0.008 ], -10 ],
+		ankle2: [[ 0.092, 0.360, -0.052 ], [ 0.762, -0.027 ]],
+		foot: [[ 0, 0.026, 0.022 ], [ 0.190, -0.342 ], 120 ],
 
 		// ARMS
-		elbow: [ 'LocusX', [ 0.427, 1.453, -0.072 ], [ 0.413, 0.467 ]],
-		wrist2: [ 'LocusX', [ 0.305, 1.453, -0.068 ], [ 0.083, 0.879 ]],
-		wrist: [ 'LocusX', [ 0.673, 1.462, -0.072 ], [ 0.635, 0.722 ]],
-		arm: [ 'LocusXY', [ 0.153, 1.408, -0.072 ], [ 0.054, 0.269 ], [ 1.067, 1.606 ]],
+		elbow: [[ 0.427, 1.453, -0.072 ], [ 0.413, 0.467 ]],
+		wrist2: [[ 0.305, 1.453, -0.068 ], [ 0.083, 0.879 ]],
+		wrist: [[ 0.673, 1.462, -0.072 ], [ 0.635, 0.722 ]],
+		arm: [[ 0.153, 1.408, -0.072 ], [ 0.054, 0.269 ], [ 1.067, 1.606 ]],
 
 	};
 
@@ -925,24 +868,24 @@ class Woman extends Disfigure {
 	static SPACE = {
 
 		// TORSO
-		head: [ 'LocusY', [ 0.001, 1.471, -0.049 ], [ 1.395, 1.551 ], 30 ],
-		chest: [ 'LocusY', [ 0.001, 1.114, -0.012 ], [ 0.737, 1.568 ], 0, [ 0.069, 0.509 ]],
-		waist: [ 'LocusY', [ 0.001, 0.961, -0.014 ], [ 0.589, 1.417 ]],
-		torso: [ 'LocusY', [ 0.001, 0.961, -0.014 ], [ -1.696, -1.694 ]],
+		head: [[ 0.001, 1.471, -0.049 ], [ 1.395, 1.551 ], 30 ],
+		chest: [[ 0.001, 1.114, -0.012 ], [ 0.737, 1.568 ], 0, [ 0.069, 0.509 ]],
+		waist: [[ 0.001, 0.961, -0.014 ], [ 0.589, 1.417 ]],
+		torso: [[ 0.001, 0.961, -0.014 ], [ -1.696, -1.694 ]],
 
 		// LEGS
-		leg: [ 'LocusT', [ 0.071, 0.920, -0.031 ], [ -2e-3, 0.005 ], [ 1.163, 0.742 ]],
-		leg2: [ 'LocusY', [ 0.076, -3e-3, -0.031 ], [ 1.180, 0.233 ]],
-		knee: [ 'LocusY', [ 0.086, 0.480, -0.037 ], [ 0.573, 0.365 ], 20 ],
-		ankle: [ 'LocusY', [ 0.076, 0.083, -5e-3 ], [ 0.161, 0.014 ], -10 ],
-		ankle2: [ 'LocusY', [ 0.088, 0.337, -0.047 ], [ 0.724, -0.059 ]],
-		foot: [ 'LocusY', [ 0.001, 0.031, 0.022 ], [ 0.184, -0.316 ], 120 ],
+		leg: [[ 0.071, 0.920, -0.031 ], [ -2e-3, 0.005 ], [ 1.163, 0.742 ]],
+		leg2: [[ 0.076, -3e-3, -0.031 ], [ 1.180, 0.233 ]],
+		knee: [[ 0.086, 0.480, -0.037 ], [ 0.573, 0.365 ], 20 ],
+		ankle: [[ 0.076, 0.083, -5e-3 ], [ 0.161, 0.014 ], -10 ],
+		ankle2: [[ 0.088, 0.337, -0.047 ], [ 0.724, -0.059 ]],
+		foot: [[ 0.001, 0.031, 0.022 ], [ 0.184, -0.316 ], 120 ],
 
 		// ARMS
-		elbow: [ 'LocusX', [ 0.404, 1.375, -0.066 ], [ 0.390, 0.441 ]],
-		wrist2: [ 'LocusX', [ 0.289, 1.375, -0.063 ], [ 0.093, 0.805 ]],
-		wrist: [ 'LocusX', [ 0.608, 1.375, -0.056 ], [ 0.581, 0.644 ]],
-		arm: [ 'LocusXY', [ 0.137, 1.338, -0.066 ], [ 0.052, 0.233 ], [ 1.011, 1.519 ]],
+		elbow: [[ 0.404, 1.375, -0.066 ], [ 0.390, 0.441 ]],
+		wrist2: [[ 0.289, 1.375, -0.063 ], [ 0.093, 0.805 ]],
+		wrist: [[ 0.608, 1.375, -0.056 ], [ 0.581, 0.644 ]],
+		arm: [[ 0.137, 1.338, -0.066 ], [ 0.052, 0.233 ], [ 1.011, 1.519 ]],
 
 	};
 
@@ -970,24 +913,24 @@ class Child extends Disfigure {
 	static SPACE = {
 
 		// TORSO
-		head: [ 'LocusY', [ 0, 1.149, -0.058 ], [ 1.091, 1.209 ], 30 ],
-		chest: [ 'LocusY', [ 0, 0.865, -0.013 ], [ 0.566, 1.236 ], 0, [ 0.054, 0.406 ]],
-		waist: [ 'LocusY', [ 0, 0.717, -0.024 ], [ 0.385, 1.130 ]],
-		torso: [ 'LocusY', [ 0, 0.717, -0.024 ], [ -1.354, -1.353 ]],
+		head: [[ 0, 1.149, -0.058 ], [ 1.091, 1.209 ], 30 ],
+		chest: [[ 0, 0.865, -0.013 ], [ 0.566, 1.236 ], 0, [ 0.054, 0.406 ]],
+		waist: [[ 0, 0.717, -0.024 ], [ 0.385, 1.130 ]],
+		torso: [[ 0, 0.717, -0.024 ], [ -1.354, -1.353 ]],
 
 		// LEGS
-		leg: [ 'LocusT', [ 0.054, 0.704, -0.027 ], [ -1e-3, 0.001 ], [ 0.845, 0.581 ], 1 ],
-		leg2: [ 'LocusY', [ 0.062, -0, -0.021 ], [ 0.946, 0.189 ]],
-		knee: [ 'LocusY', [ 0.068, 0.389, -0.031 ], [ 0.468, 0.299 ], 20 ],
-		ankle: [ 'LocusY', [ 0.073, 0.065, -0.033 ], [ 0.109, 0.044 ], -10 ],
-		ankle2: [ 'LocusY', [ 0.069, 0.272, -0.048 ], [ 0.581, -0.045 ]],
-		foot: [ 'LocusY', [ 0, 0.027, -6e-3 ], [ 0.112, -0.271 ], 120 ],
+		leg: [[ 0.054, 0.704, -0.027 ], [ -1e-3, 0.001 ], [ 0.845, 0.581 ], 1 ],
+		leg2: [[ 0.062, -0, -0.021 ], [ 0.946, 0.189 ]],
+		knee: [[ 0.068, 0.389, -0.031 ], [ 0.468, 0.299 ], 20 ],
+		ankle: [[ 0.073, 0.065, -0.033 ], [ 0.109, 0.044 ], -10 ],
+		ankle2: [[ 0.069, 0.272, -0.048 ], [ 0.581, -0.045 ]],
+		foot: [[ 0, 0.027, -6e-3 ], [ 0.112, -0.271 ], 120 ],
 
 		// ARMS
-		elbow: [ 'LocusX', [ 0.337, 1.072, -0.09 ], [ 0.311, 0.369 ]],
-		wrist2: [ 'LocusX', [ 0.230, 1.074, -0.094 ], [ 0.073, 0.642 ]],
-		wrist: [ 'LocusX', [ 0.538, 1.084, -0.091 ], [ 0.519, 0.553 ]],
-		arm: [ 'LocusXY', [ 0.108, 1.072, -0.068 ], [ 0.041, 0.185 ], [ 0.811, 1.217 ]],
+		elbow: [[ 0.337, 1.072, -0.09 ], [ 0.311, 0.369 ]],
+		wrist2: [[ 0.230, 1.074, -0.094 ], [ 0.073, 0.642 ]],
+		wrist: [[ 0.538, 1.084, -0.091 ], [ 0.519, 0.553 ]],
+		arm: [[ 0.108, 1.072, -0.068 ], [ 0.041, 0.185 ], [ 0.811, 1.217 ]],
 
 	};
 

@@ -8,23 +8,16 @@
 
 
 import { Vector3 } from "three";
-import { float, mat3, min, positionGeometry, uniform, vec3 } from "three/tsl";
-import { smoother } from "./utils.js";
+import { float, Fn, mat3, min, positionGeometry, uniform, vec3 } from "three/tsl";
 
 
 
-// clone an object and flip its pivot horizontally - this is used for all spaces
-// that represent left-right symmetry in human body (e.g. left arm and right arm)
-function clone( instance ) {
+// generate oversmooth function
+const smoother = Fn( ([ edgeFrom, edgeTo, value ])=>{
 
-	var obj = Object.assign( Object.create( instance ), instance );
-	obj.pivot = obj.pivot.clone();
-	obj.pivot.x *= -1;
-	obj.angle = new Vector3();
-	obj.matrix = uniform( mat3() );
-	return obj;
+	return value.smoothstep( edgeFrom, edgeTo ).smoothstep( 0, 1 ).smoothstep( 0, 1 );
 
-}
+}/*, { edgeFrom: 'float', edgeTo: 'float', value: 'float', return: 'float' } */ );
 
 
 
@@ -39,6 +32,17 @@ class Locus {
 
 	} // Locus.constructor
 
+	mirror( ) {
+
+		this.pivot.x *= -1;
+
+		if ( this.minX ) this.minX *= -1;
+		if ( this.maxX ) this.maxX *= -1;
+
+		return this;
+
+	} // Locus.mirror
+
 } // Locus
 
 
@@ -52,39 +56,16 @@ class LocusY extends Locus {
 
 		super( pivot );
 
-		this.minY = rangeY[ 0 ];
-		this.maxY = rangeY[ 1 ];
-
-		if ( rangeX ) {
-
-			this.minX = rangeX[ 0 ];
-			this.maxX = rangeX[ 1 ];
-
-		}
+		[ this.minY, this.maxY ] = rangeY;
+		if ( rangeX ) [ this.minX, this.maxX ] = rangeX;
 
 		this.slope = Math.tan( ( 90-angle ) * Math.PI/180 );
 
 	} // constructor
 
-	mirror( ) {
+	locus( ) {
 
-		var obj = clone( this );
-		if ( 'minX' in obj ) {
-
-			obj.minX *= -1;
-			obj.maxX *= -1;
-
-		}
-
-		return obj;
-
-	} // mirror
-
-	locus( pos = positionGeometry ) {
-
-		var x = pos.x;
-		var y = pos.y;
-		var z = pos.z;
+		var { x, y, z } = positionGeometry;
 
 		if ( this.angle!=0 ) {
 
@@ -118,25 +99,13 @@ class LocusX extends Locus {
 
 		super( pivot );
 
-		this.minX = rangeX[ 0 ];
-		this.maxX = rangeX[ 1 ];
+		[ this.minX, this.maxX ] = rangeX;
 
 	} // constructor
 
-	mirror( ) {
+	locus( ) {
 
-		var obj = clone( this );
-
-		obj.minX *= -1;
-		obj.maxX *= -1;
-
-		return obj;
-
-	} // mirror
-
-	locus( pos = positionGeometry ) {
-
-		var x = pos.x;
+		var x = positionGeometry.x;
 
 		return smoother( this.minX, this.maxX, x );
 
@@ -153,25 +122,20 @@ class LocusXY extends LocusX {
 
 		super( pivot, rangeX );
 
-		this.minY = rangeY[ 0 ];
-		this.maxY = rangeY[ 1 ];
+		[ this.minY, this.maxY ] = rangeY;
 
 	} // constructor
 
-	locus( pos = positionGeometry ) {
+	locus( ) {
 
-		var x = pos.x;
-		var y = pos.y;
+		var { x, y } = positionGeometry;
 
-		var dx = pos.y.sub( this.pivot.y ).div( 4, x.sign() );
+		var dx = y.sub( this.pivot.y ).div( 4, x.sign() );
 
-		var k = 0.8;
-
-		return float( 1 )
-			.mul( smoother( float( this.minX ).sub( dx ), float( this.maxX ).sub( dx ), x ) )
+		return smoother( float( this.minX ).sub( dx ), float( this.maxX ).sub( dx ), x )
 			.mul( min(
-				smoother( this.minY, this.minY*k+( 1-k )*this.maxY, y ),
-				smoother( this.maxY, this.maxY*k+( 1-k )*this.minY, y ),
+				smoother( this.minY, this.minY*0.8+0.2*this.maxY, y ),
+				smoother( this.maxY, this.maxY*0.8+0.2*this.minY, y ),
 			) )
 			.pow( 2 );
 
@@ -192,28 +156,27 @@ class LocusT extends LocusXY {
 
 	} // constructor
 
-	locus( pos = positionGeometry ) {
+	locus( ) {
 
-		var x = pos.x;
-		var z = pos.z;
+		var { x, y, z } = positionGeometry;
 
-		if ( this.grown==0 ) {
+		var s = vec3( x.mul( 2.0 ), y, z.min( 0 ) )
+			.sub( vec3( 0, this.pivot.y, 0 ) )
+			.length()
+			.smoothstep( 0, 0.13/( this.grown+1 ) )
+			.pow( 10 );
 
-			var y = pos.y.sub( x.abs().mul( 1/5 ) ).add( z.mul( 1/6 ) );
-			var s = vec3( pos.x.mul( 2.0 ), pos.y, pos.z.min( 0 ) ).sub( vec3( 0, this.pivot.y, 0 ) ).length().smoothstep( 0, 0.13 ).pow( 10 );
+		var yy = y.sub( x.abs().mul( 1/5 ) );
 
+		if ( this.grown==0 )
+			yy = yy.add( z.abs().mul( 1/6 ) );
+		else
+			yy = yy.add( z.abs().mul( 1/2 ) );
 
-		} else {
-
-			var y = pos.y.sub( x.abs().mul( 1/5 ) ).add( z.abs().mul( 1/2 ) );
-			var s = vec3( pos.x.mul( 2.0 ), pos.y, pos.z.min( 0 ) ).sub( vec3( 0, this.pivot.y, 0 ) ).length().smoothstep( 0, 0.065 ).pow( 10 );
-
-		}
-
-		return float( s )
+		return s
 			.mul(
 				x.smoothstep( this.minX, this.maxX ),
-				smoother( this.minY, this.maxY, y ).pow( 2 ),
+				smoother( this.minY, this.maxY, yy ).pow( 2 ),
 			);
 
 	} // locus
@@ -228,55 +191,43 @@ class Space {
 
 	constructor( bodyPartsDef ) {
 
-		const classes = { LocusT: LocusT, LocusX: LocusX, LocusXY: LocusXY, LocusY: LocusY };
-
-		// bodyPartsDef = { name:[LocusClassName, data], ... }
-		var bodyParts = { };
-		for ( var name in bodyPartsDef ) {
-
-			var partClass = classes[ bodyPartsDef[ name ][ 0 ] ];
-			bodyParts[ name ] = new partClass( ... bodyPartsDef[ name ].slice( 1 ) );
-
-		}
-		// bodyParts = { name:LocusInstance, ... }
-
 		// torso
-		this.head = bodyParts.head;
-		this.chest = bodyParts.chest;
-		this.waist = bodyParts.waist;
-		this.torso = bodyParts.torso;
+		this.head = new LocusY( ...bodyPartsDef.head );
+		this.chest = new LocusY( ...bodyPartsDef.chest );
+		this.waist = new LocusY( ...bodyPartsDef.waist );
+		this.torso = new LocusY( ...bodyPartsDef.torso );
 
 		// legs
-		this.l_knee = bodyParts.knee;
-		this.r_knee = bodyParts.knee.mirror();
+		this.l_knee = new LocusY( ...bodyPartsDef.knee );
+		this.r_knee = new LocusY( ...bodyPartsDef.knee ).mirror();
 
-		this.l_ankle = bodyParts.ankle;
-		this.r_ankle = bodyParts.ankle.mirror();
+		this.l_ankle = new LocusY( ...bodyPartsDef.ankle );
+		this.r_ankle = new LocusY( ...bodyPartsDef.ankle ).mirror();
 
-		this.l_ankle2 = bodyParts.ankle2;
-		this.r_ankle2 = bodyParts.ankle2.mirror();
+		this.l_ankle2 = new LocusY( ...bodyPartsDef.ankle2 );
+		this.r_ankle2 = new LocusY( ...bodyPartsDef.ankle2 ).mirror();
 
-		this.l_leg2 = bodyParts.leg2;
-		this.r_leg2 = bodyParts.leg2.mirror();
+		this.l_leg2 = new LocusY( ...bodyPartsDef.leg2 );
+		this.r_leg2 = new LocusY( ...bodyPartsDef.leg2 ).mirror();
 
-		this.l_foot = bodyParts.foot;
-		this.r_foot = bodyParts.foot.mirror();
+		this.l_foot = new LocusY( ...bodyPartsDef.foot );
+		this.r_foot = new LocusY( ...bodyPartsDef.foot ).mirror();
 
-		this.l_leg = bodyParts.leg;
-		this.r_leg = bodyParts.leg.mirror();
+		this.l_leg = new LocusT( ...bodyPartsDef.leg );
+		this.r_leg = new LocusT( ...bodyPartsDef.leg ).mirror();
 
 		// arms
-		this.l_elbow = bodyParts.elbow;
-		this.r_elbow = bodyParts.elbow.mirror();
+		this.l_elbow = new LocusX( ...bodyPartsDef.elbow );
+		this.r_elbow = new LocusX( ...bodyPartsDef.elbow ).mirror();
 
-		this.l_wrist2 = bodyParts.wrist2;
-		this.r_wrist2 = bodyParts.wrist2.mirror();
+		this.l_wrist2 = new LocusX( ...bodyPartsDef.wrist2 );
+		this.r_wrist2 = new LocusX( ...bodyPartsDef.wrist2 ).mirror();
 
-		this.l_wrist = bodyParts.wrist;
-		this.r_wrist = bodyParts.wrist.mirror();
+		this.l_wrist = new LocusX( ...bodyPartsDef.wrist );
+		this.r_wrist = new LocusX( ...bodyPartsDef.wrist ).mirror();
 
-		this.l_arm = bodyParts.arm;
-		this.r_arm = bodyParts.arm.mirror();
+		this.l_arm = new LocusXY( ...bodyPartsDef.arm );
+		this.r_arm = new LocusXY( ...bodyPartsDef.arm ).mirror();
 
 	} // Space.constructor
 
