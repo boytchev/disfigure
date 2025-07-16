@@ -18,7 +18,7 @@
 
 Disfigure е библиотека за движение на фигури чрез промяна на
 матричното поле на пространството около тях. Ето абсурдно
-минимален [пример на живо](minimal-cdn.html).
+минимален [пример наживо](minimal-cdn.html).
 
 ```js
 import * as Happy from 'disfigure'
@@ -36,7 +36,7 @@ new Happy.Man
 
 Disfigure дефинира класовете `Man(height)`, `Woman(height)`
 и `Child(height)`, а телата се създават като инстанции на
-тези класове ([пример на живо](body-shapes.html)).
+тези класове ([пример наживо](body-shapes.html)).
 Незадължителният параметър *height* определя височината на
 тялото в метри ([live example](body-heights.html)). По подразбиране
 мъж е висок 1.80м, жена е 1.70м и дете е 1.35м.
@@ -47,7 +47,7 @@ Disfigure дефинира класовете `Man(height)`, `Woman(height)`
 Всички видове тела имат една и съща структура, например главата
 е `head`. Левите и десните части на тялото са винаги спрямо
 тялото. Техните имена имат префикси `l_` за ляво и `r_` за
-дясно, например `l_arm` и `r_arm`, ([пример на живо](body-parts.html)):
+дясно, например `l_arm` и `r_arm`, ([пример наживо](body-parts.html)):
 
 [<img src="snapshots/body-parts.jpg">](body-parts.html)
 
@@ -100,7 +100,7 @@ man.torso.turn += 45;
 глава *head*, врат *neck*, торс *torso*, таз *pelvis* и
 цялото тяло като *body*. За да се завърти **цялото тяло** се
 използват свойствата `bend`, `turn` и `tilt` на елемента `body`
-на фигурата или самата фигура ([пример на живо](example-body.html)):
+на фигурата или самата фигура ([пример наживо](example-body.html)):
 
 ``` javascript
 figure.body.bend = angle;
@@ -114,7 +114,7 @@ figure.tilt = angle;
 
 
 
-Главата **head** поддържа свойствата `nod`, `turn` and `tilt` ([пример на живо](example-head.html)):
+Главата **head** поддържа свойствата `nod`, `turn` and `tilt` ([пример наживо](example-head.html)):
 
 ``` javascript
 figure.head.nod = angle;
@@ -122,7 +122,7 @@ figure.head.turn = angle;
 figure.head.tilt = angle;
 ```
 
-Торсът **torso** има свойства `bend`, `turn` и `tilt` ([пример на живо](example-torso.html)):
+Торсът **torso** има свойства `bend`, `turn` и `tilt` ([пример наживо](example-torso.html)):
 
 ``` javascript
 figure.torso.bend = angle;
@@ -142,7 +142,7 @@ figure.torso.tilt = angle;
 китка *wrist*, пръсти *fingers* и индивидуални пръсти върхове на пръсти *finger_0* до *finger_4* с техните средни фаланги (*finger_0.mid* до *finger_4.mid*) и върхове (*finger_0.tip* до *finger_4.tip*).
 
 И двете ръце **arms**, `l_arm` и `r_arm`, поддържат свойства `raise`,
-`straddle` и `turn` ([пример на живо](example-arm.html)).
+`straddle` и `turn` ([пример наживо](example-arm.html)).
 Следващият код показва свойствата на дясната ръка, но същите са
 налични и за лявата ръка:
 
@@ -156,7 +156,7 @@ figure.r_arm.turn = angle;
 запазят симетрията. Например, положителни относителни стойности на
 `straddle` завъртат лявата ръка наляво, а дясната &ndash; надясно.
 
-Завъртането на лакътя **elbow** е само с `bend` ([пример на живо](example-elbow.html)).
+Завъртането на лакътя **elbow** е само с `bend` ([пример наживо](example-elbow.html)).
 Отрицателни стойности на *angle* водят до неестествена поза на лакътя.
 
 ``` javascript
@@ -164,7 +164,7 @@ figure.r_elbow.bend = angle;
 ```
 
 Китките **wrists** имат същите свойства като торса: `bend`, `turn` 
-и `tilt` ([пример на живо](example-wrist.html)),
+и `tilt` ([пример наживо](example-wrist.html)),
 но подобно на ръцете, ротациите са симетрични:
 
 ``` javascript
@@ -176,13 +176,13 @@ figure.r_wrist.tilt = angle;
 Последните части на горните крайници са пръстите **fingers**.  Те са дефинирани като множества (`l_fingers` и `r_fingers`) от отделни пръсти (`l_finger_0` до `l_finger_4` и `r_finger_0` до `r_finger_0`).
 
 Множествата могат само да се свиват с *bend*. Свиването на пръстите автоматично свива и техните средни фаланги и върхове, така че с `l_fingers`
-и `r_fingers` могат да се свият целите пръсти ([пример на живо](example-fingers.html)):
+и `r_fingers` могат да се свият целите пръсти ([пример наживо](example-fingers.html)):
 
 ``` javascript
 figure.r_fingers.bend = angle;
 ```
 
-Отделните пръсти са номерирани от **палец** (0) до **кутре** (4). Пръстите поддържат свойствата `bend`, `straddle` и `turn`. Средната фаланга на пръст е `mid`, а крайната фаланга, върхът на пръста, е `tip`. Свойствата `mid` и `tip` на пръст поддтржат само `bend` ([пример на живо](example-finger-bend.html) и [пример на живо](example-finger-straddle.html)).
+Отделните пръсти са номерирани от **палец** (0) до **кутре** (4). Пръстите поддържат свойствата `bend`, `straddle` и `turn`. Средната фаланга на пръст е `mid`, а крайната фаланга, върхът на пръста, е `tip`. Свойствата `mid` и `tip` на пръст поддтржат само `bend` ([пример наживо](example-finger-bend.html) и [пример наживо](example-finger-straddle.html)).
 
 ``` javascript
 figure.r_finger_1.straddle = alpha;
@@ -197,7 +197,7 @@ figure.r_finger_1.tip.bend = beta3;
 и глезен *ankle*.
 
 И двата крака **legs** поддържат свойствата `raise`, `straddle` и `turn`
-([пример на живо](example-leg.html)). Разкрачването `straddle` и завъртането `turn` са симетрични.
+([пример наживо](example-leg.html)). Разкрачването `straddle` и завъртането `turn` са симетрични.
 
 ``` javascript
 figure.r_leg.raise = angle;
@@ -205,7 +205,7 @@ figure.r_leg.straddle = angle;
 figure.r_leg.turn = angle;
 ```
 
-Движението на коляното **knee** е само `bend` ([пример на живо](example-knee.html)). 
+Движението на коляното **knee** е само `bend` ([пример наживо](example-knee.html)). 
 Отрицателни стойности на *angle* водят до неестествена поза на коляното.
 
 ``` javascript
@@ -213,7 +213,7 @@ figure.r_knee.bend = angle;
 ```
 
 Глезените **ankles** имат същите свойства като китките: `bend`, `turn`
-и `tilt` ([пример на живо](example-ankle.html)):
+и `tilt` ([пример наживо](example-ankle.html)):
 
 ``` javascript
 figure.r_ankle.bend = angle;
@@ -230,7 +230,7 @@ figure.r_ankle.tilt = angle;
 на реда на завъртане води до различен резултат. Следващият пример показва
 навеждане на 45&deg;, завъртане на 90&deg; и накланяне встрани на 60&deg; на
 три фигури. Тъй като редът на завъртане е различен за всяка фигура, крайните
-им пози също са различни ([пример на живо](example-order.html)):
+им пози също са различни ([пример наживо](example-order.html)):
 
 ``` javascript
 man.torso.bend += 45;
@@ -253,7 +253,7 @@ woman.torso.tilt += 60;
 фигура, частите на тялото ѝ заемат вградената
 поза по подразбиране. Ако не се изолзва редактор
 на поза, всички ротации трябва да бъдат дефинирани
-програмно ([пример на живо](example-posture.html)):
+програмно ([пример наживо](example-posture.html)):
 
 [<img src="snapshots/example-posture.jpg">](example-posture.html)
 
@@ -308,7 +308,7 @@ man.r_wrist.turn -= 60;
 със същите свойства, които се използват за статична поза. Mannequin.js управлява
 динамичните пози чрез потребителска функция за анимация. Тази потребителска функция
 се извиква в цикъла на анимацията веднъж за всеки кадър. Всички промени в позата
-трябва да бъдат дефинирани във функцията ([пример на живо](example-dynamic.html)).
+трябва да бъдат дефинирани във функцията ([пример наживо](example-dynamic.html)).
 Параметърът *t* е времето, измерено в секунди от стартирането на библиотеката.
 Името на потребителската функция се подава като параметър на `createStage()`.
 
@@ -412,7 +412,7 @@ man.recolor(
 
 Цветът на ставите и крайниците се отнася до всички стави и всички крайници.
 Цветовете на индивидуалните части от тялото могат да се променят чрез метода
-`recolor` на частите ([пример на живо](example-custom-colors.html)):
+`recolor` на частите ([пример наживо](example-custom-colors.html)):
 
 [<img src="snapshots/example-custom-colors.jpg">](example-custom-colors.html)
 
@@ -455,7 +455,7 @@ figure.joint.hide( true );
 въртят и това се отразява на частите на тялото,
 прикрепени към тях. Следващият пример скрива двете
 ръце и двата крака, но те все още същестуват и се
-използват от лактите и коленете ([пример на живо](example-hide.html)):
+използват от лактите и коленете ([пример наживо](example-hide.html)):
 
 [<img src="snapshots/example-hide.jpg">](example-hide.html)
 
@@ -481,7 +481,7 @@ figure.joint.show( true );
 неговите свойства и методи. Въпреки това, поради конструкцията
 на скелета и свързването на ставите, мащабирането на част от
 тялото трябва да е еднакво по всички оси, в противен случай
-позате трябва да бъде ръчно коригирана ([пример на живо](example-custom-sizes.html)):
+позате трябва да бъде ръчно коригирана ([пример наживо](example-custom-sizes.html)):
 
 [<img src="snapshots/example-custom-sizes.jpg">](example-custom-sizes.html)
 
@@ -509,7 +509,7 @@ figure.joint.attach(object);
 Обектите могат да бъдат прикрепени към скрити части
 на тялото, но те не се скриват автоматично. Този
 подход се използва за замяна на част от тялото с
-изцяло собствен потребителски обект ([пример на живо](example-custom-body-parts.html)):
+изцяло собствен потребителски обект ([пример наживо](example-custom-body-parts.html)):
 
 [<img src="snapshots/example-custom-body-parts.jpg">](example-custom-body-parts.html)
 
@@ -550,7 +550,7 @@ man.r_leg.attach(obj);
 от тялото.
 
 Следващият пример създава въже, преминаващо през 5 точки
-от частите на тялото на фигура ([пример на живо](example-point.html)):
+от частите на тялото на фигура ([пример наживо](example-point.html)):
 
 [<img src="snapshots/example-point.jpg">](example-point.html)
 
@@ -572,7 +572,7 @@ setLoopVertex( 4, man.r_ankle.point(6,2,0) );
 обувка (т.е. `man.l_ankle`). Контактните точки са показани
 като червени точки. Минималното вертикално положение на 
 контактни точки се използва за регулиране на вертикалното
-положение на фигурата ([пример на живо](example-touch-ground.html)):
+положение на фигурата ([пример наживо](example-touch-ground.html)):
 
 [<img src="snapshots/example-touch-ground.jpg">](example-touch-ground.html)
 
@@ -640,7 +640,7 @@ man.stepOnGround();
 * указателите към Three.js и mannequin.js трябва да бъдат дефинирани като importmaps
 
 Донякъде минимална програма, която използва mannequin.js от този CDN, е показана
-в този [пример на живо](example-minimal-cdn.html). Ако файлът е свален локално, той
+в този [пример наживо](example-minimal-cdn.html). Ако файлът е свален локално, той
 може да се стартира директно без допълнителна инсталация. Указателите в importmaps в
 примера сочат към конкретна версия на Three.js и към най-новата версия на mannequin.js.
 
