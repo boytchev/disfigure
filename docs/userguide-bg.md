@@ -762,7 +762,7 @@ setAnimationLoop( animate );
 ```
 
 
----
+
 ### random( )<br>random( *min*, *max* )
 
 Генерира равномерно разпределени случайни числа в интервала
@@ -775,7 +775,7 @@ man.head.turn = random( -60, 60 );
 ```
 
 
----
+
 ### regular( *time* )<br>regular( *time*, *offset* )<br>regular( *time*, *offset*, *min*, *max* )
 
 Генерира осцилираща поредица от числа в интервала [*min*,*max*]
@@ -788,7 +788,7 @@ man.head.turn = random( -60, 60 );
 man.head.turn = regular( time, 0, -60, 60 );
 ```
 
----
+
 ### chaotic( *time* )<br>chaotic( *time*, *offset* )<br>chaotic( *time*, *offset*, *min*, *max* )
 
 Генерира хаотична (случайна, но плавно променяща се) поредица

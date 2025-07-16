@@ -680,7 +680,7 @@ setAnimationLoop( animate );
 ```
 
 
----
+
 ### random( )<br>random( *min*, *max* )
 
 
@@ -693,7 +693,7 @@ man.head.turn = random( -60, 60 );
 ```
 
 
----
+
 ### regular( *time* )<br>regular( *time*, *offset* )<br>regular( *time*, *offset*, *min*, *max* )
 
 Generates an oscilating sequence of numbers in the interval [*min*,*max*] &ndash; [live example](number-generators.html).
@@ -705,7 +705,8 @@ foreward or backward in time.
 man.head.turn = regular( time, 0, -60, 60 );
 ```
 
----
+
+
 ### chaotic( *time* )<br>chaotic( *time*, *offset* )<br>chaotic( *time*, *offset*, *min*, *max* )
 
 Generates a chaotic (random, but gradually changing) sequence
