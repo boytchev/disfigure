@@ -18,7 +18,7 @@
 
 Disfigure is a library for animating human figures by modifying
 a matrix field of the space around them. Here is an absurdly
-minimal [live example](minimal-cdn.html).
+minimal [live example](../examples/minimal-cdn.html).
 
 ```js
 import * as Happy from 'disfigure'
@@ -33,21 +33,21 @@ new Happy.Man
 
 Disfigure defines classes `Male(height)`, `Female(height)`
 and `Child(height)`, and bodies are created as instances of
-these classes ([live example](body-shapes.html)). The optional
+these classes ([live example](../examples/body-shapes.html)). The optional
 parameter *height* defines the height of the body in meters
- ([live example](body-heights.html)). By default a man is
+ ([live example](../examples/body-heights.html)). By default a man is
 tall 1.80m, a woman is 1.70m and a child is 1.35m.
 
-[<img src="snapshots/body-shapes.jpg" width="49%">](body-shapes.html)
-[<img src="snapshots/body-heights.jpg" width="49%">](body-heights.html)
+[<img src="../examples/snapshots/body-shapes.jpg" width="49%">](../examples/body-shapes.html)
+[<img src="../examples/snapshots/body-heights.jpg" width="49%">](../examples/body-heights.html)
 
 All types of bodies have the same structure, for example,
 the head is called `head`. Left and right body parts are
 always in respect to the figure. Their names have prefixes
 `l_` for left and `r_` for right, like `l_arm` and `r_arm`,
-([live example](body-parts.html)):
+([live example](../examples/body-parts.html)):
 
-[<img src="snapshots/body-parts.jpg">](body-parts.html)
+[<img src="../examples/snapshots/body-parts.jpg">](../examples/body-parts.html)
 
 <!--
 
@@ -660,7 +660,8 @@ setAnimationLoop( animate );
 ### **random**( )<br>**random**( *min*, *max* )
 
 
-Generates uniformly distributed random numbers in the interval [*min*,*max*) &ndash; [live example](number-generators.html).
+Generates uniformly distributed random numbers in the interval [*min*,*max*)
+&ndash; [live example](../examples/number-generators.html).
 By default *min*=-1 and *max*=1. Internally uses a
 pseudo-random function.
 
@@ -672,7 +673,8 @@ man.head.turn = random( -60, 60 );
 
 ### **regular**( *time* )<br>**regular**( *time*, *offset* )<br>**regular**( *time*, *offset*, *min*, *max* )
 
-Generates an oscilating sequence of numbers in the interval [*min*,*max*] &ndash; [live example](number-generators.html).
+Generates an oscilating sequence of numbers in the interval [*min*,*max*]
+&ndash; [live example](../examples/number-generators.html).
 By default *offset*=0, *min*=-1 and *max*=1. Internally uses
 the sine function. Parameter *offset* shifts the oscillation
 foreward or backward in time.
@@ -687,7 +689,7 @@ man.head.turn = regular( time, 0, -60, 60 );
 
 Generates a chaotic (random, but gradually changing) sequence
 of numbers in the interval [*min*,*max*] &ndash;
-[live example](number-generators.html). By default *offset*=0,
+[live example](../examples/number-generators.html). By default *offset*=0,
 *min*=-1 and *max*=1. Internally uses a simplex noise function.
 Parameter *offset* shifts the sequence across the time, i.e. two
 generators with different offsets produce different sequences.

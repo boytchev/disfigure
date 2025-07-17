@@ -18,9 +18,9 @@ export default [
 		files: ["**/*.html", "**/*.js"],
 		plugins: {html},
 "settings": {
-        "html/indent": "0",   // code should start at the beginning of the line (no initial indentation).
- //       "html/indent": "+2",  // indentation is the <script> indentation plus two spaces.
- //       "html/indent": "tab", // indentation is one tab at the beginning of the line.
+ //       "html/indent": "0",   // code should start at the beginning of the line (no initial indentation).
+ //       "html/indent": "+4",  // indentation is the <script> indentation plus two spaces.
+        "html/indent": "+tab", // indentation is one tab at the beginning of the line.
     },
 	
 		"rules": {

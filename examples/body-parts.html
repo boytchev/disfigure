@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Names for body parts</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		import * as Red from 'label';
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+		// create a man showing names of body parts
+
+		var man = new Happy.Man();
+
+
+		// attach the name as labels around the body
+		
+		man.torso.attach( new Red.Label( 'torso', 1.2, 0, -0.10, 0.1 ) );
+
+		man.head.attach( new Red.Label( 'head', 0.8, 0, 0.27, 0.1 ) );
+		man.chest.attach( new Red.Label( 'chest', 0.8, 0, 0.2, 0.13 ) );
+		man.waist.attach( new Red.Label( 'waist', 0.8, 0, 0.1, 0.13 ) );
+
+		man.r_arm.attach( new Red.Label( 'r_arm', 0.55, -0.03, 0.23, 0, -1 ) );
+		man.l_arm.attach( new Red.Label( 'l_arm', 0.55, 0.03, 0.23, 0, 1 ) );
+
+		man.r_elbow.attach( new Red.Label( 'r_elbow', 0.5, -0.03, 0.19, 0, -1 ) );
+		man.l_elbow.attach( new Red.Label( 'l_elbow', 0.5, 0.03, 0.19, 0, 1 ) );
+
+		man.r_wrist.attach( new Red.Label( 'r_wrist', 0.45, -0.03, 0.13, 0, -1 ) );
+		man.l_wrist.attach( new Red.Label( 'l_wrist', 0.45, 0.03, 0.13, 0, 1 ) );
+
+		man.r_leg.attach( new Red.Label( 'r_leg', 0.6, -0.2, -0.2, 0 ) );
+		man.l_leg.attach( new Red.Label( 'l_leg', 0.6, 0.2, -0.2, 0 ) );
+
+		man.r_knee.attach( new Red.Label( 'r_knee', 0.5, -0.17, 0, 0 ) );
+		man.l_knee.attach( new Red.Label( 'l_knee', 0.5, 0.17, 0, 0 ) );
+
+		man.r_ankle.attach( new Red.Label( 'r_ankle', 0.45, -0.15, 0.05, 0 ) );
+		man.l_ankle.attach( new Red.Label( 'l_ankle', 0.45, 0.15, 0.05, 0 ) );
+
+		man.r_foot.attach( new Red.Label( 'r_foot', 0.35, -0.18, 0.04, 0.1 ) );
+		man.l_foot.attach( new Red.Label( 'l_foot', 0.35, 0.18, 0.04, 0.1	 ) );
+
+
+		// animate the man with some simple dance motion
+		// the attached label should move automatically
+		
+		function animate( t ) {
+
+			t = t/1000;
+
+			var s = Math.sin( 2*t );
+
+			man.head.turn = 45 * Math.sin( 2*t +0.5 );
+			man.waist.tilt = -15 * Math.sin( 2*t -0.5 );
+			man.chest.tilt = -20 * Math.sin( 2*t +0.5 );
+			man.waist.turn = -10 * Math.sin( 2*t );
+			man.waist.turn = 10 * Math.sin( 2*t );
+
+			man.l_arm.straddle = 60 - 5 * s;
+			man.r_arm.straddle = 60 + 5 * s;
+
+			man.l_elbow.bend = 30 + 30 * s;
+			man.r_elbow.bend = 30 - 30 * s;
+
+			man.l_wrist.bend = -15 - 25 * s;
+			man.r_wrist.bend = -15 + 25 * s;
+
+			man.position.x = -0.05*s;
+			man.torso.tilt = 20*s;
+
+			man.l_leg.straddle = 20+24.5*s;
+			man.r_leg.straddle = 20-24.5*s;
+
+			man.l_ankle.tilt = -20-2.1*s;
+			man.r_ankle.tilt = -20+2.1*s;
+
+			man.position.y = -0.055-0.005*Math.abs( s );
+
+		}
+
+		Happy.setAnimationLoop( animate );
+
+	</script>
+</body>
+</html>

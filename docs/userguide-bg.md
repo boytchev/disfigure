@@ -18,7 +18,7 @@
 
 Disfigure е библиотека за движение на фигури чрез промяна на
 матричното поле на пространството около тях. Ето абсурдно
-минимален [пример наживо](minimal-cdn.html).
+минимален [пример наживо](../examples/minimal-cdn.html).
 
 ```js
 import * as Happy from 'disfigure'
@@ -36,20 +36,20 @@ new Happy.Man
 
 Disfigure дефинира класовете `Man(height)`, `Woman(height)`
 и `Child(height)`, а телата се създават като инстанции на
-тези класове ([пример наживо](body-shapes.html)).
+тези класове ([пример наживо](../examples/body-shapes.html)).
 Незадължителният параметър *height* определя височината на
-тялото в метри ([live example](body-heights.html)). По подразбиране
+тялото в метри ([live example](../examples/body-heights.html)). По подразбиране
 мъж е висок 1.80м, жена е 1.70м и дете е 1.35м.
 
-[<img src="snapshots/body-shapes.jpg" width="49%">](body-shapes.html)
-[<img src="snapshots/body-heights.jpg" width="49%">](body-heights.html)
+[<img src="../examples/snapshots/body-shapes.jpg" width="49%">](../examples/body-shapes.html)
+[<img src="../examples/snapshots/body-heights.jpg" width="49%">](../examples/body-heights.html)
 
 Всички видове тела имат една и съща структура, например главата
 е `head`. Левите и десните части на тялото са винаги спрямо
 тялото. Техните имена имат префикси `l_` за ляво и `r_` за
-дясно, например `l_arm` и `r_arm`, ([пример наживо](body-parts.html)):
+дясно, например `l_arm` и `r_arm`, ([пример наживо](../examples/body-parts.html)):
 
-[<img src="snapshots/body-parts.jpg">](body-parts.html)
+[<img src="../examples/snapshots/body-parts.jpg">](../examples/body-parts.html)
 
 <!--
 
@@ -723,7 +723,7 @@ setAnimationLoop( animate );
 ### **random**( )<br>**random**( *min*, *max* )
 
 Генерира равномерно разпределени случайни числа в интервала
-[*min*,*max*) &ndash; [пример наживо](number-generators.html).
+[*min*,*max*) &ndash; [пример наживо](../examples/number-generators.html).
 По подразбиране *min*=-1 и *max*=1. Вътрешно използва генератор
 на псевдослучайни числа.
 
@@ -736,7 +736,7 @@ man.head.turn = random( -60, 60 );
 ### **regular**( *time* )<br>**regular**( *time*, *offset* )<br>**regular**( *time*, *offset*, *min*, *max* )
 
 Генерира осцилираща поредица от числа в интервала [*min*,*max*]
-&ndash; [пример наживо](number-generators.html). По подразбиране
+&ndash; [пример наживо](../examples/number-generators.html). По подразбиране
 *offset*=0, *min*=-1 и *max*=1. Вътрешно използва функцията
 синус. Параметърът *offset* премества осцилацията напред
 или назад във времето.
@@ -749,7 +749,7 @@ man.head.turn = regular( time, 0, -60, 60 );
 ### **chaotic**( *time* )<br>**chaotic**( *time*, *offset* )<br>**chaotic**( *time*, *offset*, *min*, *max* )
 
 Генерира хаотична (случайна, но плавно променяща се) поредица
-от числа в интервала [*min*,*max*] &ndash; [пример наживо](number-generators.html).
+от числа в интервала [*min*,*max*] &ndash; [пример наживо](../examples/number-generators.html).
 По подразбиране *offset=0, *min*=-1 и *max*=1. Вътрешно използва
 функция за симплекс шум. Параметърът *offset* премества поредицата
 напреки времето, т.е. два генератора с различни отмествания

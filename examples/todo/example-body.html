@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<head>
+	<script src="../src/importmap.js"></script>
+</head>
+
+<body>
+	<script type="module">
+
+	import { Child, createStage, Female, Male } from 'mannequin';
+
+	createStage( animate );
+
+	var man = new Male();
+	man.position.x = -1;
+
+	var child = new Child();
+
+	var woman = new Female();
+	woman.position.x = 1;
+
+	man.head.label( 'body.bend', 12, 0.5 );
+	child.head.label( 'body.turn', 12, 0.5 );
+	woman.head.label( 'body.tilt', 12, 0.5 );
+
+	function animate( t ) {
+
+		man.bend = 45 * Math.sin( 3 * t );
+		child.turn = 60 * Math.sin( 3 * t ) - 90;
+		woman.tilt = 30 * Math.sin( 3 * t );
+
+	}
+
+	</script>
+</body>
+
+</html>

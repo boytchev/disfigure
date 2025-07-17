@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<head>
+	<script src="../src/importmap.js"></script>
+</head>
+
+<body>
+	<script type="module">
+
+	import { Child, createStage, Female, Male } from 'mannequin';
+
+	createStage( animate );
+
+	var man = new Male();
+	man.position.x = -1;
+
+	var child = new Child();
+
+	var woman = new Female();
+	woman.position.x = 1;
+
+	man.l_ankle.label( 'ankle.bend', -1, -0.95, 3, 1, 2, 0 );
+	child.r_ankle.label( 'ankle.turn', 1, -1.7, 0.4, 1, 2, 0 ).scale.set( 1.5, 1.5, 1.5 );
+	woman.r_ankle.label( 'ankle.tilt', 1, -1.2, 0.5, 1, 2, 0 );
+
+	function animate( t ) {
+
+		man.r_ankle.bend = 50 * Math.sin( 3*t ) - 10;
+		man.l_ankle.bend = 50 * Math.sin( 3*t ) - 10;
+
+		child.r_ankle.turn = 30 * Math.sin( 3*t ) - 5;
+		child.l_ankle.turn = 30 * Math.sin( 3*t ) - 5;
+
+		woman.r_ankle.tilt = 20 * Math.sin( 3*t ) - 20;
+		woman.l_ankle.tilt = 20 * Math.sin( 3*t ) - 20;
+	
+		man.stepOnGround( );
+
+	}
+
+	</script>
+</body>
+	
+</html>

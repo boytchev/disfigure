@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<head>
+	<script src="../src/importmap.js"></script>
+</head>
+
+<body>
+	<script type="module">
+
+	import { Child, createStage, Female, Male } from 'mannequin';
+
+	createStage( animate );
+
+	var man = new Male();
+	man.position.x = -1;
+
+	var child = new Child();
+
+	var woman = new Female();
+	woman.position.x = 1;
+	woman.l_arm.straddle = 15;
+	woman.r_arm.straddle = 15;
+
+	man.l_arm.label( 'arm.raise', 0, -0.15, 0, 3, 1 );
+	child.l_arm.label( 'arm.straddle', 0, -0.1, 0, 3, 1 ).scale.set( 1.5, 1.5, 1.5 );
+	woman.l_arm.label( 'arm.turn', 0, -0.15, 0, 3, 1 );
+
+	function animate( t ) {
+
+		man.l_arm.raise = 60 * Math.sin( 3 * t );
+		man.r_arm.raise = 60 * Math.sin( 3 * t );
+
+		child.l_arm.straddle = 30 * Math.sin( 3 * t ) + 40;
+		child.r_arm.straddle = 30 * Math.sin( 3 * t ) + 40;
+
+		woman.l_arm.turn = 40 * Math.sin( 3 * t ) + 10;
+		woman.r_arm.turn = 40 * Math.sin( 3 * t ) + 10;
+
+	}
+
+	</script>
+</body>
+	
+</html>

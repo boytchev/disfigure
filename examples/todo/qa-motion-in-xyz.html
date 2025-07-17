@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<head>
+	<script src="../src/importmap.js"></script>
+</head>
+
+<body>
+	<script type="module">
+
+	import { createStage, Female, Male } from 'mannequin';
+
+	createStage( animate );
+
+	var man = new Male();
+	var woman = new Female();
+
+	function animate( t ) {
+
+		man.position.x = 1.5 * Math.sin( 2*t );
+		woman.position.z = 1.5 * Math.cos( 2*t );
+
+	}
+
+	</script>
+</body>
+
+</html>

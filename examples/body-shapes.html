@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Supported body shapes</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+
+
+		// create a default world
+
+		new Happy.World();
+
+
+		// create a man and set his posture
+		
+		var man = new Happy.Man();
+
+		man.position.x = 0.6;
+
+		man.torso.turn = -30;
+
+		man.head.bend = 15;
+		man.head.turn = -50;
+
+		man.l_ankle.turn = 20;
+		man.r_ankle.turn = 20;
+
+		man.l_arm.straddle = 85;
+
+		man.r_arm.straddle = 40;
+		man.r_arm.raise = 10;
+		man.r_arm.foreward = -10;
+		man.r_elbow.bend = 35;
+		man.r_wrist.bend = -10;
+		man.r_wrist.tilt = 10;
+		man.r_wrist.turn = -55;
+
+
+		// create a woman and set her posture
+		
+		var woman = new Happy.Woman();
+
+		woman.position.x = -0.55;
+
+		woman.torso.turn = 30;
+
+		woman.head.bend = 40;
+		woman.head.turn = 50;
+
+		woman.l_elbow.bend = 55;
+		woman.r_arm.straddle = 80;
+
+
+		// create a child and set his posture
+
+		var child = new Happy.Child();
+
+		child.position.z = -0.18;
+
+		child.head.tilt = -15;
+
+		child.l_arm.straddle = 85;
+
+		child.r_elbow.bend = 110;
+		child.r_wrist.turn = -50;
+		child.r_wrist.bend = -10;
+		child.r_arm.foreward = 10;
+		child.r_arm.turn = 10;
+
+	</script>
+</body>
+</html>

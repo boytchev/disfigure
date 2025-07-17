@@ -1,0 +1,181 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<head>
+	<script src="../src/importmap.js"></script>
+</head>
+
+<body>
+	<script type="module">
+
+	import * as THREE from 'three';
+	import { createStage, Female, getStage, Male } from 'mannequin';
+	import { LimbShape } from "mannequin/shapes/LimbShape.js";
+
+	createStage( animate );
+
+	var man = new Male();
+
+	man.position.x = -0.6;
+	man.turn = 0;
+	man.bend = -40;
+	man.torso.bend = 72;
+
+	man.l_leg.raise = 60;
+	man.r_leg.raise = 60;
+	man.l_leg.straddle = 35;
+	man.r_leg.straddle = 35;
+	man.l_leg.raise += 15;
+	man.r_leg.raise += 15;
+	man.l_knee.bend = 115;
+	man.r_knee.bend = 115;
+
+	man.l_arm.raise = 40;
+	man.r_arm.raise = 40;
+	man.l_arm.straddle = 10;
+	man.r_arm.straddle = 10;
+	man.l_arm.turn = -20;
+	man.r_arm.turn = -20;
+	man.l_arm.raise -= 5;
+	man.r_arm.raise -= 5;
+
+	man.l_elbow.bend = 112;
+	man.r_elbow.bend = 112;
+	man.l_wrist.bend = -40;
+	man.r_wrist.bend = -40;
+	man.l_fingers.bend = 30;
+	man.r_fingers.bend = 30;
+
+	man.stepOnGround();
+	
+	//
+
+	var woman = new Female();
+	
+	woman.position.x = 0.6;
+	
+	woman.turn = 165;
+	woman.bend = -40;
+	woman.torso.bend = 20;
+	woman.torso.turn = 10;
+	woman.torso.tilt = -15;
+
+	woman.l_leg.straddle = -30;
+	woman.l_leg.raise = 65;
+	woman.l_knee.bend = 100;
+	woman.l_ankle.bend = -10;
+
+	woman.r_leg.straddle = -25;
+	woman.r_leg.turn = -25;
+	woman.r_leg.raise = 75;
+	woman.r_knee.bend = 100;
+
+	woman.r_arm.straddle = 7;
+	woman.r_arm.raise = -25;
+	woman.r_elbow.bend = 55;
+	woman.r_wrist.tilt = -30;
+	woman.r_wrist.bend = -30;
+	woman.r_wrist.turn = -5;
+	woman.r_fingers.bend = 50;
+
+	woman.l_arm.raise = 0;
+	woman.l_arm.straddle = 2;
+	woman.l_arm.turn = -35;
+	woman.l_elbow.bend = 55;
+	woman.l_wrist.bend = -55;
+	woman.l_wrist.turn -= 35;
+	woman.l_fingers.bend = 10;
+
+	woman.stepOnGround();
+	
+	//
+
+	class Chair extends THREE.Group {
+
+		constructor( x, angle ) {
+
+			super();
+
+			this.position.set( x, -0.72, 0 );
+			this.rotation.y = angle;
+
+			var seat = new LimbShape( false, [ 0.4, 0.27, 0.4, 0, 270, 1, 0.2, 0 ], 20, 60 );
+			seat.recolor( 'darksalmon' );
+
+			var backrest = new LimbShape( false, [ 0.05, 1.0, 0.15, -90, 270, 1, 0.5, 0 ], 50, 10 );
+			backrest.recolor( 'darksalmon' );
+			backrest.position.set( -0.12, 0.2, 0 );
+			backrest.rotation.set( 0, 0, 0.35 );
+
+			var cussion = new THREE.Mesh(
+				new THREE.SphereGeometry( 0.17, 40, 10, 0, 2 * Math.PI, 0, Math.PI ),
+				new THREE.MeshPhongMaterial( { color: 'black' } ) );
+			cussion.scale.set( 1, 0.2, 1 );
+			cussion.position.set( 0, 0.13, 0 );
+
+			this.add( seat, cussion, backrest );
+
+		}
+
+	}
+
+	getStage().scene.add( new Chair( -0.6, 0 ), new Chair( 0.6, Math.PI ) );
+
+	//
+
+	class Smartphone extends THREE.Group {
+
+		constructor() {
+
+			super();
+
+
+			var body = new LimbShape( false, [ 0.012, 0.09, 0.17, -1, 1, 1, 0.2, 0.001 ], 8, 8 );
+			body.recolor( 'dimgray' );
+
+			var screen = new LimbShape( false, [ 0.011, 0.08, 0.16, -1, 1, 1, 0.2, 0.001 ], 8, 8 );
+			screen.recolor( 'white' );
+			screen.position.y = 0.005;
+			screen.position.x = -0.001;
+
+			this.add( body, screen );
+
+		}
+
+	}
+
+	//
+
+	var smartphone = new Smartphone();
+	smartphone.position.set( -0.2, -0.11, 0 );
+	smartphone.rotation.set( 0, 0, -1 );
+	getStage().scene.add( smartphone );
+
+	//
+
+	function animate( t ) {
+
+		var looking = 15 * Math.sin( t ),
+			reading = 25 * Math.cos( 1.2 * t ) * Math.sin( 0.7 * t ),
+			k = Math.min( 1.5, Math.pow( Math.sin( 0.37 * t ) * 0.5016 + 0.5, 300 ) );
+
+		man.head.turn = reading * ( 1 - k );
+		man.head.nod = 15 * ( 1 - k ) - k * looking;
+
+		man.l_ankle.bend = -5 + 10 * Math.pow( Math.sin( t ), 34 );
+		man.r_ankle.bend = -5 + 10 * Math.pow( Math.sin( t + 90 ), 34 );
+
+		k = Math.min( 1.5, Math.pow( Math.sin( 0.37 * t + 10 ) * 0.5016 + 0.5, 100 ) );
+		woman.r_leg.raise = 85 + 0.5 * Math.sin( 3.4 * t );
+		woman.r_knee.bend = ( 80 + 5 * Math.sin( 3.4 * t ) ) * ( 1 - k ) + k * 45;
+		woman.r_ankle.bend = -20 - 10 * Math.sin( 3.4 * t );
+
+		woman.head.turn = 25 * Math.cos( 0.7 * t );
+		woman.head.nod = 35 + 5 * Math.cos( 0.8 * t );
+
+	}
+
+	</script>
+</body>
+</html>

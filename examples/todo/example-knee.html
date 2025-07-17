@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<head>
+	<script src="../src/importmap.js"></script>
+</head>
+
+<body>
+	<script type="module">
+
+	import { Child, createStage, Female, Male } from 'mannequin';
+
+	createStage( animate );
+
+	var man = new Male();
+	man.position.x = -1;
+	man.l_leg.raise = 20;
+	man.r_leg.raise = 20;
+
+	var child = new Child();
+	child.l_leg.raise = 40;
+	child.r_leg.raise = 40;
+
+	var woman = new Female();
+	woman.position.x = 1;
+	woman.l_leg.raise = 20;
+	woman.r_leg.raise = 20;
+
+	man.l_knee.label( 'knee.bend', 0, 0.15, 0, 1, 1 );
+	woman.r_knee.label( 'knee.bend', 15, -0.15, 0, 1, 3 );
+
+	function animate( t ) {
+
+		man.r_knee.bend = 40 * Math.sin( 3 * t ) + 40;
+		man.l_knee.bend = 40 * Math.sin( 3 * t + 180 ) + 40;
+
+		child.r_knee.bend = 60 * Math.sin( 3 * t + 120 ) + 60;
+		child.l_knee.bend = 60 * Math.sin( 3 * t + 300 ) + 60;
+
+		woman.r_knee.bend = 40 * Math.sin( 3 * t + 50 ) + 40;
+		woman.l_knee.bend = 40 * Math.sin( 3 * t + 240 ) + 40;
+
+	}
+
+	</script>
+</body>
+
+</html>
