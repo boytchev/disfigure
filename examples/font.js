@@ -49,6 +49,16 @@ class Label extends Mesh {
 		
 	} // Labe.constructor
 
+	clone( ) {
+		var mesh = new Mesh( this.geometry, this.material );
+		
+		mesh.position.copy( this.position );
+		mesh.rotation.copy( this.rotation );
+		mesh.scale.copy( this.scale );
+		
+		return mesh;
+	}
+	
 } // Label
 
 export { Label };
