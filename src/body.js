@@ -83,7 +83,7 @@ class Joint extends Group {
 
 		wrapper.add( subwrapper );
 		subwrapper.add( mesh );
-		subwrapper.rotation.z = this.isRight ? Math.PI : 0;
+		//subwrapper.rotation.z = this.isRight ? Math.PI*0 : 0;
 		//mesh.position.y *= this.isRight ? -1 : 1;
 		wrapper.matrixAutoUpdate = false;
 		wrapper.joint = this;
