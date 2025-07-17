@@ -31,17 +31,17 @@ var _mat = new Matrix3(),
 var toRad = x => x * ( 2*Math.PI/360 ),
 	toDeg = x => x / ( 2*Math.PI/360 );
 
-function getset( object, name, xyz, angle='angle' ) {
+function getset( object, name, xyz ) {
 
 	Object.defineProperty( object, name, {
 		get() {
 
-			return toDeg( object[ angle ][ xyz ]);
+			return toDeg( object.angle[ xyz ]);
 
 		},
 		set( value ) {
 
-			object[ angle ][ xyz ] = toRad( value );
+			object.angle[ xyz ] = toRad( value );
 
 		}
 	} );
@@ -51,7 +51,7 @@ function getset( object, name, xyz, angle='angle' ) {
 
 class Joint extends Group {
 
-	constructor( model, parent, space, spaceAux=space, axes='xyz' ) {
+	constructor( model, parent, space, axes='xyz' ) {
 
 		super();
 
@@ -60,7 +60,6 @@ class Joint extends Group {
 		this.pivot = space.pivot;
 		this.angle = space.angle;
 		this.matrix = space.matrix;
-		this.angleAux = spaceAux.angle;
 		this.isRight = space.isRight;
 
 		this.position.copy( space.pivot );
@@ -70,7 +69,7 @@ class Joint extends Group {
 		getset( this, 'tilt', axes[ 2 ]);
 		getset( this, 'straddle', axes[ 2 ]);
 		getset( this, 'foreward', axes[ 0 ]);
-		getset( this, 'turn', axes[ 1 ], 'angleAux' );
+		getset( this, 'turn', axes[ 1 ]);
 
 	}
 
@@ -137,23 +136,29 @@ class Disfigure extends Group {
 		this.chest = new Joint( this, this.waist, this.space.chest );
 		this.head = new Joint( this, this.chest, this.space.head );
 
-		this.l_leg = new Joint( this, this.torso, this.space.l_leg, this.space.l_leg2 );
-		this.l_knee = new Joint( this, this.l_leg, this.space.l_knee );
-		this.l_ankle = new Joint( this, this.l_knee, this.space.l_ankle, this.space.l_ankle2 );
+		this.l_leg = new Joint( this, this.torso, this.space.l_leg );
+		this.l_thigh = new Joint( this, this.l_leg, this.space.l_thigh );
+		this.l_knee = new Joint( this, this.l_thigh, this.space.l_knee );
+		this.l_shin = new Joint( this, this.l_knee, this.space.l_shin );
+		this.l_ankle = new Joint( this, this.l_shin, this.space.l_ankle );
 		this.l_foot = new Joint( this, this.l_ankle, this.space.l_foot );
 
-		this.r_leg = new Joint( this, this.torso, this.space.r_leg, this.space.r_leg2 );
-		this.r_knee = new Joint( this, this.r_leg, this.space.r_knee );
-		this.r_ankle = new Joint( this, this.r_knee, this.space.r_ankle, this.space.r_ankle2 );
+		this.r_leg = new Joint( this, this.torso, this.space.r_leg );
+		this.r_thigh = new Joint( this, this.r_leg, this.space.r_thigh );
+		this.r_knee = new Joint( this, this.r_thigh, this.space.r_knee );
+		this.r_shin = new Joint( this, this.r_knee, this.space.r_shin );
+		this.r_ankle = new Joint( this, this.r_shin, this.space.r_ankle );
 		this.r_foot = new Joint( this, this.r_ankle, this.space.r_foot );
 
-		this.l_arm = new Joint( this, this.chest, this.space.l_arm, this.space.l_arm, 'yxz' );
-		this.l_elbow = new Joint( this, this.l_arm, this.space.l_elbow, this.space.l_elbow, 'yxz' );
-		this.l_wrist = new Joint( this, this.l_elbow, this.space.l_wrist, this.space.l_wrist2, 'zxy' );
+		this.l_arm = new Joint( this, this.chest, this.space.l_arm, 'yxz' );
+		this.l_elbow = new Joint( this, this.l_arm, this.space.l_elbow, 'yxz' );
+		this.l_forearm = new Joint( this, this.l_elbow, this.space.l_forearm, 'zxy' );
+		this.l_wrist = new Joint( this, this.l_forearm, this.space.l_wrist, 'zxy' );
 
-		this.r_arm = new Joint( this, this.chest, this.space.r_arm, this.space.r_arm, 'yxz' );
-		this.r_elbow = new Joint( this, this.r_arm, this.space.r_elbow, this.space.r_elbow, 'yxz' );
-		this.r_wrist = new Joint( this, this.r_elbow, this.space.r_wrist, this.space.r_wrist2, 'zxy' );
+		this.r_arm = new Joint( this, this.chest, this.space.r_arm, 'yxz' );
+		this.r_elbow = new Joint( this, this.r_arm, this.space.r_elbow, 'yxz' );
+		this.r_forearm = new Joint( this, this.r_elbow, this.space.r_forearm, 'zxy' );
+		this.r_wrist = new Joint( this, this.r_forearm, this.space.r_wrist, 'zxy' );
 
 		// sets the materials of the model hooking them to TSL functions
 		model.material = new MeshPhysicalNodeMaterial( {
@@ -209,8 +214,8 @@ class Disfigure extends Group {
 		anglesToMatrix( this.r_wrist, 0, -1, -1 );
 
 		// wrist: turn
-		anglesToMatrix( this.space.l_wrist2, -1, 0, 0 );
-		anglesToMatrix( this.space.r_wrist2, -1, 0, 0 );
+		anglesToMatrix( this.space.l_forearm, -1, 0, 0 );
+		anglesToMatrix( this.space.r_forearm, -1, 0, 0 );
 
 		anglesToMatrix( this.l_arm, -1, 1, 1 );
 		anglesToMatrix( this.r_arm, -1, -1, -1 );
@@ -221,15 +226,15 @@ class Disfigure extends Group {
 		anglesToMatrix( this.l_ankle, -1, 0, -1 );
 		anglesToMatrix( this.r_ankle, -1, 0, 1 );
 
-		anglesToMatrix( this.space.l_ankle2, 0, -1, 0 );
-		anglesToMatrix( this.space.r_ankle2, 0, 1, 0 );
+		anglesToMatrix( this.space.l_shin, 0, -1, 0 );
+		anglesToMatrix( this.space.r_shin, 0, 1, 0 );
 
 		anglesToMatrix( this.l_foot, -1, 0, 0 );
 		anglesToMatrix( this.r_foot, -1, 0, 0 );
 
-		// legs turn
-		anglesToMatrix( this.space.l_leg2, 0, -1, 0 );
-		anglesToMatrix( this.space.r_leg2, 0, 1, 0 );
+		// thigh turn
+		anglesToMatrix( this.space.l_thigh, 0, -1, 0 );
+		anglesToMatrix( this.space.r_thigh, 0, 1, 0 );
 
 		// leg: foreward ??? straddle
 		anglesToMatrix( this.l_leg, 1, 0, -1 );
@@ -274,15 +279,15 @@ class Man extends Disfigure {
 
 		// LEGS
 		leg: [[ 0.074, 0.970, -0.034 ], [ -0.004, 0.004 ], [ 1.229, 0.782 ]],
-		leg2: [[ 0.070, -0.009, -0.034 ], [ 1.247, 0.242 ]],
+		thigh: [[ 0.070, -0.009, -0.034 ], [ 1.247, 0.242 ]],
 		knee: [[ 0.090, 0.504, -0.041 ], [ 0.603, 0.382 ], 20 ],
 		ankle: [[ 0.074, 0.082, -0.002 ], [ 0.165, 0.008 ], -10 ],
-		ankle2: [[ 0.092, 0.360, -0.052 ], [ 0.762, -0.027 ]],
+		shin: [[ 0.092, 0.360, -0.052 ], [ 0.762, -0.027 ]],
 		foot: [[ 0, 0.026, 0.022 ], [ 0.190, -0.342 ], 120 ],
 
 		// ARMS
 		elbow: [[ 0.427, 1.453, -0.072 ], [ 0.413, 0.467 ]],
-		wrist2: [[ 0.305, 1.453, -0.068 ], [ 0.083, 0.879 ]],
+		forearm: [[ 0.305, 1.453, -0.068 ], [ 0.083, 0.879 ]],
 		wrist: [[ 0.673, 1.462, -0.072 ], [ 0.635, 0.722 ]],
 		arm: [[ 0.153, 1.408, -0.072 ], [ 0.054, 0.269 ], [ 1.067, 1.606 ]],
 
@@ -319,15 +324,15 @@ class Woman extends Disfigure {
 
 		// LEGS
 		leg: [[ 0.071, 0.920, -0.031 ], [ -0.002, 0.005 ], [ 1.163, 0.742 ]],
-		leg2: [[ 0.076, -0.003, -0.031 ], [ 1.180, 0.233 ]],
+		thigh: [[ 0.076, -0.003, -0.031 ], [ 1.180, 0.233 ]],
 		knee: [[ 0.086, 0.480, -0.037 ], [ 0.573, 0.365 ], 20 ],
+		shin: [[ 0.088, 0.337, -0.047 ], [ 0.724, -0.059 ]],
 		ankle: [[ 0.076, 0.083, -0.005 ], [ 0.161, 0.014 ], -10 ],
-		ankle2: [[ 0.088, 0.337, -0.047 ], [ 0.724, -0.059 ]],
 		foot: [[ 0.001, 0.031, 0.022 ], [ 0.184, -0.316 ], 120 ],
 
 		// ARMS
 		elbow: [[ 0.404, 1.375, -0.066 ], [ 0.390, 0.441 ]],
-		wrist2: [[ 0.289, 1.375, -0.063 ], [ 0.093, 0.805 ]],
+		forearm: [[ 0.289, 1.375, -0.063 ], [ 0.093, 0.805 ]],
 		wrist: [[ 0.608, 1.375, -0.056 ], [ 0.581, 0.644 ]],
 		arm: [[ 0.137, 1.338, -0.066 ], [ 0.052, 0.233 ], [ 1.011, 1.519 ]],
 
@@ -364,15 +369,15 @@ class Child extends Disfigure {
 
 		// LEGS
 		leg: [[ 0.054, 0.704, -0.027 ], [ -0.001, 0.001 ], [ 0.845, 0.581 ], 1 ],
-		leg2: [[ 0.062, -0.000, -0.021 ], [ 0.946, 0.189 ]],
+		thigh: [[ 0.062, -0.000, -0.021 ], [ 0.946, 0.189 ]],
 		knee: [[ 0.068, 0.389, -0.031 ], [ 0.468, 0.299 ], 20 ],
+		shin: [[ 0.069, 0.272, -0.048 ], [ 0.581, -0.045 ]],
 		ankle: [[ 0.073, 0.065, -0.033 ], [ 0.109, 0.044 ], -10 ],
-		ankle2: [[ 0.069, 0.272, -0.048 ], [ 0.581, -0.045 ]],
 		foot: [[ 0, 0.027, -0.006 ], [ 0.112, -0.271 ], 120 ],
 
 		// ARMS
 		elbow: [[ 0.337, 1.072, -0.090 ], [ 0.311, 0.369 ]],
-		wrist2: [[ 0.230, 1.074, -0.094 ], [ 0.073, 0.642 ]],
+		forearm: [[ 0.230, 1.074, -0.094 ], [ 0.073, 0.642 ]],
 		wrist: [[ 0.538, 1.084, -0.091 ], [ 0.519, 0.553 ]],
 		arm: [[ 0.108, 1.072, -0.068 ], [ 0.041, 0.185 ], [ 0.811, 1.217 ]],
 

@@ -64,7 +64,7 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 	If( space.l_arm.locus( ), ()=>{
 
 		p.assign( fn( p, space.l_wrist ) );
-		p.assign( fn( p, space.l_wrist2 ) );
+		p.assign( fn( p, space.l_forearm ) );
 		p.assign( fn( p, space.l_elbow ) );
 		p.assign( fn( p, space.l_arm ) );
 
@@ -77,7 +77,7 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 	If( space.r_arm.locus( ), ()=>{
 
 		p.assign( fn( p, space.r_wrist ) );
-		p.assign( fn( p, space.r_wrist2 ) );
+		p.assign( fn( p, space.r_forearm ) );
 		p.assign( fn( p, space.r_elbow ) );
 		p.assign( fn( p, space.r_arm ) );
 
@@ -91,9 +91,9 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 		p.assign( fn( p, space.l_foot ) );
 		p.assign( fn( p, space.l_ankle ) );
-		p.assign( fn( p, space.l_ankle2 ) );
+		p.assign( fn( p, space.l_shin ) );
 		p.assign( fn( p, space.l_knee ) );
-		p.assign( fn( p, space.l_leg2 ) );
+		p.assign( fn( p, space.l_thigh ) );
 		p.assign( fn( p, space.l_leg ) );
 
 	} );
@@ -106,9 +106,9 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 		p.assign( fn( p, space.r_foot ) );
 		p.assign( fn( p, space.r_ankle ) );
-		p.assign( fn( p, space.r_ankle2 ) );
+		p.assign( fn( p, space.r_shin ) );
 		p.assign( fn( p, space.r_knee ) );
-		p.assign( fn( p, space.r_leg2 ) );
+		p.assign( fn( p, space.r_thigh ) );
 		p.assign( fn( p, space.r_leg ) );
 
 	} );

@@ -236,11 +236,11 @@ class Space {
 		this.l_ankle = new LocusY( ...bodyPartsDef.ankle );
 		this.r_ankle = new LocusY( ...bodyPartsDef.ankle ).mirror();
 
-		this.l_ankle2 = new LocusY( ...bodyPartsDef.ankle2 );
-		this.r_ankle2 = new LocusY( ...bodyPartsDef.ankle2 ).mirror();
+		this.l_shin = new LocusY( ...bodyPartsDef.shin );
+		this.r_shin = new LocusY( ...bodyPartsDef.shin ).mirror();
 
-		this.l_leg2 = new LocusY( ...bodyPartsDef.leg2 );
-		this.r_leg2 = new LocusY( ...bodyPartsDef.leg2 ).mirror();
+		this.l_thigh = new LocusY( ...bodyPartsDef.thigh );
+		this.r_thigh = new LocusY( ...bodyPartsDef.thigh ).mirror();
 
 		this.l_foot = new LocusY( ...bodyPartsDef.foot );
 		this.r_foot = new LocusY( ...bodyPartsDef.foot ).mirror();
@@ -252,8 +252,8 @@ class Space {
 		this.l_elbow = new LocusX( ...bodyPartsDef.elbow );
 		this.r_elbow = new LocusX( ...bodyPartsDef.elbow ).mirror();
 
-		this.l_wrist2 = new LocusX( ...bodyPartsDef.wrist2 );
-		this.r_wrist2 = new LocusX( ...bodyPartsDef.wrist2 ).mirror();
+		this.l_forearm = new LocusX( ...bodyPartsDef.forearm );
+		this.r_forearm = new LocusX( ...bodyPartsDef.forearm ).mirror();
 
 		this.l_wrist = new LocusX( ...bodyPartsDef.wrist );
 		this.r_wrist = new LocusX( ...bodyPartsDef.wrist ).mirror();

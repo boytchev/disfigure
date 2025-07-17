@@ -1,3 +1,6 @@
+v0.0.19
+  - added thigh, shin, forearm
+    
 v0.0.18
   - added spinner
   - simplified LocusX

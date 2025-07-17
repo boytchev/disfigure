@@ -212,7 +212,7 @@ function createGui( ) {
 	folder.add( model.space.select, 'value', {
 		Torso: 0,
 		' &#x22B8; Head': 1, ' &#x22B8; Chest': 2, ' &#x22B8; Waist': 3,
-		Leg: 11, ' &#x22B8; Leg (ext)': 12, ' &#x22B8; Knee': 13, ' &#x22B8; Ankle': 15, ' &#x22B8; Ankle (ext)': 14, ' &#x22B8; Foot': 16,
+		Leg: 11, ' &#x22B8; Thigh': 12, ' &#x22B8; Knee': 13, ' &#x22B8; Shin': 14, ' &#x22B8; Ankle': 15, ' &#x22B8; Foot': 16,
 		Arm: 21, ' &#x22B8; Elbow': 22, ' &#x22B8; Forearm': 23, ' &#x22B8; Wrist': 24,
 	} ).name( 'Heatmap' ).onChange( showPivotPoint );
 
@@ -260,8 +260,8 @@ function createGui( ) {
 		folder.add( model.chest, 'tilt', -30, 30 ).name( html( '', 'tilt' ) );
 
 		folder.add( model.waist, 'bend', -20, 40 ).name( html( 'Waist', 'bend', 'border' ) );
-		folder.add( model.waist, 'turn', -60, 60 ).name( html( '', 'turn' ) );
 		folder.add( model.waist, 'tilt', -30, 30 ).name( html( '', 'tilt' ) );
+		folder.add( model.waist, 'turn', -60, 60 ).name( html( '', 'turn' ) );
 
 	}
 
@@ -270,12 +270,14 @@ function createGui( ) {
 
 		folder.add( model.l_leg, 'foreward', -40, 120 ).name( html( 'Leg', 'foreward' ) );
 		folder.add( model.l_leg, 'straddle', -10, 90 ).name( html( '', 'straddle' ) );
-		folder.add( model.l_leg, 'turn', -40, 80 ).name( html( '', 'turn' ) );
+
+		folder.add( model.l_thigh, 'turn', -40, 80 ).name( html( 'Thigh', 'turn', 'border' ) );
 
 		folder.add( model.l_knee, 'bend', 0, 140 ).name( html( 'Knee', 'bend', 'border' ) );
 
+		folder.add( model.l_shin, 'turn', -60, 60 ).name( html( 'Shin', 'turn', 'border' ) );
+
 		folder.add( model.l_ankle, 'bend', -40, 70 ).name( html( 'Ankle', 'bend', 'border' ) );
-		folder.add( model.l_ankle, 'turn', -60, 60 ).name( html( '', 'turn' ) );
 		folder.add( model.l_ankle, 'tilt', -40, 40 ).name( html( '', 'tilt' ) );
 
 		folder.add( model.l_foot, 'bend', -40, 40 ).name( html( 'Foot', 'bend', 'border' ) );
@@ -287,12 +289,14 @@ function createGui( ) {
 
 		folder.add( model.r_leg, 'foreward', -40, 120 ).name( html( 'Leg', 'foreward' ) );
 		folder.add( model.r_leg, 'straddle', -10, 90 ).name( html( '', 'straddle' ) );
-		folder.add( model.r_leg, 'turn', -40, 80 ).name( html( '', 'turn' ) );
+
+		folder.add( model.r_thigh, 'turn', -40, 80 ).name( html( 'Thigh', 'turn', 'border' ) );
 
 		folder.add( model.r_knee, 'bend', 0, 140 ).name( html( 'Knee', 'bend', 'border' ) );
 
+		folder.add( model.r_shin, 'turn', -60, 60 ).name( html( 'Shin', 'turn', 'border' ) );
+
 		folder.add( model.r_ankle, 'bend', -40, 70 ).name( html( 'Ankle', 'bend', 'border' ) );
-		folder.add( model.r_ankle, 'turn', -60, 60 ).name( html( '', 'turn' ) );
 		folder.add( model.r_ankle, 'tilt', -40, 40 ).name( html( '', 'tilt' ) );
 
 		folder.add( model.r_foot, 'bend', -40, 40 ).name( html( 'Foot', 'bend', 'border' ) );
@@ -308,8 +312,9 @@ function createGui( ) {
 
 		folder.add( model.l_elbow, 'bend', 0, 140 ).name( html( 'Elbow', 'bend', 'border' ) );
 
+		folder.add( model.l_forearm, 'turn', -60, 60 ).name( html( 'Forearm', 'turn', 'border' ) );
+
 		folder.add( model.l_wrist, 'bend', -90, 90 ).name( html( 'Wrist', 'bend', 'border' ) );
-		folder.add( model.l_wrist, 'turn', -60, 60 ).name( html( '', 'turn' ) );
 		folder.add( model.l_wrist, 'tilt', -45, 45 ).name( html( '', 'tilt' ) );
 
 	}
@@ -323,8 +328,9 @@ function createGui( ) {
 
 		folder.add( model.r_elbow, 'bend', 0, 140 ).name( html( 'Elbow', 'bend', 'border' ) );
 
+		folder.add( model.r_forearm, 'turn', -60, 60 ).name( html( 'Forearm', 'turn', 'border' ) );
+
 		folder.add( model.r_wrist, 'bend', -90, 90 ).name( html( 'Wrist', 'bend', 'border' ) );
-		folder.add( model.r_wrist, 'turn', -60, 60 ).name( html( '', 'turn' ) );
 		folder.add( model.r_wrist, 'tilt', -45, 45 ).name( html( '', 'tilt' ) );
 
 	}
@@ -475,14 +481,14 @@ function showPivotPoint( index ) {
 			axis2.position.copy( space.r_leg.pivot.value );
 			break;
 		case 12:
-			debugSpace = space.l_leg2;
-			axis1.position.copy( space.l_leg2.pivot.value );
-			axis2.position.copy( space.r_leg2.pivot.value );
+			debugSpace = space.l_thigh;
+			axis1.position.copy( space.l_thigh.pivot.value );
+			axis2.position.copy( space.r_thigh.pivot.value );
 			break;
 		case 14:
-			debugSpace = space.l_ankle2;
-			axis1.position.copy( space.l_ankle2.pivot.value );
-			axis2.position.copy( space.r_ankle2.pivot.value );
+			debugSpace = space.l_shin;
+			axis1.position.copy( space.l_shin.pivot.value );
+			axis2.position.copy( space.r_shin.pivot.value );
 			break;
 		case 13:
 			debugSpace = space.l_knee;
@@ -511,9 +517,9 @@ function showPivotPoint( index ) {
 			axis2.position.copy( space.r_elbow.pivot.value );
 			break;
 		case 23:
-			debugSpace = space.l_wrist2;
-			axis1.position.copy( space.l_wrist2.pivot.value );
-			axis2.position.copy( space.r_wrist2.pivot.value );
+			debugSpace = space.l_forearm;
+			axis1.position.copy( space.l_forearm.pivot.value );
+			axis2.position.copy( space.r_forearm.pivot.value );
 			break;
 		case 24:
 			debugSpace = space.l_wrist;
@@ -612,8 +618,8 @@ var tslSelectionNode = Fn( ( { space } )=>{
 		.add( space.l_leg.locus( ).mul( select( s.equal( 11 ), 1, 0 ) ) )
 		.add( space.r_leg.locus( ).mul( select( s.equal( 11 ), 1, 0 ) ) )
 
-		.add( space.l_ankle2.locus( ).mul( select( s.equal( 14 ), 1, 0 ) ) )
-		.add( space.r_ankle2.locus( ).mul( select( s.equal( 14 ), 1, 0 ) ) )
+		.add( space.l_shin.locus( ).mul( select( s.equal( 14 ), 1, 0 ) ) )
+		.add( space.r_shin.locus( ).mul( select( s.equal( 14 ), 1, 0 ) ) )
 
 		.add( space.l_knee.locus( ).mul( select( s.equal( 13 ), 1, 0 ) ) )
 		.add( space.r_knee.locus( ).mul( select( s.equal( 13 ), 1, 0 ) ) )
@@ -624,8 +630,8 @@ var tslSelectionNode = Fn( ( { space } )=>{
 		.add( space.l_foot.locus( ).mul( select( s.equal( 16 ), 1, 0 ) ) )
 		.add( space.r_foot.locus( ).mul( select( s.equal( 16 ), 1, 0 ) ) )
 
-		.add( space.l_leg2.locus( ).mul( select( s.equal( 12 ), 1, 0 ) ) )
-		.add( space.r_leg2.locus( ).mul( select( s.equal( 12 ), 1, 0 ) ) )
+		.add( space.l_thigh.locus( ).mul( select( s.equal( 12 ), 1, 0 ) ) )
+		.add( space.r_thigh.locus( ).mul( select( s.equal( 12 ), 1, 0 ) ) )
 
 		.add( space.l_arm.locus( ).mul( select( s.equal( 21 ), 1, 0 ) ) )
 		.add( space.r_arm.locus( ).mul( select( s.equal( 21 ), 1, 0 ) ) )
@@ -633,8 +639,8 @@ var tslSelectionNode = Fn( ( { space } )=>{
 		.add( space.l_elbow.locus( ).mul( select( s.equal( 22 ), 1, 0 ) ) )
 		.add( space.r_elbow.locus( ).mul( select( s.equal( 22 ), 1, 0 ) ) )
 
-		.add( space.l_wrist2.locus( ).mul( select( s.equal( 23 ), 1, 0 ) ) )
-		.add( space.r_wrist2.locus( ).mul( select( s.equal( 23 ), 1, 0 ) ) )
+		.add( space.l_forearm.locus( ).mul( select( s.equal( 23 ), 1, 0 ) ) )
+		.add( space.r_forearm.locus( ).mul( select( s.equal( 23 ), 1, 0 ) ) )
 
 		.add( space.l_wrist.locus( ).mul( select( s.equal( 24 ), 1, 0 ) ) )
 		.add( space.r_wrist.locus( ).mul( select( s.equal( 24 ), 1, 0 ) ) )
