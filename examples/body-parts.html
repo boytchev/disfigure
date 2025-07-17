@@ -35,26 +35,35 @@
 		man.chest.attach( new Red.Label( 'chest', 0.8, 0, 0.2, 0.13 ) );
 		man.waist.attach( new Red.Label( 'waist', 0.8, 0, 0.1, 0.13 ) );
 
-		man.r_arm.attach( new Red.Label( 'r_arm', 0.55, -0.03, 0.23, 0, -1 ) );
+		man.r_arm.attach( new Red.Label( 'r_arm', 0.55, -0.03, -0.23, 0, 1 ) );
 		man.l_arm.attach( new Red.Label( 'l_arm', 0.55, 0.03, 0.23, 0, 1 ) );
 
-		man.r_elbow.attach( new Red.Label( 'r_elbow', 0.5, -0.03, 0.19, 0, -1 ) );
+		man.r_elbow.attach( new Red.Label( 'r_elbow', 0.5, -0.03, -0.19, 0, 1 ) );
 		man.l_elbow.attach( new Red.Label( 'l_elbow', 0.5, 0.03, 0.19, 0, 1 ) );
 
-		man.r_wrist.attach( new Red.Label( 'r_wrist', 0.45, -0.03, 0.13, 0, -1 ) );
+		man.r_forearm.attach( new Red.Label( 'r_forearm', 0.45, 0.23, -0.19, 0, 1 ) );
+		man.l_forearm.attach( new Red.Label( 'l_forearm', 0.45, 0.28, 0.19, 0, 1 ) );
+
+		man.r_wrist.attach( new Red.Label( 'r_wrist', 0.45, -0.03, -0.13, 0, 1 ) );
 		man.l_wrist.attach( new Red.Label( 'l_wrist', 0.45, 0.03, 0.13, 0, 1 ) );
 
-		man.r_leg.attach( new Red.Label( 'r_leg', 0.6, -0.2, -0.2, 0 ) );
-		man.l_leg.attach( new Red.Label( 'l_leg', 0.6, 0.2, -0.2, 0 ) );
+		man.r_leg.attach( new Red.Label( 'r_leg', 0.6, 0.2, 0.05, 0, 2 ) );
+		man.l_leg.attach( new Red.Label( 'l_leg', 0.6, 0.2, -0.05, 0 ) );
 
-		man.r_knee.attach( new Red.Label( 'r_knee', 0.5, -0.17, 0, 0 ) );
+		man.r_thigh.attach( new Red.Label( 'r_thigh', 0.5, 0.23, -0.73, 0, 2 ) );
+		man.l_thigh.attach( new Red.Label( 'l_thigh', 0.5, 0.23, 0.73, 0 ) );
+
+		man.r_knee.attach( new Red.Label( 'r_knee', 0.5, 0.17, 0, 0, 2 ) );
 		man.l_knee.attach( new Red.Label( 'l_knee', 0.5, 0.17, 0, 0 ) );
 
-		man.r_ankle.attach( new Red.Label( 'r_ankle', 0.45, -0.15, 0.05, 0 ) );
+		man.r_shin.attach( new Red.Label( 'r_shin', 0.5, 0.17, 0.07, 0, 2 ) );
+		man.l_shin.attach( new Red.Label( 'l_shin', 0.5, 0.17, -0.07, 0 ) );
+
+		man.r_ankle.attach( new Red.Label( 'r_ankle', 0.45, 0.15, -0.05, 0, 2 ) );
 		man.l_ankle.attach( new Red.Label( 'l_ankle', 0.45, 0.15, 0.05, 0 ) );
 
-		man.r_foot.attach( new Red.Label( 'r_foot', 0.35, -0.18, 0.04, 0.1 ) );
-		man.l_foot.attach( new Red.Label( 'l_foot', 0.35, 0.18, 0.04, 0.1	 ) );
+		man.r_foot.attach( new Red.Label( 'r_foot', 0.35, 0.18, -0.04, 0.1, 2 ) );
+		man.l_foot.attach( new Red.Label( 'l_foot', 0.35, 0.18, 0.04, 0.1 ) );
 
 
 		// animate the man with some simple dance motion
