@@ -41,8 +41,8 @@ Disfigure дефинира класовете `Man(height)`, `Woman(height)`
 тялото в метри ([live example](../examples/body-heights.html)). По подразбиране
 мъж е висок 1.80м, жена е 1.70м и дете е 1.35м.
 
-[<img src="../examples/snapshots/body-shapes.jpg" width="49%">](../examples/body-shapes.html)
-[<img src="../examples/snapshots/body-heights.jpg" width="49%">](../examples/body-heights.html)
+[<img src="../examples/snapshots/body-shapes.jpg" width="48%">](../examples/body-shapes.html)
+[<img src="../examples/snapshots/body-heights.jpg" width="48%">](../examples/body-heights.html)
 
 Всички видове тела имат една и съща структура, например главата
 е `head`. Левите и десните части на тялото са винаги спрямо

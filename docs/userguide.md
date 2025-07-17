@@ -38,8 +38,8 @@ parameter *height* defines the height of the body in meters
  ([live example](../examples/body-heights.html)). By default a man is
 tall 1.80m, a woman is 1.70m and a child is 1.35m.
 
-[<img src="../examples/snapshots/body-shapes.jpg" width="49%">](../examples/body-shapes.html)
-[<img src="../examples/snapshots/body-heights.jpg" width="49%">](../examples/body-heights.html)
+[<img src="../examples/snapshots/body-shapes.jpg" width="48%">](../examples/body-shapes.html)
+[<img src="../examples/snapshots/body-heights.jpg" width="48%">](../examples/body-heights.html)
 
 All types of bodies have the same structure, for example,
 the head is called `head`. Left and right body parts are
