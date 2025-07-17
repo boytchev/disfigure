@@ -38,12 +38,16 @@ for ( var i=0; i<10; i++ ) {
 
 }
 
-Happy.setAnimationLoop( (t)=>{
-	for( var body of Happy.everybody ) {
+Happy.setAnimationLoop( ( t )=>{
+
+	for ( var body of Happy.everybody ) {
+
 		body.head.turn = Happy.chaotic( t/4000, body.uid, -40, 40 );
-		body.head.bend = Happy.chaotic( t/4000, -body.uid, 0, 100*body.height-160);
+		body.head.bend = Happy.chaotic( t/4000, -body.uid, 0, 100*body.height-160 );
 		body.waist.turn = body.head.turn;
+
 	}
+
 } );
 	</script>
 </body>

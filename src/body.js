@@ -12,7 +12,7 @@ import { vec3 } from 'three/tsl';
 import { tslNormalNode, tslPositionNode } from './motion.js';
 import { centerModel } from './utils.js';
 import { Space } from './space.js';
-import { camera, renderer, 	everybody, scene } from './world.js';
+import { everybody, scene } from './world.js';
 
 
 

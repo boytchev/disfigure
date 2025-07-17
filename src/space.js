@@ -28,13 +28,17 @@ var spinnerCounter = 0,
 	spinner = document.getElementById( 'spinner' );
 
 function loader( ) {
+
 	spinnerCounter++;
-	if( spinner && spinnerCounter >= everybody.length*12 )
+	if ( spinner && spinnerCounter >= everybody.length*12 )
 		spinner.style.display = 'none';
+
 }
 
-if( spinner ) {
+if ( spinner ) {
+
 	setTimeout( ()=>spinner.style.display = 'none', 3000 );
+
 }
 
 
@@ -63,7 +67,7 @@ class Locus {
 	mirror( ) {
 
 		this.isRight = true;
-		
+
 		this.pivot.x *= -1;
 
 		if ( this.minX ) this.minX *= -1;
@@ -82,7 +86,7 @@ class Locus {
 // infinite; areas outside rangeX are consider inside the locus
 class LocusY extends Locus {
 
-	constructor( pivot, rangeY, angle=0, rangeX=[0,0] ) {
+	constructor( pivot, rangeY, angle=0, rangeX=[ 0, 0 ]) {
 
 		super( pivot );
 
@@ -94,7 +98,7 @@ class LocusY extends Locus {
 	} // constructor
 
 	locus( ) {
-		
+
 		var { x, y, z } = positionGeometry;
 
 		y = y.add( z.sub( this.pivot.z ).div( this.slope ) );

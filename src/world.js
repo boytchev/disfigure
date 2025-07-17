@@ -36,7 +36,7 @@ class World {
 		document.body.appendChild( renderer.domElement );
 		document.body.style.overflow = 'hidden';
 		document.body.style.margin = '0';
-		
+
 		scene = new Scene();
 		scene.background = new Color( 'whitesmoke' );
 
