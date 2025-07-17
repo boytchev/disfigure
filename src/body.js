@@ -12,7 +12,7 @@ import { vec3 } from 'three/tsl';
 import { tslNormalNode, tslPositionNode } from './motion.js';
 import { centerModel } from './utils.js';
 import { Space } from './space.js';
-import { everybody, scene } from './world.js';
+import { camera, renderer, 	everybody, scene } from './world.js';
 
 
 
@@ -99,7 +99,6 @@ class Joint extends Group {
 
 
 
-
 var m = new Matrix4(),
 	e = new Euler(),
 	_uid = 1;
@@ -160,7 +159,7 @@ class Disfigure extends Group {
 		model.material = new MeshPhysicalNodeMaterial( {
 			positionNode: tslPositionNode( { space: this.space } ),
 			normalNode: tslNormalNode( { space: this.space } ),
-			colorNode: vec3( 0xFE/0xFF, 0xD1/0xFF, 0xB9/0xFF ).pow( 2.2 ),
+			colorNode: vec3( 0.99, 0.65, 0.49 ),
 			metalness: 0,
 			roughness: 0.6,
 		} );
@@ -197,44 +196,44 @@ class Disfigure extends Group {
 
 		}
 
-		anglesToMatrix( this.space.head, -1, -1, 1 );
-		anglesToMatrix( this.space.chest, -1, -1, 1 );
-		anglesToMatrix( this.space.waist, -1, 1, 1 );
-		anglesToMatrix( this.space.torso, -1, -1, 1 );
+		anglesToMatrix( this.head, -1, -1, 1 );
+		anglesToMatrix( this.chest, -1, -1, 1 );
+		anglesToMatrix( this.waist, -1, -1, 1 );
+		anglesToMatrix( this.torso, -1, -1, 1 );
 
-		anglesToMatrix( this.space.l_elbow, 0, 1, 0 );
-		anglesToMatrix( this.space.r_elbow, 0, -1, 0 );
+		anglesToMatrix( this.l_elbow, 0, 1, 0 );
+		anglesToMatrix( this.r_elbow, 0, -1, 0 );
 
 		// wrist: tilt bend
-		anglesToMatrix( this.space.l_wrist, 0, 1, 1 );
-		anglesToMatrix( this.space.r_wrist, 0, -1, -1 );
+		anglesToMatrix( this.l_wrist, 0, 1, 1 );
+		anglesToMatrix( this.r_wrist, 0, -1, -1 );
 
 		// wrist: turn
 		anglesToMatrix( this.space.l_wrist2, -1, 0, 0 );
 		anglesToMatrix( this.space.r_wrist2, -1, 0, 0 );
 
-		anglesToMatrix( this.space.l_arm, -1, 1, 1 );
-		anglesToMatrix( this.space.r_arm, -1, -1, -1 );
+		anglesToMatrix( this.l_arm, -1, 1, 1 );
+		anglesToMatrix( this.r_arm, -1, -1, -1 );
 
-		anglesToMatrix( this.space.l_knee, -1, 0, 0 );
-		anglesToMatrix( this.space.r_knee, -1, 0, 0 );
+		anglesToMatrix( this.l_knee, -1, 0, 0 );
+		anglesToMatrix( this.r_knee, -1, 0, 0 );
 
-		anglesToMatrix( this.space.l_ankle, -1, 0, -1 );
-		anglesToMatrix( this.space.r_ankle, -1, 0, 1 );
+		anglesToMatrix( this.l_ankle, -1, 0, -1 );
+		anglesToMatrix( this.r_ankle, -1, 0, 1 );
 
 		anglesToMatrix( this.space.l_ankle2, 0, -1, 0 );
 		anglesToMatrix( this.space.r_ankle2, 0, 1, 0 );
 
-		anglesToMatrix( this.space.l_foot, -1, 0, 0 );
-		anglesToMatrix( this.space.r_foot, -1, 0, 0 );
+		anglesToMatrix( this.l_foot, -1, 0, 0 );
+		anglesToMatrix( this.r_foot, -1, 0, 0 );
 
 		// legs turn
 		anglesToMatrix( this.space.l_leg2, 0, -1, 0 );
 		anglesToMatrix( this.space.r_leg2, 0, 1, 0 );
 
 		// leg: foreward ??? straddle
-		anglesToMatrix( this.space.l_leg, 1, 0, -1 );
-		anglesToMatrix( this.space.r_leg, 1, 0, 1 );
+		anglesToMatrix( this.l_leg, 1, 0, -1 );
+		anglesToMatrix( this.r_leg, 1, 0, 1 );
 
 		for ( var wrapper of this.accessories ) {
 

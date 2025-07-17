@@ -174,7 +174,7 @@ const smoother = Fn( ([ edgeFrom, edgeTo, value ])=>{
 
 	return value.smoothstep( edgeFrom, edgeTo ).smoothstep( 0, 1 ).smoothstep( 0, 1 );
 
-}/*, { edgeFrom: 'float', edgeTo: 'float', value: 'float', return: 'float' } */ );
+}, { edgeFrom: 'float', edgeTo: 'float', value: 'float', return: 'float' } );
 
 
 
@@ -186,10 +186,13 @@ class Locus {
 		this.pivot = new Vector3( ...pivot );
 		this.angle = new Vector3();
 		this.matrix = uniform( mat3() );
+		this.isRight = false;
 
 	} // Locus.constructor
 
 	mirror( ) {
+
+		this.isRight = true;
 
 		this.pivot.x *= -1;
 
@@ -209,12 +212,12 @@ class Locus {
 // infinite; areas outside rangeX are consider inside the locus
 class LocusY extends Locus {
 
-	constructor( pivot, rangeY, angle=0, rangeX ) {
+	constructor( pivot, rangeY, angle=0, rangeX=[ 0, 0 ]) {
 
 		super( pivot );
 
 		[ this.minY, this.maxY ] = rangeY;
-		if ( rangeX ) [ this.minX, this.maxX ] = rangeX;
+		[ this.minX, this.maxX ] = rangeX;
 
 		this.slope = Math.tan( ( 90-angle ) * Math.PI/180 );
 
@@ -224,15 +227,11 @@ class LocusY extends Locus {
 
 		var { x, y, z } = positionGeometry;
 
-		if ( this.angle!=0 ) {
-
-			y = y.add( z.sub( this.pivot.z ).div( this.slope ) );
-
-		}
+		y = y.add( z.sub( this.pivot.z ).div( this.slope ) );
 
 		var k = smoother( this.minY, this.maxY, y );
 
-		if ( 'minX' in this ) {
+		if ( this.minX || this.maxX ) {
 
 			k = k.max(
 				smoother( this.minX, this.maxX, x.abs().add( y.sub( this.pivot.y ) ) )
@@ -326,7 +325,7 @@ class LocusT extends LocusXY {
 		var yy = y.sub( x.abs().mul( 1/5 ) );
 
 		if ( this.grown==0 )
-			yy = yy.add( z.abs().mul( 1/6 ) );
+			yy = yy.add( z.mul( 1/6 ) );
 		else
 			yy = yy.add( z.abs().mul( 1/2 ) );
 
@@ -617,6 +616,7 @@ class Joint extends Group {
 		this.angle = space.angle;
 		this.matrix = space.matrix;
 		this.angleAux = spaceAux.angle;
+		this.isRight = space.isRight;
 
 		this.position.copy( space.pivot );
 
@@ -639,8 +639,8 @@ class Joint extends Group {
 
 		wrapper.add( subwrapper );
 		subwrapper.add( mesh );
-		subwrapper.rotation.z = this.isRight ? Math.PI : 0;
-		mesh.position.y *= this.isRight ? -1 : 1;
+		subwrapper.rotation.y = this.isRight ? Math.PI : 0;
+		//mesh.position.y *= this.isRight ? -1 : 1;
 		wrapper.matrixAutoUpdate = false;
 		wrapper.joint = this;
 
@@ -715,7 +715,7 @@ class Disfigure extends Group {
 		model.material = new MeshPhysicalNodeMaterial( {
 			positionNode: tslPositionNode( { space: this.space } ),
 			normalNode: tslNormalNode( { space: this.space } ),
-			colorNode: vec3( 0xFE/0xFF, 0xD1/0xFF, 0xB9/0xFF ).pow( 2.2 ),
+			colorNode: vec3( 0.99, 0.65, 0.49 ),
 			metalness: 0,
 			roughness: 0.6,
 		} );
@@ -752,44 +752,44 @@ class Disfigure extends Group {
 
 		}
 
-		anglesToMatrix( this.space.head, -1, -1, 1 );
-		anglesToMatrix( this.space.chest, -1, -1, 1 );
-		anglesToMatrix( this.space.waist, -1, 1, 1 );
-		anglesToMatrix( this.space.torso, -1, -1, 1 );
+		anglesToMatrix( this.head, -1, -1, 1 );
+		anglesToMatrix( this.chest, -1, -1, 1 );
+		anglesToMatrix( this.waist, -1, 1, 1 );
+		anglesToMatrix( this.torso, -1, -1, 1 );
 
-		anglesToMatrix( this.space.l_elbow, 0, 1, 0 );
-		anglesToMatrix( this.space.r_elbow, 0, -1, 0 );
+		anglesToMatrix( this.l_elbow, 0, 1, 0 );
+		anglesToMatrix( this.r_elbow, 0, -1, 0 );
 
 		// wrist: tilt bend
-		anglesToMatrix( this.space.l_wrist, 0, 1, 1 );
-		anglesToMatrix( this.space.r_wrist, 0, -1, -1 );
+		anglesToMatrix( this.l_wrist, 0, 1, 1 );
+		anglesToMatrix( this.r_wrist, 0, -1, -1 );
 
 		// wrist: turn
 		anglesToMatrix( this.space.l_wrist2, -1, 0, 0 );
 		anglesToMatrix( this.space.r_wrist2, -1, 0, 0 );
 
-		anglesToMatrix( this.space.l_arm, -1, 1, 1 );
-		anglesToMatrix( this.space.r_arm, -1, -1, -1 );
+		anglesToMatrix( this.l_arm, -1, 1, 1 );
+		anglesToMatrix( this.r_arm, -1, -1, -1 );
 
-		anglesToMatrix( this.space.l_knee, -1, 0, 0 );
-		anglesToMatrix( this.space.r_knee, -1, 0, 0 );
+		anglesToMatrix( this.l_knee, -1, 0, 0 );
+		anglesToMatrix( this.r_knee, -1, 0, 0 );
 
-		anglesToMatrix( this.space.l_ankle, -1, 0, -1 );
-		anglesToMatrix( this.space.r_ankle, -1, 0, 1 );
+		anglesToMatrix( this.l_ankle, -1, 0, -1 );
+		anglesToMatrix( this.r_ankle, -1, 0, 1 );
 
 		anglesToMatrix( this.space.l_ankle2, 0, -1, 0 );
 		anglesToMatrix( this.space.r_ankle2, 0, 1, 0 );
 
-		anglesToMatrix( this.space.l_foot, -1, 0, 0 );
-		anglesToMatrix( this.space.r_foot, -1, 0, 0 );
+		anglesToMatrix( this.l_foot, -1, 0, 0 );
+		anglesToMatrix( this.r_foot, -1, 0, 0 );
 
 		// legs turn
 		anglesToMatrix( this.space.l_leg2, 0, -1, 0 );
 		anglesToMatrix( this.space.r_leg2, 0, 1, 0 );
 
 		// leg: foreward ??? straddle
-		anglesToMatrix( this.space.l_leg, 1, 0, -1 );
-		anglesToMatrix( this.space.r_leg, 1, 0, 1 );
+		anglesToMatrix( this.l_leg, 1, 0, -1 );
+		anglesToMatrix( this.r_leg, 1, 0, 1 );
 
 		for ( var wrapper of this.accessories ) {
 

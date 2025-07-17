@@ -9,6 +9,33 @@
 
 import { Vector3 } from "three";
 import { float, Fn, mat3, min, positionGeometry, uniform, vec3 } from "three/tsl";
+import { everybody } from './world.js';
+
+
+
+// inject spinner CSS
+var css = document.createElement( 'style' );
+css.innerHTML = `
+	#spinner {position:fixed;left:49%;top:45%;animation:flash 1s 3;}
+	#spinner::before {content:'Loading...'}
+	@keyframes flash{to{opacity:0}}
+`;
+document.head.appendChild( css );
+
+
+
+var spinnerCounter = 0,
+	spinner = document.getElementById( 'spinner' );
+
+function loader( ) {
+	spinnerCounter++;
+	if( spinner && spinnerCounter >= everybody.length*12 )
+		spinner.style.display = 'none';
+}
+
+if( spinner ) {
+	setTimeout( ()=>spinner.style.display = 'none', 3000 );
+}
 
 
 
@@ -17,7 +44,7 @@ const smoother = Fn( ([ edgeFrom, edgeTo, value ])=>{
 
 	return value.smoothstep( edgeFrom, edgeTo ).smoothstep( 0, 1 ).smoothstep( 0, 1 );
 
-}/*, { edgeFrom: 'float', edgeTo: 'float', value: 'float', return: 'float' } */ );
+}, { edgeFrom: 'float', edgeTo: 'float', value: 'float', return: 'float' } );
 
 
 
@@ -29,6 +56,7 @@ class Locus {
 		this.pivot = new Vector3( ...pivot );
 		this.angle = new Vector3();
 		this.matrix = uniform( mat3() );
+		this.isRight = false;
 
 	} // Locus.constructor
 
@@ -54,30 +82,26 @@ class Locus {
 // infinite; areas outside rangeX are consider inside the locus
 class LocusY extends Locus {
 
-	constructor( pivot, rangeY, angle=0, rangeX ) {
+	constructor( pivot, rangeY, angle=0, rangeX=[0,0] ) {
 
 		super( pivot );
 
 		[ this.minY, this.maxY ] = rangeY;
-		if ( rangeX ) [ this.minX, this.maxX ] = rangeX;
+		[ this.minX, this.maxX ] = rangeX;
 
 		this.slope = Math.tan( ( 90-angle ) * Math.PI/180 );
 
 	} // constructor
 
 	locus( ) {
-
+		
 		var { x, y, z } = positionGeometry;
 
-		if ( this.angle!=0 ) {
-
-			y = y.add( z.sub( this.pivot.z ).div( this.slope ) );
-
-		}
+		y = y.add( z.sub( this.pivot.z ).div( this.slope ) );
 
 		var k = smoother( this.minY, this.maxY, y );
 
-		if ( 'minX' in this ) {
+		if ( this.minX || this.maxX ) {
 
 			k = k.max(
 				smoother( this.minX, this.maxX, x.abs().add( y.sub( this.pivot.y ) ) )
@@ -130,6 +154,8 @@ class LocusXY extends LocusX {
 
 	locus( ) {
 
+		loader();
+
 		var { x, y } = positionGeometry;
 
 		var dx = y.sub( this.pivot.y ).div( 4, x.sign() );
@@ -171,7 +197,7 @@ class LocusT extends LocusXY {
 		var yy = y.sub( x.abs().mul( 1/5 ) );
 
 		if ( this.grown==0 )
-			yy = yy.add( z.abs().mul( 1/6 ) );
+			yy = yy.add( z.mul( 1/6 ) );
 		else
 			yy = yy.add( z.abs().mul( 1/2 ) );
 

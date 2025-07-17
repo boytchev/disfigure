@@ -1,4 +1,5 @@
 v0.0.18
+  - added spinner
   - simplified LocusX
   - renamed *Left and *Right to l_* and r_*
   - removed src\models\*.js

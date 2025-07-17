@@ -115,7 +115,6 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 
 
-
 	// CENTRAL BODY AXIS
 
 	p.assign( fn( p, space.head ) );
