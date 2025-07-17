@@ -27,9 +27,9 @@ Videos of earlier attempts for TSL rigging.
 
 ## Examples
 
-[<img src="snapshots/body-heights.jpg" width="24%">](body-heights.html)
-[<img src="snapshots/body-parts.jpg" width="24%">](body-parts.html)
-[<img src="snapshots/body-shapes.jpg" width="24%">](body-shapes.html)
-[<img src="snapshots/number-generators.jpg" width="24%">](number-generators.html)
+[<img src="docs/snapshots/body-heights.jpg" width="24%">](docs/body-heights.html)
+[<img src="docs/snapshots/body-parts.jpg" width="24%">](docs/body-parts.html)
+[<img src="docs/snapshots/body-shapes.jpg" width="24%">](docs/body-shapes.html)
+[<img src="docs/snapshots/number-generators.jpg" width="24%">](docs/number-generators.html)
 
 
