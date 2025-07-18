@@ -4,7 +4,7 @@
 # Disfigure: User Guide and API
 
 
-## <small><small>[Bodies](#bodies) [[*shapes*](#body-shapes)] [API](#api) [[*classes*](#api-classes), [*functions*](#api-functions), [*variables*](#api-variables)]</small></small>
+## <small><small>[Bodies](#bodies) [[*shapes*](#body-shapes) [*motions*](#body-motions)] [API](#api) [[*classes*](#api-classes), [*functions*](#api-functions), [*variables*](#api-variables)]</small></small>
 
 
 ## <small><small>Work in progress.</small></small>
