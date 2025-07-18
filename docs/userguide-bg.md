@@ -3,6 +3,8 @@
 
 # Disfigure<br>Потребителска документация
 
+## [Тела](#Тела) [[*форми*](#форми-на-телата)] [АПИ](#апи) [[*класове*](#апи-класове), [*функции*](#апи-функции), [*променливи*](#апи-променливи)]
+
 ## <small><small>В процес на изработка.</small></small>
 
 
@@ -766,22 +768,39 @@ man.head.turn = chaotic( time, 0, -60, 60 );
 
 ## АПИ променливи
 
-Следващите  променливи извеждат някои от свойствата на света,
-които могат да се ползват, за да се променят настройките по
-подразбиране. Свойство може да е недефинирано или недодефинирано,
-ако съответната опция при създаването на света не е била включена.
 
-| Променлива | Описание |
-| :--- | :--- |
-| **renderer** | Рендерерът по подразбиране, инстация на `THREE.WebGPURenderer`. |
-| **scene** | Сцена по подразбиране, инстанция на [`THREE.Scene`](https://threejs.org/docs/#api/en/scenes/Scene). Тя съдържа всички 3D елементи на света, включително и телата. |
-| **camera** | Камера по подразбиране, инстанция на [`THREE.PerspectiveCamera`](https://threejs.org/docs/#api/en/cameras/PerspectiveCamera). Използва се за управление на гледната точка. |
-| **light** | Главна светлина, инстанция на [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight). Тя е статична светлина, която генерира сенки. |
-| **cameraLight** | Вторична светлина, инстанция на [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight). Тя е прикрепена към камерата, така че моделите са осветени, дори и когато камерата гледа към гърбовете им. |
-| **controls** | Контроли за навигация, инстанция на [`OrbitControls`](https://threejs.org/docs/#examples/en/controls/OrbitControls). Те позволяват на потребителя да върти и премества камерата из света. |
-| **ground** | Земя, инстанция на [`THREE.Mesh`](https://threejs.org/docs/?q=mesh#api/en/objects/Mesh) с форма на [`PlaneGeometry`](https://threejs.org/docs/#api/en/geometries/PlaneGeometry). Тя създава илюзията за твърда повърхност. |
-| **stats** | Панел за статистика, инстанция на [`Stats`](https://mrdoob.github.io/stats.js/). Използва се за визуализиране на текущата скорост. |
-| **everybody** | Масив от тела. Съдържа всички създадени тела, инстанции на `Man`, `Woman` или `Child`. |
+### **everybody**
+
+Масив от всички създадени тела. Обикновено се използва, за да
+се изпълни някаква операция над всички тела.
+
+
+### **renderer**<br>**scene**<br>**camera**<br>**light**<br>**cameraLight**
+
+Тези променливи са за базовото рендиране и се създават само
+при създаване на предефинирания свят. Променливата `light`
+е статична светлина, която генерира сенки, а `cameraLight` е прикрепена към камерата. Тези променливи са инстанции на
+следните класове от Three.js: [`THREE.Scene`](https://threejs.org/docs/#api/en/scenes/Scene),[`THREE.PerspectiveCamera`](https://threejs.org/docs/#api/en/cameras/PerspectiveCamera) and 
+[`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight).
+
+
+### **ground**
+
+Тази променлива е земята на предефинирания свят. Тя създава
+илюзията за твърда повърхност и показва сенките на телата.
+Тя е инстанция на [`THREE.Mesh`](https://threejs.org/docs/?q=mesh#api/en/objects/Mesh) и е оформена с [`PlaneGeometry`](https://threejs.org/docs/#api/en/geometries/PlaneGeometry). 
+
+
+### **controls**
+
+Контроли за навигация в предефинирания свят. Те позволяват
+на потребителя да върти и премества камерата. Променливата
+е инстанция на [`OrbitControls`](https://threejs.org/docs/#examples/en/controls/OrbitControls).
+
+
+### **stats**
+Панел за статистика за визуализиране на текущата скорост на
+анимация в предефинирания свят. Той е инстанция на [`Stats`](https://mrdoob.github.io/stats.js/)
 
 
 <!--

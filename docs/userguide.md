@@ -3,6 +3,10 @@
 
 # Disfigure<br>User Guide and API
 
+
+## [Bodies](#bodies) [[*shapes*](#body-shapes)] [API](#api) [[*classes*](#api-classes), [*functions*](#api-functions), [*variables*](#api-variables)]
+
+
 ## <small><small>Work in progress.</small></small>
 
 
@@ -704,22 +708,41 @@ man.head.turn = chaotic( time, 0, -60, 60 );
 
 ## API variables
 
-The following variables export properties of the default world that
-can be used to modify the world. A property may be undefined or
-ill-defined if a world is not created or if the corresponding option
-is not set.
 
-| Variable | Description |
-| :--- | :--- |
-| **renderer** | The default renderer, an instance of `THREE.WebGPURenderer`. |
-| **scene** | The default scene, an instance of [`THREE.Scene`](https://threejs.org/docs/#api/en/scenes/Scene). It is a container of all 3D elements of the world, incusind the bodies. |
-| **camera** | The default camera, an instance of [`THREE.PerspectiveCamera`](https://threejs.org/docs/#api/en/cameras/PerspectiveCamera). It is used to define the viewing position. |
-| **light** | The primary light, an instance of [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight). It is a static light that casts shadows. |
-| **cameraLight** | The secondary light, an instance of [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight). It is attached to the camera, so that models are lit even when the camera looks at their backs. |
-| **controls** | The navigation controls, an instance of [`OrbitControls`](https://threejs.org/docs/#examples/en/controls/OrbitControls). It allows the user to rotate and move the camera within the world. |
-| **ground** | The ground of the world, an instance of [`THREE.Mesh`](https://threejs.org/docs/?q=mesh#api/en/objects/Mesh) with shape of [`PlaneGeometry`](https://threejs.org/docs/#api/en/geometries/PlaneGeometry). It creates the illusion of solid surface. |
-| **stats** | A statistics panel, instance of [`Stats`](https://mrdoob.github.io/stats.js/). It is used to show the current the performance. |
-| **everybody** | An array of bodies. It contains all created bodies, instances of `Man`, `Woman` or `Child`. |
+### **everybody**
+
+An array of all created bodies. Usually used to traverse them
+and do some operation on all bodies.
+
+
+### **renderer**<br>**scene**<br>**camera**<br>**light**<br>**cameraLight**
+
+These are core rendering variables that are created only for
+a default world. The `light` is a static light casting shadows,
+while `cameraLight` is attached to the `camera`. These variables
+ are instances of the following Three.js classes: [`THREE.Scene`](https://threejs.org/docs/#api/en/scenes/Scene),[`THREE.PerspectiveCamera`](https://threejs.org/docs/#api/en/cameras/PerspectiveCamera) and 
+[`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight).
+
+
+### **ground**
+
+This variable is the ground for the default world. It creates
+the illusion of a solid surface and hosts bodies' shadows.
+It is an instance of [`THREE.Mesh`](https://threejs.org/docs/?q=mesh#api/en/objects/Mesh)
+ shaped by [`PlaneGeometry`](https://threejs.org/docs/#api/en/geometries/PlaneGeometry). 
+
+
+### **controls**
+
+The navigation controls for the default world. It allows the
+user to rotate and move the camera within the world. It is
+an instance of [`OrbitControls`](https://threejs.org/docs/#examples/en/controls/OrbitControls). 
+
+
+### **stats**
+
+A statistics panel used to show the current the performance
+of rendering the default world. It is an instance of [`Stats`](https://mrdoob.github.io/stats.js/).
 
 <!--
 
