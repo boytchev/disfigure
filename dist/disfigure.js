@@ -2,7 +2,7 @@
 
 import { Vector3, Box3, WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Matrix3, Matrix4, Euler, Group, MeshPhysicalNodeMaterial } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { Fn, mix, If, normalGeometry, transformNormalToView, positionGeometry, vec3, float, min, uniform, mat3 } from 'three/tsl';
+import { Fn, mix, If, normalGeometry, transformNormalToView, positionGeometry, min, vec3, float, select, vec2, uniform, mat3 } from 'three/tsl';
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
@@ -51,11 +51,12 @@ function tslNormalNode( options ) {
 
 
 // implement the actual body bending
-//		space - compiled definition of the space around the body
+//		space - the space around the body
 //		vertex - vertex or normal coordinates to use as input data
 var disfigure = Fn( ( { fn, space, vertex } )=>{
 
-	var p = vertex.toVar();
+	var p = vertex.toVar( );
+
 
 	// LEFT-UPPER BODY
 
@@ -69,7 +70,6 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 	} );
 
 
-
 	// RIGHT-UPPER BODY
 
 	If( space.r_arm.locus( ), ()=>{
@@ -80,7 +80,6 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 		p.assign( fn( p, space.r_arm ) );
 
 	} );
-
 
 
 	// LEFT-LOWER BODY
@@ -97,7 +96,6 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 	} );
 
 
-
 	// RIGHT-LOWER BODY
 
 	If( space.r_leg.locus( ), ()=>{
@@ -110,7 +108,6 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 		p.assign( fn( p, space.r_leg ) );
 
 	} );
-
 
 
 	// CENTRAL BODY AXIS
@@ -350,6 +347,8 @@ function setAnimationLoop( animationLoop ) {
 
 }
 
+//console.time('TSL');
+
 // inject spinner CSS
 var css = document.createElement( 'style' );
 css.innerHTML = `
@@ -367,6 +366,7 @@ var spinnerCounter = 0,
 function loader$1( ) {
 
 	spinnerCounter++;
+	//	console.timeLog('TSL',spinnerCounter);
 	if ( spinner && spinnerCounter >= everybody.length*12 )
 		spinner.style.display = 'none';
 
@@ -381,11 +381,76 @@ if ( spinner ) {
 
 
 // generate oversmooth function
-const smoother = Fn( ([ edgeFrom, edgeTo, value ])=>{
+const smoother = Fn( ([ edge, value ])=>{
 
-	return value.smoothstep( edgeFrom, edgeTo ).smoothstep( 0, 1 ).smoothstep( 0, 1 );
+	return value.smoothstep( edge.x, edge.y ).smoothstep( 0, 1 ).smoothstep( 0, 1 );
 
-}, { edgeFrom: 'float', edgeTo: 'float', value: 'float', return: 'float' } );
+}, { edge: 'vec2', value: 'float', return: 'float' } );
+
+
+
+var tslLocusY = Fn( ([ pos, pivot, rangeY, slope ])=>{
+
+	var y = pos.y,
+		z = pos.z;
+
+	y = y.add( z.sub( pivot.z ).div( slope ) );
+
+	return smoother( rangeY, y );
+
+}, { pos: 'vec3', pivot: 'vec3', rangeY: 'vec2', slope: 'float', return: 'float' } ); // tslLocusY
+
+
+
+var tslLocusX = Fn( ([ pos, rangeX ])=>{
+
+	return smoother( rangeX, pos.x );
+
+}, { pos: 'vec3', rangeX: 'vec2', return: 'float' } ); // tslLocusX
+
+
+
+var tslLocusXY = Fn( ([ pos, pivot, rangeX, rangeY ])=>{
+
+	var x = pos.x,
+		y = pos.y;
+
+	var dx = y.sub( pivot.y ).div( 4, x.sign() );
+
+	return smoother( rangeX, x.add( dx ) )
+		.mul( min(
+			y.smoothstep( rangeY.x, mix( rangeY.x, rangeY.y, 0.2 ) ),
+			y.smoothstep( rangeY.y, mix( rangeY.y, rangeY.x, 0.2 ) ),
+		) )
+		.pow( 2 );
+
+}, { pos: 'vec3', pivot: 'vec3', rangeX: 'vec2', rangeY: 'vec2', return: 'float' } ); // tslLocusX
+
+
+
+var tslLocusT = Fn( ([ pos, pivot, rangeX, rangeY, grown ])=>{
+
+	var x = pos.x,
+		y = pos.y,
+		z = pos.z;
+
+	var s = vec3( x.mul( 2.0 ), y, z.min( 0 ) )
+		.sub( vec3( 0, pivot.y, 0 ) )
+		.length()
+		.smoothstep( 0, float( 0.13 ).div( float( grown ).add( 1 ) ) )
+		.pow( 10 );
+
+	var yy = y.sub( x.abs().mul( 1/5 ) );
+
+	yy = yy.add( select( grown.equal( 1 ), z.abs().mul( 1/2 ), z.mul( 1/6 ) ) );
+
+	return s
+		.mul(
+			x.smoothstep( rangeX.x, rangeX.y ),
+			smoother( rangeY, yy ).pow( 2 ),
+		);
+
+}, { pos: 'vec3', pivot: 'vec3', rangeX: 'vec2', rangeY: 'vec2', grown: 'float', return: 'float' } ); // tslLocusX
 
 
 
@@ -393,7 +458,6 @@ class Locus {
 
 	constructor( pivot ) {
 
-		// calculate a pivot vector with actual coordinates
 		this.pivot = new Vector3( ...pivot );
 		this.angle = new Vector3();
 		this.matrix = uniform( mat3() );
@@ -407,8 +471,12 @@ class Locus {
 
 		this.pivot.x *= -1;
 
-		if ( this.minX ) this.minX *= -1;
-		if ( this.maxX ) this.maxX *= -1;
+		if ( this.rangeX ) {
+
+			this.rangeX.value.x *= -1;
+			this.rangeX.value.y *= -1;
+
+		}
 
 		return this;
 
@@ -423,34 +491,18 @@ class Locus {
 // infinite; areas outside rangeX are consider inside the locus
 class LocusY extends Locus {
 
-	constructor( pivot, rangeY, angle=0, rangeX=[ 0, 0 ]) {
+	constructor( pivot, rangeY, angle=0 ) {
 
 		super( pivot );
 
-		[ this.minY, this.maxY ] = rangeY;
-		[ this.minX, this.maxX ] = rangeX;
-
+		this.rangeY = vec2( ...rangeY );
 		this.slope = Math.tan( ( 90-angle ) * Math.PI/180 );
 
 	} // constructor
 
 	locus( ) {
 
-		var { x, y, z } = positionGeometry;
-
-		y = y.add( z.sub( this.pivot.z ).div( this.slope ) );
-
-		var k = smoother( this.minY, this.maxY, y );
-
-		if ( this.minX || this.maxX ) {
-
-			k = k.max(
-				smoother( this.minX, this.maxX, x.abs().add( y.sub( this.pivot.y ) ) )
-			);
-
-		}
-
-		return k;
+		return tslLocusY( positionGeometry, this.pivot, this.rangeY, this.slope );
 
 	} // locus
 
@@ -466,15 +518,13 @@ class LocusX extends Locus {
 
 		super( pivot );
 
-		[ this.minX, this.maxX ] = rangeX;
+		this.rangeX = vec2( ...rangeX );
 
 	} // constructor
 
 	locus( ) {
 
-		var x = positionGeometry.x;
-
-		return smoother( this.minX, this.maxX, x );
+		return tslLocusX( positionGeometry, this.rangeX );
 
 	} // locus
 
@@ -489,7 +539,7 @@ class LocusXY extends LocusX {
 
 		super( pivot, rangeX );
 
-		[ this.minY, this.maxY ] = rangeY;
+		this.rangeY = vec2( ...rangeY );
 
 	} // constructor
 
@@ -497,16 +547,7 @@ class LocusXY extends LocusX {
 
 		loader$1();
 
-		var { x, y } = positionGeometry;
-
-		var dx = y.sub( this.pivot.y ).div( 4, x.sign() );
-
-		return smoother( float( this.minX ).sub( dx ), float( this.maxX ).sub( dx ), x )
-			.mul( min(
-				smoother( this.minY, this.minY*0.8+0.2*this.maxY, y ),
-				smoother( this.maxY, this.maxY*0.8+0.2*this.minY, y ),
-			) )
-			.pow( 2 );
+		return tslLocusXY( positionGeometry, this.pivot, this.rangeX, this.rangeY );
 
 	} // locus
 
@@ -527,26 +568,7 @@ class LocusT extends LocusXY {
 
 	locus( ) {
 
-		var { x, y, z } = positionGeometry;
-
-		var s = vec3( x.mul( 2.0 ), y, z.min( 0 ) )
-			.sub( vec3( 0, this.pivot.y, 0 ) )
-			.length()
-			.smoothstep( 0, 0.13/( this.grown+1 ) )
-			.pow( 10 );
-
-		var yy = y.sub( x.abs().mul( 1/5 ) );
-
-		if ( this.grown==0 )
-			yy = yy.add( z.mul( 1/6 ) );
-		else
-			yy = yy.add( z.abs().mul( 1/2 ) );
-
-		return s
-			.mul(
-				x.smoothstep( this.minX, this.maxX ),
-				smoother( this.minY, this.maxY, yy ).pow( 2 ),
-			);
+		return tslLocusT( positionGeometry, this.pivot, this.rangeX, this.rangeY, this.grown );
 
 	} // locus
 
@@ -669,7 +691,8 @@ class Joint extends Group {
 
 		wrapper.add( subwrapper );
 		subwrapper.add( mesh );
-		subwrapper.rotation.y = this.isRight ? Math.PI : 0;
+		//subwrapper.rotation.y = this.isRight ? Math.PI*0 : 0;
+		//subwrapper.rotation.z = this.isRight ? Math.PI*0 : 0;
 		//mesh.position.y *= this.isRight ? -1 : 1;
 		wrapper.matrixAutoUpdate = false;
 		wrapper.joint = this;

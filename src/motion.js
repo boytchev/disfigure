@@ -53,11 +53,12 @@ function tslNormalNode( options ) {
 
 
 // implement the actual body bending
-//		space - compiled definition of the space around the body
+//		space - the space around the body
 //		vertex - vertex or normal coordinates to use as input data
 var disfigure = Fn( ( { fn, space, vertex } )=>{
 
-	var p = vertex.toVar();
+	var p = vertex.toVar( );
+
 
 	// LEFT-UPPER BODY
 
@@ -71,7 +72,6 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 	} );
 
 
-
 	// RIGHT-UPPER BODY
 
 	If( space.r_arm.locus( ), ()=>{
@@ -82,7 +82,6 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 		p.assign( fn( p, space.r_arm ) );
 
 	} );
-
 
 
 	// LEFT-LOWER BODY
@@ -99,7 +98,6 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 	} );
 
 
-
 	// RIGHT-LOWER BODY
 
 	If( space.r_leg.locus( ), ()=>{
@@ -112,7 +110,6 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 		p.assign( fn( p, space.r_leg ) );
 
 	} );
-
 
 
 	// CENTRAL BODY AXIS
