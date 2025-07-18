@@ -1,10 +1,10 @@
 <img class="logo" src="../assets/logo/logo.png">
 
 
-# Disfigure<br>User Guide and API
+# Disfigure: User Guide and API
 
 
-## [Bodies](#bodies) [[*shapes*](#body-shapes)] [API](#api) [[*classes*](#api-classes), [*functions*](#api-functions), [*variables*](#api-variables)]
+## <small><small>[Bodies](#bodies) [[*shapes*](#body-shapes)] [API](#api) [[*classes*](#api-classes), [*functions*](#api-functions), [*variables*](#api-variables)]</small></small>
 
 
 ## <small><small>Work in progress.</small></small>
@@ -51,43 +51,38 @@ always in respect to the figure. Their names have prefixes
 `l_` for left and `r_` for right, like `l_arm` and `r_arm`,
 ([live example](../examples/body-parts.html)):
 
+* **Central parts** &ndash; these are `head`, `chest`, `waist` and `torso`.
+* **Upper limbs** &ndash; these are `arm`, `elbow`, `forearm` and `wrist`.
+* **Lower limbs** &ndash; these are `leg`, `thigh`, `knee`, `shin`, `ankle` and `foot`.
+
 [<img src="../examples/snapshots/body-parts.jpg">](../examples/body-parts.html)
 
+
+
+
+## Body motions
+
+The motion of body parts is done by manipulating their properties. Motions are
+just rotations measured in degrees. The `torso` is the root body part and
+rotating the torso totates the whole body.
+
+The motion properties of the central body parts are `bend`, `turn` and `tilt`
+&ndash; ([live example](../examples/motion-central.html)).
+The `bend` corresponds to forward-backward bending, positive angles are foreward,
+negative angles are backward. The `turn` corresponds to left-right rotations,
+positive angles are to left, negative angles are to right. The `tilt` corresponds
+to tilting sideways, positive angles are to the left, negative angles are to the right.
+
+```js
+man.head.bend = 40;
+man.chest.turn = -20;
+man.waist.tilt = 35;
+```
+
+
+[<img src="../examples/snapshots/motion-central.jpg">](../examples/motion-central.html)
+
 <!--
-
-### Central body parts
-
-The central body parts are the ones which have single instances &ndash; *head*, *neck*, *torso*, *pelvis* and the whole body as *body*. To rotate the **whole body** use properties `bend`, `turn` and `tilt` of the figure's `body` or the figure itself ([live example](example-body.html)):
-
-``` javascript
-figure.body.bend = angle;
-figure.body.turn = angle;
-figure.body.tilt = angle;
-
-figure.bend = angle;
-figure.turn = angle;
-figure.tilt = angle;
-```
-
-
-
-The **head** supports properties `nod`, `turn` and `tilt` ([live example](example-head.html)):
-
-``` javascript
-figure.head.nod = angle;
-figure.head.turn = angle;
-figure.head.tilt = angle;
-```
-
-The **torso** has properties `bend`, `turn` and `tilt` ([live example](example-torso.html)):
-
-``` javascript
-figure.torso.bend = angle;
-figure.torso.turn = angle;
-figure.torso.tilt = angle;
-```
-
-
 
 ### Upper limbs
 

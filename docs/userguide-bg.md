@@ -1,9 +1,9 @@
 <img class="logo" src="../assets/logo/logo.png">
 
 
-# Disfigure<br>Потребителска документация
+# Disfigure: Потребителска документация
 
-## [Тела](#Тела) [[*форми*](#форми-на-телата)] [АПИ](#апи) [[*класове*](#апи-класове), [*функции*](#апи-функции), [*променливи*](#апи-променливи)]
+## <small><small>[Тела](#Тела) [[*форми*](#форми-на-телата)] [АПИ](#апи) [[*класове*](#апи-класове), [*функции*](#апи-функции), [*променливи*](#апи-променливи)]</small></small>
 
 ## <small><small>В процес на изработка.</small></small>
 
@@ -51,47 +51,39 @@ Disfigure дефинира класовете `Man(height)`, `Woman(height)`
 тялото. Техните имена имат префикси `l_` за ляво и `r_` за
 дясно, например `l_arm` и `r_arm`, ([пример наживо](../examples/body-parts.html)):
 
+* **Централни части** &ndash; това са `head`, `chest`, `waist` и `torso`.
+* **Горни крайници** &ndash; това са `arm`, `elbow`, `forearm` и `wrist`.
+* **Долни крайници** &ndash; това са `leg`, `thigh`, `knee`, `shin`, `ankle` и `foot`.
+
 [<img src="../examples/snapshots/body-parts.jpg">](../examples/body-parts.html)
 
+
+
+## Движение на тялото
+
+Движението на частите на тялото се извършва чрез манипулиране на техните свойства.
+Движенията са завъртания, измерени в градуси. Торсът `torus` е основната част на
+тялото и завъртането на торса завърта цялото тяло.
+
+Свойствата на движение на централните части на тялото са `bend`, `turn` и `tilt`
+– ([пример на живо](../examples/motion-central.html)).
+Движението `bend` съответства на навеждане напред-назад, положителните ъгли са напред,
+отрицателните ъгли са назад. Движението `turn` съответства на завъртания наляво-надясно,
+положителните ъгли са наляво, отрицателните ъгли са надясно. Движението `tilt`
+съответства на накланяне настрани, положителните ъгли са наляво, отрицателните
+ъгли са надясно.
+
+```js
+man.head.bend = 40;
+man.chest.turn = -20;
+man.waist.tilt = 35;
+```
+
+
+[<img src="../examples/snapshots/motion-central.jpg">](../examples/motion-central.html)
+
+
 <!--
-
-```
-
-### Централни части на тяло
-
-Централните части на тялото са тези, които са единични  &ndash; 
-глава *head*, врат *neck*, торс *torso*, таз *pelvis* и
-цялото тяло като *body*. За да се завърти **цялото тяло** се
-използват свойствата `bend`, `turn` и `tilt` на елемента `body`
-на фигурата или самата фигура ([пример наживо](example-body.html)):
-
-``` javascript
-figure.body.bend = angle;
-figure.body.turn = angle;
-figure.body.tilt = angle;
-
-figure.bend = angle;
-figure.turn = angle;
-figure.tilt = angle;
-```
-
-
-
-Главата **head** поддържа свойствата `nod`, `turn` and `tilt` ([пример наживо](example-head.html)):
-
-``` javascript
-figure.head.nod = angle;
-figure.head.turn = angle;
-figure.head.tilt = angle;
-```
-
-Торсът **torso** има свойства `bend`, `turn` и `tilt` ([пример наживо](example-torso.html)):
-
-``` javascript
-figure.torso.bend = angle;
-figure.torso.turn = angle;
-figure.torso.tilt = angle;
-```
 
 
 

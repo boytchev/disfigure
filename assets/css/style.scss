@@ -44,6 +44,11 @@ h1, h2 {
 	border-bottom: none !important;
 }
 
+h2 a em {
+	font-weight: 300 !important;
+	font-style: normal;
+}
+
 .markdown-body h2 {
 	margin-top: 1.5em !important;
 	margin-bottom: 0.65em !important;

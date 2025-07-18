@@ -30,6 +30,7 @@ Videos of earlier attempts for TSL rigging.
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/body-heights.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/body-heights.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/body-parts.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/body-parts.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/body-shapes.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/body-shapes.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-central.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-central.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/number-generators.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/number-generators.html)
 
 
