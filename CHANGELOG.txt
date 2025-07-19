@@ -1,5 +1,7 @@
 v0.0.19
   - added thigh, shin, forearm
+  - added more sections in the documentation
+  - added more examples for the documentation
     
 v0.0.18
   - added spinner
