@@ -261,8 +261,8 @@ class Disfigure extends Group {
 		anglesToMatrix( this.space.r_thigh, 0, 1, 0 );
 
 		// leg: foreward ??? straddle
-		anglesToMatrix( this.l_leg, 1, 0, -1 );
-		anglesToMatrix( this.r_leg, 1, 0, 1 );
+		anglesToMatrixArm( this.l_leg, 1, 0, -1 );
+		anglesToMatrixArm( this.r_leg, 1, 0, 1 );
 
 		for ( var wrapper of this.accessories ) {
 
