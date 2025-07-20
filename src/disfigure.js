@@ -43,4 +43,4 @@ export {
 	regular,
 	chaotic,
 
-} from './utils.js';
+} from './motion.js';

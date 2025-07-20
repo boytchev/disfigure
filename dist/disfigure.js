@@ -1,11 +1,42 @@
 // disfigure v0.0.18
 
-import { WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, Matrix3, Matrix4, Euler, PlaneGeometry, Group, Box3, MeshPhysicalNodeMaterial } from 'three';
+import { WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, Matrix3, Matrix4, Euler, PlaneGeometry, Group, MeshPhysicalNodeMaterial } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Fn, mix, If, normalGeometry, transformNormalToView, positionGeometry, min, vec3, float, select, vec2, uniform, mat3 } from 'three/tsl';
+import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
-import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
+
+// number generators
+
+var simplex = new SimplexNoise( );
+
+// generate chaotic but random sequence of numbers in [min.max]
+function chaotic( time, offset=0, min=-1, max=1 ) {
+
+	return min + ( max-min )*( simplex.noise( time, offset )+1 )/2;
+
+}
+
+
+
+// generate repeated sequence of numbers in [min.max]
+function regular( time, offset=0, min=-1, max=1 ) {
+
+	return min + ( max-min )*( Math.sin( time+offset )+1 )/2;
+
+}
+
+
+
+// generate random sequence of numbers in [min.max]
+function random( min=-1, max=1 ) {
+
+	return min + ( max-min )*Math.random( );
+
+}
+
+
 
 // general DOF=3 rotator, used for most joints
 var jointRotateMat= Fn( ([ pos, joint ])=>{
@@ -58,14 +89,18 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 	var p = vertex.toVar( );
 
 
+	function chain( items ) {
+
+		for ( var item of items )
+			p.assign( fn( p, space[ item ]) );
+
+	}
+
 	// LEFT-UPPER BODY
 
 	If( space.l_arm.locus( ), ()=>{
 
-		p.assign( fn( p, space.l_wrist ) );
-		p.assign( fn( p, space.l_forearm ) );
-		p.assign( fn( p, space.l_elbow ) );
-		p.assign( fn( p, space.l_arm ) );
+		chain([ 'l_wrist', 'l_forearm', 'l_elbow', 'l_arm' ]);
 
 	} );
 
@@ -74,10 +109,7 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 	If( space.r_arm.locus( ), ()=>{
 
-		p.assign( fn( p, space.r_wrist ) );
-		p.assign( fn( p, space.r_forearm ) );
-		p.assign( fn( p, space.r_elbow ) );
-		p.assign( fn( p, space.r_arm ) );
+		chain([ 'r_wrist', 'r_forearm', 'r_elbow', 'r_arm' ]);
 
 	} );
 
@@ -86,12 +118,7 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 	If( space.l_leg.locus( ), ()=>{
 
-		p.assign( fn( p, space.l_foot ) );
-		p.assign( fn( p, space.l_ankle ) );
-		p.assign( fn( p, space.l_shin ) );
-		p.assign( fn( p, space.l_knee ) );
-		p.assign( fn( p, space.l_thigh ) );
-		p.assign( fn( p, space.l_leg ) );
+		chain([ 'l_foot', 'l_ankle', 'l_shin', 'l_knee', 'l_thigh', 'l_leg' ]);
 
 	} );
 
@@ -100,22 +127,14 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 	If( space.r_leg.locus( ), ()=>{
 
-		p.assign( fn( p, space.r_foot ) );
-		p.assign( fn( p, space.r_ankle ) );
-		p.assign( fn( p, space.r_shin ) );
-		p.assign( fn( p, space.r_knee ) );
-		p.assign( fn( p, space.r_thigh ) );
-		p.assign( fn( p, space.r_leg ) );
+		chain([ 'r_foot', 'r_ankle', 'r_shin', 'r_knee', 'r_thigh', 'r_leg' ]);
 
 	} );
 
 
 	// CENTRAL BODY AXIS
 
-	p.assign( fn( p, space.head ) );
-	p.assign( fn( p, space.chest ) );
-	p.assign( fn( p, space.waist ) );
-	p.assign( fn( p, space.torso ) );
+	chain([ 'head', 'chest', 'waist', 'torso' ]);
 
 	return p;
 
@@ -150,8 +169,7 @@ class World {
 		scene.background = new Color( 'whitesmoke' );
 
 		camera = new PerspectiveCamera( 30, innerWidth/innerHeight );
-		camera.position.set( 0, 1, 4 );
-		camera.lookAt( 0, 1, 0 );
+		camera.position.set( 0, 1.5, 4 );
 
 		if ( options?.stats ?? false ) {
 
@@ -193,7 +211,7 @@ class World {
 
 			controls = new OrbitControls( camera, renderer.domElement );
 			controls.enableDamping = true;
-			controls.target.set( 0, 0.8, 0 );
+			controls.target.set( 0, 0.9, 0 );
 
 		} // controls
 
@@ -666,7 +684,7 @@ var m = new Matrix4(),
 class Disfigure extends Group {
 
 
-	constructor( url, space, height ) {
+	constructor( url, space, height, geometryHeight ) {
 
 		super();
 
@@ -681,20 +699,15 @@ class Disfigure extends Group {
 		this.receiveShadow = true;
 
 		this.accessories = [];
+		this.height = height??geometryHeight;
 
 		// reduce the hierarchy of the model
 		this.model = new Mesh( dummyGeomeyry );
+		this.model.scale.setScalar( this.height / geometryHeight );
 
 		loader.load( this.url, ( gltf )=>{
 
 			this.model.geometry = gltf.scene.children[ 0 ].geometry;
-
-			var box = new Box3().setFromObject( this.model, true );
-			var modelHeight = box.max.y-box.min.y;
-
-			// rescale the model to the desired height (optional)
-			this.height = height ?? modelHeight;
-			this.model.scale.setScalar( this.height / modelHeight );
 
 		} );
 
@@ -767,6 +780,25 @@ class Disfigure extends Group {
 
 		}
 
+		function anglesToMatrixArm( space, sx, sy, sz ) {
+
+			e.set( 0, 0, 0, 'YZX' );
+
+			e.reorder( 'ZXY' );
+			e.set( e.x, e.y, e.z+sz*space.angle.z ); // straddle
+
+			e.reorder( 'YZX' );
+			e.set( e.x, e.y+sy*space.angle.y, e.z ); // foreward
+
+			e.reorder( 'XYZ' );
+			e.set( e.x+sx*space.angle.x, e.y, e.z ); // turn
+
+			m.makeRotationFromEuler( e );
+			var s = m.elements;
+			space.matrix.value.set( s[ 0 ], s[ 4 ], s[ 8 ], s[ 1 ], s[ 5 ], s[ 9 ], s[ 2 ], s[ 6 ], s[ 10 ]);
+
+		}
+
 		anglesToMatrix( this.head, -1, -1, 1 );
 		anglesToMatrix( this.chest, -1, -1, 1 );
 		anglesToMatrix( this.waist, -1, -1, 1 );
@@ -783,8 +815,8 @@ class Disfigure extends Group {
 		anglesToMatrix( this.space.l_forearm, -1, 0, 0 );
 		anglesToMatrix( this.space.r_forearm, -1, 0, 0 );
 
-		anglesToMatrix( this.l_arm, -1, 1, 1 );
-		anglesToMatrix( this.r_arm, -1, -1, -1 );
+		anglesToMatrixArm( this.l_arm, -1, 1, 1 );
+		anglesToMatrixArm( this.r_arm, -1, -1, -1 );
 
 		anglesToMatrix( this.l_knee, -1, 0, 0 );
 		anglesToMatrix( this.r_knee, -1, 0, 0 );
@@ -803,8 +835,8 @@ class Disfigure extends Group {
 		anglesToMatrix( this.space.r_thigh, 0, 1, 0 );
 
 		// leg: foreward ??? straddle
-		anglesToMatrix( this.l_leg, 1, 0, -1 );
-		anglesToMatrix( this.r_leg, 1, 0, 1 );
+		anglesToMatrixArm( this.l_leg, 1, 0, -1 );
+		anglesToMatrixArm( this.r_leg, 1, 0, 1 );
 
 		for ( var wrapper of this.accessories ) {
 
@@ -835,6 +867,7 @@ class Disfigure extends Group {
 class Man extends Disfigure {
 
 	static URL = 'man.glb';
+	static HEIGHT = 1.795;
 	static SPACE = {
 
 		// TORSO
@@ -855,13 +888,13 @@ class Man extends Disfigure {
 		elbow: [[ 0.427, 1.453, -0.072 ], [ 0.413, 0.467 ]],
 		forearm: [[ 0.305, 1.453, -0.068 ], [ 0.083, 0.879 ]],
 		wrist: [[ 0.673, 1.462, -0.072 ], [ 0.635, 0.722 ]],
-		arm: [[ 0.153, 1.408, -0.072 ], [ 0.054, 0.269 ], [ 1.067, 1.606 ]],
+		arm: [[ 0.153, 1.408, -0.072 ], [ 0.054, 0.269 ], [ 1.067, 1.616 ]],
 
 	};
 
 	constructor( height ) {
 
-		super( MODEL_PATH + Man.URL, Man.SPACE, height );
+		super( MODEL_PATH + Man.URL, Man.SPACE, height, Man.HEIGHT );
 
 		this.l_leg.straddle = this.r_leg.straddle = 5;
 		this.l_ankle.tilt = this.r_ankle.tilt = -5;
@@ -876,6 +909,7 @@ class Man extends Disfigure {
 class Woman extends Disfigure {
 
 	static URL = 'woman.glb';
+	static HEIGHT = 1.691;
 	static SPACE = {
 
 		// TORSO
@@ -902,7 +936,7 @@ class Woman extends Disfigure {
 
 	constructor( height ) {
 
-		super( MODEL_PATH + Woman.URL, Woman.SPACE, height );
+		super( MODEL_PATH + Woman.URL, Woman.SPACE, height, Woman.HEIGHT );
 
 		this.l_leg.straddle = this.r_leg.straddle = -2.9;
 		this.l_ankle.tilt = this.r_ankle.tilt = 2.9;
@@ -917,6 +951,7 @@ class Woman extends Disfigure {
 class Child extends Disfigure {
 
 	static URL = 'child.glb';
+	static HEIGHT = 1.352;
 	static SPACE = {
 
 		// TORSO
@@ -943,42 +978,13 @@ class Child extends Disfigure {
 
 	constructor( height ) {
 
-		super( MODEL_PATH + Child.URL, Child.SPACE, height );
+		super( MODEL_PATH + Child.URL, Child.SPACE, height, Child.HEIGHT );
 
 		this.l_ankle.bend = this.r_ankle.bend = 3;
 
 	} // Child.constructor
 
 } // Child
-
-// number generators
-
-var simplex = new SimplexNoise( );
-
-// generate chaotic but random sequence of numbers in [min.max]
-function chaotic( time, offset=0, min=-1, max=1 ) {
-
-	return min + ( max-min )*( simplex.noise( time, offset )+1 )/2;
-
-}
-
-
-
-// generate repeated sequence of numbers in [min.max]
-function regular( time, offset=0, min=-1, max=1 ) {
-
-	return min + ( max-min )*( Math.sin( time+offset )+1 )/2;
-
-}
-
-
-
-// generate random sequence of numbers in [min.max]
-function random( min=-1, max=1 ) {
-
-	return min + ( max-min )*Math.random( );
-
-}
 
 // disfigure
 //

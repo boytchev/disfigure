@@ -5,7 +5,7 @@
 
 
 
-import { Box3, Euler, Group, Matrix3, Matrix4, Mesh, MeshPhysicalNodeMaterial, PlaneGeometry, Vector3 } from 'three';
+import { Euler, Group, Matrix3, Matrix4, Mesh, MeshPhysicalNodeMaterial, PlaneGeometry, Vector3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { vec3 } from 'three/tsl';
 
@@ -209,16 +209,16 @@ class Disfigure extends Group {
 		function anglesToMatrixArm( space, sx, sy, sz ) {
 
 			e.set( 0, 0, 0, 'YZX' );
-			
+
 			e.reorder( 'ZXY' );
 			e.set( e.x, e.y, e.z+sz*space.angle.z ); // straddle
 
 			e.reorder( 'YZX' );
 			e.set( e.x, e.y+sy*space.angle.y, e.z ); // foreward
-			
+
 			e.reorder( 'XYZ' );
 			e.set( e.x+sx*space.angle.x, e.y, e.z ); // turn
-			
+
 			m.makeRotationFromEuler( e );
 			var s = m.elements;
 			space.matrix.value.set( s[ 0 ], s[ 4 ], s[ 8 ], s[ 1 ], s[ 5 ], s[ 9 ], s[ 2 ], s[ 6 ], s[ 10 ]);
@@ -314,7 +314,7 @@ class Man extends Disfigure {
 		elbow: [[ 0.427, 1.453, -0.072 ], [ 0.413, 0.467 ]],
 		forearm: [[ 0.305, 1.453, -0.068 ], [ 0.083, 0.879 ]],
 		wrist: [[ 0.673, 1.462, -0.072 ], [ 0.635, 0.722 ]],
-		arm: [[ 0.153, 1.408, -0.072 ], [ 0.054, 0.269 ], [ 1.067, 1.606 ]],
+		arm: [[ 0.153, 1.408, -0.072 ], [ 0.054, 0.269 ], [ 1.067, 1.616 ]],
 
 	};
 

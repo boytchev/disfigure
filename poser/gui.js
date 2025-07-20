@@ -10,7 +10,7 @@ import * as lil from "three/addons/libs/lil-gui.module.min.js";
 import { float, Fn, If, mix, select, uniform, vec3 } from "three/tsl";
 import { LocusT, LocusX } from "../src/space.js";
 import { scene, setAnimationLoop, World } from "../src/world.js";
-import { chaotic } from "../src/utils.js";
+import { chaotic } from "../src/motion.js";
 import { Joint, Man } from "../src/body.js";
 import { DEBUG, DEBUG_JOINT, DEBUG_NAME } from "./debug.js";
 

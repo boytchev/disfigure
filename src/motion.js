@@ -6,6 +6,38 @@
 
 
 import { Fn, If, mix, normalGeometry, positionGeometry, transformNormalToView } from "three/tsl";
+import { SimplexNoise } from "three/addons/math/SimplexNoise.js";
+
+
+
+// number generators
+
+var simplex = new SimplexNoise( );
+
+// generate chaotic but random sequence of numbers in [min.max]
+function chaotic( time, offset=0, min=-1, max=1 ) {
+
+	return min + ( max-min )*( simplex.noise( time, offset )+1 )/2;
+
+}
+
+
+
+// generate repeated sequence of numbers in [min.max]
+function regular( time, offset=0, min=-1, max=1 ) {
+
+	return min + ( max-min )*( Math.sin( time+offset )+1 )/2;
+
+}
+
+
+
+// generate random sequence of numbers in [min.max]
+function random( min=-1, max=1 ) {
+
+	return min + ( max-min )*Math.random( );
+
+}
 
 
 
@@ -60,14 +92,18 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 	var p = vertex.toVar( );
 
 
+	function chain( items ) {
+
+		for ( var item of items )
+			p.assign( fn( p, space[ item ]) );
+
+	}
+
 	// LEFT-UPPER BODY
 
 	If( space.l_arm.locus( ), ()=>{
 
-		p.assign( fn( p, space.l_wrist ) );
-		p.assign( fn( p, space.l_forearm ) );
-		p.assign( fn( p, space.l_elbow ) );
-		p.assign( fn( p, space.l_arm ) );
+		chain([ 'l_wrist', 'l_forearm', 'l_elbow', 'l_arm' ]);
 
 	} );
 
@@ -76,10 +112,7 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 	If( space.r_arm.locus( ), ()=>{
 
-		p.assign( fn( p, space.r_wrist ) );
-		p.assign( fn( p, space.r_forearm ) );
-		p.assign( fn( p, space.r_elbow ) );
-		p.assign( fn( p, space.r_arm ) );
+		chain([ 'r_wrist', 'r_forearm', 'r_elbow', 'r_arm' ]);
 
 	} );
 
@@ -88,12 +121,7 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 	If( space.l_leg.locus( ), ()=>{
 
-		p.assign( fn( p, space.l_foot ) );
-		p.assign( fn( p, space.l_ankle ) );
-		p.assign( fn( p, space.l_shin ) );
-		p.assign( fn( p, space.l_knee ) );
-		p.assign( fn( p, space.l_thigh ) );
-		p.assign( fn( p, space.l_leg ) );
+		chain([ 'l_foot', 'l_ankle', 'l_shin', 'l_knee', 'l_thigh', 'l_leg' ]);
 
 	} );
 
@@ -102,22 +130,14 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 	If( space.r_leg.locus( ), ()=>{
 
-		p.assign( fn( p, space.r_foot ) );
-		p.assign( fn( p, space.r_ankle ) );
-		p.assign( fn( p, space.r_shin ) );
-		p.assign( fn( p, space.r_knee ) );
-		p.assign( fn( p, space.r_thigh ) );
-		p.assign( fn( p, space.r_leg ) );
+		chain([ 'r_foot', 'r_ankle', 'r_shin', 'r_knee', 'r_thigh', 'r_leg' ]);
 
 	} );
 
 
 	// CENTRAL BODY AXIS
 
-	p.assign( fn( p, space.head ) );
-	p.assign( fn( p, space.chest ) );
-	p.assign( fn( p, space.waist ) );
-	p.assign( fn( p, space.torso ) );
+	chain([ 'head', 'chest', 'waist', 'torso' ]);
 
 	return p;
 
@@ -125,4 +145,5 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 
 
-export { tslPositionNode, tslNormalNode };
+
+export { tslPositionNode, tslNormalNode, chaotic, regular, random };
