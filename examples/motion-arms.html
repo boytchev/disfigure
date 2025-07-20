@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Motions for the arms</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+		// create three persons
+
+		var man = new Happy.Man(),
+			woman = new Happy.Woman(),
+			child = new Happy.Child();
+
+		man.position.x = -0.75;
+		woman.position.x = 0.75;
+
+		// animate the man with some simple dance motion
+		// the attached label should move automatically
+		
+		function animate( event ) {
+
+			var someone = event.target;
+			var t = event.time/2000 + 10*someone.uid;
+			
+			someone.head.bend = Happy.chaotic( t/5, 3, -10, 10 );
+			someone.head.turn = Happy.chaotic( t/2, 2, -40, 40 );
+			someone.head.tilt = Happy.chaotic( t/2, 1, -20, 20 );
+			someone.waist.turn = -someone.head.turn;
+			
+			someone.l_arm.straddle = Happy.chaotic( t, 5, -10, 60 );
+			someone.l_arm.turn = Happy.chaotic( t, 6, -10, 70 );
+			someone.l_arm.foreward = Happy.chaotic( t, 7, -20, 80 );
+
+			someone.r_arm.straddle = Happy.chaotic( t, -5, -10, 60 );
+			someone.r_arm.turn = Happy.chaotic( t, -6, -10, 70 );
+			someone.r_arm.foreward = Happy.chaotic( t, -7, -20, 80 );
+
+			someone.l_elbow.bend = Happy.chaotic( t, 9, 0, 140 );
+			someone.r_elbow.bend = Happy.chaotic( t, 7, 0, 140 );
+
+			someone.l_forearm.turn = Happy.chaotic( t, 11, -45, 45 );
+			someone.r_forearm.turn = Happy.chaotic( t, -8, -45, 45 );
+
+			someone.l_wrist.bend = Happy.chaotic( t, -2, -60, 60 );
+			someone.l_wrist.turn = Happy.chaotic( t, -3, -45, 45 );
+			someone.l_wrist.tilt = Happy.chaotic( t, -2, -40, 40 );
+
+			someone.r_wrist.bend = Happy.chaotic( t, -1, -60, 60 );
+			someone.r_wrist.turn = Happy.chaotic( t, -4, -45, 45 );
+			someone.r_wrist.tilt = Happy.chaotic( t, -1, -40, 40 );
+
+		}
+
+		man.addEventListener( 'animate', animate );
+		woman.addEventListener( 'animate', animate );
+		child.addEventListener( 'animate', animate );
+
+	</script>
+</body>
+</html>

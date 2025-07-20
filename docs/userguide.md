@@ -14,7 +14,7 @@
 ## <small><small>Този документ е наличен и на [български език](userguide-bg.md)</small></small>
 
 <!--
-- **[Body parts](#body-parts)** (<small>[Central body parts](#central-body-parts) | [Upper limbs](#upper-limbs) | [Lower limbs](#lower-limbs)</small>)
+- <small>[Lower limbs](#lower-limbs)</small>)
 - **[Body posture](#body-posture)** (<small>[Static](#static-posture) | [Dynamic](#dynamic-posture) | [Working with postures](#working-with-postures)</small>)
 - **[Other functions](#other-functions)** (<small>[Colors](#custom-colors) | [Body modification](#body-modification) | [Positioning](#global-position)</small>)
 - **[Using Mannequin.js](#using-mannequinjs)** (<small>[CDN](#running-from-a-cdn) | [local web server](#running-via-a-local-web-server) | [Nodes.js](#running-via-nodesjs) | [API](#api)</small>) 
@@ -66,8 +66,10 @@ The motion of body parts is done by manipulating their properties. Motions are
 just rotations measured in degrees. The `torso` is the root body part and
 rotating the torso totates the whole body.
 
+#### Motion of body 
+
 The motion properties of the central body parts are `bend`, `turn` and `tilt`
-&ndash; ([live example](../examples/motion-central.html)).
+&ndash; [live example](../examples/motion-central.html).
 The `bend` corresponds to forward-backward bending, positive angles are foreward,
 negative angles are backward. The `turn` corresponds to left-right rotations,
 positive angles are to left, negative angles are to right. The `tilt` corresponds
@@ -82,11 +84,21 @@ man.waist.tilt = 35;
 
 [<img src="../examples/snapshots/motion-central.jpg">](../examples/motion-central.html)
 
+
+#### Motion of arms 
+
+The arms are symmetrical body parts: `l_arm`, `l_elbow`, `l_forearm` and `l_wrist`
+for the left side of the body; and `r_arm`, `r_elbow`, `r_forearm` and `r_wrist` for
+the right side. Because of the multiple joints and their flexibility arms have
+a complex motion &ndash; [live example](../examples/motion-arms.html).
+
+[<img src="../examples/snapshots/motion-arms.jpg">](../examples/motion-arms.html)
+
+
 <!--
 
 ### Upper limbs
 
-The upper limbs are symmetrical body parts: *arm*, *elbow*, *wrist*, *fingers* and individual fingers *finger_0* to *finger_4* with their middle phalanges (*finger_0.mid* to *finger_4.mid*) and tips (*finger_0.tip* to *finger_4.tip*).
 
 Both **arms**, `l_arm` and `r_arm`, support properties `raise`, `straddle` and `turn` ([live example](example-arm.html)). The following list refers to the right arm, however, the same properties are available for the left arm:
 
@@ -112,21 +124,6 @@ figure.r_wrist.turn = angle;
 figure.r_wrist.tilt = angle;
 ```
 
-The last body parts of the upper limbs are the **fingers**. They are defined as sets (`l_fingers` and `r_fingers`) of individual fingers (`l_finger_0` to `l_finger_4` and `r_finger_0` to `r_finger_0`).
-
-The sets can only *bend*. Bending of fingers is automatically distributed to bending of their middle phalanges and tips, so use `l_fingers` and `r_fingers` to bend the fingers of a hand altogether ([live example](example-fingers.html)):
-
-``` javascript
-figure.r_fingers.bend = angle;
-```
-
-The individual fingers are numbered from the **thumb** (0) to the **little finger** (4). Fingers support properties `bend`, `straddle` and `turn`. The middle phalange of a finger is in its `mid` property, and the tip is in its `tip` property. Finger's `mid` and `tip` support only `bend` ([live example](example-finger-bend.html) and [live example](example-finger-straddle.html)).
-
-``` javascript
-figure.r_finger_1.straddle = alpha;
-figure.r_finger_1.bend = beta1;
-figure.r_finger_1.mid.bend = beta2;
-figure.r_finger_1.tip.bend = beta3;
 ```
 
 

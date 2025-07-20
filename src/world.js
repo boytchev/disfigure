@@ -41,8 +41,7 @@ class World {
 		scene.background = new Color( 'whitesmoke' );
 
 		camera = new PerspectiveCamera( 30, innerWidth/innerHeight );
-		camera.position.set( 0, 1, 4 );
-		camera.lookAt( 0, 1, 0 );
+		camera.position.set( 0, 1.5, 4 );
 
 		if ( options?.stats ?? false ) {
 
@@ -84,7 +83,7 @@ class World {
 
 			controls = new OrbitControls( camera, renderer.domElement );
 			controls.enableDamping = true;
-			controls.target.set( 0, 0.8, 0 );
+			controls.target.set( 0, 0.9, 0 );
 
 		} // controls
 
