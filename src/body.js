@@ -110,7 +110,7 @@ var m = new Matrix4(),
 class Disfigure extends Group {
 
 
-	constructor( url, space, height ) {
+	constructor( url, space, height, geometryHeight ) {
 
 		super();
 
@@ -125,20 +125,15 @@ class Disfigure extends Group {
 		this.receiveShadow = true;
 
 		this.accessories = [];
+		this.height = height??geometryHeight;
 
 		// reduce the hierarchy of the model
 		this.model = new Mesh( dummyGeomeyry );
+		this.model.scale.setScalar( this.height / geometryHeight );
 
 		loader.load( this.url, ( gltf )=>{
 
 			this.model.geometry = gltf.scene.children[ 0 ].geometry;
-
-			var box = new Box3().setFromObject( this.model, true );
-			var modelHeight = box.max.y-box.min.y;
-
-			// rescale the model to the desired height (optional)
-			this.height = height ?? modelHeight;
-			this.model.scale.setScalar( this.height / modelHeight );
 
 		} );
 
@@ -279,6 +274,7 @@ class Disfigure extends Group {
 class Man extends Disfigure {
 
 	static URL = 'man.glb';
+	static HEIGHT = 1.795;
 	static SPACE = {
 
 		// TORSO
@@ -305,7 +301,7 @@ class Man extends Disfigure {
 
 	constructor( height ) {
 
-		super( MODEL_PATH + Man.URL, Man.SPACE, height );
+		super( MODEL_PATH + Man.URL, Man.SPACE, height, Man.HEIGHT );
 
 		this.l_leg.straddle = this.r_leg.straddle = 5;
 		this.l_ankle.tilt = this.r_ankle.tilt = -5;
@@ -320,6 +316,7 @@ class Man extends Disfigure {
 class Woman extends Disfigure {
 
 	static URL = 'woman.glb';
+	static HEIGHT = 1.691;
 	static SPACE = {
 
 		// TORSO
@@ -346,7 +343,7 @@ class Woman extends Disfigure {
 
 	constructor( height ) {
 
-		super( MODEL_PATH + Woman.URL, Woman.SPACE, height );
+		super( MODEL_PATH + Woman.URL, Woman.SPACE, height, Woman.HEIGHT );
 
 		this.l_leg.straddle = this.r_leg.straddle = -2.9;
 		this.l_ankle.tilt = this.r_ankle.tilt = 2.9;
@@ -361,6 +358,7 @@ class Woman extends Disfigure {
 class Child extends Disfigure {
 
 	static URL = 'child.glb';
+	static HEIGHT = 1.352;
 	static SPACE = {
 
 		// TORSO
@@ -387,7 +385,7 @@ class Child extends Disfigure {
 
 	constructor( height ) {
 
-		super( MODEL_PATH + Child.URL, Child.SPACE, height );
+		super( MODEL_PATH + Child.URL, Child.SPACE, height, Child.HEIGHT );
 
 		this.l_ankle.bend = this.r_ankle.bend = 3;
 
