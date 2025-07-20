@@ -193,39 +193,39 @@ const
 	
 var posture = {
 	
-	head: { rot: new Vector3, mat: new Matrix3 },
-	neck: { rot: new Vector3, mat: new Matrix3 },
-	chest: { rot: new Vector3, mat: new Matrix3 },
-	waist: { rot: new Vector3, mat: new Matrix3 },
-	torso: { rot: new Vector3, mat: new Matrix3 },
+	head: new Vector3(0,0,0),
+	neck: new Vector3(0,0,0),
+	chest: new Vector3(0,0,0),
+	waist: new Vector3(0,0,0),
+	torso: new Vector3(0,0,0),
 	
-	l_foot: { rot: new Vector3, mat: new Matrix3 },
-	l_ankle: { rot: new Vector3, mat: new Matrix3 },
-	l_knee: { rot: new Vector3, mat: new Matrix3 },
-	l_leg: { rot: new Vector3, mat: new Matrix3 },
+	l_foot: new Vector3(0,0,0),
+	l_ankle: new Vector3(0,0,0),
+	l_knee: new Vector3(0,0,0),
+	l_leg: new Vector3(0,0,0),
 	
-	r_foot: { rot: new Vector3, mat: new Matrix3 },
-	r_ankle: { rot: new Vector3, mat: new Matrix3 },
-	r_knee: { rot: new Vector3, mat: new Matrix3 },
-	r_leg: { rot: new Vector3, mat: new Matrix3 },
+	r_foot: new Vector3(0,0,0),
+	r_ankle: new Vector3(0,0,0),
+	r_knee: new Vector3(0,0,0),
+	r_leg: new Vector3(0,0,0),
 	
-	l_wrist: { rot: new Vector3, mat: new Matrix3 },
-	l_forearm: { rot: new Vector3, mat: new Matrix3 },
-	l_elbow: { rot: new Vector3, mat: new Matrix3 },
-	l_arm: { rot: new Vector3, mat: new Matrix3 },
+	l_wrist: new Vector3(0,0,0),
+	l_forearm: new Vector3(0,0,0),
+	l_elbow: new Vector3(0,0,0),
+	l_arm: new Vector3(0,0,0),
 	
-	r_wrist: { rot: new Vector3, mat: new Matrix3 },
-	r_forearm: { rot: new Vector3, mat: new Matrix3 },
-	r_elbow: { rot: new Vector3, mat: new Matrix3 },
-	r_arm: { rot: new Vector3, mat: new Matrix3 },
+	r_wrist: new Vector3(0,0,0),
+	r_forearm: new Vector3(0,0,0),
+	r_elbow: new Vector3(0,0,0),
+	r_arm: new Vector3(0,0,0),
 	
 }
 
 
 
-// var axis = new AxesHelper();
-// axis.position.copy( L_ARM_PIVOT );
-// scene.add( axis );
+var axis = new AxesHelper();
+axis.position.copy( L_ARM_PIVOT );
+scene.add( axis );
 
 
 
@@ -239,8 +239,6 @@ var smooth = Fn( ([value,range])=>{
 
 var tslIsHead = Fn( ( [p] )=>{
 
-console.timeLog('TSL','- head');
-
 	var {y, z} = p;
 
 	var k = smooth( y.add(z.div(4)), HEAD_RANGE_Y ).pow(1.5);
@@ -252,8 +250,6 @@ console.timeLog('TSL','- head');
 
 var tslIsNeck = Fn( ( [p] )=>{
 
-console.timeLog('TSL','- neck');
-
 	var {x,y} = p;
 
 	var k = smooth( y.sub(x.abs()), NECK_RANGE_Y ).pow(1.5);
@@ -264,8 +260,6 @@ console.timeLog('TSL','- neck');
 
 
 var tslIsChest = Fn( ( [p] )=>{
-
-console.timeLog('TSL','- chest');
 
 	var {x,y} = p;
 
@@ -281,8 +275,6 @@ console.timeLog('TSL','- chest');
 
 var tslIsWaist = Fn( ( [p] )=>{
 	
-console.timeLog('TSL','- waist');
-
 	var {y} = p;
 
 	var k = smooth( y, WAIST_RANGE_Y ).pow(1.5);
@@ -294,8 +286,6 @@ console.timeLog('TSL','- waist');
 
 var tslIsFoot = Fn( ( [p] )=>{
 	
-console.timeLog('TSL','- foot');
-
 	var {y,z} = p;
 
 	var k = smooth( z.sub(y), FOOT_RANGE_Z ).pow(1.5);
@@ -307,8 +297,6 @@ console.timeLog('TSL','- foot');
 
 var tslIsAnkle = Fn( ( [p] )=>{
 	
-console.timeLog('TSL','- ankle');
-
 	var {y} = p;
 
 	var k = smooth( y, ANKLE_RANGE_Y ).pow(1.5);
@@ -320,8 +308,6 @@ console.timeLog('TSL','- ankle');
 
 var tslIsKnee = Fn( ( [p] )=>{
 	
-console.timeLog('TSL','- knee');
-
 	var {x,y} = p;
 
 	var k = smooth( y, KNEE_RANGE_Y ).pow(1.5);
@@ -333,8 +319,6 @@ console.timeLog('TSL','- knee');
 
 var tslIsLeg = Fn( ( [p, flip] )=>{
 	
-console.timeLog('TSL','- leg');
-
 	var {x,y,z} = p;
 
 	var s = vec3( x.mul( 2.0 ), y, z.min( 0 ) )
@@ -358,8 +342,6 @@ console.timeLog('TSL','- leg');
 
 var tslIsWrist = Fn( ( [p, flip] )=>{
 	
-console.timeLog('TSL','- wrist');
-
 	var {x} = p;
 
 	var k = smooth( x, WRIST_RANGE_X.mul(flip) ).pow(1.5);
@@ -370,8 +352,6 @@ console.timeLog('TSL','- wrist');
 
 var tslIsForearm = Fn( ( [p, flip] )=>{
 	
-console.timeLog('TSL','- forearm');
-
 	var {x} = p;
 
 	var k = smooth( x, FOREARM_RANGE_X.mul(flip) ).pow(1.5);
@@ -382,8 +362,6 @@ console.timeLog('TSL','- forearm');
 
 var tslIsElbow = Fn( ( [p, flip] )=>{
 	
-console.timeLog('TSL','- elbow');
-
 	var {x} = p;
 
 	var k = smooth( x, ELBOW_RANGE_X.mul(flip) )//.pow(1.5);
@@ -394,8 +372,6 @@ console.timeLog('TSL','- elbow');
 
 var tslIsArm = Fn( ( [p, flip] )=>{
 	
-console.timeLog('TSL','- arm');
-
 	var {x,y} = p;
 
 	var dx = y.sub( L_ARM_PIVOT.y ).div( 4, x.sign() );
@@ -583,7 +559,6 @@ console.timeLog('TSL','disfigure');
 		p.assign( mix( p, p.sub(WAIST_PIVOT).mul(WAIST_MAT).add(WAIST_PIVOT), isWaist ) );
 		n.assign( mix( n, n.mul(WAIST_MAT), isWaist ) );
 	});
-
 	
 	// torso
 	p.assign( p.sub(TORSO_PIVOT).mul(TORSO_MAT).add(TORSO_PIVOT) );
@@ -668,25 +643,25 @@ folder = gui.addFolder( 'DEBUG' ).close();
 folder = gui.addFolder( 'TORSO' )//.close();
 {
 
-	folder.add( posture.torso.rot, 'x', -270, 270 ).name( 'torso x' ).onChange(updateMatrices);
-	folder.add( posture.torso.rot, 'y', -210, 210 ).name( '- - y' ).onChange(updateMatrices);
-	folder.add( posture.torso.rot, 'z', -210, 210 ).name( '- - z' ).onChange(updateMatrices);
+	folder.add( posture.torso, 'x', -270, 270 ).name( 'torso x' ).onChange(updateMatrices);
+	folder.add( posture.torso, 'y', -210, 210 ).name( '- - y' ).onChange(updateMatrices);
+	folder.add( posture.torso, 'z', -210, 210 ).name( '- - z' ).onChange(updateMatrices);
 
-	folder.add( posture.head.rot, 'x', -35, 35 ).name( 'head x' ).onChange(updateMatrices);
-	folder.add( posture.head.rot, 'y', -15, 25 ).name( '- - y' ).onChange(updateMatrices);
-	folder.add( posture.head.rot, 'z', -25, 25 ).name( '- - z' ).onChange(updateMatrices);
+	folder.add( posture.head, 'x', -35, 35 ).name( 'head x' ).onChange(updateMatrices);
+	folder.add( posture.head, 'y', -15, 25 ).name( '- - y' ).onChange(updateMatrices);
+	folder.add( posture.head, 'z', -25, 25 ).name( '- - z' ).onChange(updateMatrices);
 
-	folder.add( posture.neck.rot, 'x', -25, 25 ).name( 'neck x' ).onChange(updateMatrices);
-	folder.add( posture.neck.rot, 'y', -15, 25 ).name( '- - y' ).onChange(updateMatrices);
-	folder.add( posture.neck.rot, 'z', -25, 25 ).name( '- - z' ).onChange(updateMatrices);
+	folder.add( posture.neck, 'x', -25, 25 ).name( 'neck x' ).onChange(updateMatrices);
+	folder.add( posture.neck, 'y', -15, 25 ).name( '- - y' ).onChange(updateMatrices);
+	folder.add( posture.neck, 'z', -25, 25 ).name( '- - z' ).onChange(updateMatrices);
 
-	folder.add( posture.chest.rot, 'x', -25, 25 ).name( 'chest x' ).onChange(updateMatrices);
-	folder.add( posture.chest.rot, 'y', -25, 45 ).name( '- - y' ).onChange(updateMatrices);
-	folder.add( posture.chest.rot, 'z', -20, 20 ).name( '- - z' ).onChange(updateMatrices);
+	folder.add( posture.chest, 'x', -25, 25 ).name( 'chest x' ).onChange(updateMatrices);
+	folder.add( posture.chest, 'y', -25, 45 ).name( '- - y' ).onChange(updateMatrices);
+	folder.add( posture.chest, 'z', -20, 20 ).name( '- - z' ).onChange(updateMatrices);
 
-	folder.add( posture.waist.rot, 'x', -35, 35 ).name( 'waist x' ).onChange(updateMatrices);
-	folder.add( posture.waist.rot, 'y', -25, 35 ).name( '- - y' ).onChange(updateMatrices);
-	folder.add( posture.waist.rot, 'z', -25, 25 ).name( '- - z' ).onChange(updateMatrices);
+	folder.add( posture.waist, 'x', -35, 35 ).name( 'waist x' ).onChange(updateMatrices);
+	folder.add( posture.waist, 'y', -25, 35 ).name( '- - y' ).onChange(updateMatrices);
+	folder.add( posture.waist, 'z', -25, 25 ).name( '- - z' ).onChange(updateMatrices);
 
 }
 
@@ -694,23 +669,23 @@ folder = gui.addFolder( 'TORSO' )//.close();
 folder = gui.addFolder( 'LEFT LEG' ).close();
 {
 
-	folder.add( posture.l_leg.rot, 'x', -25, 45 ).name( 'leg x' ).onChange(updateMatrices);
-	folder.add( posture.l_leg.rot, 'y', -25, 100 ).name( '- - y' ).onChange(updateMatrices);
-	folder.add( posture.l_leg.rot, 'z', -10, 90 ).name( '- - z' ).onChange(updateMatrices);
+	folder.add( posture.l_leg, 'x', -25, 45 ).name( 'leg x' ).onChange(updateMatrices);
+	folder.add( posture.l_leg, 'y', -25, 100 ).name( '- - y' ).onChange(updateMatrices);
+	folder.add( posture.l_leg, 'z', -10, 90 ).name( '- - z' ).onChange(updateMatrices);
 /*
 	folder.add( L_LEG_PIVOT.value, 'x', 0, 0.2 ).name( 'PIVOT X' ).onChange(updateMatrices);
 	folder.add( L_LEG_PIVOT.value, 'y', 0.8, 1.2 ).name( '- - Y' ).onChange(updateMatrices);
 	folder.add( L_LEG_PIVOT.value, 'z', -0.2, 0.2 ).name( '- - Z' ).onChange(updateMatrices);
 */
-	folder.add( posture.l_knee.rot, 'x', -25, 25 ).name( 'knee x' ).onChange(updateMatrices);
-	folder.add( posture.l_knee.rot, 'y', 0, 115 ).name( '- - y' ).onChange(updateMatrices);
-	folder.add( posture.l_knee.rot, 'z', -15, 15 ).name( '- - z' ).onChange(updateMatrices);
+	folder.add( posture.l_knee, 'x', -25, 25 ).name( 'knee x' ).onChange(updateMatrices);
+	folder.add( posture.l_knee, 'y', 0, 115 ).name( '- - y' ).onChange(updateMatrices);
+	folder.add( posture.l_knee, 'z', -15, 15 ).name( '- - z' ).onChange(updateMatrices);
 
-	folder.add( posture.l_ankle.rot, 'x', -25, 25 ).name( 'ankle x' ).onChange(updateMatrices);
-	folder.add( posture.l_ankle.rot, 'y', -35, 45 ).name( '- - y' ).onChange(updateMatrices);
-	folder.add( posture.l_ankle.rot, 'z', -25, 25 ).name( '- - z' ).onChange(updateMatrices);
+	folder.add( posture.l_ankle, 'x', -25, 25 ).name( 'ankle x' ).onChange(updateMatrices);
+	folder.add( posture.l_ankle, 'y', -35, 45 ).name( '- - y' ).onChange(updateMatrices);
+	folder.add( posture.l_ankle, 'z', -25, 25 ).name( '- - z' ).onChange(updateMatrices);
 
-	folder.add( posture.l_foot.rot, 'y', -35, 35 ).name( 'foot x' ).onChange(updateMatrices);
+	folder.add( posture.l_foot, 'y', -35, 35 ).name( 'foot x' ).onChange(updateMatrices);
 
 }
 
@@ -718,53 +693,53 @@ folder = gui.addFolder( 'LEFT LEG' ).close();
 folder = gui.addFolder( 'RIGHT LEG' ).close();
 {
 
-	folder.add( posture.r_leg.rot, 'x', -25, 45 ).name( 'leg x' ).onChange(updateMatrices);
-	folder.add( posture.r_leg.rot, 'y', -25, 100 ).name( '- - y' ).onChange(updateMatrices);
-	folder.add( posture.r_leg.rot, 'z', -10, 90 ).name( '- - z' ).onChange(updateMatrices);
+	folder.add( posture.r_leg, 'x', -25, 45 ).name( 'leg x' ).onChange(updateMatrices);
+	folder.add( posture.r_leg, 'y', -25, 100 ).name( '- - y' ).onChange(updateMatrices);
+	folder.add( posture.r_leg, 'z', -10, 90 ).name( '- - z' ).onChange(updateMatrices);
 
-	folder.add( posture.r_knee.rot, 'x', -25, 25 ).name( 'knee x' ).onChange(updateMatrices);
-	folder.add( posture.r_knee.rot, 'y', 0, 115 ).name( '- - y' ).onChange(updateMatrices);
-	folder.add( posture.r_knee.rot, 'z', -15, 15 ).name( '- - z' ).onChange(updateMatrices);
+	folder.add( posture.r_knee, 'x', -25, 25 ).name( 'knee x' ).onChange(updateMatrices);
+	folder.add( posture.r_knee, 'y', 0, 115 ).name( '- - y' ).onChange(updateMatrices);
+	folder.add( posture.r_knee, 'z', -15, 15 ).name( '- - z' ).onChange(updateMatrices);
 
-	folder.add( posture.r_ankle.rot, 'x', -25, 25 ).name( 'ankle x' ).onChange(updateMatrices);
-	folder.add( posture.r_ankle.rot, 'y', -35, 45 ).name( '- - y' ).onChange(updateMatrices);
-	folder.add( posture.r_ankle.rot, 'z', -25, 25 ).name( '- - z' ).onChange(updateMatrices);
+	folder.add( posture.r_ankle, 'x', -25, 25 ).name( 'ankle x' ).onChange(updateMatrices);
+	folder.add( posture.r_ankle, 'y', -35, 45 ).name( '- - y' ).onChange(updateMatrices);
+	folder.add( posture.r_ankle, 'z', -25, 25 ).name( '- - z' ).onChange(updateMatrices);
 
-	folder.add( posture.r_foot.rot, 'y', -35, 35 ).name( 'foot x' ).onChange(updateMatrices);
+	folder.add( posture.r_foot, 'y', -35, 35 ).name( 'foot x' ).onChange(updateMatrices);
 
 }
 
 folder = gui.addFolder( 'LEFT ARM' ).close();
 {
 
-	folder.add( posture.l_arm.rot, 'x', -45, 20 ).name( 'arm x' ).onChange(updateMatrices);
-	folder.add( posture.l_arm.rot, 'y', -45, 30 ).name( '- - y' ).onChange(updateMatrices);
-	folder.add( posture.l_arm.rot, 'z', -80, 90 ).name( '- - z' ).onChange(updateMatrices);
+	folder.add( posture.l_arm, 'x', -45, 20 ).name( 'arm x' ).onChange(updateMatrices);
+	folder.add( posture.l_arm, 'y', -45, 30 ).name( '- - y' ).onChange(updateMatrices);
+	folder.add( posture.l_arm, 'z', -80, 90 ).name( '- - z' ).onChange(updateMatrices);
 
-	folder.add( posture.l_elbow.rot, 'x', 0, 160 ).name( 'elbow x' ).onChange(updateMatrices);
+	folder.add( posture.l_elbow, 'x', 0, 160 ).name( 'elbow x' ).onChange(updateMatrices);
 
-	folder.add( posture.l_forearm.rot, 'y', -75, 45 ).name( 'forearm y' ).onChange(updateMatrices);
+	folder.add( posture.l_forearm, 'y', -75, 45 ).name( 'forearm y' ).onChange(updateMatrices);
 
-	folder.add( posture.l_wrist.rot, 'x', -45, 20 ).name( 'wrist x' ).onChange(updateMatrices);
-	folder.add( posture.l_wrist.rot, 'y', -30, 45 ).name( '- - y' ).onChange(updateMatrices);
-	folder.add( posture.l_wrist.rot, 'z', -80, 90 ).name( '- - z' ).onChange(updateMatrices);
+	folder.add( posture.l_wrist, 'x', -45, 20 ).name( 'wrist x' ).onChange(updateMatrices);
+	folder.add( posture.l_wrist, 'y', -30, 45 ).name( '- - y' ).onChange(updateMatrices);
+	folder.add( posture.l_wrist, 'z', -80, 90 ).name( '- - z' ).onChange(updateMatrices);
 
 }
 
 folder = gui.addFolder( 'RIGHT ARM' ).close();
 {
 
-	folder.add( posture.r_arm.rot, 'x', -45, 20 ).name( 'arm x' ).onChange(updateMatrices);
-	folder.add( posture.r_arm.rot, 'y', -45, 30 ).name( '- - y' ).onChange(updateMatrices);
-	folder.add( posture.r_arm.rot, 'z', -80, 90 ).name( '- - z' ).onChange(updateMatrices);
+	folder.add( posture.r_arm, 'x', -45, 20 ).name( 'arm x' ).onChange(updateMatrices);
+	folder.add( posture.r_arm, 'y', -45, 30 ).name( '- - y' ).onChange(updateMatrices);
+	folder.add( posture.r_arm, 'z', -80, 90 ).name( '- - z' ).onChange(updateMatrices);
 
-	folder.add( posture.r_elbow.rot, 'x', 0, 160 ).name( 'elbow x' ).onChange(updateMatrices);
+	folder.add( posture.r_elbow, 'x', 0, 160 ).name( 'elbow x' ).onChange(updateMatrices);
 
-	folder.add( posture.r_forearm.rot, 'y', -75, 45 ).name( 'forearm y' ).onChange(updateMatrices);
+	folder.add( posture.r_forearm, 'y', -75, 45 ).name( 'forearm y' ).onChange(updateMatrices);
 
-	folder.add( posture.r_wrist.rot, 'x', -45, 20 ).name( 'wrist x' ).onChange(updateMatrices);
-	folder.add( posture.r_wrist.rot, 'y', -30, 45 ).name( '- - y' ).onChange(updateMatrices);
-	folder.add( posture.r_wrist.rot, 'z', -80, 90 ).name( '- - z' ).onChange(updateMatrices);
+	folder.add( posture.r_wrist, 'x', -45, 20 ).name( 'wrist x' ).onChange(updateMatrices);
+	folder.add( posture.r_wrist, 'y', -30, 45 ).name( '- - y' ).onChange(updateMatrices);
+	folder.add( posture.r_wrist, 'z', -80, 90 ).name( '- - z' ).onChange(updateMatrices);
 
 }
 
@@ -772,102 +747,101 @@ folder = gui.addFolder( 'RIGHT ARM' ).close();
 var _mat = new Matrix3();
 function updateMatrices( )
 {
-	
-	_mat = eulerToMatrix3( ...posture.head.rot );
+	_mat = eulerToMatrix3( ...posture.head );
 	HEAD_MAT.value.copy( _mat );
 
-	_mat = eulerToMatrix3( ...posture.neck.rot );
+	_mat = eulerToMatrix3( ...posture.neck );
 	NECK_MAT.value.copy( _mat );
 
-	_mat = eulerToMatrix3( ...posture.chest.rot );
+	_mat = eulerToMatrix3( ...posture.chest );
 	CHEST_MAT.value.copy( _mat );
 	
-	_mat = eulerToMatrix3( ...posture.waist.rot );
+	_mat = eulerToMatrix3( ...posture.waist );
 	WAIST_MAT.value.copy( _mat );
 	
-	_mat = eulerToMatrix3( ...posture.torso.rot );
+	_mat = eulerToMatrix3( ...posture.torso );
 	TORSO_MAT.value.copy( _mat );
 
 	//
 	
-	_mat = eulerToMatrix3( ...posture.l_foot.rot, 1, 1, -1 );
+	_mat = eulerToMatrix3( ...posture.l_foot, 1, 1, -1 );
 	L_FOOT_MAT.value.copy( _mat );
 	
-	_mat = eulerToMatrix3( ...posture.r_foot.rot, -1, 1, 1 );
+	_mat = eulerToMatrix3( ...posture.r_foot, -1, 1, 1 );
 	R_FOOT_MAT.value.copy( _mat );
 	
 	//
 	
-	_mat = eulerToMatrix3( ...posture.l_ankle.rot, 1, 1, -1 );
+	_mat = eulerToMatrix3( ...posture.l_ankle, 1, 1, -1 );
 	L_ANKLE_MAT.value.copy( _mat );
 	
-	_mat = eulerToMatrix3( ...posture.r_ankle.rot, -1, 1, 1 );
+	_mat = eulerToMatrix3( ...posture.r_ankle, -1, 1, 1 );
 	R_ANKLE_MAT.value.copy( _mat );
 	
 	//
 	
-	_mat = eulerToMatrix3( ...posture.l_knee.rot, 1, 1, -1 );
+	_mat = eulerToMatrix3( ...posture.l_knee, 1, 1, -1 );
 	L_KNEE_MAT.value.copy( _mat );
 	
-	_mat = eulerToMatrix3( ...posture.r_knee.rot, -1, 1, 1 );
+	_mat = eulerToMatrix3( ...posture.r_knee, -1, 1, 1 );
 	R_KNEE_MAT.value.copy( _mat );
 	
 	//
 	
-	_mat = eulerToMatrix3( ...posture.l_leg.rot, 1, -1, -1 );
+	_mat = eulerToMatrix3( ...posture.l_leg, 1, -1, -1 );
 	L_LEG_MAT.value.copy( _mat );
 	
-	_mat = eulerToMatrix3( ...posture.r_leg.rot, -1, -1, 1 );
+	_mat = eulerToMatrix3( ...posture.r_leg, -1, -1, 1 );
 	R_LEG_MAT.value.copy( _mat );
 	
 	//
 	
-	_mat = eulerToMatrix3( ...posture.l_wrist.rot, -1, 1, 1 );
+	_mat = eulerToMatrix3( ...posture.l_wrist, -1, 1, 1 );
 	L_WRIST_MAT.value.copy( _mat );
 	
-	_mat = eulerToMatrix3( ...posture.r_wrist.rot, 1, 1, -1 );
+	_mat = eulerToMatrix3( ...posture.r_wrist, 1, 1, -1 );
 	R_WRIST_MAT.value.copy( _mat );
 	
 	//
 	
-	_mat = eulerToMatrix3( ...posture.l_forearm.rot, -1, 1, -1 );
+	_mat = eulerToMatrix3( ...posture.l_forearm, -1, 1, -1 );
 	L_FOREARM_MAT.value.copy( _mat );
 	
-	_mat = eulerToMatrix3( ...posture.r_forearm.rot, 1, 1, 1 );
+	_mat = eulerToMatrix3( ...posture.r_forearm, 1, 1, 1 );
 	R_FOREARM_MAT.value.copy( _mat );
 	
 	//
 	
-	_mat = eulerToMatrix3( ...posture.l_elbow.rot, -1, 0, 0 );
+	_mat = eulerToMatrix3( ...posture.l_elbow, -1, 0, 0 );
 	L_ELBOW_MAT.value.copy( _mat );
 	
-	_mat = eulerToMatrix3( ...posture.r_elbow.rot, 1, 0, 0 );
+	_mat = eulerToMatrix3( ...posture.r_elbow, 1, 0, 0 );
 	R_ELBOW_MAT.value.copy( _mat );
 	
 	//
 	
-	_mat = eulerToMatrix3( ...posture.l_arm.rot, -1, 1, 1 );
+	_mat = eulerToMatrix3( ...posture.l_arm, -1, 1, 1 );
 	L_ARM_MAT.value.copy( _mat );
 	
-	_mat = eulerToMatrix3( ...posture.r_arm.rot, 1, 1, -1 );
+	_mat = eulerToMatrix3( ...posture.r_arm, 1, 1, -1 );
 	R_ARM_MAT.value.copy( _mat );
 	
 }
 
 
-var disfigureNode = tslDisfigureNode( );
+var disfigureNode = tslDisfigureNode();
 model.material.positionNode = disfigureNode.element(0);
 model.material.normalNode = disfigureNode.element(1);
 model.material.colorNode = tslColorNode();
 
-var disfigureNode = tslDisfigureNode( );
-model2.material.positionNode = disfigureNode.element(0);
-model2.material.normalNode = disfigureNode.element(1);
+var disfigureNode2 = tslDisfigureNode();
+model2.material.positionNode = disfigureNode2.element(0);
+model2.material.normalNode = disfigureNode2.element(1);
 model2.material.colorNode = tslColorNode();
 
-var disfigureNode = tslDisfigureNode( );
-model3.material.positionNode = disfigureNode.element(0);
-model3.material.normalNode = disfigureNode.element(1);
+var disfigureNode3 = tslDisfigureNode();
+model3.material.positionNode = disfigureNode3.element(0);
+model3.material.normalNode = disfigureNode3.element(1);
 model3.material.colorNode = tslColorNode();
 
 

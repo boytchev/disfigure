@@ -5,14 +5,17 @@
 
 
 
-import { Euler, Group, Matrix3, Matrix4, Mesh, MeshPhysicalNodeMaterial, Vector3 } from 'three';
+import { Box3, Euler, Group, Matrix3, Matrix4, Mesh, MeshPhysicalNodeMaterial, PlaneGeometry, Vector3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { vec3 } from 'three/tsl';
 
 import { tslNormalNode, tslPositionNode } from './motion.js';
-import { centerModel } from './utils.js';
 import { Space } from './space.js';
 import { everybody, scene } from './world.js';
+
+
+
+var loader = new GLTFLoader();
 
 
 
@@ -101,18 +104,20 @@ class Joint extends Group {
 
 var m = new Matrix4(),
 	e = new Euler(),
+	dummyGeomeyry = new PlaneGeometry(),
 	_uid = 1;
 
 class Disfigure extends Group {
 
 
-	constructor( gltf, space, height ) {
+	constructor( url, space, height ) {
 
 		super();
 
 
 
 		// unique number for each body, used to make their motions different
+		this.url = url;
 		this.uid = _uid;
 		_uid += 0.3 + 2*Math.random();
 
@@ -121,13 +126,22 @@ class Disfigure extends Group {
 
 		this.accessories = [];
 
-		this.space = {};
-
 		// reduce the hierarchy of the model
-		var model = new Mesh( gltf.scene.children[ 0 ].geometry );
+		this.model = new Mesh( dummyGeomeyry );
 
-		// center the model and get its dimensions
-		var modelHeight = centerModel( model );
+		loader.load( this.url, ( gltf )=>{
+
+			this.model.geometry = gltf.scene.children[ 0 ].geometry;
+
+			var box = new Box3().setFromObject( this.model, true );
+			var modelHeight = box.max.y-box.min.y;
+
+			// rescale the model to the desired height (optional)
+			this.height = height ?? modelHeight;
+			this.model.scale.setScalar( this.height / modelHeight );
+
+		} );
+
 
 		// create the space around the model
 		this.space = new Space( space );
@@ -162,7 +176,7 @@ class Disfigure extends Group {
 		this.r_wrist = new Joint( this, this.r_forearm, this.space.r_wrist, 'zxy' );
 
 		// sets the materials of the model hooking them to TSL functions
-		model.material = new MeshPhysicalNodeMaterial( {
+		this.model.material = new MeshPhysicalNodeMaterial( {
 			positionNode: tslPositionNode( { space: this.space } ),
 			normalNode: tslNormalNode( { space: this.space } ),
 			colorNode: vec3( 0.99, 0.65, 0.49 ),
@@ -170,17 +184,12 @@ class Disfigure extends Group {
 			roughness: 0.6,
 		} );
 
-		// rescale the model to the desired height (optional)
-		this.height = height ?? modelHeight;
-		model.scale.setScalar( this.height / modelHeight );
-		model.position.y = 0;
+		this.model.position.y = 0;
 
-		model.castShadow = true;
-		model.receiveShadow = true;
+		this.model.castShadow = true;
+		this.model.receiveShadow = true;
 
-		this.model = model;
-		//		this.torso = model;
-		this.add( model );
+		this.add( this.model );
 
 		// register the model
 		everybody.push( this );
@@ -296,11 +305,7 @@ class Man extends Disfigure {
 
 	constructor( height ) {
 
-		super( gltf_man, Man.SPACE, height );
-
-		this.url = MODEL_PATH + Man.URL;
-
-		//this.position.y = this.height/2 - 0.015;
+		super( MODEL_PATH + Man.URL, Man.SPACE, height );
 
 		this.l_leg.straddle = this.r_leg.straddle = 5;
 		this.l_ankle.tilt = this.r_ankle.tilt = -5;
@@ -341,11 +346,7 @@ class Woman extends Disfigure {
 
 	constructor( height ) {
 
-		super( gltf_woman, Woman.SPACE, height );
-
-		this.url = MODEL_PATH + Woman.URL;
-
-		//this.position.y = this.height/2 - 0.005;
+		super( MODEL_PATH + Woman.URL, Woman.SPACE, height );
 
 		this.l_leg.straddle = this.r_leg.straddle = -2.9;
 		this.l_ankle.tilt = this.r_ankle.tilt = 2.9;
@@ -386,29 +387,13 @@ class Child extends Disfigure {
 
 	constructor( height ) {
 
-		super( gltf_child, Child.SPACE, height );
-
-		this.url = MODEL_PATH + Child.URL;
-
-		//this.position.y = this.height/2 - 0.005;
+		super( MODEL_PATH + Child.URL, Child.SPACE, height );
 
 		this.l_ankle.bend = this.r_ankle.bend = 3;
 
 	} // Child.constructor
 
 } // Child
-
-
-
-var loader = new GLTFLoader();
-
-var [ gltf_man, gltf_woman, gltf_child ] = await Promise.all(
-	[
-		loader.loadAsync( MODEL_PATH + Man.URL ),
-		loader.loadAsync( MODEL_PATH + Woman.URL ),
-		loader.loadAsync( MODEL_PATH + Child.URL ),
-	]
-);
 
 
 

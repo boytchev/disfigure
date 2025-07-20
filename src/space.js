@@ -14,15 +14,6 @@ import { everybody } from './world.js';
 
 //console.time('TSL');
 
-// inject spinner CSS
-var css = document.createElement( 'style' );
-css.innerHTML = `
-	#spinner {position:fixed;left:49%;top:45%;animation:flash 1s 3;}
-	#spinner::before {content:'Loading...'}
-	@keyframes flash{to{opacity:0}}
-`;
-document.head.appendChild( css );
-
 
 
 var spinnerCounter = 0,

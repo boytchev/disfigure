@@ -25,15 +25,15 @@
 		// create three men
 
 		var bendingMan = new Happy.Man();
-			bendingMan.position.x = -1.1;
-			bendingMan.chest.attach( new Red.Label( 'bend', 1.2, 0, 0.2, 0.12 ) );
+		bendingMan.position.x = -1.1;
+		bendingMan.chest.attach( new Red.Label( 'bend', 1.2, 0, 0.2, 0.12 ) );
 		
 		var turningMan = new Happy.Man();
-			turningMan.chest.attach( new Red.Label( 'turn', 1.2, 0, 0.2, 0.12 ) );
+		turningMan.chest.attach( new Red.Label( 'turn', 1.2, 0, 0.2, 0.12 ) );
 		
 		var tiltingMan = new Happy.Man();
-			tiltingMan.position.x = 1.1;
-			tiltingMan.chest.attach( new Red.Label( 'tilt', 1.2, 0, 0.2, 0.12 ) );
+		tiltingMan.position.x = 1.1;
+		tiltingMan.chest.attach( new Red.Label( 'tilt', 1.2, 0, 0.2, 0.12 ) );
 
 
 		// animate the man with some simple dance motion
@@ -46,11 +46,11 @@
 			bendingMan.head.bend = Happy.chaotic( t, 0, -30, 45 );
 			bendingMan.chest.bend = Happy.chaotic( t, 1, -40, 60 );
 			bendingMan.waist.bend = Happy.chaotic( t, 2, -50, 75 );
-			
+		
 			turningMan.head.turn = Happy.chaotic( t, 3, -70, 70 );
 			turningMan.chest.turn = Happy.chaotic( t, 4, -60, 60 );
 			turningMan.waist.turn = Happy.chaotic( t, 5, -60, 60 );
-			
+		
 			tiltingMan.head.tilt = Happy.chaotic( t, 6, -60, 60 );
 			tiltingMan.chest.tilt = Happy.chaotic( t, 7, -50, 50 );
 			tiltingMan.waist.tilt = Happy.chaotic( t, 8, -50, 50 );

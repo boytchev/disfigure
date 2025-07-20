@@ -67,3 +67,6 @@ header img {
 	opacity: 0.75;
 }
 
+#spinner {position:fixed;z-index:1;left:49%;top:45%;animation:flash 1s 3;}
+#spinner::before {content:'Loading...'}
+@keyframes flash{to{opacity:0}}

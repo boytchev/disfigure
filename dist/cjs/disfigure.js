@@ -1,27 +1,30 @@
 // disfigure v0.0.18
 
-import { WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, Matrix3, Matrix4, Euler, PlaneGeometry, Group, Box3, MeshPhysicalNodeMaterial } from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { Fn, mix, If, normalGeometry, transformNormalToView, positionGeometry, min, vec3, float, select, vec2, uniform, mat3 } from 'three/tsl';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import Stats from 'three/addons/libs/stats.module.js';
-import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
+'use strict';
 
+var three = require('three');
+var GLTFLoader_js = require('three/addons/loaders/GLTFLoader.js');
+var tsl = require('three/tsl');
+var OrbitControls_js = require('three/addons/controls/OrbitControls.js');
+var Stats = require('three/addons/libs/stats.module.js');
+var SimplexNoise_js = require('three/addons/math/SimplexNoise.js');
+
+var _documentCurrentScript = typeof document !== 'undefined' ? document.currentScript : null;
 // general DOF=3 rotator, used for most joints
-var jointRotateMat= Fn( ([ pos, joint ])=>{
+var jointRotateMat= tsl.Fn( ([ pos, joint ])=>{
 
 	var p = pos.sub( joint.pivot ).mul( joint.matrix ).add( joint.pivot );
-	return mix( pos, p, joint.locus() );
+	return tsl.mix( pos, p, joint.locus() );
 
 } );
 
 
 
 // general DOF=3 rotator, used for most joints
-var jointNormalMat= Fn( ([ pos, joint ])=>{
+var jointNormalMat= tsl.Fn( ([ pos, joint ])=>{
 
 	var p = pos.mul( joint.matrix );
-	return mix( pos, p, joint.locus() );
+	return tsl.mix( pos, p, joint.locus() );
 
 } );
 
@@ -30,7 +33,7 @@ var jointNormalMat= Fn( ([ pos, joint ])=>{
 // calculate vertices of bent body surface
 function tslPositionNode( options ) {
 
-	options.vertex = positionGeometry;
+	options.vertex = tsl.positionGeometry;
 	options.fn = jointRotateMat;
 
 	return disfigure( options );
@@ -42,10 +45,10 @@ function tslPositionNode( options ) {
 // calculate normals of bent body surface
 function tslNormalNode( options ) {
 
-	options.vertex = normalGeometry;
+	options.vertex = tsl.normalGeometry;
 	options.fn = jointNormalMat;
 
-	return transformNormalToView( disfigure( options ) );
+	return tsl.transformNormalToView( disfigure( options ) );
 
 }
 
@@ -53,14 +56,14 @@ function tslNormalNode( options ) {
 // implement the actual body bending
 //		space - the space around the body
 //		vertex - vertex or normal coordinates to use as input data
-var disfigure = Fn( ( { fn, space, vertex } )=>{
+var disfigure = tsl.Fn( ( { fn, space, vertex } )=>{
 
 	var p = vertex.toVar( );
 
 
 	// LEFT-UPPER BODY
 
-	If( space.l_arm.locus( ), ()=>{
+	tsl.If( space.l_arm.locus( ), ()=>{
 
 		p.assign( fn( p, space.l_wrist ) );
 		p.assign( fn( p, space.l_forearm ) );
@@ -72,7 +75,7 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 	// RIGHT-UPPER BODY
 
-	If( space.r_arm.locus( ), ()=>{
+	tsl.If( space.r_arm.locus( ), ()=>{
 
 		p.assign( fn( p, space.r_wrist ) );
 		p.assign( fn( p, space.r_forearm ) );
@@ -84,7 +87,7 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 	// LEFT-LOWER BODY
 
-	If( space.l_leg.locus( ), ()=>{
+	tsl.If( space.l_leg.locus( ), ()=>{
 
 		p.assign( fn( p, space.l_foot ) );
 		p.assign( fn( p, space.l_ankle ) );
@@ -98,7 +101,7 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 	// RIGHT-LOWER BODY
 
-	If( space.r_leg.locus( ), ()=>{
+	tsl.If( space.r_leg.locus( ), ()=>{
 
 		p.assign( fn( p, space.r_foot ) );
 		p.assign( fn( p, space.r_ankle ) );
@@ -121,7 +124,7 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 
 } ); // disfigure
 
-var renderer, scene, camera, light, cameraLight, controls, ground, userAnimationLoop, stats, everybody = [];
+exports.renderer = void 0; exports.scene = void 0; exports.camera = void 0; exports.light = void 0; exports.cameraLight = void 0; exports.controls = void 0; exports.ground = void 0; var userAnimationLoop, stats, everybody = [];
 
 
 
@@ -137,21 +140,21 @@ class World {
 
 	constructor( options ) {
 
-		renderer = new WebGPURenderer( { antialias: true } );
-		renderer.setSize( innerWidth, innerHeight );
-		renderer.shadowMap.enabled = options?.shadows ?? true;
-		renderer.shadowMap.type = PCFSoftShadowMap;
+		exports.renderer = new three.WebGPURenderer( { antialias: true } );
+		exports.renderer.setSize( innerWidth, innerHeight );
+		exports.renderer.shadowMap.enabled = options?.shadows ?? true;
+		exports.renderer.shadowMap.type = three.PCFSoftShadowMap;
 
-		document.body.appendChild( renderer.domElement );
+		document.body.appendChild( exports.renderer.domElement );
 		document.body.style.overflow = 'hidden';
 		document.body.style.margin = '0';
 
-		scene = new Scene();
-		scene.background = new Color( 'whitesmoke' );
+		exports.scene = new three.Scene();
+		exports.scene.background = new three.Color( 'whitesmoke' );
 
-		camera = new PerspectiveCamera( 30, innerWidth/innerHeight );
-		camera.position.set( 0, 1, 4 );
-		camera.lookAt( 0, 1, 0 );
+		exports.camera = new three.PerspectiveCamera( 30, innerWidth/innerHeight );
+		exports.camera.position.set( 0, 1, 4 );
+		exports.camera.lookAt( 0, 1, 0 );
 
 		if ( options?.stats ?? false ) {
 
@@ -162,38 +165,38 @@ class World {
 
 		if ( options?.lights ?? true ) {
 
-			light = new DirectionalLight( 'white', 1.5 );
-			light.position.set( 0, 14, 7 );
+			exports.light = new three.DirectionalLight( 'white', 1.5 );
+			exports.light.position.set( 0, 14, 7 );
 			if ( options?.shadows ?? true ) {
 
-				light.shadow.mapSize.width = 2048;
-				light.shadow.mapSize.height = light.shadow.mapSize.width;
-				light.shadow.camera.near = 1;
-				light.shadow.camera.far = 50;
-				light.shadow.camera.left = -5;
-				light.shadow.camera.right = 5;
-				light.shadow.camera.top = 5;
-				light.shadow.camera.bottom = -5;
-				light.shadow.normalBias = 0.01;
-				light.autoUpdate = false;
-				light.castShadow = true;
+				exports.light.shadow.mapSize.width = 2048;
+				exports.light.shadow.mapSize.height = exports.light.shadow.mapSize.width;
+				exports.light.shadow.camera.near = 1;
+				exports.light.shadow.camera.far = 50;
+				exports.light.shadow.camera.left = -5;
+				exports.light.shadow.camera.right = 5;
+				exports.light.shadow.camera.top = 5;
+				exports.light.shadow.camera.bottom = -5;
+				exports.light.shadow.normalBias = 0.01;
+				exports.light.autoUpdate = false;
+				exports.light.castShadow = true;
 
 			} // light shadows
 
-			scene.add( light );
+			exports.scene.add( exports.light );
 
-			cameraLight = new DirectionalLight( 'white', 1.5 );
-			cameraLight.target = scene;
-			camera.add( cameraLight );
-			scene.add( camera );
+			exports.cameraLight = new three.DirectionalLight( 'white', 1.5 );
+			exports.cameraLight.target = exports.scene;
+			exports.camera.add( exports.cameraLight );
+			exports.scene.add( exports.camera );
 
 		} // lights
 
 		if ( options?.controls ?? true ) {
 
-			controls = new OrbitControls( camera, renderer.domElement );
-			controls.enableDamping = true;
-			controls.target.set( 0, 0.8, 0 );
+			exports.controls = new OrbitControls_js.OrbitControls( exports.camera, exports.renderer.domElement );
+			exports.controls.enableDamping = true;
+			exports.controls.target.set( 0, 0.8, 0 );
 
 		} // controls
 
@@ -211,30 +214,30 @@ class World {
 			context.arc( 64, 64, 38, 0, 2*Math.PI );
 			context.fill();
 
-			ground = new Mesh(
-				new CircleGeometry( 50 ),
-				new MeshLambertMaterial( {
+			exports.ground = new three.Mesh(
+				new three.CircleGeometry( 50 ),
+				new three.MeshLambertMaterial( {
 					color: 'antiquewhite',
 					transparent: true,
-					map: new CanvasTexture( canvas )
+					map: new three.CanvasTexture( canvas )
 				} )
 			);
-			ground.receiveShadow = true;
-			ground.rotation.x = -Math.PI / 2;
-			ground.renderOrder = -1;
-			scene.add( ground );
+			exports.ground.receiveShadow = true;
+			exports.ground.rotation.x = -Math.PI / 2;
+			exports.ground.renderOrder = -1;
+			exports.scene.add( exports.ground );
 
 		} // ground
 
 		window.addEventListener( "resize", ( /*event*/ ) => {
 
-			camera.aspect = innerWidth/innerHeight;
-			camera.updateProjectionMatrix( );
-			renderer.setSize( innerWidth, innerHeight );
+			exports.camera.aspect = innerWidth/innerHeight;
+			exports.camera.updateProjectionMatrix( );
+			exports.renderer.setSize( innerWidth, innerHeight );
 
 		} );
 
-		renderer.setAnimationLoop( defaultAnimationLoop );
+		exports.renderer.setAnimationLoop( defaultAnimationLoop );
 
 	} // World.constructor
 
@@ -285,11 +288,11 @@ function defaultAnimationLoop( time ) {
 
 	if ( userAnimationLoop ) userAnimationLoop( time );
 
-	if ( controls ) controls.update( );
+	if ( exports.controls ) exports.controls.update( );
 
 	if ( stats ) stats.update( );
 
-	renderer.render( scene, camera );
+	exports.renderer.render( exports.scene, exports.camera );
 
 }
 
@@ -328,7 +331,7 @@ if ( spinner ) {
 
 
 // generate oversmooth function
-const smoother = Fn( ([ edge, value ])=>{
+const smoother = tsl.Fn( ([ edge, value ])=>{
 
 	return value.smoothstep( edge.x, edge.y ).smoothstep( 0, 1 ).smoothstep( 0, 1 );
 
@@ -336,7 +339,7 @@ const smoother = Fn( ([ edge, value ])=>{
 
 
 
-var tslLocusY = Fn( ([ pos, pivot, rangeY, slope ])=>{
+var tslLocusY = tsl.Fn( ([ pos, pivot, rangeY, slope ])=>{
 
 	var y = pos.y,
 		z = pos.z;
@@ -349,7 +352,7 @@ var tslLocusY = Fn( ([ pos, pivot, rangeY, slope ])=>{
 
 
 
-var tslLocusX = Fn( ([ pos, rangeX ])=>{
+var tslLocusX = tsl.Fn( ([ pos, rangeX ])=>{
 
 	return smoother( rangeX, pos.x );
 
@@ -357,7 +360,7 @@ var tslLocusX = Fn( ([ pos, rangeX ])=>{
 
 
 
-var tslLocusXY = Fn( ([ pos, pivot, rangeX, rangeY ])=>{
+var tslLocusXY = tsl.Fn( ([ pos, pivot, rangeX, rangeY ])=>{
 
 	var x = pos.x,
 		y = pos.y;
@@ -365,9 +368,9 @@ var tslLocusXY = Fn( ([ pos, pivot, rangeX, rangeY ])=>{
 	var dx = y.sub( pivot.y ).div( 4, x.sign() );
 
 	return smoother( rangeX, x.add( dx ) )
-		.mul( min(
-			y.smoothstep( rangeY.x, mix( rangeY.x, rangeY.y, 0.2 ) ),
-			y.smoothstep( rangeY.y, mix( rangeY.y, rangeY.x, 0.2 ) ),
+		.mul( tsl.min(
+			y.smoothstep( rangeY.x, tsl.mix( rangeY.x, rangeY.y, 0.2 ) ),
+			y.smoothstep( rangeY.y, tsl.mix( rangeY.y, rangeY.x, 0.2 ) ),
 		) )
 		.pow( 2 );
 
@@ -375,21 +378,21 @@ var tslLocusXY = Fn( ([ pos, pivot, rangeX, rangeY ])=>{
 
 
 
-var tslLocusT = Fn( ([ pos, pivot, rangeX, rangeY, grown ])=>{
+var tslLocusT = tsl.Fn( ([ pos, pivot, rangeX, rangeY, grown ])=>{
 
 	var x = pos.x,
 		y = pos.y,
 		z = pos.z;
 
-	var s = vec3( x.mul( 2.0 ), y, z.min( 0 ) )
-		.sub( vec3( 0, pivot.y, 0 ) )
+	var s = tsl.vec3( x.mul( 2.0 ), y, z.min( 0 ) )
+		.sub( tsl.vec3( 0, pivot.y, 0 ) )
 		.length()
-		.smoothstep( 0, float( 0.13 ).div( float( grown ).add( 1 ) ) )
+		.smoothstep( 0, tsl.float( 0.13 ).div( tsl.float( grown ).add( 1 ) ) )
 		.pow( 10 );
 
 	var yy = y.sub( x.abs().mul( 1/5 ) );
 
-	yy = yy.add( select( grown.equal( 1 ), z.abs().mul( 1/2 ), z.mul( 1/6 ) ) );
+	yy = yy.add( tsl.select( grown.equal( 1 ), z.abs().mul( 1/2 ), z.mul( 1/6 ) ) );
 
 	return s
 		.mul(
@@ -405,9 +408,9 @@ class Locus {
 
 	constructor( pivot ) {
 
-		this.pivot = new Vector3( ...pivot );
-		this.angle = new Vector3();
-		this.matrix = uniform( mat3() );
+		this.pivot = new three.Vector3( ...pivot );
+		this.angle = new three.Vector3();
+		this.matrix = tsl.uniform( tsl.mat3() );
 		this.isRight = false;
 
 	} // Locus.constructor
@@ -442,14 +445,14 @@ class LocusY extends Locus {
 
 		super( pivot );
 
-		this.rangeY = vec2( ...rangeY );
+		this.rangeY = tsl.vec2( ...rangeY );
 		this.slope = Math.tan( ( 90-angle ) * Math.PI/180 );
 
 	} // constructor
 
 	locus( ) {
 
-		return tslLocusY( positionGeometry, this.pivot, this.rangeY, this.slope );
+		return tslLocusY( tsl.positionGeometry, this.pivot, this.rangeY, this.slope );
 
 	} // locus
 
@@ -465,13 +468,13 @@ class LocusX extends Locus {
 
 		super( pivot );
 
-		this.rangeX = vec2( ...rangeX );
+		this.rangeX = tsl.vec2( ...rangeX );
 
 	} // constructor
 
 	locus( ) {
 
-		return tslLocusX( positionGeometry, this.rangeX );
+		return tslLocusX( tsl.positionGeometry, this.rangeX );
 
 	} // locus
 
@@ -486,7 +489,7 @@ class LocusXY extends LocusX {
 
 		super( pivot, rangeX );
 
-		this.rangeY = vec2( ...rangeY );
+		this.rangeY = tsl.vec2( ...rangeY );
 
 	} // constructor
 
@@ -494,7 +497,7 @@ class LocusXY extends LocusX {
 
 		loader$1();
 
-		return tslLocusXY( positionGeometry, this.pivot, this.rangeX, this.rangeY );
+		return tslLocusXY( tsl.positionGeometry, this.pivot, this.rangeX, this.rangeY );
 
 	} // locus
 
@@ -515,7 +518,7 @@ class LocusT extends LocusXY {
 
 	locus( ) {
 
-		return tslLocusT( positionGeometry, this.pivot, this.rangeX, this.rangeY, this.grown );
+		return tslLocusT( tsl.positionGeometry, this.pivot, this.rangeX, this.rangeY, this.grown );
 
 	} // locus
 
@@ -571,19 +574,19 @@ class Space {
 
 } // Space
 
-var loader = new GLTFLoader();
+var loader = new GLTFLoader_js.GLTFLoader();
 
 
 
 // path to models as GLB files
-const MODEL_PATH = import.meta.url.replace( '/src/body.js', '/assets/models/' );
+const MODEL_PATH = (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('disfigure.js', document.baseURI).href)).replace( '/src/body.js', '/assets/models/' );
 
 
 
 // dummy vars
-var _mat = new Matrix3(),
-	_m = new Matrix3(),
-	_v = new Vector3();
+var _mat = new three.Matrix3(),
+	_m = new three.Matrix3(),
+	_v = new three.Vector3();
 
 
 
@@ -608,7 +611,7 @@ function getset( object, name, xyz ) {
 }
 
 
-class Joint extends Group {
+class Joint extends three.Group {
 
 	constructor( model, parent, space, axes='xyz' ) {
 
@@ -637,8 +640,8 @@ class Joint extends Group {
 
 		if ( mesh.parent ) mesh = mesh.clone();
 
-		var wrapper = new Group();
-		var subwrapper = new Group();
+		var wrapper = new three.Group();
+		var subwrapper = new three.Group();
 
 		wrapper.add( subwrapper );
 		subwrapper.add( mesh );
@@ -658,12 +661,12 @@ class Joint extends Group {
 
 
 
-var m = new Matrix4(),
-	e = new Euler(),
-	dummyGeomeyry = new PlaneGeometry(),
+var m = new three.Matrix4(),
+	e = new three.Euler(),
+	dummyGeomeyry = new three.PlaneGeometry(),
 	_uid = 1;
 
-class Disfigure extends Group {
+class Disfigure extends three.Group {
 
 
 	constructor( url, space, height ) {
@@ -683,13 +686,13 @@ class Disfigure extends Group {
 		this.accessories = [];
 
 		// reduce the hierarchy of the model
-		this.model = new Mesh( dummyGeomeyry );
+		this.model = new three.Mesh( dummyGeomeyry );
 
 		loader.load( this.url, ( gltf )=>{
 
 			this.model.geometry = gltf.scene.children[ 0 ].geometry;
 
-			var box = new Box3().setFromObject( this.model, true );
+			var box = new three.Box3().setFromObject( this.model, true );
 			var modelHeight = box.max.y-box.min.y;
 
 			// rescale the model to the desired height (optional)
@@ -732,10 +735,10 @@ class Disfigure extends Group {
 		this.r_wrist = new Joint( this, this.r_forearm, this.space.r_wrist, 'zxy' );
 
 		// sets the materials of the model hooking them to TSL functions
-		this.model.material = new MeshPhysicalNodeMaterial( {
+		this.model.material = new three.MeshPhysicalNodeMaterial( {
 			positionNode: tslPositionNode( { space: this.space } ),
 			normalNode: tslNormalNode( { space: this.space } ),
-			colorNode: vec3( 0.99, 0.65, 0.49 ),
+			colorNode: tsl.vec3( 0.99, 0.65, 0.49 ),
 			metalness: 0,
 			roughness: 0.6,
 		} );
@@ -749,7 +752,7 @@ class Disfigure extends Group {
 
 		// register the model
 		everybody.push( this );
-		if ( scene ) scene.add( this );
+		if ( exports.scene ) exports.scene.add( this );
 
 		this.l_arm.straddle = this.r_arm.straddle = 65;
 		this.l_elbow.bend = this.r_elbow.bend = 20;
@@ -953,7 +956,7 @@ class Child extends Disfigure {
 
 // number generators
 
-var simplex = new SimplexNoise( );
+var simplex = new SimplexNoise_js.SimplexNoise( );
 
 // generate chaotic but random sequence of numbers in [min.max]
 function chaotic( time, offset=0, min=-1, max=1 ) {
@@ -989,4 +992,12 @@ function random( min=-1, max=1 ) {
 
 console.log( '\n%c\u22EE\u22EE\u22EE Disfigure\n%chttps://boytchev.github.io/disfigure/\n', 'color: navy', 'font-size:80%' );
 
-export { Child, Man, Woman, World, camera, cameraLight, chaotic, controls, everybody, ground, light, random, regular, renderer, scene, setAnimationLoop };
+exports.Child = Child;
+exports.Man = Man;
+exports.Woman = Woman;
+exports.World = World;
+exports.chaotic = chaotic;
+exports.everybody = everybody;
+exports.random = random;
+exports.regular = regular;
+exports.setAnimationLoop = setAnimationLoop;
