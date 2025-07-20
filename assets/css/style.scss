@@ -64,6 +64,13 @@ h2 a em {
 	border-bottom: dotted lightgray 1px;
 }
 
+.markdown-body h4 {
+	margin-top: 1.5em !important;
+	margin-bottom: 0.5em !important;
+	font-weight: normal !important;
+	font-size: 1.25em;
+}
+
 p {
 	font-size: 1.2em !important;
 	text-align: justify;

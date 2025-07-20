@@ -85,7 +85,7 @@ man.waist.tilt = 35;
 [<img src="../examples/snapshots/motion-central.jpg">](../examples/motion-central.html)
 
 
-### Движение на ръцете
+#### Движение на ръцете
 
 Ръцете са симетрични часто на тялото: `l_arm` (ръка в рамото), `l_elbow` (лакът),
 `l_forearm` (предмипница) и `l_wrist` (китка) за лявата страна; и съответните им
