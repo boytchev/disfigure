@@ -85,7 +85,7 @@ man.waist.tilt = 35;
 [<img src="../examples/snapshots/motion-central.jpg">](../examples/motion-central.html)
 
 
-#### Motion of arms 
+### Motion of arms 
 
 The arms are symmetrical body parts: `l_arm`, `l_elbow`, `l_forearm` and `l_wrist`
 for the left side of the body; and `r_arm`, `r_elbow`, `r_forearm` and `r_wrist` for

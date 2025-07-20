@@ -206,6 +206,25 @@ class Disfigure extends Group {
 
 		}
 
+		function anglesToMatrixArm( space, sx, sy, sz ) {
+
+			e.set( 0, 0, 0, 'YZX' );
+			
+			e.reorder( 'ZXY' );
+			e.set( e.x, e.y, e.z+sz*space.angle.z ); // straddle
+
+			e.reorder( 'YZX' );
+			e.set( e.x, e.y+sy*space.angle.y, e.z ); // foreward
+			
+			e.reorder( 'XYZ' );
+			e.set( e.x+sx*space.angle.x, e.y, e.z ); // turn
+			
+			m.makeRotationFromEuler( e );
+			var s = m.elements;
+			space.matrix.value.set( s[ 0 ], s[ 4 ], s[ 8 ], s[ 1 ], s[ 5 ], s[ 9 ], s[ 2 ], s[ 6 ], s[ 10 ]);
+
+		}
+
 		anglesToMatrix( this.head, -1, -1, 1 );
 		anglesToMatrix( this.chest, -1, -1, 1 );
 		anglesToMatrix( this.waist, -1, -1, 1 );
@@ -222,8 +241,8 @@ class Disfigure extends Group {
 		anglesToMatrix( this.space.l_forearm, -1, 0, 0 );
 		anglesToMatrix( this.space.r_forearm, -1, 0, 0 );
 
-		anglesToMatrix( this.l_arm, -1, 1, 1 );
-		anglesToMatrix( this.r_arm, -1, -1, -1 );
+		anglesToMatrixArm( this.l_arm, -1, 1, 1 );
+		anglesToMatrixArm( this.r_arm, -1, -1, -1 );
 
 		anglesToMatrix( this.l_knee, -1, 0, 0 );
 		anglesToMatrix( this.r_knee, -1, 0, 0 );
