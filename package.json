@@ -1,6 +1,6 @@
 {
   "name": "disfigure",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "A library to rig non-rigged 3D models",
   "main": "./src/disfigure.js",
   "module": "./src/disfigure.js",
