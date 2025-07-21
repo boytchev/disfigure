@@ -839,7 +839,7 @@ man.head.turn = chaotic( time, 0, -60, 60 );
 
 <!--
 
-* `l_leg`, `l_knee`, `l_ankle` &ndash; свойства, части на ляв крак
+*** `l_leg`, `l_knee`, `l_ankle` &ndash; свойства, части на ляв крак
 * `r_leg`, `r_knee`, `r_ankle` &ndash; свойства, части на десен крак
 * `bend`, `tilt`, `turn` &ndash; свойства, завъртяност на тяло
 * `posture`, `postureString` &ndash; свойства, поза на фигура
