@@ -1,9 +1,8 @@
 ﻿
 // disfigure
 //
-// Non-core functionality for creating a predefined 3D world with all basic
-// Three.js elements (like renderer, scene, camera, lights). This is mainly done
-// to make concise demos and examples.
+// Non-core functionality for creating a predefined 3D world.
+// This is mainly done to make concise demos and examples.
 
 
 
@@ -16,13 +15,15 @@ var renderer, scene, camera, light, cameraLight, controls, ground, userAnimation
 
 
 
-// creates a default world with all its primary attributes the options parameters
+// creates a default world with primary attributes. the options
 // is a collection of flags that turn on/off specific features:
-//    lights	true, create lights
-//    controls	true, create OrbitControls
-//    ground	true, create ground
-//    shadows	true, create shadows
-//	  stats		false, create stats panel
+// {
+//		lights: true,
+//		controls: true,
+//		ground: true,
+//		shadows: true,
+//		stats: false,
+// }
 
 class World {
 
@@ -68,7 +69,7 @@ class World {
 				light.autoUpdate = false;
 				light.castShadow = true;
 
-			} // light shadows
+			} // shadows
 
 			scene.add( light );
 
@@ -102,7 +103,7 @@ class World {
 			context.fill();
 
 			ground = new Mesh(
-				new CircleGeometry( 50 ),
+				new CircleGeometry( 32 ),
 				new MeshLambertMaterial( {
 					color: 'antiquewhite',
 					transparent: true,
@@ -157,8 +158,8 @@ var animateEvent = new AnimateEvent( );
 
 
 
-// default animation loop that dispatches animation events to the window and to
-// each body in the scene
+// default animation loop that dispatches animation events
+// to the window and to each body in the scene
 
 function defaultAnimationLoop( time ) {
 
@@ -194,7 +195,8 @@ function defaultAnimationLoop( time ) {
 
 
 
-// function to set animation loop, for when the user is scared to use events
+// function to set animation loop, for when the user is
+// scared to use events
 
 function setAnimationLoop( animationLoop ) {
 

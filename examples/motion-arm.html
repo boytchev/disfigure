@@ -34,9 +34,9 @@
 
 		// add labels indicating ther motion style
 		
-		man1.chest.attach( new Red.Label( 'turn', 1, 0, 0, 0.1 ) );
-		man2.chest.attach( new Red.Label( 'foreward', 1, 0, 0, 0.1 ) );
-		man3.chest.attach( new Red.Label( 'straddle', 1, 0, 0, 0.1 ) );
+		man1.l_arm.attach( new Red.Label( 'turn', 1, 0.15, 0.18, 0 ) );
+		man2.l_arm.attach( new Red.Label( 'foreward', 1, 0.15, 0.18, 0 ) );
+		man3.l_arm.attach( new Red.Label( 'straddle', 1, 0.18, 0.18, 0 ) );
 
 
 		// animate the men
@@ -44,14 +44,9 @@
 		Happy.setAnimationLoop( ( t )=>{
 
 			t = t/1000;
-		
-			man1.waist.turn = Happy.chaotic( t/4, 6, 0, 30 );
-			man2.waist.turn = Happy.chaotic( t/4, 7, -10, 10 );
-			man3.waist.turn = Happy.chaotic( t/4, 8, -30, 10 );
-			man1.head.turn = man1.waist.turn;
-			man2.head.turn = man2.waist.turn;
-			man3.head.turn = man3.waist.turn;
 
+			// motions or arms
+			
 			man1.l_arm.turn = Happy.chaotic( t, 0, -60, 60 );
 			man1.r_arm.turn = Happy.regular( t, 1, -60, 60 );
 
@@ -60,6 +55,16 @@
 
 			man3.l_arm.straddle = Happy.chaotic( t, 4, -20, 60 );
 			man3.r_arm.straddle = Happy.regular( t, 5, -20, 60 );
+
+			// some general motion of the bodies
+			
+			man1.waist.turn = Happy.chaotic( t/4, 6, 0, 30 );
+			man2.waist.turn = Happy.chaotic( t/4, 7, -10, 10 );
+			man3.waist.turn = Happy.chaotic( t/4, 8, -30, 10 );
+
+			man1.head.turn = man1.waist.turn;
+			man2.head.turn = man2.waist.turn;
+			man3.head.turn = man3.waist.turn;
 
 		} );
 

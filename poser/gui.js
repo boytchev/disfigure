@@ -274,6 +274,7 @@ function createGui( ) {
 		folder.add( model.l_thigh, 'turn', -40, 80 ).name( html( 'Thigh', 'turn', 'border' ) );
 
 		folder.add( model.l_knee, 'bend', 0, 140 ).name( html( 'Knee', 'bend', 'border' ) );
+		folder.add( model.l_knee, 'tilt', -20, 20 ).name( html( '', 'tilt' ) );
 
 		folder.add( model.l_shin, 'turn', -60, 60 ).name( html( 'Shin', 'turn', 'border' ) );
 
@@ -293,6 +294,7 @@ function createGui( ) {
 		folder.add( model.r_thigh, 'turn', -40, 80 ).name( html( 'Thigh', 'turn', 'border' ) );
 
 		folder.add( model.r_knee, 'bend', 0, 140 ).name( html( 'Knee', 'bend', 'border' ) );
+		folder.add( model.r_knee, 'tilt', -20, 20 ).name( html( '', 'tilt' ) );
 
 		folder.add( model.r_shin, 'turn', -60, 60 ).name( html( 'Shin', 'turn', 'border' ) );
 
@@ -673,6 +675,6 @@ var tslSelectionNode = Fn( ( { space } )=>{
 createGui( );
 
 
-model.children[ 0 ].material.colorNode = tslSelectionNode( { space: model.space } );
+model.material.colorNode = tslSelectionNode( { space: model.space } );
 //model.children[0].material.colorNode = vec3( 1 );
-model.children[ 0 ].material.roughness = 0.2;
+model.material.roughness = 0.2;

@@ -87,39 +87,27 @@ man.waist.tilt = 35;
 
 #### Движение на ръцете
 
-Ръцете са симетрични часто на тялото: `l_arm` (ръка в рамото), `l_elbow` (лакът),
-`l_forearm` (предмипница) и `l_wrist` (китка) за лявата страна; и съответните им
+Ръцете са симетрични части на тялото, съставени от: `l_arm` (ръка в рамото), `l_elbow` (лакът),
+`l_forearm` (предмишница) и `l_wrist` (китка) за лявата страна; и съответните им
 `r_arm`, `r_elbow`, `r_forearm` и `r_wrist` за дясната страна. Поради многото
-стави и гъвкавостта им ръцете имат сложно свижение
+стави и гъвкавостта им ръцете имат сложно движение
 &ndash; [live example](../examples/motion-arms.html).
 
 [<img src="../examples/snapshots/motion-arms.jpg">](../examples/motion-arms.html)
 
-
-<!--
-
-
-
-### Горни крайници
-
-Горните крайници са симетрични части на тялото: ръка *arm*, лакът *elbow*,
-китка *wrist*, пръсти *fingers* и индивидуални пръсти върхове на пръсти *finger_0* до *finger_4* с техните средни фаланги (*finger_0.mid* до *finger_4.mid*) и върхове (*finger_0.tip* до *finger_4.tip*).
-
-И двете ръце **arms**, `l_arm` и `r_arm`, поддържат свойства `raise`,
-`straddle` и `turn` ([пример наживо](example-arm.html)).
-Следващият код показва свойствата на дясната ръка, но същите са
-налични и за лявата ръка:
+И двете ръце, `l_arm` и `r_arm`, поддържат свойствата `foreward` (движение
+напред-назад), `straddle` (движение встрани) и `turn` (въртене около протежението
+на ръката) &ndash [пример наживо](example-arm.html). Следващият код показва свойствата на дясната ръка, но същите са налични и за лявата ръка:
 
 ``` javascript
-figure.r_arm.raise = angle;
-figure.r_arm.straddle = angle;
-figure.r_arm.turn = angle;
+figure.r_arm.foreward = 70;
+figure.r_arm.straddle = -30;
+figure.r_arm.turn = 5;
 ```
 
-По принцип ротациите на симетричните части на тялото се стремят да
-запазят симетрията. Например, положителни относителни стойности на
-`straddle` завъртат лявата ръка наляво, а дясната &ndash; надясно.
+[<img src="../examples/snapshots/motion-arm.jpg">](../examples/motion-arm.html)
 
+<!--
 Завъртането на лакътя **elbow** е само с `bend` ([пример наживо](example-elbow.html)).
 Отрицателни стойности на *angle* водят до неестествена поза на лакътя.
 
@@ -695,7 +683,7 @@ var person = new Man( );
 
 Горни крайници:
 
-- `l_arm` и `r_arm` &ndash; ръце с подсвойства `foreward`, `turn` и `straddle`
+- `l_arm` и `r_arm` &ndash; ръце с подсвойства `foreward`, `straddle` и `turn`
 
 
 

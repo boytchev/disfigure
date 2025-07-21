@@ -1,3 +1,6 @@
+v0.0.20
+  - knees can tilt sideways
+  
 v0.0.19
   - added thigh, shin, forearm
   - added more sections in the documentation

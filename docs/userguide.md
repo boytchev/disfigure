@@ -94,21 +94,20 @@ a complex motion &ndash; [live example](../examples/motion-arms.html).
 
 [<img src="../examples/snapshots/motion-arms.jpg">](../examples/motion-arms.html)
 
-
-<!--
-
-### Upper limbs
-
-
-Both **arms**, `l_arm` and `r_arm`, support properties `raise`, `straddle` and `turn` ([live example](example-arm.html)). The following list refers to the right arm, however, the same properties are available for the left arm:
+Both arms, `l_arm` and `r_arm`, support properties `форевард`, `straddle` and
+`turn` &ndash; [live example](example-arm.html). The following list refers to
+the right arm, however, the same properties are available for the left arm:
 
 ``` javascript
-figure.r_arm.raise = angle;
-figure.r_arm.straddle = angle;
-figure.r_arm.turn = angle;
+figure.r_arm.foreward = 70;
+figure.r_arm.straddle = -30;
+figure.r_arm.turn = 5;
 ```
 
-Genrally, rotations of symmetrical body parts retain symmetry. For example, setting `straddle` to a positive relative angle straddles the left arm to the left, but the right arm &ndash; to the right.
+[<img src="../examples/snapshots/motion-arm.jpg">](../examples/motion-arm.html)
+
+
+<!--
 
 The motion of the **elbow** is only `bend` ([live example](example-elbow.html)). Negative values for *angle* result in unnatural elbow position.
 
@@ -637,7 +636,7 @@ Central body parts:
 
 Upper limbs:
 
-- `l_arm` and `r_arm` &ndash; with properties `foreward`, `turn` and `straddle`
+- `l_arm` and `r_arm` &ndash; with properties `foreward`, `straddle` and `turn`
 
 
 
@@ -787,8 +786,6 @@ All figures (instances of `Mannequin`, `Male`, `Female` and `Child`) have the
 same set of properties and methods.
 
 
-* `l_leg`, `l_knee`, `l_ankle` &ndash; properties, body parts of the left leg 
-* `r_leg`, `r_knee`, `r_ankle` &ndash; properties, body parts of the right leg
 * `bend`, `tilt`, `turn` &ndash; properties, body rotation
 * `posture`, `postureString` &ndash; properties, figure posture 
 * `stepOnGround()` &ndash; method, moves the figure vertically to reach the ground

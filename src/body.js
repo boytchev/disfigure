@@ -78,7 +78,7 @@ class Joint {
 		wrapper.matrixAutoUpdate = false;
 		wrapper.joint = this;
 
-		this.model.children[ 0 ].add( wrapper );
+		this.model.add( wrapper );
 		this.model.accessories.push( wrapper );
 
 	}
@@ -93,13 +93,12 @@ var m = new Matrix4(),
 	dummyGeomeyry = new PlaneGeometry(),
 	_uid = 1;
 
-class Disfigure extends Group {
+class Disfigure extends Mesh {
 
 
 	constructor( url, space, height, geometryHeight ) {
 
-		super();
-
+		super( dummyGeomeyry );
 
 
 		// unique number for each body, used to make their motions different
@@ -113,13 +112,11 @@ class Disfigure extends Group {
 		this.accessories = [];
 		this.height = height??geometryHeight;
 
-		// reduce the hierarchy of the model
-		this.model = new Mesh( dummyGeomeyry );
-		this.model.scale.setScalar( this.height / geometryHeight );
+		this.scale.setScalar( this.height / geometryHeight );
 
 		loader.load( this.url, ( gltf )=>{
 
-			this.model.geometry = gltf.scene.children[ 0 ].geometry;
+			this.geometry = gltf.scene.children[ 0 ].geometry;
 
 		} );
 
@@ -156,7 +153,7 @@ class Disfigure extends Group {
 		this.r_wrist = new Joint( this, this.r_forearm, this.space.r_wrist, 'zxy' );
 
 		// sets the materials of the model hooking them to TSL functions
-		this.model.material = new MeshPhysicalNodeMaterial( {
+		this.material = new MeshPhysicalNodeMaterial( {
 			positionNode: tslPositionNode( { space: this.space, joints: this } ),
 			normalNode: tslNormalNode( { space: this.space, joints: this } ),
 			colorNode: vec3( 0.99, 0.65, 0.49 ),
@@ -164,12 +161,10 @@ class Disfigure extends Group {
 			roughness: 0.6,
 		} );
 
-		this.model.position.y = 0;
+		this.position.y = 0;
 
-		this.model.castShadow = true;
-		this.model.receiveShadow = true;
-
-		this.add( this.model );
+		this.castShadow = true;
+		this.receiveShadow = true;
 
 		// register the model
 		everybody.push( this );
@@ -185,30 +180,32 @@ class Disfigure extends Group {
 		function anglesToMatrix( joint, sx, sy, sz ) {
 
 			e.set( sx*joint.angle.x, sy*joint.angle.y, sz*joint.angle.z, 'YZX' );
+			transferMatrix( joint );
+
+		}
+
+		function anglesToMatrixArm( joint, sx, sy, sz ) {
+
+			e.set( 0, 0, sz*joint.angle.z ); // straddle
+
+			e.reorder( 'YZX' );
+			e.set( 0, sy*joint.angle.y, e.z ); // foreward
+
+			e.reorder( 'XYZ' );
+			e.set( e.x+sx*joint.angle.x, e.y, e.z ); // turn
+
+			transferMatrix( joint );
+
+		}
+
+		function transferMatrix( joint ) {
+
 			m.makeRotationFromEuler( e );
 			var s = m.elements;
 			joint.matrix.value.set( s[ 0 ], s[ 4 ], s[ 8 ], s[ 1 ], s[ 5 ], s[ 9 ], s[ 2 ], s[ 6 ], s[ 10 ]);
 
 		}
 
-		function anglesToMatrixArm( space, sx, sy, sz ) {
-
-			e.set( 0, 0, 0, 'YZX' );
-
-			e.reorder( 'ZXY' );
-			e.set( e.x, e.y, e.z+sz*space.angle.z ); // straddle
-
-			e.reorder( 'YZX' );
-			e.set( e.x, e.y+sy*space.angle.y, e.z ); // foreward
-
-			e.reorder( 'XYZ' );
-			e.set( e.x+sx*space.angle.x, e.y, e.z ); // turn
-
-			m.makeRotationFromEuler( e );
-			var s = m.elements;
-			space.matrix.value.set( s[ 0 ], s[ 4 ], s[ 8 ], s[ 1 ], s[ 5 ], s[ 9 ], s[ 2 ], s[ 6 ], s[ 10 ]);
-
-		}
 
 		anglesToMatrix( this.head, -1, -1, 1 );
 		anglesToMatrix( this.chest, -1, -1, 1 );
@@ -229,8 +226,8 @@ class Disfigure extends Group {
 		anglesToMatrixArm( this.l_arm, -1, 1, 1 );
 		anglesToMatrixArm( this.r_arm, -1, -1, -1 );
 
-		anglesToMatrix( this.l_knee, -1, 0, 0 );
-		anglesToMatrix( this.r_knee, -1, 0, 0 );
+		anglesToMatrix( this.l_knee, -1, 0, 1 );
+		anglesToMatrix( this.r_knee, -1, 0, -1 );
 
 		anglesToMatrix( this.l_ankle, -1, 0, -1 );
 		anglesToMatrix( this.r_ankle, -1, 0, 1 );
