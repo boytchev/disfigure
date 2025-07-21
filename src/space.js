@@ -8,13 +8,16 @@
 
 
 import { Vector3 } from "three";
-import { float, Fn, mat3, min, mix, positionGeometry, select, uniform, vec2, vec3 } from "three/tsl";
+import { float, Fn, min, mix, positionGeometry, select, vec2, vec3 } from "three/tsl";
 import { everybody } from './world.js';
 
 
-//console.time('TSL');
+console.time( 'TSL' );
 
 
+
+// hide the spinner when the TSL's of all models are compiled
+// or if some predefined time had ellapsed
 
 var spinnerCounter = 0,
 	spinner = document.getElementById( 'spinner' );
@@ -23,14 +26,18 @@ function loader( ) {
 
 	spinnerCounter++;
 	//	console.timeLog('TSL',spinnerCounter);
-	if ( spinner && spinnerCounter >= everybody.length*12 )
+	if ( spinner && spinnerCounter >= everybody.length*12 ) {
+
+		console.timeLog( 'TSL', spinnerCounter );
 		spinner.style.display = 'none';
+
+	}
 
 }
 
 if ( spinner ) {
 
-	setTimeout( ()=>spinner.style.display = 'none', 3000 );
+	setTimeout( ()=>spinner.style.display = 'none', 10000 );
 
 }
 
@@ -115,8 +122,6 @@ class Locus {
 	constructor( pivot ) {
 
 		this.pivot = new Vector3( ...pivot );
-		this.angle = new Vector3();
-		this.matrix = uniform( mat3() );
 		this.isRight = false;
 
 	} // Locus.constructor

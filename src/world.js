@@ -162,24 +162,33 @@ var animateEvent = new AnimateEvent( );
 
 function defaultAnimationLoop( time ) {
 
-	animateEvent.time = time;
+	try {
 
-	window.dispatchEvent( animateEvent );
+		animateEvent.time = time;
 
-	everybody.forEach( ( p )=>{
+		window.dispatchEvent( animateEvent );
 
-		p.update( );
-		p.dispatchEvent( animateEvent );
+		everybody.forEach( ( p )=>{
 
-	} );
+			p.update( );
+			p.dispatchEvent( animateEvent );
 
-	if ( userAnimationLoop ) userAnimationLoop( time );
+		} );
 
-	if ( controls ) controls.update( );
+		if ( userAnimationLoop ) userAnimationLoop( time );
 
-	if ( stats ) stats.update( );
+		if ( controls ) controls.update( );
 
-	renderer.render( scene, camera );
+		if ( stats ) stats.update( );
+
+		renderer.render( scene, camera );
+
+	} catch ( err ) {
+
+		  renderer.setAnimationLoop( null );
+		  throw ( err );
+
+	}
 
 }
 

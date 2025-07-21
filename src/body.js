@@ -7,7 +7,7 @@
 
 import { Euler, Group, Matrix3, Matrix4, Mesh, MeshPhysicalNodeMaterial, PlaneGeometry, Vector3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { vec3 } from 'three/tsl';
+import { uniform, vec3 } from 'three/tsl';
 
 import { tslNormalNode, tslPositionNode } from './motion.js';
 import { Space } from './space.js';
@@ -31,20 +31,17 @@ var _mat = new Matrix3(),
 
 
 
-var toRad = x => x * ( 2*Math.PI/360 ),
-	toDeg = x => x / ( 2*Math.PI/360 );
-
 function getset( object, name, xyz ) {
 
 	Object.defineProperty( object, name, {
 		get() {
 
-			return toDeg( object.angle[ xyz ]);
+			return object.angle[ xyz ] * 180 / Math.PI;
 
 		},
 		set( value ) {
 
-			object.angle[ xyz ] = toRad( value );
+			object.angle[ xyz ] = value * Math.PI / 180;
 
 		}
 	} );
@@ -52,20 +49,15 @@ function getset( object, name, xyz ) {
 }
 
 
-class Joint extends Group {
+class Joint {
 
 	constructor( model, parent, space, axes='xyz' ) {
 
-		super();
-
 		this.model = model;
 		this.parent = parent;
-		this.pivot = space.pivot;
-		this.angle = space.angle;
-		this.matrix = space.matrix;
-		this.isRight = space.isRight;
-
-		this.position.copy( space.pivot );
+		this.space = space;
+		this.angle = new Vector3();
+		this.matrix = uniform( new Matrix3() );
 
 		getset( this, 'bend', axes[ 0 ]);
 		getset( this, 'raise', axes[ 0 ]);
@@ -82,13 +74,7 @@ class Joint extends Group {
 		if ( mesh.parent ) mesh = mesh.clone();
 
 		var wrapper = new Group();
-		var subwrapper = new Group();
-
-		wrapper.add( subwrapper );
-		subwrapper.add( mesh );
-		//subwrapper.rotation.y = this.isRight ? Math.PI*0 : 0;
-		//subwrapper.rotation.z = this.isRight ? Math.PI*0 : 0;
-		//mesh.position.y *= this.isRight ? -1 : 1;
+		wrapper.add( mesh );
 		wrapper.matrixAutoUpdate = false;
 		wrapper.joint = this;
 
@@ -137,7 +123,6 @@ class Disfigure extends Group {
 
 		} );
 
-
 		// create the space around the model
 		this.space = new Space( space );
 
@@ -172,8 +157,8 @@ class Disfigure extends Group {
 
 		// sets the materials of the model hooking them to TSL functions
 		this.model.material = new MeshPhysicalNodeMaterial( {
-			positionNode: tslPositionNode( { space: this.space } ),
-			normalNode: tslNormalNode( { space: this.space } ),
+			positionNode: tslPositionNode( { space: this.space, joints: this } ),
+			normalNode: tslNormalNode( { space: this.space, joints: this } ),
 			colorNode: vec3( 0.99, 0.65, 0.49 ),
 			metalness: 0,
 			roughness: 0.6,
@@ -197,12 +182,12 @@ class Disfigure extends Group {
 
 	update( ) {
 
-		function anglesToMatrix( space, sx, sy, sz ) {
+		function anglesToMatrix( joint, sx, sy, sz ) {
 
-			e.set( sx*space.angle.x, sy*space.angle.y, sz*space.angle.z, 'YZX' );
+			e.set( sx*joint.angle.x, sy*joint.angle.y, sz*joint.angle.z, 'YZX' );
 			m.makeRotationFromEuler( e );
 			var s = m.elements;
-			space.matrix.value.set( s[ 0 ], s[ 4 ], s[ 8 ], s[ 1 ], s[ 5 ], s[ 9 ], s[ 2 ], s[ 6 ], s[ 10 ]);
+			joint.matrix.value.set( s[ 0 ], s[ 4 ], s[ 8 ], s[ 1 ], s[ 5 ], s[ 9 ], s[ 2 ], s[ 6 ], s[ 10 ]);
 
 		}
 
@@ -238,8 +223,8 @@ class Disfigure extends Group {
 		anglesToMatrix( this.r_wrist, 0, -1, -1 );
 
 		// wrist: turn
-		anglesToMatrix( this.space.l_forearm, -1, 0, 0 );
-		anglesToMatrix( this.space.r_forearm, -1, 0, 0 );
+		anglesToMatrix( this.l_forearm, -1, 0, 0 );
+		anglesToMatrix( this.r_forearm, -1, 0, 0 );
 
 		anglesToMatrixArm( this.l_arm, -1, 1, 1 );
 		anglesToMatrixArm( this.r_arm, -1, -1, -1 );
@@ -250,15 +235,15 @@ class Disfigure extends Group {
 		anglesToMatrix( this.l_ankle, -1, 0, -1 );
 		anglesToMatrix( this.r_ankle, -1, 0, 1 );
 
-		anglesToMatrix( this.space.l_shin, 0, -1, 0 );
-		anglesToMatrix( this.space.r_shin, 0, 1, 0 );
+		anglesToMatrix( this.l_shin, 0, -1, 0 );
+		anglesToMatrix( this.r_shin, 0, 1, 0 );
 
 		anglesToMatrix( this.l_foot, -1, 0, 0 );
 		anglesToMatrix( this.r_foot, -1, 0, 0 );
 
 		// thigh turn
-		anglesToMatrix( this.space.l_thigh, 0, -1, 0 );
-		anglesToMatrix( this.space.r_thigh, 0, 1, 0 );
+		anglesToMatrix( this.l_thigh, 0, -1, 0 );
+		anglesToMatrix( this.r_thigh, 0, 1, 0 );
 
 		// leg: foreward ??? straddle
 		anglesToMatrixArm( this.l_leg, 1, 0, -1 );
@@ -269,13 +254,13 @@ class Disfigure extends Group {
 			var b = wrapper.joint;
 
 			_m.identity();
-			_v.copy( b.pivot );
+			_v.copy( b.space.pivot );
 
 			for ( ; b; b=b.parent ) {
 
 				_mat.copy( b.matrix.value ).transpose();
 				_m.premultiply( _mat );
-				_v.sub( b.pivot ).applyMatrix3( _mat ).add( b.pivot );
+				_v.sub( b.space.pivot ).applyMatrix3( _mat ).add( b.space.pivot );
 
 			}
 

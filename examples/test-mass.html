@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Custom heights for bodies</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+
+
+		// create a default world
+
+		new Happy.World();
+
+
+		// position the camera for a better view
+
+		Happy.camera.position.set( 6, 1.5, 0 );
+		Happy.controls.autoRotate = true;
+		Happy.controls.autoRotateSpeed = 0.5;
+
+
+		var n = 20;
+		
+		for ( var i=0; i<n; i++ ) {
+
+			var man = new Happy.Man( 1 + Math.random()/2 );
+
+			man.position.set( Happy.random( -1.5, 1.5 ), 0, Happy.random( -1.5, 1.5 ) );
+
+		}
+
+
+		// make the men move their heads and upper bodies
+		
+		Happy.setAnimationLoop( ( t )=>{
+
+			for ( var somebody of Happy.everybody ) {
+
+				somebody.head.turn = Happy.chaotic( t/4000, somebody.uid, -40, 40 );
+				somebody.head.bend = Happy.chaotic( t/4000, -somebody.uid, 0, 100*somebody.height-160 );
+				somebody.waist.turn = somebody.head.turn;
+
+			}
+
+		} );
+		
+	</script>
+</body>
+</html>

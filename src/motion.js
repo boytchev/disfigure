@@ -42,20 +42,20 @@ function random( min=-1, max=1 ) {
 
 
 // general DOF=3 rotator, used for most joints
-var jointRotateMat= Fn( ([ pos, joint ])=>{
+var jointRotateMat= Fn( ([ pos, pivot, matrix, locus ])=>{
 
-	var p = pos.sub( joint.pivot ).mul( joint.matrix ).add( joint.pivot );
-	return mix( pos, p, joint.locus() );
+	var p = pos.sub( pivot ).mul( matrix ).add( pivot );
+	return mix( pos, p, locus );
 
 } );
 
 
 
 // general DOF=3 rotator, used for most joints
-var jointNormalMat= Fn( ([ pos, joint ])=>{
+var jointNormalMat= Fn( ([ pos, pivot, matrix, locus ])=>{ // eslint-disable-line no-unused-vars
 
-	var p = pos.mul( joint.matrix );
-	return mix( pos, p, joint.locus() );
+	var p = pos.mul( matrix );
+	return mix( pos, p, locus );
 
 } );
 
@@ -87,7 +87,7 @@ function tslNormalNode( options ) {
 // implement the actual body bending
 //		space - the space around the body
 //		vertex - vertex or normal coordinates to use as input data
-var disfigure = Fn( ( { fn, space, vertex } )=>{
+var disfigure = Fn( ( { fn, space, joints, vertex } )=>{
 
 	var p = vertex.toVar( );
 
@@ -95,7 +95,7 @@ var disfigure = Fn( ( { fn, space, vertex } )=>{
 	function chain( items ) {
 
 		for ( var item of items )
-			p.assign( fn( p, space[ item ]) );
+			p.assign( fn( p, space[ item ].pivot, joints[ item ].matrix, space[ item ].locus() ) );
 
 	}
 

@@ -618,6 +618,51 @@ know how to fix it, please get in touch.
 
 ## API classes
 
+
+### new **Man**( )<br>new **Man**( *height* )
+
+Creates a male body with given *height*. As an object it is 
+[THREE.Group](https://threejs.org/docs/#api/en/objects/Group), but it hasadditional properties.
+
+```js
+var person = new Man( );
+```
+
+Central body parts:
+
+- `head` &ndash; with properties `bend`, `turn` and `tilt`
+- `chest` &ndash; with properties `bend`, `turn` and `tilt`
+- `waist` &ndash; with properties `bend`, `turn` and `tilt`
+- `torso` &ndash; the whole body with properties `bend`, `turn` and `tilt`
+
+Upper limbs:
+
+- `l_arm` and `r_arm` &ndash; with properties `foreward`, `turn` and `straddle`
+
+
+
+### new **Woman**( )<br>new **Woman**( *height* )
+
+Creates a female body with given *height*. It has the same properties and
+functionalities as `Man`.
+
+```js
+var person = new Woman( );
+```
+
+
+
+### new **Child**( )<br>new **Child**( *height* )
+
+Creates a child body with given *height*. It has the same properties and
+functionalities as `Man`.
+
+```js
+var person = new Child( );
+```
+
+
+
 ### new **World**( )<br>new **World**( *features* )
 
 Creates a predefined default 3D world with all basic attributes,
@@ -741,12 +786,9 @@ of rendering the default world. It is an instance of [`Stats`](https://mrdoob.gi
 All figures (instances of `Mannequin`, `Male`, `Female` and `Child`) have the
 same set of properties and methods.
 
-* `body`, `pelvis`, `torso`, `neck`, `head` &ndash; properties, general body parts
+
 * `l_leg`, `l_knee`, `l_ankle` &ndash; properties, body parts of the left leg 
 * `r_leg`, `r_knee`, `r_ankle` &ndash; properties, body parts of the right leg
-* `l_arm`, `l_elbow`, `l_wrist`, `l_finger_0`...`l_finger_4`, `l_fingers`, `l_nails` &ndash; properties, body parts of the left arm
-* `r_arm`, `r_elbow`, `r_wrist`, `r_finger_0`...`r_finger_4`, `r_fingers`, `r_nails` &ndash; properties, body parts of the right arm
-* `feminine` &ndash; property, a boolean flag of the figure type
 * `bend`, `tilt`, `turn` &ndash; properties, body rotation
 * `posture`, `postureString` &ndash; properties, figure posture 
 * `stepOnGround()` &ndash; method, moves the figure vertically to reach the ground
@@ -766,19 +808,6 @@ properties are not available for all body parts (for biological reasons).
 * `bend`, `straddle`, `turn` &ndash; properties, rotations of fingers
 * `raise`, `straddle`, `turn` &ndash; properties, rotations of arms and legs
 * `nod`, `tilt`, `turn` &ndash; properties, rotations of head
-
-For finges there are additional properties and methods to manage their structure:
-
-* `mid` &ndash; property, the middle phalange of a finger
-* `mid.bend` &ndash; method, rotation of the middle phalange
-* `tip` &ndash; property, the last phalange of a finger
-* `tip.nail` &ndash; property, the nail of a finger
-* `tip.bend` &ndash; method, rotation of the last phalange
-	
-The collective properties `l_fingers` and `r_fingers` contain:
-* `finger_0`...`finger_4` &ndash; properties, individual fingers, corresponding to `l_finger_0`...`l_finger_4` and `r_finger_0`...`r_finger_4`
-* `bend` &ndash; method, bending rotation of all fingers at once, including middle phalanges and tips
-* `hide()`, `show()` &ndash; methods, shows and hides all figers
 
 -->
 

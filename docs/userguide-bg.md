@@ -676,6 +676,51 @@ Three.js, така и на mannequin.js.
 
 ## АПИ класове
 
+### new **Man**( )<br>new **Man**( *height* )
+
+Създава мъжка фигура с дадена височина *height*. Като обект е от тип
+[THREE.Group](https://threejs.org/docs/#api/en/objects/Group), но има допълнителни
+свойства.
+
+```js
+var person = new Man( );
+```
+
+Централни части на тялото:
+
+- `head` &ndash; глава с подстойства `bend`, `turn` и `tilt`
+- `chest` &ndash; гърди с подстойства `bend`, `turn` и `tilt`
+- `waist` &ndash; кръст с подстойства `bend`, `turn` и `tilt`
+- `torso` &ndash; цялото тяло с подстойства `bend`, `turn` и `tilt`
+
+Горни крайници:
+
+- `l_arm` и `r_arm` &ndash; ръце с подсвойства `foreward`, `turn` и `straddle`
+
+
+
+### new **Woman**( )<br>new **Woman**( *height* )
+
+Създава женска фигура с дадена височина *height*. Има същите свойства и 
+функционалности като `Man`.
+
+```js
+var person = new Woman( );
+```
+
+
+
+### new **Child**( )<br>new **Child**( *height* )
+
+Създава детска фигура с дадена височина *height*. Има същите свойства и 
+функционалности като `Man`.
+
+```js
+var person = new Child( );
+```
+
+
+
 ### new **World**( )<br>new **World**( *features* )
 
 Създава предефиниран Three.js 3D свят с всички основни атрибути,
@@ -794,15 +839,8 @@ man.head.turn = chaotic( time, 0, -60, 60 );
 
 <!--
 
-Всички фигури (инстанции на `Mannequin`, `Male`, `Female` и `Child`) имат еднакъв
-набор от свойства и методи.
-
-* `body`, `pelvis`, `torso`, `neck`, `head` &ndash; свойства, основни части на тяло
 * `l_leg`, `l_knee`, `l_ankle` &ndash; свойства, части на ляв крак
 * `r_leg`, `r_knee`, `r_ankle` &ndash; свойства, части на десен крак
-* `l_arm`, `l_elbow`, `l_wrist`, `l_finger_0`...`l_finger_4`, `l_fingers`, `l_nails` &ndash; свойства, части на лява ръка
-* `r_arm`, `r_elbow`, `r_wrist`, `r_finger_0`...`r_finger_4`, `r_fingers`, `r_nails` &ndash; свойства, части на дясна ръка
-* `feminine` &ndash; свойство, булев флаг дали фигура е женска
 * `bend`, `tilt`, `turn` &ndash; свойства, завъртяност на тяло
 * `posture`, `postureString` &ndash; свойства, поза на фигура
 * `stepOnGround()` &ndash; метод, премества вертикално фигура, за да докосне земята
@@ -822,20 +860,6 @@ man.head.turn = chaotic( time, 0, -60, 60 );
 * `bend`, `straddle`, `turn` &ndash; свойства, завъртяност на пръсти
 * `raise`, `straddle`, `turn` &ndash; свойства, завъртяност на ръце и крака
 * `nod`, `tilt`, `turn` &ndash; свойства, завъртяност на глава
-
-Пръстите имат допълителни свойства и методи за достъп до тяхната структура:
-
-* `mid` &ndash; свойство, средна фаланга на пръст
-* `mid.bend` &ndash; метод, завъртяност на средната фаланга
-* `tip` &ndash; свойство, крайна фаланга на пръст
-* `tip.nail` &ndash; свойство, нокът на пръст
-* `tip.bend` &ndash; метод, завъртяност на крайната фаланга
-* `tip.nail.bend` &ndash; метод, завъртяност на нокът ... шегувам се, няма такъв метод
-	
-Груповите свойства `l_fingers` и `r_fingers` съдържат:
-* `finger_0`...`finger_4` &ndash; свойства, отделните пръсти, съответстващи на `l_finger_0`...`l_finger_4` и `r_finger_0`...`r_finger_4`
-* `bend` &ndash; метод, свиване на всички пръсти, включително средните и крайните фаланги
-* `hide()`, `show()` &ndash; методи, скриване и показване на всички пръсти
 		
 -->		
 		
