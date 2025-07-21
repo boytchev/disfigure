@@ -35,8 +35,9 @@ Videos of earlier attempts for TSL rigging.
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/body-parts.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/body-parts.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/body-shapes.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/body-shapes.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-arm.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/motion-arm.html)
-[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-arms.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/motion-arms.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-arms-combined.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/motion-arms-combined.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-central.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/motion-central.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-elbow.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/motion-elbow.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/number-generators.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/number-generators.html)
 
 

@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Individual motions for the elbows</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		import * as Red from 'label';
+
+
+		// create a default world
+
+		new Happy.World( );
+		Happy.camera.position.set( 1.75, 1.7, 0.75 );
+		Happy.controls.target.set( 0, 1.2, 0 );
+
+
+		// create a man 
+		
+		var man = new Happy.Man( );
+
+
+		// add labels indicating elbows motion style
+		
+		var l_lab = new Red.Label( 'bend', 0.6, 0.14, 0, 0.08, 2 );
+		l_lab.rotation.x = -Math.PI/2;
+		man.l_elbow.attach( l_lab );
+
+		var r_lab = new Red.Label( 'bend', 0.6, -0.14, 0, 0.08, 0 );
+		r_lab.rotation.x = Math.PI/2;
+		man.r_elbow.attach( r_lab );
+
+
+		// animate the man
+		
+		Happy.setAnimationLoop( ( t )=>{
+
+			t = t/2000;
+
+			// motions of elbows
+			
+			man.l_elbow.bend = Happy.chaotic( t, 0, 0, 80 );
+			man.r_elbow.bend = Happy.regular( t, 1, 0, 80 );
+
+			// some general motion of the body
+			
+			man.l_arm.foreward = Happy.chaotic( t, 0, -20, 0 );
+			man.r_arm.foreward = Happy.regular( t, 1, -20, 0 );
+
+			man.waist.turn = Happy.chaotic( t/4, 6, 0, 30 );
+			man.head.turn = man.waist.turn;
+
+		} );
+
+	</script>
+</body>
+</html>

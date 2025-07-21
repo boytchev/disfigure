@@ -5,7 +5,7 @@
 <body>
 	<header>
 		<h1><b>Disfigure</b></h1>
-		<h3>Motions for the arms</h3></br>
+		<h3>Combined motions for the arms</h3></br>
 	</header>
 
 	<div id="spinner"></div>
@@ -30,19 +30,15 @@
 		man.position.x = -0.75;
 		woman.position.x = 0.75;
 
-		// animate the man with some simple dance motion
-		// the attached label should move automatically
+		// animate the arms
 		
 		function animate( event ) {
 
 			var someone = event.target;
 			var t = event.time/2000 + 10*someone.uid;
-		
-			someone.head.bend = Happy.chaotic( t/5, 3, -10, 10 );
-			someone.head.turn = Happy.chaotic( t/2, 2, -40, 40 );
-			someone.head.tilt = Happy.chaotic( t/2, 1, -20, 20 );
-			someone.waist.turn = -someone.head.turn;
-		
+
+			// arms
+			
 			someone.l_arm.straddle = Happy.chaotic( t, 5, -10, 60 );
 			someone.l_arm.turn = Happy.chaotic( t, 6, -10, 70 );
 			someone.l_arm.foreward = Happy.chaotic( t, 7, -20, 80 );
@@ -65,6 +61,13 @@
 			someone.r_wrist.turn = Happy.chaotic( t, -4, -45, 45 );
 			someone.r_wrist.tilt = Happy.chaotic( t, -1, -40, 40 );
 
+			// body
+			
+			someone.head.bend = Happy.chaotic( t/5, 3, -10, 10 );
+			someone.head.turn = Happy.chaotic( t/2, 2, -40, 40 );
+			someone.head.tilt = Happy.chaotic( t/2, 1, -20, 20 );
+			someone.waist.turn = -someone.head.turn;
+		
 		}
 
 		man.addEventListener( 'animate', animate );

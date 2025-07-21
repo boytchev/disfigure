@@ -32,7 +32,7 @@
 		man3.position.x = 1;
 
 
-		// add labels indicating ther motion style
+		// add labels indicating their motion style
 		
 		man1.l_arm.attach( new Red.Label( 'turn', 1, 0.15, 0.18, 0 ) );
 		man2.l_arm.attach( new Red.Label( 'foreward', 1, 0.15, 0.18, 0 ) );
@@ -45,7 +45,7 @@
 
 			t = t/1000;
 
-			// motions or arms
+			// motions of arms
 			
 			man1.l_arm.turn = Happy.chaotic( t, 0, -60, 60 );
 			man1.r_arm.turn = Happy.regular( t, 1, -60, 60 );

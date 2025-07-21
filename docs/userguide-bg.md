@@ -91,30 +91,29 @@ man.waist.tilt = 35;
 `l_forearm` (предмишница) и `l_wrist` (китка) за лявата страна; и съответните им
 `r_arm`, `r_elbow`, `r_forearm` и `r_wrist` за дясната страна. Поради многото
 стави и гъвкавостта им ръцете имат сложно движение
-&ndash; [live example](../examples/motion-arms.html).
+&ndash; [live example](../examples/motion-arms-combined.html).
 
-[<img src="../examples/snapshots/motion-arms.jpg">](../examples/motion-arms.html)
 
 И двете ръце, `l_arm` и `r_arm`, поддържат свойствата `foreward` (движение
 напред-назад), `straddle` (движение встрани) и `turn` (въртене около протежението
-на ръката) &ndash [пример наживо](example-arm.html). Следващият код показва свойствата на дясната ръка, но същите са налични и за лявата ръка:
+на ръката) &ndash [пример наживо](../examples/motion-arm.html). Следващият код показва свойствата на дясната ръка, но същите са налични и за лявата ръка:
 
 ``` javascript
-figure.r_arm.foreward = 70;
-figure.r_arm.straddle = -30;
-figure.r_arm.turn = 5;
+man.r_arm.foreward = 70;
+man.r_arm.straddle = -30;
+man.r_arm.turn = 5;
 ```
 
-[<img src="../examples/snapshots/motion-arm.jpg">](../examples/motion-arm.html)
+[<img src="../examples/snapshots/motion-arms-combined.jpg" width="48%">](../examples/motion-arms-combined.html)
+[<img src="../examples/snapshots/motion-arm.jpg" width="48%">](../examples/motion-arm.html)
+
+Завъртането на лактите `l_elbow` и `r_elbow` е само с `bend` &ndash; [пример наживо](../examples/motion-elbow.html)
+
+``` javascript
+man.r_elbow.bend = 45;
+```
 
 <!--
-Завъртането на лакътя **elbow** е само с `bend` ([пример наживо](example-elbow.html)).
-Отрицателни стойности на *angle* водят до неестествена поза на лакътя.
-
-``` javascript
-figure.r_elbow.bend = angle;
-```
-
 Китките **wrists** имат същите свойства като торса: `bend`, `turn` 
 и `tilt` ([пример наживо](example-wrist.html)),
 но подобно на ръцете, ротациите са симетрични:

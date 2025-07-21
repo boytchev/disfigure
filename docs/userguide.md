@@ -90,30 +90,31 @@ man.waist.tilt = 35;
 The arms are symmetrical body parts: `l_arm`, `l_elbow`, `l_forearm` and `l_wrist`
 for the left side of the body; and `r_arm`, `r_elbow`, `r_forearm` and `r_wrist` for
 the right side. Because of the multiple joints and their flexibility arms have
-a complex motion &ndash; [live example](../examples/motion-arms.html).
+a complex motion &ndash; [live example](../examples/motion-arms-combined.html).
 
-[<img src="../examples/snapshots/motion-arms.jpg">](../examples/motion-arms.html)
-
-Both arms, `l_arm` and `r_arm`, support properties `форевард`, `straddle` and
-`turn` &ndash; [live example](example-arm.html). The following list refers to
+Both arms, `l_arm` and `r_arm`, support properties `foreward`, `straddle` and
+`turn` &ndash; [live example](motion-arm.html). The following list refers to
 the right arm, however, the same properties are available for the left arm:
 
 ``` javascript
-figure.r_arm.foreward = 70;
-figure.r_arm.straddle = -30;
-figure.r_arm.turn = 5;
+man.r_arm.foreward = 70;
+man.r_arm.straddle = -30;
+man.r_arm.turn = 5;
 ```
 
-[<img src="../examples/snapshots/motion-arm.jpg">](../examples/motion-arm.html)
+[<img src="../examples/snapshots/motion-arms-combined.jpg"> width="48%"](../examples/motion-arms-combined.html)
+[<img src="../examples/snapshots/motion-arm.jpg"> width="48%"](../examples/motion-arm.html)
 
 
-<!--
-
-The motion of the **elbow** is only `bend` ([live example](example-elbow.html)). Negative values for *angle* result in unnatural elbow position.
+The motion of elbows `l_elbow` and `r_elbow` is only `bend` &ndash; [live example](motion-elbow.html). 
 
 ``` javascript
-figure.r_elbow.bend = angle;
+man.r_elbow.bend = 45;
 ```
+
+[<img src="../examples/snapshots/motion-elbow.jpg"> width="48%"](../examples/motion-elbow.html)
+
+<!--
 
 The **wrists** have the same properties as the torso: `bend`, `turn` and `tilt` ([live example](example-wrist.html)), but similar to the arms, rotations are symmetrical:
 
