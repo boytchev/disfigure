@@ -102,8 +102,8 @@ man.r_arm.straddle = -30;
 man.r_arm.turn = 5;
 ```
 
-[<img src="../examples/snapshots/motion-arms-combined.jpg"> width="48%"](../examples/motion-arms-combined.html)
-[<img src="../examples/snapshots/motion-arm.jpg"> width="48%"](../examples/motion-arm.html)
+[<img src="../examples/snapshots/motion-arms-combined.jpg" width="48%">](../examples/motion-arms-combined.html)
+[<img src="../examples/snapshots/motion-arm.jpg" width="48%">](../examples/motion-arm.html)
 
 
 The motion of elbows `l_elbow` and `r_elbow` is only `bend` &ndash; [live example](motion-elbow.html). 
@@ -112,7 +112,7 @@ The motion of elbows `l_elbow` and `r_elbow` is only `bend` &ndash; [live exampl
 man.r_elbow.bend = 45;
 ```
 
-[<img src="../examples/snapshots/motion-elbow.jpg"> width="48%"](../examples/motion-elbow.html)
+[<img src="../examples/snapshots/motion-elbow.jpg" width="48%">](../examples/motion-elbow.html)
 
 <!--
 
