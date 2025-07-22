@@ -5,8 +5,6 @@
 
 ## <small><small>[Тела](#Тела) [[*форми*](#форми-на-телата) &middot; [*движения*](#движения-на-телата) ] [АПИ](#апи) [[*класове*](#апи-класове) &middot; [*функции*](#апи-функции) &middot; [*променливи*](#апи-променливи)]</small></small>
 
-## <small><small>В процес на изработка.</small></small>
-
 
 
 ## <small><small>This document is also available in [English](userguide.md)</small></small>
@@ -38,9 +36,9 @@ new Happy.Man
 
 Disfigure дефинира класовете `Man(height)`, `Woman(height)`
 и `Child(height)`, а телата се създават като инстанции на
-тези класове ([пример наживо](../examples/body-shapes.html)).
+тези класове &ndash; [пример наживо](../examples/body-shapes.html).
 Незадължителният параметър *height* определя височината на
-тялото в метри ([live example](../examples/body-heights.html)). По подразбиране
+тялото в метри &ndash; [live example](../examples/body-heights.html). По подразбиране
 мъж е висок 1.80м, жена е 1.70м и дете е 1.35м.
 
 [<img src="../examples/snapshots/body-shapes.jpg" width="48%">](../examples/body-shapes.html)
@@ -49,7 +47,7 @@ Disfigure дефинира класовете `Man(height)`, `Woman(height)`
 Всички видове тела имат една и съща структура, например главата
 е `head`. Левите и десните части на тялото са винаги спрямо
 тялото. Техните имена имат префикси `l_` за ляво и `r_` за
-дясно, например `l_arm` и `r_arm`, ([пример наживо](../examples/body-parts.html)):
+дясно, например `l_arm` и `r_arm` &ndash; [пример наживо](../examples/body-parts.html):
 
 * **Централни части** &ndash; това са `head`, `chest`, `waist` и `torso`.
 * **Горни крайници** &ndash; това са `arm`, `elbow`, `forearm` и `wrist`.
@@ -85,12 +83,12 @@ man.waist.tilt = 35;
 [<img src="../examples/snapshots/motion-central.jpg">](../examples/motion-central.html)
 
 
-#### Движение на ръцете
+#### Движение на горните крайници
 
-Ръцете са симетрични части на тялото, съставени от: `l_arm` (ръка в рамото), `l_elbow` (лакът),
-`l_forearm` (предмишница) и `l_wrist` (китка) за лявата страна; и съответните им
-`r_arm`, `r_elbow`, `r_forearm` и `r_wrist` за дясната страна. Поради многото
-стави и гъвкавостта им ръцете имат сложно движение
+Горните крайници са симетрични части на тялото, съставени от: `l_arm` (ръка в рамото),
+`l_elbow` (лакът), `l_forearm` (предмишница) и `l_wrist` (китка) за лявата страна;
+и съответните им `r_arm`, `r_elbow`, `r_forearm` и `r_wrist` за дясната страна.
+Поради многото стави и гъвкавостта им ръцете имат сложно движение
 &ndash; [live example](../examples/motion-arms-combined.html).
 
 
@@ -107,24 +105,28 @@ man.r_arm.turn = 5;
 [<img src="../examples/snapshots/motion-arms-combined.jpg" width="48%">](../examples/motion-arms-combined.html)
 [<img src="../examples/snapshots/motion-arm.jpg" width="48%">](../examples/motion-arm.html)
 
-Завъртането на лактите `l_elbow` и `r_elbow` е само с `bend` &ndash; [пример наживо](../examples/motion-elbow.html)
+Завъртането на лактите `l_elbow` и `r_elbow` е само с `bend` &ndash; [пример наживо](../examples/motion-elbow.html), докато предмишниците
+`l_forearm` и `r_forearm` имат само `turn` &ndash; [пример наживо](motion-forearm.html)
 
 ``` javascript
 man.r_elbow.bend = 45;
+man.r_forearm.turn = -20;
 ```
 
-<!--
-Китките **wrists** имат същите свойства като торса: `bend`, `turn` 
-и `tilt` ([пример наживо](example-wrist.html)),
-но подобно на ръцете, ротациите са симетрични:
+[<img src="../examples/snapshots/motion-elbow.jpg" width="48%">](../examples/motion-elbow.html)
+[<img src="../examples/snapshots/motion-forearm.jpg" width="48%">](../examples/motion-forearm.html)
+
+Движенията на китките `l_wrist` и `r_wrist` са `bend` и `tilt`,
+като завъртането се очаква да се направи през предмишницата [пример наживо](example-wrist.html):
 
 ``` javascript
-figure.r_wrist.bend = angle;
-figure.r_wrist.turn = angle;
-figure.r_wrist.tilt = angle;
+man.r_wrist.bend = -60;
+man.r_wrist.tilt = 10;
 ```
 
+[<img src="../examples/snapshots/motion-wrist.jpg" width="48%">](../examples/motion-wrist.html)
 
+<!--
 
 ### Долни крайници
 
@@ -675,15 +677,43 @@ var person = new Man( );
 
 Централни части на тялото:
 
-- `head` &ndash; глава с подстойства `bend`, `turn` и `tilt`
-- `chest` &ndash; гърди с подстойства `bend`, `turn` и `tilt`
-- `waist` &ndash; кръст с подстойства `bend`, `turn` и `tilt`
-- `torso` &ndash; цялото тяло с подстойства `bend`, `turn` и `tilt`
+- `head` &ndash; глава със свойства `bend`, `turn` и `tilt`
+- `chest` &ndash; гърди със свойства `bend`, `turn` и `tilt`
+- `waist` &ndash; кръст съв свойства `bend`, `turn` и `tilt`
+- `torso` &ndash; цялото тяло съв свойства `bend`, `turn` и `tilt`
 
 Горни крайници:
 
-- `l_arm` и `r_arm` &ndash; ръце с подсвойства `foreward`, `straddle` и `turn`
+- `l_arm` и `r_arm` &ndash; ръце със свойства `foreward`, `straddle` и `turn` &ndash; [live example](motion-arm.html)
+- `l_elbow` и `r_elbow` &ndash; лакти със свойство `bend`  &ndash; [live example](motion-elbow.html)
+- `l_forearm` и `r_forearm` &ndash; предмишници със свойство `turn` &ndash; [live example](motion-forearm.html)
+- `l_wrist` и `r_wrist` &ndash; китки със свойства `turn` и `tilt` &ndash; [live example](motion-wrist.html)
 
+
+<!--
+
+*** `l_leg`, `l_knee`, `l_ankle` &ndash; свойства, части на ляв крак
+* `r_leg`, `r_knee`, `r_ankle` &ndash; свойства, части на десен крак
+* `bend`, `tilt`, `turn` &ndash; свойства, завъртяност на тяло
+* `posture`, `postureString` &ndash; свойства, поза на фигура
+* `stepOnGround()` &ndash; метод, премества вертикално фигура, за да докосне земята
+* `recolor(...)` &ndash; метод, променя цветовете на частите на тяло
+
+Всички части на тяло имат подобни свойства и методи. Някои от свойствата за завъртане
+не са налични за всички части поради биологически причини.
+
+* `posture` &ndash; свойство, поза на част на тяло (масив от ъглите на завъртане)
+* `hide()`, `show()` &ndash; методи, скриване и показване на част от тяло
+* `attach(image)`, `detach(image)` &ndash; методи, добавяне и премахване на потребителски 3D обект ктм част на тяло
+* `point(x,y,z)` &ndash; метод, изчисляване на глобални координати на локална позиция (x,y,z) спрямо част на тяло
+* `recolor(...)` &ndash; метод, смяна на цветовете на част на тяло
+* `label(...)` &ndash; метод, добавяне на 3D текст към част на тяло
+* `bend`, `tilt`, `turn` &ndash; свойства, завъртяност на глезени, тяло, торс и китки
+* `bend` &ndash; свойство, завъртяност на лакти и колена
+* `bend`, `straddle`, `turn` &ndash; свойства, завъртяност на пръсти
+* `raise`, `straddle`, `turn` &ndash; свойства, завъртяност на ръце и крака
+		
+-->		
 
 
 ### new **Woman**( )<br>new **Woman**( *height* )
@@ -809,7 +839,7 @@ man.head.turn = chaotic( time, 0, -60, 60 );
 
 Тази променлива е земята на предефинирания свят. Тя създава
 илюзията за твърда повърхност и показва сенките на телата.
-Тя е инстанция на [`THREE.Mesh`](https://threejs.org/docs/?q=mesh#api/en/objects/Mesh) и е оформена с [`PlaneGeometry`](https://threejs.org/docs/#api/en/geometries/PlaneGeometry). 
+Тя е инстанция на [`THREE.Mesh`](https://threejs.org/docs/#api/en/objects/Mesh) и е оформена с [`PlaneGeometry`](https://threejs.org/docs/#api/en/geometries/PlaneGeometry). 
 
 
 ### **controls**
@@ -824,31 +854,6 @@ man.head.turn = chaotic( time, 0, -60, 60 );
 анимация в предефинирания свят. Той е инстанция на [`Stats`](https://mrdoob.github.io/stats.js/)
 
 
-<!--
-
-*** `l_leg`, `l_knee`, `l_ankle` &ndash; свойства, части на ляв крак
-* `r_leg`, `r_knee`, `r_ankle` &ndash; свойства, части на десен крак
-* `bend`, `tilt`, `turn` &ndash; свойства, завъртяност на тяло
-* `posture`, `postureString` &ndash; свойства, поза на фигура
-* `stepOnGround()` &ndash; метод, премества вертикално фигура, за да докосне земята
-* `recolor(...)` &ndash; метод, променя цветовете на частите на тяло
-
-Всички части на тяло имат подобни свойства и методи. Някои от свойствата за завъртане
-не са налични за всички части поради биологически причини.
-
-* `posture` &ndash; свойство, поза на част на тяло (масив от ъглите на завъртане)
-* `hide()`, `show()` &ndash; методи, скриване и показване на част от тяло
-* `attach(image)`, `detach(image)` &ndash; методи, добавяне и премахване на потребителски 3D обект ктм част на тяло
-* `point(x,y,z)` &ndash; метод, изчисляване на глобални координати на локална позиция (x,y,z) спрямо част на тяло
-* `recolor(...)` &ndash; метод, смяна на цветовете на част на тяло
-* `label(...)` &ndash; метод, добавяне на 3D текст към част на тяло
-* `bend`, `tilt`, `turn` &ndash; свойства, завъртяност на глезени, тяло, торс и китки
-* `bend` &ndash; свойство, завъртяност на лакти и колена
-* `bend`, `straddle`, `turn` &ndash; свойства, завъртяност на пръсти
-* `raise`, `straddle`, `turn` &ndash; свойства, завъртяност на ръце и крака
-* `nod`, `tilt`, `turn` &ndash; свойства, завъртяност на глава
-		
--->		
 		
 		
 <div class="footnote">

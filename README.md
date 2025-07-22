@@ -34,6 +34,8 @@ Videos of earlier attempts for TSL rigging.
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-arms-combined.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-arms-combined.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-central.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-central.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-elbow.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-elbow.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-forearm.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-forearm.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-wrist.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-wrist.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/number-generators.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/number-generators.html)
 
 

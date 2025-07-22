@@ -5,7 +5,7 @@
 <body>
 	<header>
 		<h1><b>Disfigure</b></h1>
-		<h3>Individual motions for the elbows</h3></br>
+		<h3>Individual motions for the forearms</h3></br>
 	</header>
 
 	<div id="spinner"></div>
@@ -29,15 +29,15 @@
 		var man = new Happy.Man( );
 
 
-		// add labels indicating elbows motion style
+		// add labels indicating forearms motion style
 		
-		var l_lab = new Red.Label( 'bend', 0.6, 0.14, 0, 0.08, 2 );
+		var l_lab = new Red.Label( 'turn', 0.6, 0.28, 0, 0.06, 2 );
 		l_lab.rotation.x = -Math.PI/2;
-		man.l_elbow.attach( l_lab );
+		man.l_forearm.attach( l_lab );
 
-		var r_lab = new Red.Label( 'bend', 0.6, -0.14, 0, 0.08, 0 );
+		var r_lab = new Red.Label( 'turn', 0.6, -0.28, 0, 0.06, 0 );
 		r_lab.rotation.x = Math.PI/2;
-		man.r_elbow.attach( r_lab );
+		man.r_forearm.attach( r_lab );
 
 
 		// animate the man
@@ -46,17 +46,20 @@
 
 			t = t/2000;
 
-			// motions of elbows
+			// motions of forearms
 			
-			man.l_elbow.bend = Happy.chaotic( t, 0, 0, 80 );
-			man.r_elbow.bend = Happy.chaotic( t, 1, 0, 80 );
+			man.l_forearm.turn = Happy.chaotic( t, 0, -40, 80 );
+			man.r_forearm.turn = Happy.chaotic( t, 1, -80, 40 );
 
 			// some general motion of the body
 			
-			man.l_arm.foreward = Happy.chaotic( t, 0, -20, 0 );
-			man.r_arm.foreward = Happy.chaotic( t, 1, -20, 0 );
+			man.l_arm.foreward = Happy.chaotic( t/2, 0, -10, 0 );
+			man.r_arm.foreward = Happy.chaotic( t/2, 1, 20, 30 );
 
-			man.waist.turn = Happy.chaotic( t/4, 6, 0, 30 );
+			man.l_elbow.bend = Happy.chaotic( t, 2, 50, 60 );
+			man.r_elbow.bend = Happy.chaotic( t, 3, 70, 90 );
+
+			man.waist.turn = Happy.chaotic( t/4, 6, 0, 20 );
 			man.head.turn = man.waist.turn;
 
 		} );

@@ -7,9 +7,6 @@
 ## <small><small>[Bodies](#bodies) [[*shapes*](#body-shapes) &middot; [*motions*](#body-motions)] [API](#api) [[*classes*](#api-classes) &middot; [*functions*](#api-functions) &middot; [*variables*](#api-variables)]</small></small>
 
 
-## <small><small>Work in progress.</small></small>
-
-
 
 ## <small><small>Този документ е наличен и на [български език](userguide-bg.md)</small></small>
 
@@ -37,9 +34,9 @@ new Happy.Man
 
 Disfigure defines classes `Male(height)`, `Female(height)`
 and `Child(height)`, and bodies are created as instances of
-these classes ([live example](../examples/body-shapes.html)). The optional
+these classes &ndash; [live example](../examples/body-shapes.html). The optional
 parameter *height* defines the height of the body in meters
- ([live example](../examples/body-heights.html)). By default a man is
+ &ndash; [live example](../examples/body-heights.html). By default a man is
 tall 1.80m, a woman is 1.70m and a child is 1.35m.
 
 [<img src="../examples/snapshots/body-shapes.jpg" width="48%">](../examples/body-shapes.html)
@@ -48,8 +45,8 @@ tall 1.80m, a woman is 1.70m and a child is 1.35m.
 All types of bodies have the same structure, for example,
 the head is called `head`. Left and right body parts are
 always in respect to the figure. Their names have prefixes
-`l_` for left and `r_` for right, like `l_arm` and `r_arm`,
-([live example](../examples/body-parts.html)):
+`l_` for left and `r_` for right, like `l_arm` and `r_arm`
+&ndash; [live example](../examples/body-parts.html):
 
 * **Central parts** &ndash; these are `head`, `chest`, `waist` and `torso`.
 * **Upper limbs** &ndash; these are `arm`, `elbow`, `forearm` and `wrist`.
@@ -106,26 +103,28 @@ man.r_arm.turn = 5;
 [<img src="../examples/snapshots/motion-arm.jpg" width="48%">](../examples/motion-arm.html)
 
 
-The motion of elbows `l_elbow` and `r_elbow` is only `bend` &ndash; [live example](motion-elbow.html). 
+The motion of elbows `l_elbow` and `r_elbow` is only `bend` &ndash; [live example](motion-elbow.html), while
+the forearms `l_forearm` and `r_forearm` have only `turn` &ndash; [live example](motion-forearm.html):
 
 ``` javascript
 man.r_elbow.bend = 45;
+man.r_forearm.turn = -20;
 ```
 
 [<img src="../examples/snapshots/motion-elbow.jpg" width="48%">](../examples/motion-elbow.html)
+[<img src="../examples/snapshots/motion-forearm.jpg" width="48%">](../examples/motion-forearm.html)
 
-<!--
-
-The **wrists** have the same properties as the torso: `bend`, `turn` and `tilt` ([live example](example-wrist.html)), but similar to the arms, rotations are symmetrical:
+The wrists motions of wrist `l_wrist` and `r_wrist` are `bend` and `tilt`,
+as turning is supposed to be handles by the forearm [live example](example-wrist.html):
 
 ``` javascript
-figure.r_wrist.bend = angle;
-figure.r_wrist.turn = angle;
-figure.r_wrist.tilt = angle;
+man.r_wrist.bend = -60;
+man.r_wrist.tilt = 10;
 ```
 
-```
+[<img src="../examples/snapshots/motion-wrist.jpg" width="48%">](../examples/motion-wrist.html)
 
+<!--
 
 ### Lower limbs
 
@@ -637,8 +636,39 @@ Central body parts:
 
 Upper limbs:
 
-- `l_arm` and `r_arm` &ndash; with properties `foreward`, `straddle` and `turn`
+- `l_arm` and `r_arm` &ndash; with properties `foreward`, `straddle` and `turn` &ndash; [live example](motion-arm.html)
+- `l_elbow` and `r_elbow` &ndash; with property `bend` &ndash; [live example](motion-elbow.html)
+- `l_forearm` and `r_forearm` &ndash; with property `turn` &ndash; [live example](motion-forearm.html)
+- `l_wrist` and `r_wrist` &ndash; with properties `turn` and `tilt` &ndash; [live example](motion-wrist.html)
 
+
+<!--
+
+All figures (instances of `Mannequin`, `Male`, `Female` and `Child`) have the
+same set of properties and methods.
+
+
+* `bend`, `tilt`, `turn` &ndash; properties, body rotation
+* `posture`, `postureString` &ndash; properties, figure posture 
+* `stepOnGround()` &ndash; method, moves the figure vertically to reach the ground
+* `recolor(...)` &ndash; method, changes the colors of body parts
+
+All body parts have almost the same set of properties and methods. Some rotation
+properties are not available for all body parts (for biological reasons).
+
+* `posture` &ndash; property, posture of the body part (an array of its rotation angles)
+* `hide()`, `show()` &ndash; methods, shows and hides a body part
+* `attach(image)`, `detach(image)` &ndash; methods, attaches and detaches a custom image to a body part
+* `point(x,y,z)` &ndash; method, calculates global coordinates of local position (x,y,z) in respect to the body part
+* `recolor(...)` &ndash; method, changes the colors of a body part
+* `label(...)` &ndash; method, attaches a 3D text to a body part
+* `bend`, `tilt`, `turn` &ndash; properties, rotations of ankles, body, torse and wrists
+* `bend` &ndash; property, rotation of elbows and knees
+* `bend`, `straddle`, `turn` &ndash; properties, rotations of fingers
+* `raise`, `straddle`, `turn` &ndash; properties, rotations of arms and legs
+* `nod`, `tilt`, `turn` &ndash; properties, rotations of head
+
+-->
 
 
 ### new **Woman**( )<br>new **Woman**( *height* )
@@ -765,7 +795,7 @@ while `cameraLight` is attached to the `camera`. These variables
 
 This variable is the ground for the default world. It creates
 the illusion of a solid surface and hosts bodies' shadows.
-It is an instance of [`THREE.Mesh`](https://threejs.org/docs/?q=mesh#api/en/objects/Mesh)
+It is an instance of [`THREE.Mesh`](https://threejs.org/docs/#api/en/objects/Mesh)
  shaped by [`PlaneGeometry`](https://threejs.org/docs/#api/en/geometries/PlaneGeometry). 
 
 
@@ -781,33 +811,6 @@ an instance of [`OrbitControls`](https://threejs.org/docs/#examples/en/controls/
 A statistics panel used to show the current the performance
 of rendering the default world. It is an instance of [`Stats`](https://mrdoob.github.io/stats.js/).
 
-<!--
-
-All figures (instances of `Mannequin`, `Male`, `Female` and `Child`) have the
-same set of properties and methods.
-
-
-* `bend`, `tilt`, `turn` &ndash; properties, body rotation
-* `posture`, `postureString` &ndash; properties, figure posture 
-* `stepOnGround()` &ndash; method, moves the figure vertically to reach the ground
-* `recolor(...)` &ndash; method, changes the colors of body parts
-
-All body parts have almost the same set of properties and methods. Some rotation
-properties are not available for all body parts (for biological reasons).
-
-* `posture` &ndash; property, posture of the body part (an array of its rotation angles)
-* `hide()`, `show()` &ndash; methods, shows and hides a body part
-* `attach(image)`, `detach(image)` &ndash; methods, attaches and detaches a custom image to a body part
-* `point(x,y,z)` &ndash; method, calculates global coordinates of local position (x,y,z) in respect to the body part
-* `recolor(...)` &ndash; method, changes the colors of a body part
-* `label(...)` &ndash; method, attaches a 3D text to a body part
-* `bend`, `tilt`, `turn` &ndash; properties, rotations of ankles, body, torse and wrists
-* `bend` &ndash; property, rotation of elbows and knees
-* `bend`, `straddle`, `turn` &ndash; properties, rotations of fingers
-* `raise`, `straddle`, `turn` &ndash; properties, rotations of arms and legs
-* `nod`, `tilt`, `turn` &ndash; properties, rotations of head
-
--->
 
 <div class="footnote">
 	<a href="../">Home</a> &middot;
