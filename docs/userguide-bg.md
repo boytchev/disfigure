@@ -18,7 +18,7 @@
 
 Disfigure е библиотека за движение на фигури чрез промяна на
 матричното поле на пространството около тях. Ето абсурдно
-минимален [пример наживо](../examples/minimal-cdn.html).
+минимален пример [виж](../examples/minimal-cdn.html).
 
 ```js
 import * as Happy from 'disfigure'
@@ -36,7 +36,7 @@ new Happy.Man
 
 Disfigure дефинира класовете `Man(height)`, `Woman(height)`
 и `Child(height)`, а телата се създават като инстанции на
-тези класове &ndash; [пример наживо](../examples/body-shapes.html).
+тези класове &ndash; [виж](../examples/body-shapes.html).
 Незадължителният параметър *height* определя височината на
 тялото в метри &ndash; [live example](../examples/body-heights.html). По подразбиране
 мъж е висок 1.80м, жена е 1.70м и дете е 1.35м.
@@ -47,7 +47,7 @@ Disfigure дефинира класовете `Man(height)`, `Woman(height)`
 Всички видове тела имат една и съща структура, например главата
 е `head`. Левите и десните части на тялото са винаги спрямо
 тялото. Техните имена имат префикси `l_` за ляво и `r_` за
-дясно, например `l_arm` и `r_arm` &ndash; [пример наживо](../examples/body-parts.html):
+дясно, например `l_arm` и `r_arm` &ndash; [виж](../examples/body-parts.html):
 
 * **Централни части** &ndash; това са `head`, `chest`, `waist` и `torso`.
 * **Горни крайници** &ndash; това са `arm`, `elbow`, `forearm` и `wrist`.
@@ -94,7 +94,7 @@ man.waist.tilt = 35;
 
 И двете ръце, `l_arm` и `r_arm`, поддържат свойствата `foreward` (движение
 напред-назад), `straddle` (движение встрани) и `turn` (въртене около протежението
-на ръката) &ndash [пример наживо](../examples/motion-arm.html). Следващият код показва свойствата на дясната ръка, но същите са налични и за лявата ръка:
+на ръката) &ndash [виж](../examples/motion-arm.html). Следващият код показва свойствата на дясната ръка, но същите са налични и за лявата ръка:
 
 ``` javascript
 man.r_arm.foreward = 70;
@@ -105,8 +105,8 @@ man.r_arm.turn = 5;
 [<img src="../examples/snapshots/motion-arms-combined.jpg" width="48%">](../examples/motion-arms-combined.html)
 [<img src="../examples/snapshots/motion-arm.jpg" width="48%">](../examples/motion-arm.html)
 
-Завъртането на лактите `l_elbow` и `r_elbow` е само с `bend` &ndash; [пример наживо](../examples/motion-elbow.html), докато предмишниците
-`l_forearm` и `r_forearm` имат само `turn` &ndash; [пример наживо](motion-forearm.html)
+Завъртането на лактите `l_elbow` и `r_elbow` е само с `bend` &ndash; [виж](../examples/motion-elbow.html), докато предмишниците
+`l_forearm` и `r_forearm` имат само `turn` &ndash; [виж](motion-forearm.html)
 
 ``` javascript
 man.r_elbow.bend = 45;
@@ -117,7 +117,7 @@ man.r_forearm.turn = -20;
 [<img src="../examples/snapshots/motion-forearm.jpg" width="48%">](../examples/motion-forearm.html)
 
 Движенията на китките `l_wrist` и `r_wrist` са `bend` и `tilt`,
-като завъртането се очаква да се направи през предмишницата [пример наживо](example-wrist.html):
+като завъртането се очаква да се направи през предмишницата [виж](example-wrist.html):
 
 ``` javascript
 man.r_wrist.bend = -60;
@@ -134,7 +134,7 @@ man.r_wrist.tilt = 10;
 и глезен *ankle*.
 
 И двата крака **legs** поддържат свойствата `raise`, `straddle` и `turn`
-([пример наживо](example-leg.html)). Разкрачването `straddle` и завъртането `turn` са симетрични.
+([виж](example-leg.html)). Разкрачването `straddle` и завъртането `turn` са симетрични.
 
 ``` javascript
 figure.r_leg.raise = angle;
@@ -142,7 +142,7 @@ figure.r_leg.straddle = angle;
 figure.r_leg.turn = angle;
 ```
 
-Движението на коляното **knee** е само `bend` ([пример наживо](example-knee.html)). 
+Движението на коляното **knee** е само `bend` ([виж](example-knee.html)). 
 Отрицателни стойности на *angle* водят до неестествена поза на коляното.
 
 ``` javascript
@@ -150,7 +150,7 @@ figure.r_knee.bend = angle;
 ```
 
 Глезените **ankles** имат същите свойства като китките: `bend`, `turn`
-и `tilt` ([пример наживо](example-ankle.html)):
+и `tilt` ([виж](example-ankle.html)):
 
 ``` javascript
 figure.r_ankle.bend = angle;
@@ -167,7 +167,7 @@ figure.r_ankle.tilt = angle;
 на реда на завъртане води до различен резултат. Следващият пример показва
 навеждане на 45&deg;, завъртане на 90&deg; и накланяне встрани на 60&deg; на
 три фигури. Тъй като редът на завъртане е различен за всяка фигура, крайните
-им пози също са различни ([пример наживо](example-order.html)):
+им пози също са различни ([виж](example-order.html)):
 
 ``` javascript
 man.torso.bend += 45;
@@ -190,7 +190,7 @@ woman.torso.tilt += 60;
 фигура, частите на тялото ѝ заемат вградената
 поза по подразбиране. Ако не се изолзва редактор
 на поза, всички ротации трябва да бъдат дефинирани
-програмно ([пример наживо](example-posture.html)):
+програмно ([виж](example-posture.html)):
 
 [<img src="snapshots/example-posture.jpg">](example-posture.html)
 
@@ -245,7 +245,7 @@ man.r_wrist.turn -= 60;
 със същите свойства, които се използват за статична поза. Mannequin.js управлява
 динамичните пози чрез потребителска функция за анимация. Тази потребителска функция
 се извиква в цикъла на анимацията веднъж за всеки кадър. Всички промени в позата
-трябва да бъдат дефинирани във функцията ([пример наживо](example-dynamic.html)).
+трябва да бъдат дефинирани във функцията ([виж](example-dynamic.html)).
 Параметърът *t* е времето, измерено в секунди от стартирането на библиотеката.
 Името на потребителската функция се подава като параметър на `createStage()`.
 
@@ -349,7 +349,7 @@ man.recolor(
 
 Цветът на ставите и крайниците се отнася до всички стави и всички крайници.
 Цветовете на индивидуалните части от тялото могат да се променят чрез метода
-`recolor` на частите ([пример наживо](example-custom-colors.html)):
+`recolor` на частите ([виж](example-custom-colors.html)):
 
 [<img src="snapshots/example-custom-colors.jpg">](example-custom-colors.html)
 
@@ -392,7 +392,7 @@ figure.joint.hide( true );
 въртят и това се отразява на частите на тялото,
 прикрепени към тях. Следващият пример скрива двете
 ръце и двата крака, но те все още същестуват и се
-използват от лактите и коленете ([пример наживо](example-hide.html)):
+използват от лактите и коленете ([виж](example-hide.html)):
 
 [<img src="snapshots/example-hide.jpg">](example-hide.html)
 
@@ -418,7 +418,7 @@ figure.joint.show( true );
 неговите свойства и методи. Въпреки това, поради конструкцията
 на скелета и свързването на ставите, мащабирането на част от
 тялото трябва да е еднакво по всички оси, в противен случай
-позате трябва да бъде ръчно коригирана ([пример наживо](example-custom-sizes.html)):
+позате трябва да бъде ръчно коригирана ([виж](example-custom-sizes.html)):
 
 [<img src="snapshots/example-custom-sizes.jpg">](example-custom-sizes.html)
 
@@ -446,7 +446,7 @@ figure.joint.attach(object);
 Обектите могат да бъдат прикрепени към скрити части
 на тялото, но те не се скриват автоматично. Този
 подход се използва за замяна на част от тялото с
-изцяло собствен потребителски обект ([пример наживо](example-custom-body-parts.html)):
+изцяло собствен потребителски обект ([виж](example-custom-body-parts.html)):
 
 [<img src="snapshots/example-custom-body-parts.jpg">](example-custom-body-parts.html)
 
@@ -487,7 +487,7 @@ man.r_leg.attach(obj);
 от тялото.
 
 Следващият пример създава въже, преминаващо през 5 точки
-от частите на тялото на фигура ([пример наживо](example-point.html)):
+от частите на тялото на фигура ([виж](example-point.html)):
 
 [<img src="snapshots/example-point.jpg">](example-point.html)
 
@@ -509,7 +509,7 @@ setLoopVertex( 4, man.r_ankle.point(6,2,0) );
 обувка (т.е. `man.l_ankle`). Контактните точки са показани
 като червени точки. Минималното вертикално положение на 
 контактни точки се използва за регулиране на вертикалното
-положение на фигурата ([пример наживо](example-touch-ground.html)):
+положение на фигурата ([виж](example-touch-ground.html)):
 
 [<img src="snapshots/example-touch-ground.jpg">](example-touch-ground.html)
 
@@ -577,7 +577,7 @@ man.stepOnGround();
 * указателите към Three.js и mannequin.js трябва да бъдат дефинирани като importmaps
 
 Донякъде минимална програма, която използва mannequin.js от този CDN, е показана
-в този [пример наживо](example-minimal-cdn.html). Ако файлът е свален локално, той
+в този [виж](example-minimal-cdn.html). Ако файлът е свален локално, той
 може да се стартира директно без допълнителна инсталация. Указателите в importmaps в
 примера сочат към конкретна версия на Three.js и към най-новата версия на mannequin.js.
 
@@ -776,7 +776,7 @@ setAnimationLoop( animate );
 ### **random**( )<br>**random**( *min*, *max* )
 
 Генерира равномерно разпределени случайни числа в интервала
-[*min*,*max*) &ndash; [пример наживо](../examples/number-generators.html).
+[*min*,*max*) &ndash; [виж](../examples/number-generators.html).
 По подразбиране *min*=-1 и *max*=1. Вътрешно използва генератор
 на псевдослучайни числа.
 
@@ -789,7 +789,7 @@ man.head.turn = random( -60, 60 );
 ### **regular**( *time* )<br>**regular**( *time*, *offset* )<br>**regular**( *time*, *offset*, *min*, *max* )
 
 Генерира осцилираща поредица от числа в интервала [*min*,*max*]
-&ndash; [пример наживо](../examples/number-generators.html). По подразбиране
+&ndash; [виж](../examples/number-generators.html). По подразбиране
 *offset*=0, *min*=-1 и *max*=1. Вътрешно използва функцията
 синус. Параметърът *offset* премества осцилацията напред
 или назад във времето.
@@ -802,7 +802,7 @@ man.head.turn = regular( time, 0, -60, 60 );
 ### **chaotic**( *time* )<br>**chaotic**( *time*, *offset* )<br>**chaotic**( *time*, *offset*, *min*, *max* )
 
 Генерира хаотична (случайна, но плавно променяща се) поредица
-от числа в интервала [*min*,*max*] &ndash; [пример наживо](../examples/number-generators.html).
+от числа в интервала [*min*,*max*] &ndash; [виж](../examples/number-generators.html).
 По подразбиране *offset=0, *min*=-1 и *max*=1. Вътрешно използва
 функция за симплекс шум. Параметърът *offset* премества поредицата
 напреки времето, т.е. два генератора с различни отмествания

@@ -1,25 +1,18 @@
 <img class="logo" src="../assets/logo/logo.png">
 
 
-# Disfigure: User Guide and API
+# Disfigure: User Guide
 
 
-## <small><small>[Bodies](#bodies) [[*shapes*](#body-shapes) &middot; [*motions*](#body-motions)] [API](#api) [[*classes*](#api-classes) &middot; [*functions*](#api-functions) &middot; [*variables*](#api-variables)]</small></small>
+## <small><small>[Figures](#figure-shapes) &middot; [Motions](#figure-motions) &middot; [Worlds](#world) &middot; [Others](#others)</small></small>
 
 
 
-## <small><small>Този документ е наличен и на [български език](userguide-bg.md)</small></small>
-
-<!--
-- <small>[Lower limbs](#lower-limbs)</small>)
-- **[Body posture](#body-posture)** (<small>[Static](#static-posture) | [Dynamic](#dynamic-posture) | [Working with postures](#working-with-postures)</small>)
-- **[Other functions](#other-functions)** (<small>[Colors](#custom-colors) | [Body modification](#body-modification) | [Positioning](#global-position)</small>)
-- **[Using Mannequin.js](#using-mannequinjs)** (<small>[CDN](#running-from-a-cdn) | [local web server](#running-via-a-local-web-server) | [Nodes.js](#running-via-nodesjs) | [API](#api)</small>) 
--->
+<!--## <small><small>Този документ е наличен и на [български език](userguide-bg.md)</small></small>-->
 
 Disfigure is a library for animating human figures by modifying
 a matrix field of the space around them. Here is an absurdly
-minimal [live example](../examples/minimal-cdn.html).
+minimal demo &ndash; [see it live](../examples/minimal.html).
 
 ```js
 import * as Happy from 'disfigure'
@@ -28,94 +21,133 @@ new Happy.World
 new Happy.Man
 ```
 
-# Bodies
+# Figures
 
-## Body shapes
+### new **Man**( *height* )<br>new **Woman**( *height* )<br>new **Child**( *height* )
 
-Disfigure defines classes `Male(height)`, `Female(height)`
-and `Child(height)`, and bodies are created as instances of
-these classes &ndash; [live example](../examples/body-shapes.html). The optional
-parameter *height* defines the height of the body in meters
- &ndash; [live example](../examples/body-heights.html). By default a man is
-tall 1.80m, a woman is 1.70m and a child is 1.35m.
-
-[<img src="../examples/snapshots/body-shapes.jpg" width="48%">](../examples/body-shapes.html)
-[<img src="../examples/snapshots/body-heights.jpg" width="48%">](../examples/body-heights.html)
-
-All types of bodies have the same structure, for example,
-the head is called `head`. Left and right body parts are
-always in respect to the figure. Their names have prefixes
-`l_` for left and `r_` for right, like `l_arm` and `r_arm`
-&ndash; [live example](../examples/body-parts.html):
-
-* **Central parts** &ndash; these are `head`, `chest`, `waist` and `torso`.
-* **Upper limbs** &ndash; these are `arm`, `elbow`, `forearm` and `wrist`.
-* **Lower limbs** &ndash; these are `leg`, `thigh`, `knee`, `shin`, `ankle` and `foot`.
-
-[<img src="../examples/snapshots/body-parts.jpg">](../examples/body-parts.html)
-
-
-
-
-## Body motions
-
-The motion of body parts is done by manipulating their properties. Motions are
-just rotations measured in degrees. The `torso` is the root body part and
-rotating the torso totates the whole body.
-
-#### Motion of body 
-
-The motion properties of the central body parts are `bend`, `turn` and `tilt`
-&ndash; [live example](../examples/motion-central.html).
-The `bend` corresponds to forward-backward bending, positive angles are foreward,
-negative angles are backward. The `turn` corresponds to left-right rotations,
-positive angles are to left, negative angles are to right. The `tilt` corresponds
-to tilting sideways, positive angles are to the left, negative angles are to the right.
+Disfigure defines figures as instances of classes `Man`, `Woman`
+and `Child` &ndash; [see it](../examples/body-shapes.html).
+The optional parameter *height* defines the height of a figure
+in meters &ndash; [see it](../examples/body-heights.html).
+By default a man is 1.80m, a woman is 1.70m and a child is 1.35m.
 
 ```js
-man.head.bend = 40;
-man.chest.turn = -20;
-man.waist.tilt = 35;
+var man = new Happy.Man( 1.90 );
+var woman = new Happy.Woman( );
 ```
 
+[<img src="../examples/snapshots/figure-create-basic.jpg" width="48%">](../examples/figure-create-basic.html)
+[<img src="../examples/snapshots/figure-create-height.jpg" width="48%">](../examples/figure-create-height.html)
 
-[<img src="../examples/snapshots/motion-central.jpg">](../examples/motion-central.html)
+All types of figures have the exact same structure with names
+corresponding to body parts, like `head` and `chest`. Left and
+right body parts are always in respect to the figure. Their
+names have prefixes `l_···` for left and `r_···` for right, so
+there is `l_knee` and `r_knee` &ndash; [see it](../examples/body-parts.html):
+
+* **Whole body** &ndash; `torso`
+* **Central parts** &ndash; `head`, `chest`, `waist`
+* **Upper limbs** &ndash; `arm`, `elbow`, `forearm`, `wrist`
+* **Lower limbs** &ndash; `leg`, `thigh`, `knee`, `shin`, `ankle`, `foot`
+
+[<img src="../examples/snapshots/figure-parts.jpg">](../examples/figure-parts.html)
 
 
-#### Motion of arms 
 
-The arms are symmetrical body parts: `l_arm`, `l_elbow`, `l_forearm` and `l_wrist`
-for the left side of the body; and `r_arm`, `r_elbow`, `r_forearm` and `r_wrist` for
-the right side. Because of the multiple joints and their flexibility arms have
-a complex motion &ndash; [live example](../examples/motion-arms-combined.html).
 
-Both arms, `l_arm` and `r_arm`, support properties `foreward`, `straddle` and
-`turn` &ndash; [live example](motion-arm.html). The following list refers to
-the right arm, however, the same properties are available for the left arm:
+# Motions
+
+## Central parts
+
+The motion of a figure is done by manipulating properties of
+body parts. Motions are just rotations measured in degrees.
+
+### figure.**torso**<br>figure.**head**<br>figure.chest<br>figure.**waist**
+
+The `torso` is the root body part and its rotation affects
+the whole body. Torso has properties `bend`, `turn` and `tilt`
+&ndash; [see it](../examples/motion-torso.html). The central
+body parts are `head`, `chest` and `waist`. They have the
+same set of properties as the torso &ndash; [see it](../examples/motion-central.html).
+
+* `bend` &ndash; bends foreward or backward
+* `turn` &ndash; turns to the left or right
+* `tilt` &ndash; tilts sideways to the left or right
+
+```js
+figure.torso.bend = 40;
+figure.head.bend = 40;
+figure.chest.turn = -20;
+figure.waist.tilt = 35;
+```
+
+[<img src="../examples/snapshots/motion-torso.jpg" width="48%">](../examples/motion-torso.html)
+[<img src="../examples/snapshots/motion-central.jpg" width="48%">](../examples/motion-central.html)
+
+
+
+## Upper limb motions
+
+
+### figure.**l_arm**<br>figure.**r_arm**
+
+The upper limbs are symmetrical body parts with multiple joints
+and rotation properties that recreate a complex and flexible
+motion &ndash; [see it](../examples/motion-limbs-upper.html).
+Arms have `foreward`, `turn` and `straddle` &ndash; [see it](../examples/motion-arm.html)
+
+* `foreward` &ndash; moves an arm foreward (or backward)
+* `turn` &ndash; turns an arm inwards (or outwards)
+* `straddle` &ndash; moves an arm sideways to the body (or away from the body)
 
 ``` javascript
-man.r_arm.foreward = 70;
-man.r_arm.straddle = -30;
-man.r_arm.turn = 5;
+figure.r_arm.foreward = 70;
+figure.r_arm.straddle = -30;
+figure.r_arm.turn = 5;
 ```
 
-[<img src="../examples/snapshots/motion-arms-combined.jpg" width="48%">](../examples/motion-arms-combined.html)
+[<img src="../examples/snapshots/motion-limbs-upper.jpg" width="48%">](../examples/motion-limbs-upper.html)
 [<img src="../examples/snapshots/motion-arm.jpg" width="48%">](../examples/motion-arm.html)
 
 
-The motion of elbows `l_elbow` and `r_elbow` is only `bend` &ndash; [live example](motion-elbow.html), while
-the forearms `l_forearm` and `r_forearm` have only `turn` &ndash; [live example](motion-forearm.html):
+### figure.**l_elbow**<br>figure.**r_elbow**
+
+Elbows `l_elbow` and `r_elbow` have limited motions. Elbows
+have only `bend` &ndash; [see it](../examples/motion-elbow.html).
+
+* `bend` &ndash; bends an elbow towards the body (or away from the body)
 
 ``` javascript
-man.r_elbow.bend = 45;
-man.r_forearm.turn = -20;
+figure.r_elbow.bend = 45;
 ```
 
 [<img src="../examples/snapshots/motion-elbow.jpg" width="48%">](../examples/motion-elbow.html)
+
+
+### figure.**l_forearm**<br>figure.**r_forearm**
+
+Forearms `l_forearm` and `r_forearm` have limited motions.
+Forearms have only `turn` &ndash; [see it](../examples/motion-forearm.html).
+
+* `turn` &ndash; turns a forearm inwards (or outwards)
+
+``` javascript
+figure.r_forearm.turn = -20;
+```
+
 [<img src="../examples/snapshots/motion-forearm.jpg" width="48%">](../examples/motion-forearm.html)
 
-The wrists motions of wrist `l_wrist` and `r_wrist` are `bend` and `tilt`,
-as turning is supposed to be handles by the forearm [live example](example-wrist.html):
+
+### figure.**l_wrist**<br>figure.**r_wrist**
+
+Wrists `l_wrist` and `r_wrist` support `bend` and `tilt` &ndash;
+[see it](../examples/example-wrist.html). Wrist have no turns,
+as turning is done in the forearm or the arm.
+
+Motions of `l_wrist` and `r_wrist`:
+
+* `bend` &ndash; bends a wrist down or up
+* `turn` &ndash; turns a wrist foreward or backward
 
 ``` javascript
 man.r_wrist.bend = -60;
@@ -124,13 +156,14 @@ man.r_wrist.tilt = 10;
 
 [<img src="../examples/snapshots/motion-wrist.jpg" width="48%">](../examples/motion-wrist.html)
 
+
 <!--
 
 ### Lower limbs
 
 The lower limbs are symmetrical body parts: *leg*, *knee* and *ankle*.
 
-Both **legs** support properties `raise`, `straddle` and `turn` ([live example](example-leg.html)). Straddling and turning are symmetrical.
+Both **legs** support properties `raise`, `straddle` and `turn` ([see it](example-leg.html)). Straddling and turning are symmetrical.
 
 ``` javascript
 figure.r_leg.raise = angle;
@@ -138,13 +171,13 @@ figure.r_leg.straddle = angle;
 figure.r_leg.turn = angle;
 ```
 
-The motion of the **knee** is only `bend` ([live example](example-knee.html)). Negative values for *angle* result in unnatural knee position.
+The motion of the **knee** is only `bend` ([see it](example-knee.html)). Negative values for *angle* result in unnatural knee position.
 
 ``` javascript
 figure.r_knee.bend = angle;
 ```
 
-The **ankles** have the same properties as the wrists: `bend`, `turn` and `tilt` ([live example](example-ankle.html)):
+The **ankles** have the same properties as the wrists: `bend`, `turn` and `tilt` ([see it](example-ankle.html)):
 
 ``` javascript
 figure.r_ankle.bend = angle;
@@ -156,7 +189,7 @@ figure.r_ankle.tilt = angle;
 
 # Body posture
 
-The posture of a figure is defined by a setting the rotation properties of body parts. The order of rotations is important, i.e. changing the order of rotations produce different result. The next example applies bending 45&deg;, turning 90&deg; and tilting 60&deg; of three figures. As the order of rotations is different for each figure, the final position is also different ([live example](example-order.html)):
+The posture of a figure is defined by a setting the rotation properties of body parts. The order of rotations is important, i.e. changing the order of rotations produce different result. The next example applies bending 45&deg;, turning 90&deg; and tilting 60&deg; of three figures. As the order of rotations is different for each figure, the final position is also different ([see it](example-order.html)):
 
 ``` javascript
 man.torso.bend += 45;
@@ -174,7 +207,7 @@ woman.torso.tilt += 60;
 
 ### Static posture
 
-The static posture defines the position of body part that do not change. By default, when a figure is created, its body parts are set to the default posture. If the posture editor is not used, all rotations has to be defined programmatically ([live example](example-posture.html)):
+The static posture defines the position of body part that do not change. By default, when a figure is created, its body parts are set to the default posture. If the posture editor is not used, all rotations has to be defined programmatically ([see it](example-posture.html)):
 
 [<img src="snapshots/example-posture.jpg">](example-posture.html)
 
@@ -226,7 +259,7 @@ The dynamic posture &ndash; i.e. a posture that changes over time &ndash; is set
 with the same properties that are used for static posture. Mannequin.js manages
 dynamic posture by a user-defined function called in the animation loop once for
 each frame. All changes of a posture should be defined inside this function
-([live example](example-dynamic.html)). The parameter *t* is the time, measured
+([see it](example-dynamic.html)). The parameter *t* is the time, measured
 in seconds since the start of the library. The name of the user-defined function
 is passed as an argument to `createStage()`.
 
@@ -318,7 +351,7 @@ man.recolor(
 ```
 
 The color of joints and limbs refers to all joints and all limbs. 
-Individual colors of body parts are set via the `recolor` method of each body part ([live example](example-custom-colors.html)):
+Individual colors of body parts are set via the `recolor` method of each body part ([see it](example-custom-colors.html)):
 
 [<img src="snapshots/example-custom-colors.jpg">](example-custom-colors.html)
 
@@ -359,7 +392,7 @@ figure.joint.hide( true );
 where *joint* is the name of the body part to hide. Hidden body parts can still
 be rotated and this affects the other body parts attached to them. The following
 example hides both arms and both legs, but they are still preserved internally
-and used by elbows and knees ([live example](example-hide.html)):
+and used by elbows and knees ([see it](example-hide.html)):
 
 [<img src="snapshots/example-hide.jpg">](example-hide.html)
 
@@ -384,7 +417,7 @@ figure.joint.show( true );
 Body parts are descendants of [`THREE.Object3D`](https://threejs.org/docs/#api/en/core/Object3D)
 and support its properties and methods. However, due to the skeletal dependency
 and joint attachment, scaling of a body part should be congruent along all axes,
-otherwise positions need to be adjusted ([live example](example-custom-sizes.html)):
+otherwise positions need to be adjusted ([see it](example-custom-sizes.html)):
 
 [<img src="snapshots/example-custom-sizes.jpg">](example-custom-sizes.html)
 
@@ -406,7 +439,7 @@ Any custom `THREE.Object3D` could be attached to a body part. The attached objec
 figure.joint.attach(object);
 ```
 
-Objects can be attached to hidden body parts, but they are not automatically hidden. This approach is used to replace a body part with entirely custom user object ([live example](example-custom-body-parts.html)):
+Objects can be attached to hidden body parts, but they are not automatically hidden. This approach is used to replace a body part with entirely custom user object ([see it](example-custom-body-parts.html)):
 
 [<img src="snapshots/example-custom-body-parts.jpg">](example-custom-body-parts.html)
 
@@ -446,7 +479,7 @@ and calculates the global coordinates of the point *(x,y,z)*, defined in the
 local coordinate system of the body part.
 
 The following example creates a thread going through 5 points relative to body
-parts of a figure ([live example](example-point.html)):
+parts of a figure ([see it](example-point.html)):
 
 [<img src="snapshots/example-point.jpg">](example-point.html)
 
@@ -466,7 +499,7 @@ position.
 The following example uses four contact points on the left shoe (i.e. `man.l_ankle`).
 The contacts points are shown as red dots. The minimal vertical position of the
 contact points is used to adjust the vertical position of the figure
-([live example](example-touch-ground.html)):
+([see it](example-touch-ground.html)):
 
 [<img src="snapshots/example-touch-ground.jpg">](example-touch-ground.html)
 
@@ -532,7 +565,7 @@ The main disadvantages of using a CDN are:
 * pointers to Three.js and mannequin.js must be defined as importmaps
 
 A somewhat minimal program that uses mannequin.js from this CDN is shown
-in this [live example](example-minimal-cdn.html). If the file is downloaded, it
+in this [see it](example-minimal-cdn.html). If the file is downloaded, it
 could be run locally without any additional installation. The importmaps in the
 example point to specific release of Three.js and to the latest version of mannequin.js.
 
@@ -613,85 +646,7 @@ know how to fix it, please get in touch.
 -->
 
 
-# API
-
-## API classes
-
-
-### new **Man**( )<br>new **Man**( *height* )
-
-Creates a male body with given *height*. As an object it is 
-[THREE.Group](https://threejs.org/docs/#api/en/objects/Group), but it hasadditional properties.
-
-```js
-var person = new Man( );
-```
-
-Central body parts:
-
-- `head` &ndash; with properties `bend`, `turn` and `tilt`
-- `chest` &ndash; with properties `bend`, `turn` and `tilt`
-- `waist` &ndash; with properties `bend`, `turn` and `tilt`
-- `torso` &ndash; the whole body with properties `bend`, `turn` and `tilt`
-
-Upper limbs:
-
-- `l_arm` and `r_arm` &ndash; with properties `foreward`, `straddle` and `turn` &ndash; [live example](motion-arm.html)
-- `l_elbow` and `r_elbow` &ndash; with property `bend` &ndash; [live example](motion-elbow.html)
-- `l_forearm` and `r_forearm` &ndash; with property `turn` &ndash; [live example](motion-forearm.html)
-- `l_wrist` and `r_wrist` &ndash; with properties `turn` and `tilt` &ndash; [live example](motion-wrist.html)
-
-
-<!--
-
-All figures (instances of `Mannequin`, `Male`, `Female` and `Child`) have the
-same set of properties and methods.
-
-
-* `bend`, `tilt`, `turn` &ndash; properties, body rotation
-* `posture`, `postureString` &ndash; properties, figure posture 
-* `stepOnGround()` &ndash; method, moves the figure vertically to reach the ground
-* `recolor(...)` &ndash; method, changes the colors of body parts
-
-All body parts have almost the same set of properties and methods. Some rotation
-properties are not available for all body parts (for biological reasons).
-
-* `posture` &ndash; property, posture of the body part (an array of its rotation angles)
-* `hide()`, `show()` &ndash; methods, shows and hides a body part
-* `attach(image)`, `detach(image)` &ndash; methods, attaches and detaches a custom image to a body part
-* `point(x,y,z)` &ndash; method, calculates global coordinates of local position (x,y,z) in respect to the body part
-* `recolor(...)` &ndash; method, changes the colors of a body part
-* `label(...)` &ndash; method, attaches a 3D text to a body part
-* `bend`, `tilt`, `turn` &ndash; properties, rotations of ankles, body, torse and wrists
-* `bend` &ndash; property, rotation of elbows and knees
-* `bend`, `straddle`, `turn` &ndash; properties, rotations of fingers
-* `raise`, `straddle`, `turn` &ndash; properties, rotations of arms and legs
-* `nod`, `tilt`, `turn` &ndash; properties, rotations of head
-
--->
-
-
-### new **Woman**( )<br>new **Woman**( *height* )
-
-Creates a female body with given *height*. It has the same properties and
-functionalities as `Man`.
-
-```js
-var person = new Woman( );
-```
-
-
-
-### new **Child**( )<br>new **Child**( *height* )
-
-Creates a child body with given *height*. It has the same properties and
-functionalities as `Man`.
-
-```js
-var person = new Child( );
-```
-
-
+# Worlds
 
 ### new **World**( )<br>new **World**( *features* )
 
@@ -710,9 +665,6 @@ It is a set of the following options:
 new World( {ground: false, stats: true} );
 ```
 
-
-## API functions
-
 ### **userAnimationLoop**( *animate* )
 
 Sets the user-defined function *animate* to be called from the main
@@ -726,62 +678,6 @@ function animate( ms ) {...}
 setAnimationLoop( animate );
 ```
 
-
-
-### **random**( )<br>**random**( *min*, *max* )
-
-
-Generates uniformly distributed random numbers in the interval [*min*,*max*)
-&ndash; [live example](../examples/number-generators.html).
-By default *min*=-1 and *max*=1. Internally uses a
-pseudo-random function.
-
-```js
-man.head.turn = random( -60, 60 );
-```
-
-
-
-### **regular**( *time* )<br>**regular**( *time*, *offset* )<br>**regular**( *time*, *offset*, *min*, *max* )
-
-Generates an oscilating sequence of numbers in the interval [*min*,*max*]
-&ndash; [live example](../examples/number-generators.html).
-By default *offset*=0, *min*=-1 and *max*=1. Internally uses
-the sine function. Parameter *offset* shifts the oscillation
-foreward or backward in time.
-
-```js
-man.head.turn = regular( time, 0, -60, 60 );
-```
-
-
-
-### **chaotic**( *time* )<br>**chaotic**( *time*, *offset* )<br>**chaotic**( *time*, *offset*, *min*, *max* )
-
-Generates a chaotic (random, but gradually changing) sequence
-of numbers in the interval [*min*,*max*] &ndash;
-[live example](../examples/number-generators.html). By default *offset*=0,
-*min*=-1 and *max*=1. Internally uses a simplex noise function.
-Parameter *offset* shifts the sequence across the time, i.e. two
-generators with different offsets produce different sequences.
-
-```js
-man.head.turn = chaotic( time, 0, -60, 60 );
-```
-
-
-
-
-
-## API variables
-
-
-### **everybody**
-
-An array of all created bodies. Usually used to traverse them
-and do some operation on all bodies.
-
-
 ### **renderer**<br>**scene**<br>**camera**<br>**light**<br>**cameraLight**
 
 These are core rendering variables that are created only for
@@ -789,6 +685,9 @@ a default world. The `light` is a static light casting shadows,
 while `cameraLight` is attached to the `camera`. These variables
  are instances of the following Three.js classes: [`THREE.Scene`](https://threejs.org/docs/#api/en/scenes/Scene),[`THREE.PerspectiveCamera`](https://threejs.org/docs/#api/en/cameras/PerspectiveCamera) and 
 [`THREE.DirectionalLight`](https://threejs.org/docs/#api/en/lights/DirectionalLight).
+They are used to modify the predefined world &ndash; [see it](../examples/world-customize.html):
+
+[<img src="../examples/snapshots/world-customize.jpg" width="48%">](../examples/world-customize.html)
 
 
 ### **ground**
@@ -810,6 +709,61 @@ an instance of [`OrbitControls`](https://threejs.org/docs/#examples/en/controls/
 
 A statistics panel used to show the current the performance
 of rendering the default world. It is an instance of [`Stats`](https://mrdoob.github.io/stats.js/).
+
+
+
+
+# Others
+
+
+
+### **random**( )<br>**random**( *min*, *max* )
+
+Generates uniformly distributed random numbers in the interval [*min*,*max*)
+&ndash; [see it](../examples/number-generators.html).
+By default *min*=-1 and *max*=1. Internally uses a
+pseudo-random function.
+
+```js
+figure.head.turn = random( -60, 60 );
+```
+
+
+
+### **regular**( *time* )<br>**regular**( *time*, *offset* )<br>**regular**( *time*, *offset*, *min*, *max* )
+
+Generates an oscilating sequence of numbers in the interval [*min*,*max*]
+&ndash; [see it](../examples/number-generators.html).
+By default *offset*=0, *min*=-1 and *max*=1. Internally uses
+the sine function. Parameter *offset* shifts the oscillation
+foreward or backward in time.
+
+```js
+figure.head.turn = regular( time, 0, -60, 60 );
+```
+
+
+
+### **chaotic**( *time* )<br>**chaotic**( *time*, *offset* )<br>**chaotic**( *time*, *offset*, *min*, *max* )
+
+Generates a chaotic (random, but gradually changing) sequence
+of numbers in the interval [*min*,*max*] &ndash;
+[see it](../examples/number-generators.html). By default *offset*=0,
+*min*=-1 and *max*=1. Internally uses a simplex noise function.
+Parameter *offset* shifts the sequence across the time, i.e. two
+generators with different offsets produce different sequences.
+
+```js
+figure.head.turn = chaotic( time, 0, -60, 60 );
+```
+
+
+
+### **everybody**
+
+An array of all created bodies. Usually used to traverse them
+and do some operation on all bodies.
+
 
 
 <div class="footnote">

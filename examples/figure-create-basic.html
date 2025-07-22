@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Basic creation of figures</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		import * as Red from 'label';
+
+
+		// create a default world
+
+		new Happy.World();
+
+
+		// create a man, a woman and a child
+
+		var man = new Happy.Man( );
+			man.position.x = -1;
+			man.head.attach( new Red.Label( 'man', 1, 0, 0.3, 0 ) );
+			
+		var woman = new Happy.Woman( );
+			woman.position.x = 1;
+			woman.head.attach( new Red.Label( 'woman', 1, 0, 0.3, 0 ) );
+			
+		var child = new Happy.Child( );
+			child.head.attach( new Red.Label( 'child', 1, 0, 0.3, 0 ) );
+			
+
+		// move the people
+		
+		Happy.setAnimationLoop( ( t )=>{
+
+			for ( var somebody of Happy.everybody ) {
+
+				somebody.head.turn = Happy.chaotic( t/4000, somebody.uid, -40, 40 );
+				somebody.head.bend = Happy.chaotic( t/4000, -somebody.uid, -20, 60 );
+				somebody.waist.turn = somebody.head.turn;
+
+			}
+
+		} );
+		
+	</script>
+</body>
+</html>

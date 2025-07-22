@@ -22,49 +22,54 @@
 		new Happy.World( );
 
 
-		// create three men next to each other
+		// create three persons next to each other
 		
-		var man1 = new Happy.Man( ),
-			man2 = new Happy.Man( ),
-			man3 = new Happy.Man( );
+		var man = new Happy.Man(),
+			woman = new Happy.Woman(),
+			child = new Happy.Child();
 
-		man1.position.x = -1;
-		man3.position.x = 1;
+		man.position.x = -1;
+		woman.position.x = 1;
 
 
 		// add labels indicating their motion style
 		
-		man1.l_arm.attach( new Red.Label( 'turn', 1, 0.15, 0.18, 0 ) );
-		man2.l_arm.attach( new Red.Label( 'foreward', 1, 0.15, 0.18, 0 ) );
-		man3.l_arm.attach( new Red.Label( 'straddle', 1, 0.18, 0.18, 0 ) );
+		man.l_arm.attach( new Red.Label( 'turn', 0.8, 0.15, 0.16, 0 ) );
+		man.r_arm.attach( new Red.Label( 'turn', 0.8, -0.15, 0.16, 0 ) );
+		
+		woman.l_arm.attach( new Red.Label( 'foreward', 0.8, 0.22, 0.14, 0 ) );
+		woman.r_arm.attach( new Red.Label( 'foreward', 0.8, -0.22, 0.14, 0 ) );
+		
+		child.l_arm.attach( new Red.Label( 'straddle', 0.8, 0.23, 0.10, 0 ) );
+		child.r_arm.attach( new Red.Label( 'straddle', 0.8, -0.23, 0.10, 0 ) );
 
 
 		// animate the men
 		
 		Happy.setAnimationLoop( ( t )=>{
 
-			t = t/1000;
+			t = t/2000;
 
 			// motions of arms
 			
-			man1.l_arm.turn = Happy.chaotic( t, 0, -60, 60 );
-			man1.r_arm.turn = Happy.chaotic( t, 1, -60, 60 );
+			man.l_arm.turn = Happy.chaotic( t, 0, -60, 60 );
+			man.r_arm.turn = Happy.chaotic( t, 1, -60, 60 );
 
-			man2.l_arm.foreward = Happy.chaotic( t, 2, -20, 80 );
-			man2.r_arm.foreward = Happy.chaotic( t, 3, -20, 80 );
+			woman.l_arm.foreward = Happy.chaotic( t, 2, -40, 80 );
+			woman.r_arm.foreward = Happy.chaotic( t, 3, -40, 80 );
 
-			man3.l_arm.straddle = Happy.chaotic( t, 4, -20, 60 );
-			man3.r_arm.straddle = Happy.chaotic( t, 5, -20, 60 );
+			child.l_arm.straddle = Happy.chaotic( t, 4, -40, 80 );
+			child.r_arm.straddle = Happy.chaotic( t, 5, -40, 80 );
 
 			// some general motion of the bodies
 			
-			man1.waist.turn = Happy.chaotic( t/4, 6, 0, 30 );
-			man2.waist.turn = Happy.chaotic( t/4, 7, -10, 10 );
-			man3.waist.turn = Happy.chaotic( t/4, 8, -30, 10 );
+			man.waist.turn = Happy.chaotic( t/4, 6, 0, 30 );
+			woman.waist.turn = Happy.chaotic( t/4, 7, -10, 10 );
+			child.waist.turn = Happy.chaotic( t/4, 8, -30, 10 );
 
-			man1.head.turn = man1.waist.turn;
-			man2.head.turn = man2.waist.turn;
-			man3.head.turn = man3.waist.turn;
+			man.head.turn = man.waist.turn;
+			woman.head.turn = woman.waist.turn;
+			child.head.turn = child.waist.turn;
 
 		} );
 

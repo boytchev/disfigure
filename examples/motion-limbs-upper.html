@@ -5,7 +5,7 @@
 <body>
 	<header>
 		<h1><b>Disfigure</b></h1>
-		<h3>Combined motions for the arms</h3></br>
+		<h3>Combined motions for the upper limbs</h3></br>
 	</header>
 
 	<div id="spinner"></div>
@@ -30,6 +30,7 @@
 		man.position.x = -0.75;
 		woman.position.x = 0.75;
 
+
 		// animate the arms
 		
 		function animate( event ) {
@@ -39,11 +40,11 @@
 
 			// arms
 			
-			someone.l_arm.straddle = Happy.chaotic( t, 5, -10, 60 );
+			someone.l_arm.straddle = Happy.chaotic( t, 5, 30, 70 );
 			someone.l_arm.turn = Happy.chaotic( t, 6, -10, 70 );
 			someone.l_arm.foreward = Happy.chaotic( t, 7, -20, 80 );
 
-			someone.r_arm.straddle = Happy.chaotic( t, -5, -10, 60 );
+			someone.r_arm.straddle = Happy.chaotic( t, -5, 30, 70 );
 			someone.r_arm.turn = Happy.chaotic( t, -6, -10, 70 );
 			someone.r_arm.foreward = Happy.chaotic( t, -7, -20, 80 );
 
@@ -53,12 +54,10 @@
 			someone.l_forearm.turn = Happy.chaotic( t, 11, -45, 45 );
 			someone.r_forearm.turn = Happy.chaotic( t, -8, -45, 45 );
 
-			someone.l_wrist.bend = Happy.chaotic( t, -2, -60, 60 );
-			someone.l_wrist.turn = Happy.chaotic( t, -3, -45, 45 );
+			someone.l_wrist.bend = Happy.chaotic( t, -2, -90, 90 );
 			someone.l_wrist.tilt = Happy.chaotic( t, -2, -40, 40 );
 
-			someone.r_wrist.bend = Happy.chaotic( t, -1, -60, 60 );
-			someone.r_wrist.turn = Happy.chaotic( t, -4, -45, 45 );
+			someone.r_wrist.bend = Happy.chaotic( t, -1, -90, 90 );
 			someone.r_wrist.tilt = Happy.chaotic( t, -1, -40, 40 );
 
 			// body

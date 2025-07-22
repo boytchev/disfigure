@@ -5,7 +5,7 @@
 <body>
 	<header>
 		<h1><b>Disfigure</b></h1>
-		<h3>Custom heights for bodies</h3></br>
+		<h3>Massive creation of figures of different heights</h3></br>
 	</header>
 
 	<div id="spinner"></div>
@@ -24,31 +24,38 @@
 
 		// position the camera for a better view
 
-		Happy.camera.position.set( 6, 1.5, 0 );
+		Happy.camera.position.set( 5, 1.5, 0 );
 		Happy.controls.autoRotate = true;
 		Happy.controls.autoRotateSpeed = 0.5;
 
 
-		// create 10 men with labels above heads
+		// moves a figure at random position and shows the
+		// height as a label above the head
 
-		for ( var i=0; i<10; i++ ) {
+		function add( figure ) {
+		
+			figure.position.set( Happy.random(-3,3), 0, Happy.random(-3,3) );
+			figure.torso.turn = Happy.random(0,360);
 
-			var man = new Happy.Man( 1 + Math.random() );
-
-			var a = i/10 * 2*Math.PI;
-
-			man.position.set( 1.5*Math.cos( a ), 0, 1.5*Math.sin( a ) );
-			man.rotation.y = -Math.PI/2-a;
-
-			var label = new Red.Label( man.height.toFixed( 2 ), 1 );
+			var label = new Red.Label( figure.height.toFixed( 2 ), 1 );
 			label.position.set( 0, 0.3, 0 );
 
-			man.head.attach( label );
+			figure.head.attach( label );
+		}
+		
+		
+		// create 10 men, 10 women and 10 children with labels above heads
+		
+		for ( var i=0; i<10; i++ ) {
+
+			add( new Happy.Man( Happy.random(1.5,1.9) ) );
+			add( new Happy.Woman( Happy.random(1.4,1.7) ) );
+			add( new Happy.Child( Happy.random(0.9,1.4) ) );
 
 		}
 
 
-		// make the men move their heads and upper bodies
+		// move the people
 		
 		Happy.setAnimationLoop( ( t )=>{
 

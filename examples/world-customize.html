@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Customized predefined world</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Three from 'three';
+		import * as Happy from 'disfigure';
+
+
+		// create a default world
+
+		new Happy.World();
+
+
+		// modify the lights
+		
+		Happy.cameraLight.intensity = 0.2;
+		Happy.light.intensity = 2;
+		Happy.light.position.set(10,1,2);
+		
+		
+		// hide the ground
+		
+		Happy.ground.visible = false;
+
+
+		// create a man
+
+		var man = new Happy.Man( );
+			man.material.metalness = 1;
+
+
+		// generate a texture for a veil
+
+		// texture
+		var canvas = document.createElement( 'CANVAS' );
+			canvas.width = 64;
+			canvas.height = 8;
+
+		var context = canvas.getContext( '2d' );
+
+		var gradient = context.createLinearGradient( 0, 0, 64, 0 );
+				gradient.addColorStop( 0.0, 'rgba(255,255,255,0)' );
+				gradient.addColorStop( 0.5, 'rgba(255,255,255,128)' );
+				gradient.addColorStop( 1.0, 'rgba(255,255,255,0)' );
+				context.fillStyle = gradient;
+
+		context.fillRect( 0, 0, 64, 8 );
+
+		var texture = new Three.CanvasTexture( canvas );
+
+
+		// create veils
+
+		var n = 20, // number of veils
+			veils = [],
+			material = new Three.MeshBasicMaterial( {
+								map: texture,
+								side:Three.DoubleSide,
+								transparent: true,
+								depthWrite: false,
+						} );
+			
+		for( var i=0; i<n; i++ )
+		{
+			var veil = new Three.Mesh( new Three.PlaneGeometry( 1, 1, 20, 1 ), material );
+			veil.pos = veil.geometry.getAttribute( 'position' );
+			veil.rnd = Happy.random(4,8);
+			veil.ofs = Happy.random(0,6.28);
+			veils.push( veil );
+		}
+
+		Happy.scene.add( ...veils );
+
+
+		// function to move a veil
+		
+		function flowVeil( time, veil )
+		{
+			for( var i=0; i<42; i++ )
+			{
+				var t = time + (i%21)/100,
+					r = 0.5*Happy.chaotic( t+5*veil.rnd, t-5*veil.rnd, 1, 2 )**2,
+					x = r*Math.sin( veil.rnd*t+veil.ofs ),
+					y = r*Math.cos( veil.rnd*t+veil.ofs ),
+					z = Happy.chaotic( x/8+5*veil.rnd, y/8-5*veil.rnd, 0.5, 2 ) + 0.02*(i>20?1:-1)*Math.cos((i%21-10)/8);
+			
+				veil.pos.setXYZ( i, x, z, -y );
+			}
+			veil.pos.needsUpdate = true;
+		}
+
+
+		// animate the scene
+		
+		Happy.setAnimationLoop( ( t )=>{
+
+			t=t/4000;
+			
+			// floating veils
+			for( var veil of veils ) flowVeil( t, veil );
+			
+			// changing light and background
+			Happy.light.color.setHSL( t, 1, 0.5 );
+			Happy.scene.background.setHSL( t, 0.5, 0.7 );
+			
+			// animating the man
+
+			man.torso.bend = Happy.chaotic( t, 0, -80, 80 );
+			man.torso.turn = Happy.chaotic( t, 4, -180, 180 );
+			man.torso.tilt = Happy.chaotic( t, 2, -50, 50 );
+
+			man.head.bend = Happy.chaotic( t, 0, -30, 50 );
+			man.head.turn = Happy.chaotic( t, 4, -60, 60 );
+			man.head.tilt = Happy.chaotic( t, 2, -50, 50 );
+
+			man.chest.bend = Happy.chaotic( t, 1, -20, 40 );
+			man.chest.turn = Happy.chaotic( t, 6, -60, 60 );
+			man.chest.tilt = Happy.chaotic( t, 6, -30, 30 );
+
+			man.waist.bend = Happy.chaotic( t, 3, -20, 40 );
+			man.waist.turn = Happy.chaotic( t, 5, -60, 60 );
+			man.waist.tilt = Happy.chaotic( t, 6, -30, 30 );
+
+			man.l_elbow.bend = Happy.chaotic( t, 9, 0, 140 );
+			man.l_elbow.bend = Happy.chaotic( t, 7, 0, 140 );
+
+			man.l_wrist.bend = Happy.chaotic( t, -2, -60, 60 );
+			man.l_wrist.turn = Happy.chaotic( t, -3, -45, 45 );
+			man.l_wrist.tilt = Happy.chaotic( t, -2, -40, 40 );
+
+			man.r_wrist.bend = Happy.chaotic( t, -1, -60, 60 );
+			man.r_wrist.turn = Happy.chaotic( t, -4, -45, 45 );
+			man.r_wrist.tilt = Happy.chaotic( t, -1, -40, 40 );
+
+			man.l_arm.straddle = Happy.chaotic( t, 5, -50, 40 );
+			man.l_arm.turn = Happy.chaotic( t, 6, -20, 20 );
+			man.l_arm.foreward = Happy.chaotic( t, 7, -20, 80 );
+
+			man.r_arm.straddle = Happy.chaotic( t, -5, -50, 40 );
+			man.r_arm.turn = Happy.chaotic( t, -6, -20, 20 );
+			man.r_arm.foreward = Happy.chaotic( t, -7, -20, 80 );
+
+			man.l_knee.bend = Happy.chaotic( t, 6, 0, 140 );
+			man.r_knee.bend = Happy.chaotic( t, 0, 0, 140 );
+
+			man.l_foot.bend = Happy.chaotic( t, 7, -40, 40 );
+			man.r_foot.bend = Happy.chaotic( t, 5, -40, 40 );
+
+			man.l_ankle.bend = Happy.chaotic( t, -31, -40, 70 );
+			man.l_ankle.turn = Happy.chaotic( t, 22, 0, 70 );
+			man.l_ankle.tilt = Happy.chaotic( t, -2, -40, 40 );
+
+			man.r_ankle.bend = Happy.chaotic( t, 1, -40, 70 );
+			man.r_ankle.turn = Happy.chaotic( t, -11, 0, 70 );
+			man.r_ankle.tilt = Happy.chaotic( t, -13, -40, 40 );
+
+			man.l_leg.straddle = Happy.chaotic( t, -8, 0, 40 );
+			man.l_leg.foreward = Happy.chaotic( t, -2, -40, 80 );
+			man.l_thigh.turn = Happy.chaotic( t, 8, -40, 80 );
+
+			man.r_leg.straddle = Happy.chaotic( t, -3, 0, 40 );
+			man.r_leg.foreward = Happy.chaotic( t, 4, -40, 80 );
+			man.r_thigh.turn = Happy.chaotic( t, -1, -40, 80 );
+
+		} );
+		
+	</script>
+</body>
+</html>

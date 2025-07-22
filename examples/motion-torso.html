@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Motion of the torso</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		import * as Red from 'label';
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+		// create three men
+
+		var bendingMan = new Happy.Man();
+		bendingMan.position.x = -1.1;
+		bendingMan.chest.attach( new Red.Label( 'bend', 1.2, 0, 0.2, 0.12 ) );
+		
+		var turningMan = new Happy.Man();
+		turningMan.chest.attach( new Red.Label( 'turn', 1.2, 0, 0.2, 0.12 ) );
+		
+		var tiltingMan = new Happy.Man();
+		tiltingMan.position.x = 1.1;
+		tiltingMan.chest.attach( new Red.Label( 'tilt', 1.2, 0, 0.2, 0.12 ) );
+
+
+		// animate the men
+		
+		function animate( t ) {
+
+			t = t/3000;
+
+			bendingMan.torso.bend = Happy.chaotic( t, 0, -30, 60 );
+			turningMan.torso.turn = Happy.chaotic( t, 1, -80, 80 );
+			tiltingMan.torso.tilt = Happy.chaotic( t, 2, -40, 40 );
+
+		}
+
+		Happy.setAnimationLoop( animate );
+
+	</script>
+</body>
+</html>
