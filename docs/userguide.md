@@ -4,7 +4,7 @@
 # Disfigure: User Guide
 
 
-## <small><small>[Figures](#figure-shapes) &middot; [Motions](#figure-motions) &middot; [Worlds](#world) &middot; [Others](#others)</small></small>
+## <small><small>[Figures](#figure-shapes) &middot; [Motions](#figure-motions) &middot; [World](#predefined-world) &middot; [Others](#others)</small></small>
 
 
 
@@ -21,7 +21,7 @@ new Happy.World
 new Happy.Man
 ```
 
-# Figures
+# Figure shapes
 
 ### new **Man**( *height* )<br>new **Woman**( *height* )<br>new **Child**( *height* )
 
@@ -55,7 +55,7 @@ there is `l_knee` and `r_knee` &ndash; [see it](../examples/figure-parts.html):
 
 
 
-# Motions
+# Figure motions
 
 ## Central parts
 
@@ -141,7 +141,7 @@ figure.r_forearm.turn = -20;
 ### figure.**l_wrist**<br>figure.**r_wrist**
 
 Wrists `l_wrist` and `r_wrist` support `bend` and `tilt` &ndash;
-[see it](../examples/example-wrist.html). Wrist have no turns,
+[see it](../examples/motion-wrist.html). Wrist have no turns,
 as turning is done in the forearm or the arm.
 
 Motions of `l_wrist` and `r_wrist`:
@@ -646,7 +646,7 @@ know how to fix it, please get in touch.
 -->
 
 
-# Worlds
+# Predefined world
 
 ### new **World**( )<br>new **World**( *features* )
 
