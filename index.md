@@ -9,18 +9,23 @@ A library to rig boneless and morphless 3D models. **WIP.**
 
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/poser-prototype.jpg">](https://boytchev.github.io/disfigure/poser)
 
-[<img width="23%" src="https://boytchev.github.io/disfigure/examples/snapshots/figure-create-basic.jpg">](https://boytchev.github.io/disfigure/examples/figure-create-basic.html)
-[<img width="23%" src="https://boytchev.github.io/disfigure/examples/snapshots/figure-create-height.jpg">](https://boytchev.github.io/disfigure/examples/figure-create-height.html)
-[<img width="23%" src="https://boytchev.github.io/disfigure/examples/snapshots/figure-parts.jpg">](https://boytchev.github.io/disfigure/examples/figure-parts.html)
-[<img width="23%" src="https://boytchev.github.io/disfigure/examples/snapshots/motion-arm.jpg">](https://boytchev.github.io/disfigure/examples/motion-arm.html)
-[<img width="23%" src="https://boytchev.github.io/disfigure/examples/snapshots/motion-central.jpg">](https://boytchev.github.io/disfigure/examples/motion-central.html)
-[<img width="23%" src="https://boytchev.github.io/disfigure/examples/snapshots/motion-elbow.jpg">](https://boytchev.github.io/disfigure/examples/motion-elbow.html)
-[<img width="23%" src="https://boytchev.github.io/disfigure/examples/snapshots/motion-forearm.jpg">](https://boytchev.github.io/disfigure/examples/motion-forearm.html)
-[<img width="23%" src="https://boytchev.github.io/disfigure/examples/snapshots/motion-limbs-upper.jpg">](https://boytchev.github.io/disfigure/examples/motion-limbs-upper.html)
-[<img width="23%" src="https://boytchev.github.io/disfigure/examples/snapshots/motion-torso.jpg">](https://boytchev.github.io/disfigure/examples/motion-torso.html)
-[<img width="23%" src="https://boytchev.github.io/disfigure/examples/snapshots/motion-wrist.jpg">](https://boytchev.github.io/disfigure/examples/motion-wrist.html)
-[<img width="23%" src="https://boytchev.github.io/disfigure/examples/snapshots/number-generators.jpg">](https://boytchev.github.io/disfigure/examples/number-generators.html)
-[<img width="23%" src="https://boytchev.github.io/disfigure/examples/snapshots/world-customize.jpg">](https://boytchev.github.io/disfigure/examples/world-customize.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-create-basic.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/figure-create-basic.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-create-height.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/figure-create-height.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-parts.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/figure-parts.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-arm.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-arm.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-central.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-central.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-elbow.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-elbow.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-forearm.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-forearm.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-knee.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-knee.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-leg.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-leg.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-limbs-lower.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-limbs-lower.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-limbs-upper.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-limbs-upper.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-thigh.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-thigh.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-torso.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-torso.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-wrist.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/motion-wrist.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/number-generators.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/number-generators.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/world-customize.jpg" width="24%">](https://boytchev.github.io/disfigure/examples/world-customize.html)
+
 
 
 ## Social media

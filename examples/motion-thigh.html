@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Individual motions for the thighs</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		import * as Red from 'label';
+
+
+		// create a default world
+
+		new Happy.World( );
+		Happy.camera.position.set( 0, 1.2, 2.5 );
+		Happy.controls.target.set( 0, 0.7, 0 );
+
+
+		// create a man
+		
+		var man = new Happy.Man( );
+
+
+		// add labels indicating forearms motion style
+		
+		var l_lab = new Red.Label( 'turn', 0.6, 0.05, 0.8, 0.11, -1 );
+		man.l_thigh.attach( l_lab );
+
+		var r_lab = new Red.Label( 'turn', 0.6, -0.05, 0.8, 0.11, 1 );
+		man.r_thigh.attach( r_lab );
+
+
+		// animate the man
+		
+		Happy.setAnimationLoop( ( t )=>{
+
+			t = t/2000;
+
+			// motions of forearms
+		
+			man.l_thigh.turn = Happy.chaotic( t, 0, -40, 80 );
+			man.r_thigh.turn = Happy.chaotic( t, 1, -40, 80 );
+
+			// some general motion of the body
+		
+			man.l_leg.foreward = Happy.chaotic( t/2, 2, 10, 20 );
+			man.r_leg.foreward = Happy.chaotic( t/2, 3, 10, 60 );
+
+			man.l_leg.straddle = Happy.chaotic( t/2, 4, 20, 30 );
+			man.r_leg.straddle = Happy.chaotic( t/2, 5, 20, 30 );
+
+			man.l_knee.bend = Happy.chaotic( t, 6, 60, 65 );
+			man.r_knee.bend = Happy.chaotic( t, 7, 10, 25 );
+
+		} );
+
+	</script>
+</body>
+</html>

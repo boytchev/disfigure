@@ -178,6 +178,44 @@ figure.r_leg.straddle = 50;
 [<img src="../examples/snapshots/motion-limbs-lower.jpg" width="48%">](../examples/motion-limbs-lower.html)
 [<img src="../examples/snapshots/motion-leg.jpg" width="48%">](../examples/motion-leg.html)
 
+
+
+### figure.**l_thigh**<br>figure.**r_thigh**
+
+Thighs `l_thigh` and `r_thigh` have limited motions.
+Thighs have only `turn` &ndash; [see it](../examples/motion-thigh.html).
+
+* `turn` &ndash; turns a thigh outwards (or inwards)
+
+``` javascript
+figure.r_thigh.turn = 20;
+```
+
+[<img src="../examples/snapshots/motion-thigh.jpg" width="48%">](../examples/motion-thigh.html)
+
+
+
+### figure.**l_knee**<br>figure.**r_knee**
+
+Knees `l_knee` and `r_knee` support `bend` and `tilt` &ndash;
+[see it](../examples/motion-knee.html). Knee have no turns,
+as turning is done in the thigh or the shin. However, their
+tilting is used to model bowlegs and knock knees.
+
+Motions of `l_knee` and `r_knee`:
+
+* `bend` &ndash; bends a knee backward
+* `tilt` &ndash; tilts a knee sideways
+
+``` javascript
+man.r_knee.bend = 40;
+man.r_knee.tilt = 0;
+```
+
+[<img src="../examples/snapshots/motion-knee.jpg" width="48%">](../examples/motion-knee.html)
+
+
+
 <!--
 
 The motion of the **knee** is only `bend` ([see it](example-knee.html)). Negative values for *angle* result in unnatural knee position.
