@@ -24,7 +24,7 @@
 		Happy.controls.target.set( 0, 1.2, 0 );
 
 
-		// create a man 
+		// create a man
 		
 		var man = new Happy.Man( );
 
@@ -47,12 +47,12 @@
 			t = t/2000;
 
 			// motions of forearms
-			
+		
 			man.l_forearm.turn = Happy.chaotic( t, 0, -40, 80 );
 			man.r_forearm.turn = Happy.chaotic( t, 1, -80, 40 );
 
 			// some general motion of the body
-			
+		
 			man.l_arm.foreward = Happy.chaotic( t/2, 0, -10, 0 );
 			man.r_arm.foreward = Happy.chaotic( t/2, 1, 20, 30 );
 

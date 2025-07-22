@@ -86,7 +86,7 @@ figure.waist.tilt = 35;
 
 
 
-## Upper limb motions
+## Upper limbs
 
 
 ### figure.**l_arm**<br>figure.**r_arm**
@@ -94,7 +94,7 @@ figure.waist.tilt = 35;
 The upper limbs are symmetrical body parts with multiple joints
 and rotation properties that recreate a complex and flexible
 motion &ndash; [see it](../examples/motion-limbs-upper.html).
-Arms have `foreward`, `turn` and `straddle` &ndash; [see it](../examples/motion-arm.html)
+Arms have `foreward`, `turn` and `straddle` &ndash; [see it](../examples/motion-arm.html).
 
 * `foreward` &ndash; moves an arm foreward (or backward)
 * `turn` &ndash; turns an arm inwards (or outwards)
@@ -157,19 +157,28 @@ man.r_wrist.tilt = 10;
 [<img src="../examples/snapshots/motion-wrist.jpg" width="48%">](../examples/motion-wrist.html)
 
 
-<!--
 
-### Lower limbs
+## Lower limbs
 
-The lower limbs are symmetrical body parts: *leg*, *knee* and *ankle*.
+### figure.**l_leg**<br>figure.**r_leg**
 
-Both **legs** support properties `raise`, `straddle` and `turn` ([see it](example-leg.html)). Straddling and turning are symmetrical.
+The lower limbs are symmetrical body parts with multiple joints
+and rotation properties that recreate a complex and flexible
+motion &ndash; [see it](../examples/motion-limbs-lower.html).
+Legs have `foreward` and `straddle` &ndash; [see it](../examples/motion-leg.html).
+
+* `foreward` &ndash; moves a leg foreward (or backward)
+* `straddle` &ndash; moves a leg sideways away from the body (or to the body)
 
 ``` javascript
-figure.r_leg.raise = angle;
-figure.r_leg.straddle = angle;
-figure.r_leg.turn = angle;
+figure.r_leg.foreward = -10;
+figure.r_leg.straddle = 50;
 ```
+
+[<img src="../examples/snapshots/motion-limbs-lower.jpg" width="48%">](../examples/motion-limbs-lower.html)
+[<img src="../examples/snapshots/motion-leg.jpg" width="48%">](../examples/motion-leg.html)
+
+<!--
 
 The motion of the **knee** is only `bend` ([see it](example-knee.html)). Negative values for *angle* result in unnatural knee position.
 

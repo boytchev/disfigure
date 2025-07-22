@@ -26,7 +26,7 @@
 		
 		Happy.cameraLight.intensity = 0.2;
 		Happy.light.intensity = 2;
-		Happy.light.position.set(10,1,2);
+		Happy.light.position.set( 10, 1, 2 );
 		
 		
 		// hide the ground
@@ -37,23 +37,23 @@
 		// create a man
 
 		var man = new Happy.Man( );
-			man.material.metalness = 1;
+		man.material.metalness = 1;
 
 
 		// generate a texture for a veil
 
 		// texture
 		var canvas = document.createElement( 'CANVAS' );
-			canvas.width = 64;
-			canvas.height = 8;
+		canvas.width = 64;
+		canvas.height = 8;
 
 		var context = canvas.getContext( '2d' );
 
 		var gradient = context.createLinearGradient( 0, 0, 64, 0 );
-				gradient.addColorStop( 0.0, 'rgba(255,255,255,0)' );
-				gradient.addColorStop( 0.5, 'rgba(255,255,255,128)' );
-				gradient.addColorStop( 1.0, 'rgba(255,255,255,0)' );
-				context.fillStyle = gradient;
+		gradient.addColorStop( 0.0, 'rgba(255,255,255,0)' );
+		gradient.addColorStop( 0.5, 'rgba(255,255,255,128)' );
+		gradient.addColorStop( 1.0, 'rgba(255,255,255,0)' );
+		context.fillStyle = gradient;
 
 		context.fillRect( 0, 0, 64, 8 );
 
@@ -65,20 +65,21 @@
 		var n = 20, // number of veils
 			veils = [],
 			material = new Three.MeshBasicMaterial( {
-								map: texture,
-								side:Three.DoubleSide,
-								transparent: true,
-								depthWrite: false,
-						} );
-			
-		for( var i=0; i<n; i++ )
-		{
+				map: texture,
+				side: Three.DoubleSide,
+				transparent: true,
+				depthWrite: false,
+			} );
+		
+		for ( var i=0; i<n; i++ ) 		{
+
 			var veil = new Three.Mesh( new Three.PlaneGeometry( 1, 1, 20, 1 ), material );
 			veil.pos = veil.geometry.getAttribute( 'position' );
-			veil.rnd = Happy.random(4,8);
-			veil.ofs = Happy.random(0,6.28);
+			veil.rnd = Happy.random( 4, 8 );
+			veil.ofs = Happy.random( 0, 6.28 );
 			veil.castShadow = true;
 			veils.push( veil );
+		
 		}
 
 		Happy.scene.add( ...veils );
@@ -86,19 +87,22 @@
 
 		// function to move a veil
 		
-		function flowVeil( time, veil )
-		{
-			for( var i=0; i<42; i++ )
-			{
-				var t = time + (i%21)/100,
+		function flowVeil( time, veil ) {
+
+			for ( var i=0; i<42; i++ ) {
+
+				var t = time + ( i%21 )/100,
 					r = 0.5*Happy.chaotic( t+5*veil.rnd, t-5*veil.rnd, 1, 2 )**2,
 					x = r*Math.sin( veil.rnd*t+veil.ofs ),
 					y = r*Math.cos( veil.rnd*t+veil.ofs ),
-					z = Happy.chaotic( x/8+5*veil.rnd, y/8-5*veil.rnd, 0.5, 2 ) + 0.02*(i>20?1:-1)*Math.cos((i%21-10)/8);
-			
+					z = Happy.chaotic( x/8+5*veil.rnd, y/8-5*veil.rnd, 0.5, 2 ) + 0.02*( i>20?1:-1 )*Math.cos( ( i%21-10 )/8 );
+		
 				veil.pos.setXYZ( i, x, z, -y );
+		
 			}
+
 			veil.pos.needsUpdate = true;
+		
 		}
 
 
@@ -107,14 +111,14 @@
 		Happy.setAnimationLoop( ( t )=>{
 
 			t=t/4000;
-			
+		
 			// floating veils
-			for( var veil of veils ) flowVeil( t, veil );
-			
+			for ( var veil of veils ) flowVeil( t, veil );
+		
 			// changing light and background
 			Happy.light.color.setHSL( t, 1, 0.5 );
 			Happy.scene.background.setHSL( t, 0.5, 0.7 );
-			
+		
 			// animating the man
 
 			man.torso.bend = Happy.chaotic( t, 0, -80, 80 );

@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<head>
+	<script src="importmap.js"></script>
+</head>
+
+<body>
+	<div id="spinner"></div>
+	<script type="module">
+
+import * as THREE from 'three';
+import * as HAPPY from 'disfigure';
+import * as JOYFUL from 'label';
+
+new HAPPY.World( { stats: true } );
+
+var a = new HAPPY.Man( );
+
+a.position.x = 0.7;
+
+var b = new HAPPY.Woman( );
+b.position.x = -0.7;
+
+var c = new HAPPY.Child( );
+c.position.z = 0.5;
+
+var lab = new JOYFUL.Label( 'head.bending', 1.6 );
+lab.position.y = 0.1;
+lab.position.z = 0.15;
+a.head.attach( lab );
+
+var bracelet = new THREE.Mesh(
+	new THREE.TorusGeometry( 0.03, 0.01 ),
+	new THREE.MeshStandardMaterial( { color: 'crimson' } )
+);
+bracelet.rotation.y = Math.PI/2;
+bracelet.scale.set( 1, 1, 10 );
+bracelet.position.set( 0.1, 0.05, 0 );
+
+b.l_elbow.attach( bracelet );
+b.r_elbow.attach( bracelet );
+b.l_elbow.attach( new THREE.AxesHelper( 0.7 ) );
+b.r_elbow.attach( new THREE.AxesHelper( 0.7 ) );
+
+/*
+var gugu = new JOYFUL.Label( 'GUGU', 1.6 );
+//gugu.rotation.y = Math.PI/2;
+//gugu.position.x = 0.02;
+//gugu.position.y = -0.2;
+a.l_knee.attach( gugu );
+a.l_knee.attach( new THREE.AxesHelper() );
+
+//var gaga = new JOYFUL.Label( 'GAGA', 0.6 );
+//gaga.rotation.y = Math.PI/2;
+//gaga.position.x = 0.02;
+//gaga.position.y = -0.2;
+//a.r_knee.attach( gaga );
+a.r_knee.attach( gugu );
+a.r_knee.attach( new THREE.AxesHelper() );
+*/
+
+
+var anim = ( e )=>{
+
+	var m = e.target;
+	var t = e.time/4000 + m.uid;
+	var k = 1;
+
+	m.head.bend = k*HAPPY.chaotic( t, 0, -30, 50 );
+	m.head.turn = k*HAPPY.chaotic( t, 4, -60, 60 );
+	m.head.tilt = k*HAPPY.chaotic( t, 2, -50, 50 );
+
+	m.chest.bend = k*HAPPY.chaotic( t, 1, -20, 40 );
+	m.chest.turn = k*HAPPY.chaotic( t, 6, -60, 60 );
+	m.chest.tilt = k*HAPPY.chaotic( t, 6, -30, 30 );
+
+	m.waist.bend = k*HAPPY.chaotic( t, 3, -20, 40 );
+	m.waist.turn = k*HAPPY.chaotic( t, 5, -60, 60 );
+	m.waist.tilt = k*HAPPY.chaotic( t, 6, -30, 30 );
+
+	m.l_elbow.bend = k*HAPPY.chaotic( t, 9, 0, 140 );
+	m.l_elbow.bend = k*HAPPY.chaotic( t, 7, 0, 140 );
+
+	m.l_wrist.bend = k*HAPPY.chaotic( t, -2, -60, 60 );
+	m.l_wrist.turn = k*HAPPY.chaotic( t, -3, -45, 45 );
+	m.l_wrist.tilt = k*HAPPY.chaotic( t, -2, -40, 40 );
+
+	m.r_wrist.bend = k*HAPPY.chaotic( t, -1, -60, 60 );
+	m.r_wrist.turn = k*HAPPY.chaotic( t, -4, -45, 45 );
+	m.r_wrist.tilt = k*HAPPY.chaotic( t, -1, -40, 40 );
+
+	m.l_arm.straddle = k*HAPPY.chaotic( t, 5, -50, 40 );
+	m.l_arm.turn = k*HAPPY.chaotic( t, 6, -20, 20 );
+	m.l_arm.foreward = k*HAPPY.chaotic( t, 7, -20, 80 );
+
+	m.r_arm.straddle = k*HAPPY.chaotic( t, -5, -50, 40 );
+	m.r_arm.turn = k*HAPPY.chaotic( t, -6, -20, 20 );
+	m.r_arm.foreward = k*HAPPY.chaotic( t, -7, -20, 80 );
+
+
+
+	m.l_knee.bend = k*HAPPY.chaotic( t, 6, 0, 140 );
+	m.r_knee.bend = k*HAPPY.chaotic( t, 0, 0, 140 );
+
+	m.l_foot.bend = k*HAPPY.chaotic( t, 7, -40, 40 );
+	m.r_foot.bend = k*HAPPY.chaotic( t, 5, -40, 40 );
+
+	m.l_ankle.bend = k*HAPPY.chaotic( t, -31, -40, 70 );
+	m.l_ankle.turn = k*HAPPY.chaotic( t, 22, 0, 70 );
+	m.l_ankle.tilt = k*HAPPY.chaotic( t, -2, -40, 40 );
+
+	m.r_ankle.bend = k*HAPPY.chaotic( t, 1, -40, 70 );
+	m.r_ankle.turn = k*HAPPY.chaotic( t, -11, 0, 70 );
+	m.r_ankle.tilt = k*HAPPY.chaotic( t, -13, -40, 40 );
+
+	m.l_leg.straddle = k*HAPPY.chaotic( t, -8, 0, 40 );
+	m.l_leg.foreward = k*HAPPY.chaotic( t, -2, -40, 80 );
+	m.l_thigh.turn = k*HAPPY.chaotic( t, 8, -40, 80 );
+
+	m.r_leg.straddle = k*HAPPY.chaotic( t, -3, 0, 40 );
+	m.r_leg.foreward = k*HAPPY.chaotic( t, 4, -40, 80 );
+	m.r_thigh.turn = k*HAPPY.chaotic( t, -1, -40, 80 );
+
+
+};
+
+
+a.addEventListener( 'animate', anim );
+
+b.addEventListener( 'animate', anim );
+c.addEventListener( 'animate', anim );
+
+
+	</script>
+</body>
+</html>

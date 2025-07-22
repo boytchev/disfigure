@@ -34,13 +34,14 @@
 
 		function add( figure ) {
 		
-			figure.position.set( Happy.random(-3,3), 0, Happy.random(-3,3) );
-			figure.torso.turn = Happy.random(0,360);
+			figure.position.set( Happy.random( -3, 3 ), 0, Happy.random( -3, 3 ) );
+			figure.torso.turn = Happy.random( 0, 360 );
 
 			var label = new Red.Label( figure.height.toFixed( 2 ), 1 );
 			label.position.set( 0, 0.3, 0 );
 
 			figure.head.attach( label );
+		
 		}
 		
 		
@@ -48,9 +49,9 @@
 		
 		for ( var i=0; i<10; i++ ) {
 
-			add( new Happy.Man( Happy.random(1.5,1.9) ) );
-			add( new Happy.Woman( Happy.random(1.4,1.7) ) );
-			add( new Happy.Child( Happy.random(0.9,1.4) ) );
+			add( new Happy.Man( Happy.random( 1.5, 1.9 ) ) );
+			add( new Happy.Woman( Happy.random( 1.4, 1.7 ) ) );
+			add( new Happy.Child( Happy.random( 0.9, 1.4 ) ) );
 
 		}
 

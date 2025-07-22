@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Combined motions for the lower limbs</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+		// create three persons
+
+		var man = new Happy.Man(),
+			woman = new Happy.Woman(),
+			child = new Happy.Child();
+
+		man.position.x = -0.75;
+		woman.position.x = 0.75;
+
+
+		// animate the arms
+		
+		function animate( event ) {
+
+			var someone = event.target;
+			var t = event.time/2000 + 10*someone.uid;
+
+			// legs
+		
+			someone.l_leg.straddle = Happy.chaotic( t, 0, 0, 40 );
+			someone.l_leg.foreward = Happy.chaotic( t, 1, -40, 80 );
+
+			someone.r_leg.straddle = Happy.chaotic( t, 2, 0, 40 );
+			someone.r_leg.foreward = Happy.chaotic( t, 3, -40, 80 );
+
+			someone.l_thigh.bend = Happy.chaotic( t, 4, -40, 80 );
+			someone.r_thigh.bend = Happy.chaotic( t, 5, -40, 80 );
+
+			someone.l_knee.bend = Happy.chaotic( t, 6, 0, 140 );
+			someone.r_knee.bend = Happy.chaotic( t, 7, 0, 140 );
+
+			someone.l_shin.bend = Happy.chaotic( t, -8, -40, 40 );
+			someone.r_shin.bend = Happy.chaotic( t, -7, 40, 40 );
+
+			someone.l_ankle.bend = Happy.chaotic( t, 8, -40, 70 );
+			someone.l_ankle.turn = Happy.chaotic( t, 9, 0, 70 );
+			someone.l_ankle.tilt = Happy.chaotic( t, -1, -40, 40 );
+
+			someone.r_ankle.bend = Happy.chaotic( t, -2, -40, 70 );
+			someone.r_ankle.turn = Happy.chaotic( t, -3, 0, 70 );
+			someone.r_ankle.tilt = Happy.chaotic( t, -4, -40, 40 );
+
+			someone.l_foot.turn = Happy.chaotic( t, -5, -40, 40 );
+			someone.r_foot.turn = Happy.chaotic( t, -6, -40, 40 );
+
+
+			// body
+		
+			someone.head.bend = Happy.chaotic( t/5, 3, -10, 10 );
+			someone.head.turn = Happy.chaotic( t/2, 2, -40, 40 );
+			someone.head.tilt = Happy.chaotic( t/2, 1, -20, 20 );
+			someone.waist.turn = -someone.head.turn;
+		
+		}
+
+		man.addEventListener( 'animate', animate );
+		woman.addEventListener( 'animate', animate );
+		child.addEventListener( 'animate', animate );
+
+	</script>
+</body>
+</html>

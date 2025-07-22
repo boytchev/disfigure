@@ -41,12 +41,12 @@
 			t = t/2000;
 
 			// motions of wrists
-			
+		
 			man.l_wrist.bend = Happy.chaotic( t, 2, -80, 80 );
 			man.r_wrist.tilt = Happy.chaotic( 1.5*t, 5, -50, 50 );
 
 			// some general motion of the body
-			
+		
 			man.waist.turn = Happy.chaotic( t/4, 6, 0, 30 );
 			man.head.turn = man.waist.turn;
 			man.r_forearm.turn = Happy.chaotic( t/2, 7, 40, 60 );

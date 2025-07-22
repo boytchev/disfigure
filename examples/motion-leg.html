@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Individual motions for the legs</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		import * as Red from 'label';
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+		// create two persons next to each other
+		
+		var man = new Happy.Man(),
+			woman = new Happy.Woman();
+
+		man.position.x = -0.65;
+		woman.position.x = 0.65;
+
+
+		// add labels indicating their motion style
+		
+		man.l_leg.attach( new Red.Label( 'straddle', 0.8, 0.17, -0.21, 0, -1 ) );
+		man.r_leg.attach( new Red.Label( 'straddle', 0.8, -0.17, -0.21, 0, 1 ) );
+		
+		woman.l_leg.attach( new Red.Label( 'foreward', 0.8, 0.17, -0.21, 0, -1 ) );
+		woman.r_leg.attach( new Red.Label( 'foreward', 0.8, -0.17, -0.21, 0, 1 ) );
+		
+
+		// animate the men
+		
+		Happy.setAnimationLoop( ( t )=>{
+
+			t = t/2000;
+
+			// motions of arms
+		
+			man.l_leg.straddle = Happy.chaotic( t, 0, 0, 40 );
+			man.r_leg.straddle = Happy.chaotic( t, 1, 0, 40 );
+
+			woman.l_leg.foreward = Happy.chaotic( t, 2, -40, 80 );
+			woman.r_leg.foreward = Happy.chaotic( t, 3, -40, 80 );
+
+			// some general motion of the bodies
+		
+			man.waist.turn = Happy.chaotic( t/4, 6, -30, 30 );
+			woman.waist.turn = Happy.chaotic( t/4, 7, -30, 30 );
+
+			man.head.turn = man.waist.turn;
+			woman.head.turn = woman.waist.turn;
+
+		} );
+
+	</script>
+</body>
+</html>

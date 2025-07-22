@@ -51,7 +51,7 @@
 			t = t/2000;
 
 			// motions of arms
-			
+		
 			man.l_arm.turn = Happy.chaotic( t, 0, -60, 60 );
 			man.r_arm.turn = Happy.chaotic( t, 1, -60, 60 );
 
@@ -62,7 +62,7 @@
 			child.r_arm.straddle = Happy.chaotic( t, 5, -40, 80 );
 
 			// some general motion of the bodies
-			
+		
 			man.waist.turn = Happy.chaotic( t/4, 6, 0, 30 );
 			woman.waist.turn = Happy.chaotic( t/4, 7, -10, 10 );
 			child.waist.turn = Happy.chaotic( t/4, 8, -30, 10 );

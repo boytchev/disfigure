@@ -32,7 +32,7 @@ var fontParams = {
 
 class Label extends Mesh {
 
-	constructor( text, scale, px=0, py=0, pz=0, angle=0 ) {
+	constructor( text, scale, px=0, py=0, pz=0, anglez=0, angley=0, anglex=0 ) {
 
 		var geometry = new TextGeometry( text, fontParams );
 
@@ -44,7 +44,7 @@ class Label extends Mesh {
 		this.castShadow = true;
 
 		this.position.set( px, py, pz );
-		this.rotation.set( 0, 0, Math.PI*angle/2 );
+		this.rotation.set( Math.PI*anglex/2, Math.PI*angley/2, Math.PI*anglez/2 );
 		this.scale.setScalar( scale );
 		
 	} // Labe.constructor

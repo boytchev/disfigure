@@ -5,7 +5,7 @@
 <body>
 	<header>
 		<h1><b>Disfigure</b></h1>
-		<h3>Custom heights for bodies</h3></br>
+		<h3>Massive test for 50 bodies</h3></br>
 	</header>
 
 	<div id="spinner"></div>
@@ -18,7 +18,7 @@
 
 		// create a default world
 
-		new Happy.World();
+		new Happy.World( { stats: true } );
 
 
 		// position the camera for a better view
@@ -28,7 +28,7 @@
 		Happy.controls.autoRotateSpeed = 0.5;
 
 
-		var n = 20;
+		var n = 50;
 		
 		for ( var i=0; i<n; i++ ) {
 
