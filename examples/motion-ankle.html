@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Individual motions for the ankles</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		import * as Red from 'label';
+
+
+		// create a default world
+
+		new Happy.World( );
+		Happy.camera.position.set( 0, 1.0, 2.5 );
+		Happy.controls.target.set( 0, 0.4, 0 );
+
+
+		// create a couple
+		
+		var man = new Happy.Man( );
+		var woman = new Happy.Woman( );
+		
+		man.position.x = -0.5;
+		woman.position.x = 0.5;
+
+		man.position.y = 0.2;
+		woman.position.y = 0.2;
+
+
+		// add labels indicating ankles motion style
+		
+		var l_lab = new Red.Label( 'tilt', 0.6, 0.09, 0, 0 );
+		man.l_ankle.attach( l_lab );
+
+		var r_lab = new Red.Label( 'tilt', 0.6, -0.09, 0, 0 );
+		man.r_ankle.attach( r_lab );
+
+		l_lab = new Red.Label( 'bend', 0.6, 0.14, -0.02, 0 );
+		woman.l_ankle.attach( l_lab );
+
+		r_lab = new Red.Label( 'bend', 0.6, -0.14, -0.02, 0 );
+		woman.r_ankle.attach( r_lab );
+
+
+		// animate the couple
+		
+		Happy.setAnimationLoop( ( t )=>{
+
+			t = t/2000;
+
+			// motions of ankles
+		
+			man.l_ankle.tilt = Happy.chaotic( t, 0, -60, 40 );
+			man.r_ankle.tilt = man.l_ankle.tilt;
+
+			woman.l_ankle.bend = Happy.chaotic( t, 1, -80, 70 );
+			woman.r_ankle.bend = Happy.chaotic( t, 2, -80, 70 );
+			
+			// some general motion of the body
+		
+			man.torso.turn  = Happy.chaotic( t/2, 3, 10, 10 );
+			woman.torso.turn  = Happy.chaotic( t/2, 4, -10, 10 );
+			
+			man.l_leg.straddle = Happy.chaotic( t/2, 7, 5, 10 );
+			man.r_leg.straddle = Happy.chaotic( t/2, 8, 5, 10 );
+			
+			man.l_leg.foreward = Happy.chaotic( t/2, 7, 30, 40 );
+			man.r_leg.foreward = Happy.chaotic( t/2, 8, 30, 40 );
+			
+			man.l_knee.foreward = 1.5*man.l_leg.foreward;
+			man.r_knee.foreward = 1.5*man.r_leg.foreward;
+
+			woman.l_leg.straddle = Happy.chaotic( t/2, 7, 5, 10 );
+			woman.r_leg.straddle = Happy.chaotic( t/2, 8, 5, 10 );
+			
+			woman.l_leg.foreward = Happy.chaotic( t/2, 7, 30, 40 );
+			woman.r_leg.foreward = Happy.chaotic( t/2, 8, 30, 40 );
+			
+			woman.l_knee.foreward = 1.5*woman.l_leg.foreward;
+			woman.r_knee.foreward = 1.5*woman.r_leg.foreward;
+
+
+		} );
+
+	</script>
+</body>
+</html>

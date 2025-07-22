@@ -62,7 +62,7 @@ there is `l_knee` and `r_knee` &ndash; [see it](../examples/figure-parts.html):
 The motion of a figure is done by manipulating properties of
 body parts. Motions are just rotations measured in degrees.
 
-### figure.**torso**<br>figure.**head**<br>figure.chest<br>figure.**waist**
+### figure.**torso**<br>figure.**head**<br>figure.**chest**<br>figure.**waist**
 
 The `torso` is the root body part and its rotation affects
 the whole body. Torso has properties `bend`, `turn` and `tilt`
@@ -200,7 +200,8 @@ figure.r_thigh.turn = 20;
 Knees `l_knee` and `r_knee` support `bend` and `tilt` &ndash;
 [see it](../examples/motion-knee.html). Knee have no turns,
 as turning is done in the thigh or the shin. However, their
-tilting is used to model bowlegs and knock knees.
+tilting is used to model [bowlegs](https://en.wikipedia.org/wiki/Genu_varum)
+and [knock knees](https://en.wikipedia.org/wiki/Genu_valgum).
 
 Motions of `l_knee` and `r_knee`:
 
@@ -216,22 +217,57 @@ man.r_knee.tilt = 0;
 
 
 
+### figure.**l_shin**<br>figure.**r_shin**
+
+Shins `l_shin` and `r_shin` have limited motions, just like thighs.
+Shins have only `turn` &ndash; [see it](../examples/motion-shin.html).
+
+* `turn` &ndash; turns a shin outwards (or inwards)
+
+``` javascript
+figure.r_shin.turn = 20;
+```
+
+[<img src="../examples/snapshots/motion-shin.jpg" width="48%">](../examples/motion-shin.html)
+
+
+
+
+### figure.**l_ankle**<br>figure.**r_ankle**
+
+Ankles `l_ankle` and `r_ankle` support `bend` and `tilt` &ndash;
+[see it](../examples/motion-ankle.html). Ankle have no turns,
+as turning is done in the shin.
+
+Motions of `l_ankle` and `r_ankle`:
+
+* `bend` &ndash; bends an ankle foreward or backward
+* `tilt` &ndash; tilts a ankle outward or inward
+
+``` javascript
+man.r_ankle.bend = 40;
+man.r_ankle.tilt = -10;
+```
+
+[<img src="../examples/snapshots/motion-ankle.jpg" width="48%">](../examples/motion-ankle.html)
+
+
+### figure.**l_foot**<br>figure.**r_foot**
+
+Feet `l_foot` and `r_foot` have limited motions. Feet have only
+`bend` &ndash; [see it](../examples/motion-foot.html).
+
+* `bend` &ndash; bends a foot downward (or upward)
+
+``` javascript
+figure.r_foot.bend = 20;
+```
+
+[<img src="../examples/snapshots/motion-foot.jpg" width="48%">](../examples/motion-foot.html)
+
+
+
 <!--
-
-The motion of the **knee** is only `bend` ([see it](example-knee.html)). Negative values for *angle* result in unnatural knee position.
-
-``` javascript
-figure.r_knee.bend = angle;
-```
-
-The **ankles** have the same properties as the wrists: `bend`, `turn` and `tilt` ([see it](example-ankle.html)):
-
-``` javascript
-figure.r_ankle.bend = angle;
-figure.r_ankle.turn = angle;
-figure.r_ankle.tilt = angle;
-```
-
 
 
 # Body posture
