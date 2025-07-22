@@ -26,9 +26,9 @@ new Happy.Man
 ### new **Man**( *height* )<br>new **Woman**( *height* )<br>new **Child**( *height* )
 
 Disfigure defines figures as instances of classes `Man`, `Woman`
-and `Child` &ndash; [see it](../examples/body-shapes.html).
+and `Child` &ndash; [see it](../examples/figure-create-basic.html).
 The optional parameter *height* defines the height of a figure
-in meters &ndash; [see it](../examples/body-heights.html).
+in meters &ndash; [see it](../examples/figure-create-height.html).
 By default a man is 1.80m, a woman is 1.70m and a child is 1.35m.
 
 ```js
@@ -43,7 +43,7 @@ All types of figures have the exact same structure with names
 corresponding to body parts, like `head` and `chest`. Left and
 right body parts are always in respect to the figure. Their
 names have prefixes `l_···` for left and `r_···` for right, so
-there is `l_knee` and `r_knee` &ndash; [see it](../examples/body-parts.html):
+there is `l_knee` and `r_knee` &ndash; [see it](../examples/figure-parts.html):
 
 * **Whole body** &ndash; `torso`
 * **Central parts** &ndash; `head`, `chest`, `waist`
