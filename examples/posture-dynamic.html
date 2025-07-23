@@ -52,7 +52,9 @@
 
 		// animate the child
 		
-		Happy.setAnimationLoop( ( t )=>{
+		Happy.setAnimationLoop( animate );
+		
+		function animate( t ) {
 
 			t = t/1000;
 
@@ -108,7 +110,7 @@
 			child.l_ankle.bend = -8+5*s;
 			child.r_ankle.bend = -8-5*s;
 
-		} );
+		};
 
 	</script>
 </body>

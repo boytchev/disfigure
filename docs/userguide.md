@@ -319,12 +319,12 @@ called automatically each frame. This user function accepts a parameter
 &ndash; [see it](../examples/posture-dynamic.html).
 
 ```javascript
-setAnimationLoop( animation );
+setAnimationLoop( animate );
 
-function animation( time ) {
-   :
-   : // executed one per frame
-   :
+function animate( time ) {
+   
+   // executed once per frame
+   
 }
 ```
 
