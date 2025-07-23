@@ -2,7 +2,7 @@
 
 import { WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, Matrix3, Matrix4, Euler, PlaneGeometry, MeshPhysicalNodeMaterial, Group } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { Fn, mix, If, normalGeometry, transformNormalToView, positionGeometry, min, vec3, float, select, vec2, uniform } from 'three/tsl';
+import { Fn, mix, If, transformNormalToView, normalGeometry, positionGeometry, min, vec3, float, select, vec2, uniform } from 'three/tsl';
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
@@ -59,34 +59,27 @@ var jointNormalMat= Fn( ([ pos, pivot, matrix, locus ])=>{ // eslint-disable-lin
 
 
 // calculate vertices of bent body surface
-function tslPositionNode( options ) {
+function tslPositionNode( joints ) {
 
-	options.vertex = positionGeometry;
-	options.fn = jointRotateMat;
-
-	return disfigure( options );
+	return disfigure( jointRotateMat, joints, positionGeometry );
 
 }
 
 
 
 // calculate normals of bent body surface
-function tslNormalNode( options ) {
+function tslNormalNode( joints ) {
 
-	options.vertex = normalGeometry;
-	options.fn = jointNormalMat;
-
-	return transformNormalToView( disfigure( options ) );
+	return transformNormalToView( disfigure( jointNormalMat, joints, normalGeometry ) );
 
 }
 
 
 // implement the actual body bending
-//		space - the space around the body
-//		vertex - vertex or normal coordinates to use as input data
-var disfigure = Fn( ( { fn, space, joints, vertex } )=>{
+var disfigure = Fn( ([ fn, joints, vertex ])=>{
 
-	var p = vertex.toVar( );
+	var p = vertex.toVar( ),
+		space = joints.space;
 
 
 	function chain( items ) {
@@ -158,7 +151,7 @@ class World {
 
 	constructor( options ) {
 
-		renderer = new WebGPURenderer( { antialias: true } );
+		renderer = new WebGPURenderer( { antialias: true, forceWebGL: true } );
 		renderer.setSize( innerWidth, innerHeight );
 		renderer.shadowMap.enabled = options?.shadows ?? true;
 		renderer.shadowMap.type = PCFSoftShadowMap;
@@ -577,47 +570,6 @@ class Space {
 
 		}
 
-
-
-
-		// torso
-		//this.head = new LocusY( ...bodyPartsDef.head );
-		//this.chest = new LocusY( ...bodyPartsDef.chest );
-		//this.waist = new LocusY( ...bodyPartsDef.waist );
-		//this.torso = new LocusY( ...bodyPartsDef.torso );
-
-		// legs
-		// this.l_knee = new LocusY( ...bodyPartsDef.knee );
-		// this.r_knee = new LocusY( ...bodyPartsDef.knee ).mirror();
-
-		// this.l_ankle = new LocusY( ...bodyPartsDef.ankle );
-		// this.r_ankle = new LocusY( ...bodyPartsDef.ankle ).mirror();
-
-		// this.l_shin = new LocusY( ...bodyPartsDef.shin );
-		// this.r_shin = new LocusY( ...bodyPartsDef.shin ).mirror();
-
-		// this.l_thigh = new LocusY( ...bodyPartsDef.thigh );
-		// this.r_thigh = new LocusY( ...bodyPartsDef.thigh ).mirror();
-
-		// this.l_foot = new LocusY( ...bodyPartsDef.foot );
-		// this.r_foot = new LocusY( ...bodyPartsDef.foot ).mirror();
-
-		// this.l_leg = new LocusT( ...bodyPartsDef.leg );
-		// this.r_leg = new LocusT( ...bodyPartsDef.leg ).mirror();
-
-		//arms
-		// this.l_elbow = new LocusX( ...bodyPartsDef.elbow );
-		// this.r_elbow = new LocusX( ...bodyPartsDef.elbow ).mirror();
-
-		// this.l_forearm = new LocusX( ...bodyPartsDef.forearm );
-		// this.r_forearm = new LocusX( ...bodyPartsDef.forearm ).mirror();
-
-		// this.l_wrist = new LocusX( ...bodyPartsDef.wrist );
-		// this.r_wrist = new LocusX( ...bodyPartsDef.wrist ).mirror();
-
-		// this.l_arm = new LocusXY( ...bodyPartsDef.arm );
-		// this.r_arm = new LocusXY( ...bodyPartsDef.arm ).mirror();
-
 	} // Space.constructor
 
 } // Space
@@ -697,7 +649,7 @@ class Joint {
 
 var m = new Matrix4(),
 	e = new Euler(),
-	dummyGeomeyry = new PlaneGeometry(),
+	dummyGeometry = new PlaneGeometry(),
 	_uid = 1;
 
 class Disfigure extends Mesh {
@@ -705,13 +657,13 @@ class Disfigure extends Mesh {
 
 	constructor( url, space, height, geometryHeight ) {
 
-		super( dummyGeomeyry );
+		super( dummyGeometry );
 
 
 		// unique number for each body, used to make their motions different
 		this.url = url;
 		this.uid = _uid;
-		_uid += 0.3 + 2*Math.random();
+		_uid += 1 + 10*Math.random();
 
 		this.castShadow = true;
 		this.receiveShadow = true;
@@ -761,8 +713,8 @@ class Disfigure extends Mesh {
 
 		// sets the materials of the model hooking them to TSL functions
 		this.material = new MeshPhysicalNodeMaterial( {
-			positionNode: tslPositionNode( { space: this.space, joints: this } ),
-			normalNode: tslNormalNode( { space: this.space, joints: this } ),
+			positionNode: tslPositionNode( this ),
+			normalNode: tslNormalNode( this ),
 			colorNode: vec3( 0.99, 0.65, 0.49 ),
 			metalness: 0,
 			roughness: 0.6,
@@ -850,8 +802,8 @@ class Disfigure extends Mesh {
 		anglesToMatrix( this.r_thigh, 0, 1, 0 );
 
 		// leg: foreward ??? straddle
-		anglesToMatrixArm( this.l_leg, 1, 0, -1 );
-		anglesToMatrixArm( this.r_leg, 1, 0, 1 );
+		anglesToMatrixArm( this.l_leg, 1, -1, -1 );
+		anglesToMatrixArm( this.r_leg, 1, 1, 1 );
 
 		for ( var wrapper of this.accessories ) {
 

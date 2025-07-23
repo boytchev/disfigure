@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Defining a dynamic ball-balancing posture</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Three from 'three';
+		import * as Happy from 'disfigure';
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+
+		// create a child
+		
+		var child = new Happy.Child( );
+
+		child.position.y = 0.36;
+		child.waist.bend = 10;
+		child.l_foot.bend = 8;
+		child.r_foot.bend = 8;
+			
+
+
+		// a ball
+		var geometry = new Three.IcosahedronGeometry( 0.21, 2 );
+		var material = new Three.MeshPhysicalMaterial( { 
+				color: 'crimson',
+				roughness: 0.3,
+				metalness: 0.6,
+				flatShading: true,
+			} );
+		var ball = new Three.Mesh( geometry, material );
+		ball.position.set( 0, 0.2, 0.05 );
+		ball.receiveShadow = true;
+		ball.castShadow = true;
+		
+		Happy.scene.add( ball );
+
+
+		// animate the child
+		
+		Happy.setAnimationLoop( ( t )=>{
+
+			t = t/1000;
+
+			var s = Happy.chaotic( t, 0 );
+			var c = Happy.chaotic( t, 0.5 );
+			
+			
+			// ball and child positions
+			
+			ball.position.x = 0.05*s;
+			ball.rotation.z = -0.24*s;
+
+			child.position.x = 0.02*s;
+			child.position.y = 0.36-0.02*(s**2);
+			
+			// motion of child's upper body
+			
+			child.torso.tilt = 7*s;
+			child.head.tilt = -20*s;
+			
+			child.chest.tilt = -7*s;
+			child.chest.turn = Happy.chaotic( t, 2, -15, 15 );
+			
+			child.waist.tilt = 7*s;
+			child.waist.turn = Happy.chaotic( t, 1, -15, 15 );
+			
+			child.l_arm.straddle = 50+30*s;
+			child.r_arm.straddle = 50-30*c;
+
+			child.l_arm.foreward = 20+30*c;
+			child.r_arm.foreward = 20-30*s;
+
+			child.l_arm.turn = 30*s;
+			child.r_arm.turn = -30*c;
+
+			child.l_elbow.bend = 40+30*c;
+			child.r_elbow.bend = 40-30*s;
+
+			// motion of child lower body
+			
+			child.l_leg.straddle = -2 + 15 * s;
+			child.r_leg.straddle = -2 - 15 * s;
+
+			child.r_leg.foreward = 20-2*s;
+			child.l_leg.foreward = 20+2*s;
+			
+			child.r_knee.bend = 30-2*s;
+			child.l_knee.bend = 30+2*s;
+			
+			child.l_ankle.tilt = -20*s;
+			child.r_ankle.tilt = 20*s;
+
+			child.l_ankle.bend = -8+5*s;
+			child.r_ankle.bend = -8-5*s;
+
+		} );
+
+	</script>
+</body>
+</html>

@@ -62,34 +62,27 @@ var jointNormalMat= Fn( ([ pos, pivot, matrix, locus ])=>{ // eslint-disable-lin
 
 
 // calculate vertices of bent body surface
-function tslPositionNode( options ) {
+function tslPositionNode( joints ) {
 
-	options.vertex = positionGeometry;
-	options.fn = jointRotateMat;
-
-	return disfigure( options );
+	return disfigure( joints, jointRotateMat, positionGeometry );
 
 }
 
 
 
 // calculate normals of bent body surface
-function tslNormalNode( options ) {
+function tslNormalNode( joints ) {
 
-	options.vertex = normalGeometry;
-	options.fn = jointNormalMat;
-
-	return transformNormalToView( disfigure( options ) );
+	return transformNormalToView( disfigure( joints, jointNormalMat, normalGeometry ) );
 
 }
 
 
 // implement the actual body bending
-//		space - the space around the body
-//		vertex - vertex or normal coordinates to use as input data
-var disfigure = Fn( ( { fn, space, joints, vertex } )=>{
+var disfigure = Fn( ([ joints, fn, p ])=>{
 
-	var p = vertex.toVar( );
+	var p = p.toVar( ),
+		space = joints.space;
 
 
 	function chain( items ) {

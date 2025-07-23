@@ -306,41 +306,37 @@ figure.l_elbow.bend = 140;
 
 [<img src="../examples/snapshots/posture-static.jpg" width="48%">](../examples/posture-static.html)
 
-<!--
 
-### Dynamic posture
 
-The dynamic posture &ndash; i.e. a posture that changes over time &ndash; is set
-with the same properties that are used for static posture. Mannequin.js manages
-dynamic posture by a user-defined function called in the animation loop once for
-each frame. All changes of a posture should be defined inside this function
-([see it](example-dynamic.html)). The parameter *t* is the time, measured
-in seconds since the start of the library. The name of the user-defined function
-is passed as an argument to `createStage()`.
+A dynamic posture is when is changes over time. If a predefined world
+is used, it manages posture animation in two ways &ndash; via animation
+loop function or via timer events. In both ways the user program should
+provide angles at a given time.
 
-[<img src="snapshots/example-dynamic.jpg">](example-dynamic.html)
+The function `setAnimationLoop` registers a user-defind function that is
+called automatically each frame. This user function accepts a parameter
+*time* with the current time in miliseconds
+&ndash; [see it](../examples/posture-dynamic.html).
 
-``` javascript
-createStage( animate );
+```javascript
+setAnimationLoop( animation );
 
-function animate(t)
-{
-    var time1 = Math.sin( 2*t ),
-		time2 = Math.sin( 2*t-60 );
-	
-    ball.position.x = 0.06*time1;
-	
-    child.position.y = 0.31 + 0.05*Math.cos(time1 * Math.PI/2);
-
-    child.turn = -90-20*time1+20*time2;
-    child.tilt = 10*time1;
-    :
+function animation( time ) {
+   :
+   : // executed one per frame
+   :
 }
 ```
 
-To make the animation loop faster, all constant rotations should be defined outside `animate`. 
-			
-			
+[<img src="../examples/snapshots/posture-dynamic.jpg" width="48%">](../examples/posture-dynamic.html)
+
+
+
+
+
+
+<!--
+
 ### Working with postures
 
 A posture could be extracted from a figure with the `posture` property. It contains an object with fields `version` for the posture data format version, and `data` &ndash; a nested array for joint angles. The `posture` property can be used to push a posture to a figure. 

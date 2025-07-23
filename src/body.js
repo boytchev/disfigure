@@ -90,7 +90,7 @@ class Joint {
 
 var m = new Matrix4(),
 	e = new Euler(),
-	dummyGeomeyry = new PlaneGeometry(),
+	dummyGeometry = new PlaneGeometry(),
 	_uid = 1;
 
 class Disfigure extends Mesh {
@@ -98,13 +98,13 @@ class Disfigure extends Mesh {
 
 	constructor( url, space, height, geometryHeight ) {
 
-		super( dummyGeomeyry );
+		super( dummyGeometry );
 
 
 		// unique number for each body, used to make their motions different
 		this.url = url;
 		this.uid = _uid;
-		_uid += 0.3 + 2*Math.random();
+		_uid += 1 + 10*Math.random();
 
 		this.castShadow = true;
 		this.receiveShadow = true;
@@ -154,8 +154,8 @@ class Disfigure extends Mesh {
 
 		// sets the materials of the model hooking them to TSL functions
 		this.material = new MeshPhysicalNodeMaterial( {
-			positionNode: tslPositionNode( { space: this.space, joints: this } ),
-			normalNode: tslNormalNode( { space: this.space, joints: this } ),
+			positionNode: tslPositionNode( this ),
+			normalNode: tslNormalNode( this ),
 			colorNode: vec3( 0.99, 0.65, 0.49 ),
 			metalness: 0,
 			roughness: 0.6,
