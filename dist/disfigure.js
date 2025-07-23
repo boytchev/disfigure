@@ -564,43 +564,59 @@ class Space {
 
 	constructor( bodyPartsDef ) {
 
+		var centrals = { head: LocusY, chest: LocusY, waist: LocusY, torso: LocusY },
+			symmetricals = { knee: LocusY, ankle: LocusY, shin: LocusY, thigh: LocusY, foot: LocusY, leg: LocusT, elbow: LocusX, forearm: LocusX, wrist: LocusX, arm: LocusXY };
+
+		for ( var name in centrals )
+			this[ name ] = new ( centrals[ name ])( ...bodyPartsDef[ name ]);
+
+		for ( var name in symmetricals ) {
+
+			this[ 'l_'+name ] = new ( symmetricals[ name ])( ...bodyPartsDef[ name ]);
+			this[ 'r_'+name ] = new ( symmetricals[ name ])( ...bodyPartsDef[ name ]).mirror();
+
+		}
+
+
+
+
 		// torso
-		this.head = new LocusY( ...bodyPartsDef.head );
-		this.chest = new LocusY( ...bodyPartsDef.chest );
-		this.waist = new LocusY( ...bodyPartsDef.waist );
-		this.torso = new LocusY( ...bodyPartsDef.torso );
+		//this.head = new LocusY( ...bodyPartsDef.head );
+		//this.chest = new LocusY( ...bodyPartsDef.chest );
+		//this.waist = new LocusY( ...bodyPartsDef.waist );
+		//this.torso = new LocusY( ...bodyPartsDef.torso );
 
 		// legs
-		this.l_knee = new LocusY( ...bodyPartsDef.knee );
-		this.r_knee = new LocusY( ...bodyPartsDef.knee ).mirror();
+		// this.l_knee = new LocusY( ...bodyPartsDef.knee );
+		// this.r_knee = new LocusY( ...bodyPartsDef.knee ).mirror();
 
-		this.l_ankle = new LocusY( ...bodyPartsDef.ankle );
-		this.r_ankle = new LocusY( ...bodyPartsDef.ankle ).mirror();
+		// this.l_ankle = new LocusY( ...bodyPartsDef.ankle );
+		// this.r_ankle = new LocusY( ...bodyPartsDef.ankle ).mirror();
 
-		this.l_shin = new LocusY( ...bodyPartsDef.shin );
-		this.r_shin = new LocusY( ...bodyPartsDef.shin ).mirror();
+		// this.l_shin = new LocusY( ...bodyPartsDef.shin );
+		// this.r_shin = new LocusY( ...bodyPartsDef.shin ).mirror();
 
-		this.l_thigh = new LocusY( ...bodyPartsDef.thigh );
-		this.r_thigh = new LocusY( ...bodyPartsDef.thigh ).mirror();
+		// this.l_thigh = new LocusY( ...bodyPartsDef.thigh );
+		// this.r_thigh = new LocusY( ...bodyPartsDef.thigh ).mirror();
 
-		this.l_foot = new LocusY( ...bodyPartsDef.foot );
-		this.r_foot = new LocusY( ...bodyPartsDef.foot ).mirror();
+		// this.l_foot = new LocusY( ...bodyPartsDef.foot );
+		// this.r_foot = new LocusY( ...bodyPartsDef.foot ).mirror();
 
-		this.l_leg = new LocusT( ...bodyPartsDef.leg );
-		this.r_leg = new LocusT( ...bodyPartsDef.leg ).mirror();
+		// this.l_leg = new LocusT( ...bodyPartsDef.leg );
+		// this.r_leg = new LocusT( ...bodyPartsDef.leg ).mirror();
 
-		// arms
-		this.l_elbow = new LocusX( ...bodyPartsDef.elbow );
-		this.r_elbow = new LocusX( ...bodyPartsDef.elbow ).mirror();
+		//arms
+		// this.l_elbow = new LocusX( ...bodyPartsDef.elbow );
+		// this.r_elbow = new LocusX( ...bodyPartsDef.elbow ).mirror();
 
-		this.l_forearm = new LocusX( ...bodyPartsDef.forearm );
-		this.r_forearm = new LocusX( ...bodyPartsDef.forearm ).mirror();
+		// this.l_forearm = new LocusX( ...bodyPartsDef.forearm );
+		// this.r_forearm = new LocusX( ...bodyPartsDef.forearm ).mirror();
 
-		this.l_wrist = new LocusX( ...bodyPartsDef.wrist );
-		this.r_wrist = new LocusX( ...bodyPartsDef.wrist ).mirror();
+		// this.l_wrist = new LocusX( ...bodyPartsDef.wrist );
+		// this.r_wrist = new LocusX( ...bodyPartsDef.wrist ).mirror();
 
-		this.l_arm = new LocusXY( ...bodyPartsDef.arm );
-		this.r_arm = new LocusXY( ...bodyPartsDef.arm ).mirror();
+		// this.l_arm = new LocusXY( ...bodyPartsDef.arm );
+		// this.r_arm = new LocusXY( ...bodyPartsDef.arm ).mirror();
 
 	} // Space.constructor
 

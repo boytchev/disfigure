@@ -61,12 +61,12 @@
 
 			woman.l_knee.bend = Happy.chaotic( t, 1, 20, 120 );
 			woman.r_knee.bend = Happy.chaotic( t, 2, 20, 120 );
-			
+		
 			// some general motion of the body
 		
-			man.torso.turn  = Happy.chaotic( t/2, 3, 10, 0 );
-			woman.torso.turn  = Happy.chaotic( t/2, 4, -10, 0 );
-			
+			man.torso.turn = Happy.chaotic( t/2, 3, 10, 0 );
+			woman.torso.turn = Happy.chaotic( t/2, 4, -10, 0 );
+		
 			man.l_leg.straddle = Happy.chaotic( t/2, 5, 10, 20 );
 			man.r_leg.straddle = man.l_leg.straddle;
 

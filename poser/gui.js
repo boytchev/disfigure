@@ -269,6 +269,7 @@ function createGui( ) {
 	{
 
 		folder.add( model.l_leg, 'foreward', -40, 120 ).name( html( 'Leg', 'foreward' ) );
+		folder.add( model.l_leg, 'turn', -10, 90 ).name( html( '', 'turn' ) );
 		folder.add( model.l_leg, 'straddle', -10, 90 ).name( html( '', 'straddle' ) );
 
 		folder.add( model.l_thigh, 'turn', -40, 80 ).name( html( 'Thigh', 'turn', 'border' ) );
@@ -289,6 +290,7 @@ function createGui( ) {
 	{
 
 		folder.add( model.r_leg, 'foreward', -40, 120 ).name( html( 'Leg', 'foreward' ) );
+		folder.add( model.r_leg, 'turn', -10, 90 ).name( html( '', 'turn' ) );
 		folder.add( model.r_leg, 'straddle', -10, 90 ).name( html( '', 'straddle' ) );
 
 		folder.add( model.r_thigh, 'turn', -40, 80 ).name( html( 'Thigh', 'turn', 'border' ) );

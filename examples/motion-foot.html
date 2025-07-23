@@ -50,17 +50,17 @@
 		
 			man.l_foot.bend = Happy.chaotic( t, 1, -60, 60 );
 			man.r_foot.bend = Happy.chaotic( t, 2, -60, 60 );
-			
+		
 			// some general motion of the body
 		
-			man.torso.turn  = Happy.chaotic( t/2, 3, -10, 10 );
-			
+			man.torso.turn = Happy.chaotic( t/2, 3, -10, 10 );
+		
 			man.l_leg.straddle = Happy.chaotic( t/2, 7, 15, 20 );
 			man.r_leg.straddle = Happy.chaotic( t/2, 8, 15, 20 );
-			
+		
 			man.l_leg.foreward = Happy.chaotic( t/2, 7, 0, -10 );
 			man.r_leg.foreward = Happy.chaotic( t/2, 8, 30, 40 );
-			
+		
 			man.l_knee.foreward = -1.5*man.l_leg.foreward;
 			man.r_knee.foreward = 1.5*man.r_leg.foreward;
 

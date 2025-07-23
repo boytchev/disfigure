@@ -4,7 +4,7 @@
 # Disfigure: User Guide
 
 
-## <small><small>[Figures](#figure-shapes) &middot; [Motions](#figure-motions) &middot; [World](#predefined-world) &middot; [Others](#others)</small></small>
+## <small><small>[Figures](#figures-shapes) &middot; [Motions](#figure-motions) &middot; [Postures](#figure-postures) &middot; [Worlds](#predefined-world) &middot; [Others](#others)</small></small>
 
 
 
@@ -165,14 +165,16 @@ man.r_wrist.tilt = 10;
 The lower limbs are symmetrical body parts with multiple joints
 and rotation properties that recreate a complex and flexible
 motion &ndash; [see it](../examples/motion-limbs-lower.html).
-Legs have `foreward` and `straddle` &ndash; [see it](../examples/motion-leg.html).
+Legs have `foreward`, `straddle` and `turn` &ndash; [see it](../examples/motion-leg.html).
 
 * `foreward` &ndash; moves a leg foreward (or backward)
 * `straddle` &ndash; moves a leg sideways away from the body (or to the body)
+* `turn` &ndash; turns a leg inward (or outward)
 
 ``` javascript
 figure.r_leg.foreward = -10;
 figure.r_leg.straddle = 50;
+figure.r_leg.turn = 20;
 ```
 
 [<img src="../examples/snapshots/motion-limbs-lower.jpg" width="48%">](../examples/motion-limbs-lower.html)
@@ -267,75 +269,45 @@ figure.r_foot.bend = 20;
 
 
 
-<!--
+# Figure postures
 
+The posture of a figure is defined by the rotation properties of its body parts.
 
-# Body posture
+The static posture defines the position of body part that do not change.
+By default, when a figure is created, it is set to a default posture. 
 
-The posture of a figure is defined by a setting the rotation properties of body parts. The order of rotations is important, i.e. changing the order of rotations produce different result. The next example applies bending 45&deg;, turning 90&deg; and tilting 60&deg; of three figures. As the order of rotations is different for each figure, the final position is also different ([see it](example-order.html)):
+When a posture is defined programmatically, it might be easier
+to define it step by step. To recreate a [Tai Chi Chuan](https://en.wikipedia.org/wiki/Tai_chi)
+posture &ndash; [see it](../examples/posture-static.html), first the
+whole body position is defined:
+
 
 ``` javascript
-man.torso.bend += 45;
-man.torso.turn += 90;
-man.torso.tilt += 60;
-
-child.torso.tilt += 60;
-child.torso.bend += 45;
-child.torso.turn += 90;
-
-woman.torso.turn += 90;
-woman.torso.bend += 45;
-woman.torso.tilt += 60;
+figure.torso.bend = 10;
+figure.torso.tilt = -5;
+:
 ```
 
-### Static posture
-
-The static posture defines the position of body part that do not change. By default, when a figure is created, its body parts are set to the default posture. If the posture editor is not used, all rotations has to be defined programmatically ([see it](example-posture.html)):
-
-[<img src="snapshots/example-posture.jpg">](example-posture.html)
-
-Sometimes it is better to define the figure step by step. Tai Chi Chuan posture, shown above, could start by defining the whole body position:
+Then the orientations of the legs are set:
 
 ``` javascript
-// overall body position
-man.body.tilt = -5;
-man.body.bend = 15.2;
-:
-// torso and head
-man.torso.turn -= 30;
-man.head.turn -= 70;
-```
-
-Then the orientation of the legs can be set:
-
-``` javascript
-// right leg
-man.r_leg.turn = 50;
-man.r_knee.bend = 90;
-man.r_ankle.bend = 15;
-:
-// left leg
-man.l_leg.raise = -20;
-man.l_knee.bend = 30;
-man.l_ankle.bend = 42;
+figure.l_leg.straddle = 25;
+figure.l_knee.bend = 50;
 :
 ```
 
 Finally, the arms are fixed:
 	
 ``` javascript
-// left arm
-man.l_arm.straddle = 70;
-man.l_elbow.bend = 155;
-man.l_wrist.bend = -20;
-:
-// right arm
-man.r_arm.straddle += 70;
-man.r_elbow.bend += 40;
-man.r_wrist.turn -= 60;
+figure.l_arm.straddle = 12;
+figure.l_elbow.bend = 140;
 :
 ```
-	
+
+[<img src="../examples/snapshots/posture-static.jpg" width="48%">](../examples/posture-static.html)
+
+<!--
+
 ### Dynamic posture
 
 The dynamic posture &ndash; i.e. a posture that changes over time &ndash; is set

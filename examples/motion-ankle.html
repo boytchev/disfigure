@@ -64,27 +64,27 @@
 
 			woman.l_ankle.bend = Happy.chaotic( t, 1, -80, 70 );
 			woman.r_ankle.bend = Happy.chaotic( t, 2, -80, 70 );
-			
+		
 			// some general motion of the body
 		
-			man.torso.turn  = Happy.chaotic( t/2, 3, 10, 10 );
-			woman.torso.turn  = Happy.chaotic( t/2, 4, -10, 10 );
-			
+			man.torso.turn = Happy.chaotic( t/2, 3, 10, 10 );
+			woman.torso.turn = Happy.chaotic( t/2, 4, -10, 10 );
+		
 			man.l_leg.straddle = Happy.chaotic( t/2, 7, 5, 10 );
 			man.r_leg.straddle = Happy.chaotic( t/2, 8, 5, 10 );
-			
+		
 			man.l_leg.foreward = Happy.chaotic( t/2, 7, 30, 40 );
 			man.r_leg.foreward = Happy.chaotic( t/2, 8, 30, 40 );
-			
+		
 			man.l_knee.foreward = 1.5*man.l_leg.foreward;
 			man.r_knee.foreward = 1.5*man.r_leg.foreward;
 
 			woman.l_leg.straddle = Happy.chaotic( t/2, 7, 5, 10 );
 			woman.r_leg.straddle = Happy.chaotic( t/2, 8, 5, 10 );
-			
+		
 			woman.l_leg.foreward = Happy.chaotic( t/2, 7, 30, 40 );
 			woman.r_leg.foreward = Happy.chaotic( t/2, 8, 30, 40 );
-			
+		
 			woman.l_knee.foreward = 1.5*woman.l_leg.foreward;
 			woman.r_knee.foreward = 1.5*woman.r_leg.foreward;
 
