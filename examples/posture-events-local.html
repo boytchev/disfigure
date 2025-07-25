@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Defining dynamic postures with local events</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Three from 'three';
+		import * as Happy from 'disfigure';
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+
+		// create a person, a woperson and a child
+		
+		var man = new Happy.Man( );
+		var woman = new Happy.Woman( );
+		var child = new Happy.Child( );
+
+		man.position.z = -1;
+		woman.position.z = -0.5;
+		
+
+		// make each person listen to his her own local animate event
+		
+		man.addEventListener( 'animate', animate );
+		woman.addEventListener( 'animate', animate );
+		child.addEventListener( 'animate', animate );
+
+
+		// animate adult
+		
+		function animate ( event ) {
+		
+			// get person and time from the event
+			
+			var time = event.time/2000;
+			var person = event.target;
+
+			// animate the person
+			
+			person.head.tilt = Happy.chaotic( time, person.id, -40, 40 );
+			person.waist.turn = person.head.tilt;
+			person.waist.tilt = -person.head.tilt/2;
+			person.chest.tilt = -person.head.tilt/2;
+
+			person.l_arm.straddle = -person.head.tilt;
+			person.r_arm.straddle = person.head.tilt;
+		};
+		
+	</script>
+</body>
+</html>

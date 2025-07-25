@@ -28,6 +28,8 @@ A library to rig boneless and morphless 3D models. **WIP.**
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-wrist.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/motion-wrist.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/number-generators.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/number-generators.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/posture-dynamic.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/posture-dynamic.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/posture-events-global.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/posture-events-global.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/posture-events-local.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/posture-events-local.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/posture-static.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/posture-static.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/world-customize.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/world-customize.html)
 

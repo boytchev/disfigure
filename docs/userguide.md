@@ -316,7 +316,10 @@ provide angles at a given time.
 The function `setAnimationLoop` registers a user-defind function that is
 called automatically each frame. This user function accepts a parameter
 *time* with the current time in miliseconds
-&ndash; [see it](../examples/posture-dynamic.html).
+&ndash; [see it](../examples/posture-dynamic.html). The alternative
+approach is to let the `window` object listen to the `animate`
+events via the `addEventListener` method. The `event.time`
+holds the current time in miliseconds &ndash; [see it](../examples/posture-events-global.html).
 
 ```javascript
 setAnimationLoop( animate );
@@ -328,11 +331,37 @@ function animate( time ) {
 }
 ```
 
+```
+window.addEventListener( 'animate', animate );
+
+function animate ( event ) {
+		
+	// var time = event.time;
+
+}
+```
+
 [<img src="../examples/snapshots/posture-dynamic.jpg" width="48%">](../examples/posture-dynamic.html)
+[<img src="../examples/snapshots/posture-events-global.jpg" width="48%">](../examples/posture-events-global.html)
 
 
+The *animate* event is triggered to each figure. In this case
+the activating figure is stored in the property `event.target`.
+This allows the same animation to be applied to several figures
+&ndash; [see it](../examples/posture-events-local.html).
 
+```
+figure.addEventListener( 'animate', animate );
 
+function animate ( event ) {
+		
+	// var time = event.time;
+	// var figure = event.target;
+
+}
+```
+
+[<img src="../examples/snapshots/posture-events-local.jpg" width="48%">](../examples/posture-events-local.html)
 
 
 <!--
