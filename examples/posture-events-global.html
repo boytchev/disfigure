@@ -13,7 +13,6 @@
 	<script src="importmap.js"></script>
 	<script type="module">
 
-		import * as Three from 'three';
 		import * as Happy from 'disfigure';
 
 
@@ -32,7 +31,7 @@
 		man.l_ankle.tilt = 0;
 		woman.l_ankle.tilt = 0;
 		child.l_ankle.tilt = 0;
-			
+		
 
 		// listen to the global animate event
 		
@@ -41,14 +40,14 @@
 
 		// animate all
 		
-		function animate ( event ) {
+		function animate( event ) {
 		
 			// get time from the event
-			
+		
 			var time = event.time/2000;
 
 			// animate the people
-			
+		
 			man.torso.tilt = Happy.chaotic( time, man.id, 0, 20 );
 			woman.torso.tilt = Happy.chaotic( time, woman.id, 0, 20 );
 			child.torso.tilt = Happy.chaotic( time, child.id, 0, 20 );
@@ -72,7 +71,8 @@
 			man.position.y = man.height*man.torso.tilt/2000;
 			woman.position.y = woman.height*woman.torso.tilt/2000;
 			child.position.y = child.height*child.torso.tilt/2000;
-		};
+
+		}
 
 		
 	</script>

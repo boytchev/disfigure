@@ -5,7 +5,7 @@
 
 
 
-import { Euler, Group, Matrix3, Matrix4, Mesh, MeshPhysicalNodeMaterial, PlaneGeometry, Vector3, MathUtils } from 'three';
+import { Euler, Group, MathUtils, Matrix3, Matrix4, Mesh, MeshPhysicalNodeMaterial, PlaneGeometry, Vector3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { uniform, vec3 } from 'three/tsl';
 
@@ -29,18 +29,20 @@ var _mat = new Matrix3(),
 	_m = new Matrix3(),
 	_v = new Vector3();
 
+const V0 = new Vector3();
+
 
 var toDeg = x => x * 180 / Math.PI,
 	toRad = x => x / 180 * Math.PI,
-	toRound = x => Math.round(100*x)/100;
+	toRound = x => Math.round( 100*x )/100;
 
 
 function getset( object, name, xyz ) {
 
 	Object.defineProperty( object, name, {
 		get() {
-			
-			return toDeg( object.angle[ xyz ] );
+
+			return toDeg( object.angle[ xyz ]);
 
 		},
 		set( value ) {
@@ -100,8 +102,8 @@ var m = new Matrix4(),
 
 class Disfigure extends Mesh {
 
-	static POSTURE_PARTS = ['torso','waist','chest','head','l_leg','l_thigh','l_knee','l_shin','l_ankle','l_foot','r_leg','r_thigh','r_knee','r_shin','r_ankle','r_foot','l_arm','l_elbow','l_forearm','l_wrist','r_arm','r_elbow','r_forearm','r_wrist'];
-	
+	static POSTURE_PARTS = [ 'torso', 'waist', 'chest', 'head', 'l_leg', 'l_thigh', 'l_knee', 'l_shin', 'l_ankle', 'l_foot', 'r_leg', 'r_thigh', 'r_knee', 'r_shin', 'r_ankle', 'r_foot', 'l_arm', 'l_elbow', 'l_forearm', 'l_wrist', 'r_arm', 'r_elbow', 'r_forearm', 'r_wrist' ];
+
 	constructor( url, space, height, geometryHeight ) {
 
 		super( dummyGeometry );
@@ -279,51 +281,102 @@ class Disfigure extends Mesh {
 	get posture() {
 
 		var angles = [];
-		
-		for( var name of Disfigure.POSTURE_PARTS )
-		{
-			angles.push( ...this[name].angle )
+
+		for ( var name of Disfigure.POSTURE_PARTS ) {
+
+			angles.push( ...this[ name ].angle );
+
 		}
-		
-		var position = [...this.position];
-		var rotation = [...this.rotation];
-		
+
+		var position = [ ...this.position ];
+		var rotation = [ ...this.rotation ];
+
 		return {
 			version: 8,
-			position: position.map( x=>toRound(x) ),
+			position: position.map( x=>toRound( x ) ),
 			rotation: rotation,
-			angles: angles.map( x=>toRound(toDeg(x)) ) };
+			angles: angles.map( x=>toRound( toDeg( x ) ) ) };
 
 	} // Disfigure.posture
-	
-	
-	
+
+
+
 	get postureString() {
 
 		return JSON.stringify( this.posture );
 
 	} // Disfigure.postureString
-	
-	
-	
+
+
+
 	set posture( data ) {
 
-		if( data.version !=8 )
+		if ( data.version !=8 )
 			console.error( 'Incompatible posture version' );
 
 		var i = 0;
-		
-		var angles = data.angles.map( x=>toRad(x) );
-	
+
+		var angles = data.angles.map( x=>toRad( x ) );
+
 		this.position.set( ...data.position );
 		this.rotation.set( ...data.rotation );
-		
-		for( var name of Disfigure.POSTURE_PARTS ) {
-			this[name].angle.set( angles[i], angles[i+1], angles[i+2] );
+
+		for ( var name of Disfigure.POSTURE_PARTS ) {
+
+			this[ name ].angle.set( angles[ i ], angles[ i+1 ], angles[ i+2 ]);
 			i += 3;
+
 		}
-		
+
 	} // Disfigure.posture
+
+
+	anchor( object, atPosition=V0 ) {
+
+		this.position.set( 0, 0, 0 );
+		this.updateMatrixWorld( true );
+
+		var matrixElements = object.matrixWorld.elements;
+
+		this.position.x = atPosition.x-matrixElements[ 12 ];
+		this.position.y = atPosition.y-matrixElements[ 13 ];
+		this.position.z = atPosition.z-matrixElements[ 14 ];
+
+		this.updateMatrixWorld( true );
+
+	} // Disfigure.anchor
+
+
+
+	blend( postureA, postureB, k ) {
+
+		function lerp( a, b ) {
+
+			var c = [];
+			for ( var i=0; i<a.length; i++ )
+				c[ i ] = MathUtils.lerp( a[ i ], b[ i ], k );
+
+			return c;
+
+		}
+
+		var eulerA = new Euler( ...postureA.rotation ),
+			eulerB = new Euler( ...postureB.rotation );
+		eulerA.reorder( eulerB._order );
+
+		var posture = {
+			version: postureA.version,
+			position: lerp( postureA.position, postureB.position ),
+			rotation: new Euler(
+				...lerp([ eulerA._x, eulerA._y, eulerA._z ],
+							 [ eulerB._x, eulerB._y, eulerB._z ])
+			),
+			angles: lerp( postureA.angles, postureB.angles ),
+		};
+
+		this.posture = posture;
+
+	} // Disfigure.blend
 
 } // Disfigure
 
@@ -453,34 +506,4 @@ class Child extends Disfigure {
 
 
 
-function blend( postureA, postureB, k ) {
-
-	function lerp (a,b) {
-		var c = [];
-		for( var i=0; i<a.length; i++ )
-			c[i] = MathUtils.lerp( a[i], b[i], k );
-		
-		return c;
-	}
-		
-	var eulerA = new Euler( ...postureA.rotation ),
-		eulerB = new Euler( ...postureB.rotation );
-	eulerA.reorder( eulerB._order );
-	
-	var posture = {
-		version: postureA.version,
-		position: lerp( postureA.position, postureB.position ),
-		rotation: new Euler(
-				...lerp( [eulerA._x, eulerA._y, eulerA._z],
-						 [eulerB._x, eulerB._y, eulerB._z] )
-			),
-		angles: lerp( postureA.angles, postureB.angles ),
-	};
-		
-	return posture;
-	
-} // blend
-
-
-
-export { Man, Woman, Child, Joint, blend };
+export { Man, Woman, Child, Joint };

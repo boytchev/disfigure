@@ -584,7 +584,7 @@ function updateGUI( ) {
 function animationLoop( t ) {
 
 	if ( options.animate ) rigModel( t );
-	
+
 }
 
 

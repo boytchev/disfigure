@@ -30,7 +30,7 @@
 
 		var postureA = man.posture;
 		
-		var postureB = {"version":8,"position":[0,-0.29,0.5],"rotation":[0,0,0,"XYZ"],"angles":[8,0,0,-4,4,-6,3,-34,0,-5,-60,-8,-7,-1,25,0,0,0,52,0,0,0,-4,0,-32,0,-23,-23,0,0,49,26,40,0,45,0,88,0,0,0,6,0,-16,0,5,0,0,0,0,7,7,0,140,0,0,0,0,0,0,-25,5,-20,12,0,50,0,50,0,0,0,-5,-17]};
+		var postureB = { "version": 8, "position": [ 0, -0.29, 0.5 ], "rotation": [ 0, 0, 0, "XYZ" ], "angles": [ 8, 0, 0, -4, 4, -6, 3, -34, 0, -5, -60, -8, -7, -1, 25, 0, 0, 0, 52, 0, 0, 0, -4, 0, -32, 0, -23, -23, 0, 0, 49, 26, 40, 0, 45, 0, 88, 0, 0, 0, 6, 0, -16, 0, 5, 0, 0, 0, 0, 7, 7, 0, 140, 0, 0, 0, 0, 0, 0, -25, 5, -20, 12, 0, 50, 0, 50, 0, 0, 0, -5, -17 ] };
 
 		// man's stick
 
@@ -44,31 +44,19 @@
 
 		man.r_wrist.attach( stick );
 
-		
-		var geometry = new Three.BoxGeometry( 0.05,0.05,0.05 ),
-			material = new Three.MeshStandardMaterial( { color: 'crimson' } )
-			
-			var s2 = new Three.Mesh( geometry, material );
-		s2.position.z = 0.12	;
-		s2.position.y = -0.03;
-		s2.position.x = -0.1;
-		man.l_foot.attach( s2 );
+		var fixedPos = new Three.Object3D();
+		fixedPos.position.set( -0.1, -0.03, 0.12 );
+		man.l_foot.attach( fixedPos );
 		
 
-		Happy.setAnimationLoop( (t)=>{
+		Happy.setAnimationLoop( ( t )=>{
 		
-			var k = Happy.regular(t/400 + Math.sin(t/400 * 2)/2, 0, 0, 1);
+			var k = Happy.regular( t/400 + Math.sin( t/400 * 2 )/2, 0, 0, 1 );
 			k = Math.min( k, 1 );
 			k = Math.max( k, 0 );
-			
-			man.posture = Happy.blend( postureA, postureB, k );
-			
-			man.position.set(0,0,0);
-			man.updateMatrixWorld( true );
-			man.position.x = -s2.matrixWorld.elements[12];
-			man.position.y = -s2.matrixWorld.elements[13];
-			man.position.z = -s2.matrixWorld.elements[14];
-			man.updateMatrixWorld( true );
+		
+			man.blend( postureA, postureB, k );
+			man.anchor( fixedPos );
 
 		} );
 		
