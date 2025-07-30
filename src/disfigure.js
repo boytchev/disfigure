@@ -15,6 +15,7 @@ export {
 	Man,
 	Woman,
 	Child,
+	blend,
 
 } from './body.js';
 

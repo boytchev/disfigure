@@ -31,56 +31,74 @@
 
 		// overall body position
 
-		man.position.y = -0.3;
-		man.torso.bend = 10;
-		man.torso.tilt = -5;
+		man.position.y = -0.29;
 
 		// torso and head
-
-		man.head.turn = -55;
-		man.head.tilt = -5;
-		man.chest.turn = -30;
-		man.chest.tilt = 15;
-		man.waist.bend = -10;
-		man.waist.turn = -30;
-		man.waist.tilt = -10;
+		man.torso.bend = 8;
+		
+		man.head.bend = -5;
+		man.head.turn = -60;
+		man.head.tilt = -8;
+		
+		man.chest.bend = 3;
+		man.chest.turn = -34;
+		man.chest.tilt = 0;
+		
+		man.waist.bend = -4;
+		man.waist.turn = 4;
+		man.waist.tilt = -6;
 
 		// left leg
 
-		man.l_leg.foreward = -3;
+		man.l_leg.foreward = -7;
+		man.l_leg.turn = -1;
 		man.l_leg.straddle = 25;
-		man.l_knee.bend = 50;
-		man.l_ankle.bend = -20;
-		man.l_ankle.tilt = -30;
-		man.l_foot.bend = -30;
+		
+		man.l_knee.bend = 52;
+		
+		man.l_shin.turn = -4;
+		
+		man.l_ankle.bend = -32;
+		man.l_ankle.tilt = -23;
+		
+		man.l_foot.bend = -23;
 
 		// right leg
 
-		man.r_leg.foreward = 40;
-		man.r_leg.straddle = 45;
-		man.r_leg.turn = 45;
-		man.r_thigh.turn = 30;
-		man.r_knee.bend = 90;
-		man.r_ankle.bend = -20;
-		man.r_ankle.tilt = 0;
+		man.r_leg.foreward = 49;
+		man.r_leg.turn = 26;
+		man.r_leg.straddle = 40;
+		
+		man.r_thigh.turn = 45;
+		
+		man.r_knee.bend = 88;
+		
+		man.r_shin.turn = 6;
+		
+		man.r_ankle.bend = -16;
+		man.r_ankle.tilt = 5;
 
 		// left arm
 
-		man.l_arm.straddle = 12;
-		man.l_arm.foreward = 10;
+		man.l_arm.straddle = 7;
+		man.l_arm.foreward = 7;
+		
 		man.l_elbow.bend = 140;
-		man.l_forearm.turn = 10;
-		man.l_wrist.bend = -10;
+		
+		man.l_wrist.bend = -25;
 
 		// right arm
 
-		man.r_arm.straddle = 15;
-		man.r_arm.turn = 0;
-		man.r_arm.foreward = -10;
-		man.r_elbow.bend = 45;
+		man.r_arm.straddle = 12;
+		man.r_arm.turn = 5;
+		man.r_arm.foreward = -20;
+		
+		man.r_elbow.bend = 50;
+		
 		man.r_forearm.turn = 50;
-		man.r_wrist.bens = -20;
-
+		
+		man.r_wrist.bend = -17;
+		man.r_wrist.tilt = -5;
 		// stick
 
 		var geometry = new Three.CylinderGeometry( 0.01, 0.01, 2 ),

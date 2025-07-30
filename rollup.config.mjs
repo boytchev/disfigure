@@ -42,11 +42,7 @@ export default [
 			'three/addons/math/SimplexNoise.js'
 		],
 		plugins: [
-			terser({
-				format: {
-					comments: 'some'
-				}
-			})
+			terser()
 		]
 	}	
 

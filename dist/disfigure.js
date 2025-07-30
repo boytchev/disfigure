@@ -1,6 +1,6 @@
 // disfigure v0.0.19
 
-import { WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, Matrix3, Matrix4, Euler, PlaneGeometry, MeshPhysicalNodeMaterial, Group } from 'three';
+import { WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, Matrix3, Matrix4, Euler, PlaneGeometry, MeshPhysicalNodeMaterial, MathUtils, Group } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Fn, mix, If, transformNormalToView, normalGeometry, positionGeometry, min, vec3, float, select, vec2, uniform } from 'three/tsl';
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
@@ -61,7 +61,7 @@ var jointNormalMat= Fn( ([ pos, pivot, matrix, locus ])=>{ // eslint-disable-lin
 // calculate vertices of bent body surface
 function tslPositionNode( joints ) {
 
-	return disfigure( jointRotateMat, joints, positionGeometry );
+	return disfigure( joints, jointRotateMat, positionGeometry );
 
 }
 
@@ -70,15 +70,15 @@ function tslPositionNode( joints ) {
 // calculate normals of bent body surface
 function tslNormalNode( joints ) {
 
-	return transformNormalToView( disfigure( jointNormalMat, joints, normalGeometry ) );
+	return transformNormalToView( disfigure( joints, jointNormalMat, normalGeometry ) );
 
 }
 
 
 // implement the actual body bending
-var disfigure = Fn( ([ fn, joints, vertex ])=>{
+var disfigure = Fn( ([ joints, fn, p ])=>{
 
-	var p = vertex.toVar( ),
+	var p = p.toVar( ),
 		space = joints.space;
 
 
@@ -589,18 +589,22 @@ var _mat = new Matrix3(),
 	_v = new Vector3();
 
 
+var toDeg = x => x * 180 / Math.PI,
+	toRad = x => x / 180 * Math.PI,
+	toRound = x => Math.round(100*x)/100;
+
 
 function getset( object, name, xyz ) {
 
 	Object.defineProperty( object, name, {
 		get() {
-
-			return object.angle[ xyz ] * 180 / Math.PI;
+			
+			return toDeg( object.angle[ xyz ] );
 
 		},
 		set( value ) {
 
-			object.angle[ xyz ] = value * Math.PI / 180;
+			object.angle[ xyz ] = toRad( value );
 
 		}
 	} );
@@ -652,9 +656,11 @@ var m = new Matrix4(),
 	dummyGeometry = new PlaneGeometry(),
 	_uid = 1;
 
+
 class Disfigure extends Mesh {
 
-
+	static POSTURE_PARTS = ['torso','waist','chest','head','l_leg','l_thigh','l_knee','l_shin','l_ankle','l_foot','r_leg','r_thigh','r_knee','r_shin','r_ankle','r_foot','l_arm','l_elbow','l_forearm','l_wrist','r_arm','r_elbow','r_forearm','r_wrist'];
+	
 	constructor( url, space, height, geometryHeight ) {
 
 		super( dummyGeometry );
@@ -766,10 +772,10 @@ class Disfigure extends Mesh {
 		}
 
 
+		anglesToMatrix( this.torso, -1, -1, 1 );
 		anglesToMatrix( this.head, -1, -1, 1 );
 		anglesToMatrix( this.chest, -1, -1, 1 );
 		anglesToMatrix( this.waist, -1, -1, 1 );
-		anglesToMatrix( this.torso, -1, -1, 1 );
 
 		anglesToMatrix( this.l_elbow, 0, 1, 0 );
 		anglesToMatrix( this.r_elbow, 0, -1, 0 );
@@ -826,6 +832,57 @@ class Disfigure extends Mesh {
 		}
 
 	} // Disfigure.update
+
+
+
+	get posture() {
+
+		var angles = [];
+		
+		for( var name of Disfigure.POSTURE_PARTS )
+		{
+			angles.push( ...this[name].angle );
+		}
+		
+		var position = [...this.position];
+		var rotation = [...this.rotation];
+		
+		return {
+			version: 8,
+			position: position.map( x=>toRound(x) ),
+			rotation: rotation,
+			angles: angles.map( x=>toRound(toDeg(x)) ) };
+
+	} // Disfigure.posture
+	
+	
+	
+	get postureString() {
+
+		return JSON.stringify( this.posture );
+
+	} // Disfigure.postureString
+	
+	
+	
+	set posture( data ) {
+
+		if( data.version !=8 )
+			console.error( 'Incompatible posture version' );
+
+		var i = 0;
+		
+		var angles = data.angles.map( x=>toRad(x) );
+	
+		this.position.set( ...data.position );
+		this.rotation.set( ...data.rotation );
+		
+		for( var name of Disfigure.POSTURE_PARTS ) {
+			this[name].angle.set( angles[i], angles[i+1], angles[i+2] );
+			i += 3;
+		}
+		
+	} // Disfigure.posture
 
 } // Disfigure
 
@@ -953,6 +1010,36 @@ class Child extends Disfigure {
 
 } // Child
 
+
+
+function blend( postureA, postureB, k ) {
+
+	function lerp (a,b) {
+		var c = [];
+		for( var i=0; i<a.length; i++ )
+			c[i] = MathUtils.lerp( a[i], b[i], k );
+		
+		return c;
+	}
+		
+	var eulerA = new Euler( ...postureA.rotation ),
+		eulerB = new Euler( ...postureB.rotation );
+	eulerA.reorder( eulerB._order );
+	
+	var posture = {
+		version: postureA.version,
+		position: lerp( postureA.position, postureB.position ),
+		rotation: new Euler(
+				...lerp( [eulerA._x, eulerA._y, eulerA._z],
+						 [eulerB._x, eulerB._y, eulerB._z] )
+			),
+		angles: lerp( postureA.angles, postureB.angles ),
+	};
+		
+	return posture;
+	
+} // blend
+
 // disfigure
 //
 // A software burrito that wraps everything in a single file
@@ -962,4 +1049,4 @@ class Child extends Disfigure {
 
 console.log( '\n%c\u22EE\u22EE\u22EE Disfigure\n%chttps://boytchev.github.io/disfigure/\n', 'color: navy', 'font-size:80%' );
 
-export { Child, Man, Woman, World, camera, cameraLight, chaotic, controls, everybody, ground, light, random, regular, renderer, scene, setAnimationLoop };
+export { Child, Man, Woman, World, blend, camera, cameraLight, chaotic, controls, everybody, ground, light, random, regular, renderer, scene, setAnimationLoop };

@@ -272,9 +272,9 @@ figure.r_foot.bend = 20;
 # Figure postures
 
 The posture of a figure is defined by the rotation properties of its body parts.
-
-The static posture defines the position of body part that do not change.
 By default, when a figure is created, it is set to a default posture. 
+
+## Manual control
 
 When a posture is defined programmatically, it might be easier
 to define it step by step. To recreate a [Tai Chi Chuan](https://en.wikipedia.org/wiki/Tai_chi)
@@ -307,6 +307,9 @@ figure.l_elbow.bend = 140;
 [<img src="../examples/snapshots/posture-static.jpg" width="48%">](../examples/posture-static.html)
 
 
+## Manual control
+
+
 
 A dynamic posture is when is changes over time. If a predefined world
 is used, it manages posture animation in two ways &ndash; via animation
@@ -331,12 +334,14 @@ function animate( time ) {
 }
 ```
 
-```
+```javascript
 window.addEventListener( 'animate', animate );
 
 function animate ( event ) {
-		
-	// var time = event.time;
+
+   // executed once per frame
+   
+   var time = event.time;
 
 }
 ```
@@ -350,35 +355,51 @@ the activating figure is stored in the property `event.target`.
 This allows the same animation to be applied to several figures
 &ndash; [see it](../examples/posture-events-local.html).
 
-```
+```javascript
 figure.addEventListener( 'animate', animate );
 
 function animate ( event ) {
 		
-	// var time = event.time;
-	// var figure = event.target;
+   // executed once per frame
+   
+   var time = event.time;
+   var figure = event.target;
 
 }
 ```
 
 [<img src="../examples/snapshots/posture-events-local.jpg" width="48%">](../examples/posture-events-local.html)
 
+## Postures
 
-<!--
+### figure.**posture**<br> figure.**postureString**
 
-### Working with postures
-
-A posture could be extracted from a figure with the `posture` property. It contains an object with fields `version` for the posture data format version, and `data` &ndash; a nested array for joint angles. The `posture` property can be used to push a posture to a figure. 
+A posture could be extracted from a figure with the `posture` property.
+The posture object contains properties `version` of the posture data
+format, `positio` for the coordinates of the figure, `rotation` for its
+orientation and `data` with joint angles. The `posture` property can be
+used to push a posture to a figure &ndash; [see it](../examples/posture.html).
 
 ``` javascript
-{ "version": 7,
-  "data": [ [0,0,0], [90,-85,74.8], [16.1,-29.5,26.3], [3.5,-34.8,6.1], ... ]
-}
+figure.posture = {
+   version:  8,
+   position: [0,-0.29,0.5],
+   rotation: [0,0,0,"XYZ"],
+   angles:   [8,0,0,-4,4,-6,3,-34,0,-5,-60,...]
+};
 ```
 
-There is alternative `postureString` property to get or set the posture as a string. Converting the posture to and from a string is done with `JSON.stringify` and `JSON.parse`.
+A read-only property `postureString` retrieves the posture as a string.
 
+``` javascript
+var str = figure.postureString;
+```
 
+[<img src="../examples/snapshots/posture.jpg" width="48%">](../examples/posture.html)
+
+### **blend**( figureA, figureB, k )
+
+<!--
 Postures could be blended via Euler interpolation (i.e. linear interpolation of
 Euler anglеs). The function `blend(posture0,posture1,k)` mixes the initial
 *posture0* and the final *posture1* with a coefficient *k*&isin;[0,1]. When
