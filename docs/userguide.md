@@ -68,7 +68,8 @@ The `torso` is the root body part and its rotation affects
 the whole body. Torso has properties `bend`, `turn` and `tilt`
 &ndash; [see it](../examples/motion-torso.html). The central
 body parts are `head`, `chest` and `waist`. They have the
-same set of properties as the torso &ndash; [see it](../examples/motion-central.html).
+same set of properties as the torso &ndash;
+[see it](../examples/motion-central.html).
 
 * `bend` &ndash; bends foreward or backward
 * `turn` &ndash; turns to the left or right
@@ -94,7 +95,8 @@ figure.waist.tilt = 35;
 The upper limbs are symmetrical body parts with multiple joints
 and rotation properties that recreate a complex and flexible
 motion &ndash; [see it](../examples/motion-limbs-upper.html).
-Arms have `foreward`, `turn` and `straddle` &ndash; [see it](../examples/motion-arm.html).
+Arms have `foreward`, `turn` and `straddle` &ndash;
+[see it](../examples/motion-arm.html).
 
 * `foreward` &ndash; moves an arm foreward (or backward)
 * `turn` &ndash; turns an arm inwards (or outwards)
@@ -320,7 +322,8 @@ called automatically each frame. This user function accepts a parameter
 &ndash; [see it](../examples/posture-dynamic.html). The alternative
 approach is to let the `window` object listen to the `animate`
 events via the `addEventListener` method. The `event.time`
-holds the current time in miliseconds &ndash; [see it](../examples/posture-events-global.html).
+holds the current time in miliseconds &ndash;
+[see it](../examples/posture-events-global.html).
 
 ```javascript
 setAnimationLoop( animate );
@@ -452,28 +455,6 @@ v = figure.l_arm.point(0,0.1,0);
 
 
 <!--
-### figure.bodypart.**point**(x, y, z)
-
-The function `point(x,y,z)` for each body part. This
-method implements [forward kinematics](https://en.wikipedia.org/wiki/Forward_kinematics)
-and calculates the global coordinates of the point *(x,y,z)*, defined in the
-local coordinate system of the body part.
-
-The following example creates a thread going through 5 points relative to body
-parts of a figure ([see it](example-point.html)):
-
-[<img src="snapshots/example-point.jpg">](example-point.html)
-
-``` javascript
-setLoopVertex( 0, man.r_fingers.tips.point(0,1,0) );
-setLoopVertex( 1, man.head.point(3,1.2,0) );
-setLoopVertex( 2, man.l_fingers.tips.point(0,1,0) );
-setLoopVertex( 3, man.l_ankle.point(6,2,0) );
-setLoopVertex( 4, man.r_ankle.point(6,2,0) );
-```
-
-
-
 A figure may use `stepOnGround()` to move it vertically, so that its lower point
 touches the ground.
 
