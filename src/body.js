@@ -5,7 +5,7 @@
 
 
 
-import { Euler, Group, MathUtils, Matrix3, Matrix4, Mesh, MeshPhysicalNodeMaterial, PlaneGeometry, Vector3 } from 'three';
+import { Vector4, Euler, Group, MathUtils, Matrix3, Matrix4, Mesh, MeshPhysicalNodeMaterial, PlaneGeometry, Vector3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { uniform, vec3 } from 'three/tsl';
 
@@ -27,7 +27,9 @@ const MODEL_PATH = import.meta.url.replace( '/src/body.js', '/assets/models/' );
 // dummy vars
 var _mat = new Matrix3(),
 	_m = new Matrix3(),
-	_v = new Vector3();
+	_m4 = new Matrix4(),
+	_v = new Vector3(),
+	_v4 = new Vector4();
 
 const V0 = new Vector3();
 
@@ -75,10 +77,12 @@ class Joint {
 	}
 
 
-	attach( mesh ) {
+	attach( mesh, x=0, y=0, z=0 ) {
 
 		if ( mesh.parent ) mesh = mesh.clone();
 
+		mesh.position.set( x, y, z );
+		
 		var wrapper = new Group();
 		wrapper.add( mesh );
 		wrapper.matrixAutoUpdate = false;
@@ -87,6 +91,35 @@ class Joint {
 		this.model.add( wrapper );
 		this.model.accessories.push( wrapper );
 
+	}
+
+
+	point( x, y, z ) {
+
+
+		var b = this;
+
+		_m.identity();
+		_v.copy( b.space.pivot );
+
+		for ( ; b; b=b.parent ) {
+
+			_mat.copy( b.matrix.value ).transpose();
+			_m.premultiply( _mat );
+			_v.sub( b.space.pivot ).applyMatrix3( _mat ).add( b.space.pivot );
+
+		}
+
+		_m4.setFromMatrix3( _m );
+		_m4.setPosition( _v );
+
+		_v4.set( x, y, z, 1 );
+		_v4.applyMatrix4( _m4 );
+
+		_v.set( _v4.x, _v4.y, _v4.z );
+		
+		return _v;
+		
 	}
 
 } // Joint
@@ -333,16 +366,12 @@ class Disfigure extends Mesh {
 
 	anchor( object, atPosition=V0 ) {
 
-		this.position.set( 0, 0, 0 );
-		this.updateMatrixWorld( true );
+		object.updateWorldMatrix( true, false );
 
-		var matrixElements = object.matrixWorld.elements;
+		_v.setFromMatrixPosition( object.matrixWorld );
 
-		this.position.x = atPosition.x-matrixElements[ 12 ];
-		this.position.y = atPosition.y-matrixElements[ 13 ];
-		this.position.z = atPosition.z-matrixElements[ 14 ];
-
-		this.updateMatrixWorld( true );
+		this.position.add( atPosition );
+		this.position.sub( _v );
 
 	} // Disfigure.anchor
 
@@ -404,7 +433,7 @@ class Man extends Disfigure {
 
 		// ARMS
 		elbow: [[ 0.427, 1.453, -0.072 ], [ 0.413, 0.467 ]],
-		forearm: [[ 0.305, 1.453, -0.068 ], [ 0.083, 0.879 ]],
+		forearm: [[ 0.550, 1.453, -0.068 ], [ 0.083, 0.879 ]],
 		wrist: [[ 0.673, 1.462, -0.072 ], [ 0.635, 0.722 ]],
 		arm: [[ 0.153, 1.408, -0.072 ], [ 0.054, 0.269 ], [ 1.067, 1.616 ]],
 
@@ -446,7 +475,7 @@ class Woman extends Disfigure {
 
 		// ARMS
 		elbow: [[ 0.404, 1.375, -0.066 ], [ 0.390, 0.441 ]],
-		forearm: [[ 0.289, 1.375, -0.063 ], [ 0.093, 0.805 ]],
+		forearm: [[ 0.506, 1.375, -0.063 ], [ 0.093, 0.805 ]],
 		wrist: [[ 0.608, 1.375, -0.056 ], [ 0.581, 0.644 ]],
 		arm: [[ 0.137, 1.338, -0.066 ], [ 0.052, 0.233 ], [ 1.011, 1.519 ]],
 
@@ -488,7 +517,7 @@ class Child extends Disfigure {
 
 		// ARMS
 		elbow: [[ 0.337, 1.072, -0.090 ], [ 0.311, 0.369 ]],
-		forearm: [[ 0.230, 1.074, -0.094 ], [ 0.073, 0.642 ]],
+		forearm: [[ 0.438, 1.074, -0.094 ], [ 0.073, 0.642 ]],
 		wrist: [[ 0.538, 1.084, -0.091 ], [ 0.519, 0.553 ]],
 		arm: [[ 0.108, 1.072, -0.068 ], [ 0.041, 0.185 ], [ 0.811, 1.217 ]],
 

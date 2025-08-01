@@ -892,16 +892,12 @@ class Disfigure extends Mesh {
 
 	anchor( object, atPosition=V0 ) {
 
-		this.position.set( 0, 0, 0 );
-		this.updateMatrixWorld( true );
+		object.updateWorldMatrix( true, false );
 
-		var matrixElements = object.matrixWorld.elements;
+		_v.setFromMatrixPosition( object.matrixWorld );
 
-		this.position.x = atPosition.x-matrixElements[ 12 ];
-		this.position.y = atPosition.y-matrixElements[ 13 ];
-		this.position.z = atPosition.z-matrixElements[ 14 ];
-
-		this.updateMatrixWorld( true );
+		this.position.add( atPosition );
+		this.position.sub( _v );
 
 	} // Disfigure.anchor
 

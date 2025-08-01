@@ -4,7 +4,7 @@
 # Disfigure: User Guide
 
 
-## <small><small>[Figures](#figures-shapes) &middot; [Motions](#figure-motions) &middot; [Postures](#figure-postures) &middot; [Worlds](#predefined-world) &middot; [Others](#others)</small></small>
+## <small><small>[Figures](#figures-shapes) &middot; [Motions](#figure-motions) &middot; [Postures](#figure-postures) &middot; [Customizations](#figure-customizations) &middot; [Worlds](#predefined-world) &middot; [Others](#others)</small></small>
 
 
 
@@ -274,7 +274,7 @@ figure.r_foot.bend = 20;
 The posture of a figure is defined by the rotation properties of its body parts.
 By default, when a figure is created, it is set to a default posture. 
 
-## Manual control
+## Figure setup
 
 When a posture is defined programmatically, it might be easier
 to define it step by step. To recreate a [Tai Chi Chuan](https://en.wikipedia.org/wiki/Tai_chi)
@@ -307,9 +307,7 @@ figure.l_elbow.bend = 140;
 [<img src="../examples/snapshots/posture-static.jpg" width="48%">](../examples/posture-static.html)
 
 
-## Manual control
-
-
+## Figure animation
 
 A dynamic posture is when is changes over time. If a predefined world
 is used, it manages posture animation in two ways &ndash; via animation
@@ -370,7 +368,7 @@ function animate ( event ) {
 
 [<img src="../examples/snapshots/posture-events-local.jpg" width="48%">](../examples/posture-events-local.html)
 
-## Postures
+## Figure postures
 
 ### figure.**posture**<br> figure.**postureString**
 
@@ -397,41 +395,93 @@ var str = figure.postureString;
 
 [<img src="../examples/snapshots/posture.jpg" width="48%">](../examples/posture.html)
 
-### **blend**( figureA, figureB, k )
+### figure.**blend**( postureA, postureB, k )
 
-<!--
-Postures could be blended via Euler interpolation (i.e. linear interpolation of
-Euler anglеs). The function `blend(posture0,posture1,k)` mixes the initial
-*posture0* and the final *posture1* with a coefficient *k*&isin;[0,1]. When
-*k*=0 the result is *posture0*, when *k*=1 the result is *posture1*, when *k*
-is between 0 and 1 the result is a posture between *posture0* and *posture1*.
-The following example blends the posture of [one figure](example-posture.html)
-and copies it to [another figure](example-posture-standing.html)
-([live example 1](example-posture-blend.html) and [live example 2](example-posture-blend-2.html)):
-
-[<img src="snapshots/example-posture-blend.jpg" width="250">](example-posture-blend.html) [<img src="snapshots/example-posture-blend-2.jpg" width="250">](example-posture-blend-2.html)
+A posture could be defined as a blend of other postures. The
+method `blend` mixes the initial *postureA* and the final
+*postureB* with a coefficient *k*&isin;[0,1]. When *k*=0 the
+result is *postureA*, when *k*=1 the result is *postureB*,
+when *k* is between 0 and 1 the result is a posture between
+*postureA* and *postureB* &ndash; [see it](../examples/posture-blend.html).
 
 ``` javascript
-// two figures
-var man = new Male();
-var woman = new Female();
+var A = manA.posture;
+var B = manB.posture;
 
-// two postures
-var A = {"version": 7, "data": [[ 0, -7.2, 0 ],...]};
-var B = {"version": 7, "data": [[ 0, 2.8, 0 ],...]};
+manZ.blend(A,B,0.5);
+```
+[<img src="../examples/snapshots/posture-blend.jpg" width="48%">](../examples/posture-blend.html)
 
-// set an intermediate posture
-man.posture = blend(A,B,0.5);
 
-// copy the posture to another figure
-woman.posture = man.posture;
+
+# Figure customizations
+
+Apart for moving body parts, Disfigure provides basic functionality
+for additional modification of a figure &ndash; adding accessories
+or changing colors.
+
+
+## Accessories
+
+### figure.bodypart.**attach**( *accessory*, *x*, *y*, *z* )
+
+Accessories are Three.js objects attached to a specific body part.
+They do not deform, but move as if attached to the body. The position
+of *accessory* is defined by the optional parameters *x*, *y* and *z*.
+The position is in respect to the origin point of the body part &ndash;
+[see it](../examples/extras-attach.html).
+
+``` javascript
+figure.l_arm.attach(spike);
 ```
 
-# Other functions
+### figure.bodypart.**point**( *x*, *y*, *z* )
 
-Apart for moving body parts, the current version of mannequin.js provides basic
-functionality for additional modification or accessing the figure.
+When just the final coordinates are needed it is faster to use `point`,
+which calculates the position and ignores the orientation &ndash;
+[see it](../examples/extras-point.html).
 
+``` javascript
+v = figure.l_arm.point(0,0.1,0);
+```
+
+[<img src="../examples/snapshots/extras-attach.jpg" width="48%">](../examples/extras-attach.html)
+[<img src="../examples/snapshots/extras-point.jpg" width="48%">](../examples/extras-point.html)
+
+
+
+
+<!--
+### figure.bodypart.**point**(x, y, z)
+
+The function `point(x,y,z)` for each body part. This
+method implements [forward kinematics](https://en.wikipedia.org/wiki/Forward_kinematics)
+and calculates the global coordinates of the point *(x,y,z)*, defined in the
+local coordinate system of the body part.
+
+The following example creates a thread going through 5 points relative to body
+parts of a figure ([see it](example-point.html)):
+
+[<img src="snapshots/example-point.jpg">](example-point.html)
+
+``` javascript
+setLoopVertex( 0, man.r_fingers.tips.point(0,1,0) );
+setLoopVertex( 1, man.head.point(3,1.2,0) );
+setLoopVertex( 2, man.l_fingers.tips.point(0,1,0) );
+setLoopVertex( 3, man.l_ankle.point(6,2,0) );
+setLoopVertex( 4, man.r_ankle.point(6,2,0) );
+```
+
+
+
+A figure may use `stepOnGround()` to move it vertically, so that its lower point
+touches the ground.
+
+``` javascript
+man.stepOnGround();
+```	
+
+<!--
 ### Custom colors
 
 By default, all figures use a predefined set of colors for body parts.
@@ -481,39 +531,6 @@ The tips of the fingers are accessed via `l_fingers.tips` and `r_fingers.tips`.
 
 ### Body modification
 
-Each body part could be hidden. This does not remove the body part and its
-graphical object from the figure, instead it is just not rendered in the frame.
-The method to hide a joint from a figure is:
-
-``` javascript
-figure.joint.hide();
-figure.joint.hide( true );
-```
-
-where *joint* is the name of the body part to hide. Hidden body parts can still
-be rotated and this affects the other body parts attached to them. The following
-example hides both arms and both legs, but they are still preserved internally
-and used by elbows and knees ([see it](example-hide.html)):
-
-[<img src="snapshots/example-hide.jpg">](example-hide.html)
-
-``` javascript
-man.l_leg.hide();
-man.r_leg.hide();
-man.l_arm.hide();
-man.r_arm.hide();
-```
-
-If `hide` is used with parameter `true`, then hiding is applied to the body part
-and all its subparts.
-
-To show a hidden body part use:
-
-``` javascript
-figure.joint.show();
-figure.joint.show( true );
-```
-
 
 Body parts are descendants of [`THREE.Object3D`](https://threejs.org/docs/#api/en/core/Object3D)
 and support its properties and methods. However, due to the skeletal dependency
@@ -534,102 +551,6 @@ man.l_wrist.scale.set(3,5,3);
 man.r_wrist.scale.set(3,5,3);
 ```
 
-Any custom `THREE.Object3D` could be attached to a body part. The attached object is included in the body and is subject to any motion the body is doing:
-
-``` javascript
-figure.joint.attach(object);
-```
-
-Objects can be attached to hidden body parts, but they are not automatically hidden. This approach is used to replace a body part with entirely custom user object ([see it](example-custom-body-parts.html)):
-
-[<img src="snapshots/example-custom-body-parts.jpg">](example-custom-body-parts.html)
-
-``` javascript
-var man = new Male();
-
-// adding bracelets
-var bracelet = new THREE.Mesh(
-    new THREE.CylinderGeometry(3,3,1,16),	
-    new THREE.MeshPhongMaterial({color:'crimson',shininess:200})
-);
-bracelet.castShadow = true;
-bracelet.position.y = 6;
-man.l_elbow.attach(bracelet);
-
-bracelet = bracelet.clone();
-man.r_elbow.attach(bracelet);
-
-
-// replacing the leg with other objects
-man.r_leg.hide();
-
-var material = new THREE.MeshPhongMaterial({color:'crimson',shininess:200});
-
-var obj = new THREE.Mesh(new THREE.CylinderGeometry(3,2,3,32), material);
-obj.castShadow = true;
-obj.position.y = 2;
-man.r_leg.attach(obj);
-```
-
-### Global position
-
-Not all interaction between figures and other objects can be implemented by
-attaching. Mannequin.js provides method `point(x,y,z)` for each body part. This
-method implements [forward kinematics](https://en.wikipedia.org/wiki/Forward_kinematics)
-and calculates the global coordinates of the point *(x,y,z)*, defined in the
-local coordinate system of the body part.
-
-The following example creates a thread going through 5 points relative to body
-parts of a figure ([see it](example-point.html)):
-
-[<img src="snapshots/example-point.jpg">](example-point.html)
-
-``` javascript
-setLoopVertex( 0, man.r_fingers.tips.point(0,1,0) );
-setLoopVertex( 1, man.head.point(3,1.2,0) );
-setLoopVertex( 2, man.l_fingers.tips.point(0,1,0) );
-setLoopVertex( 3, man.l_ankle.point(6,2,0) );
-setLoopVertex( 4, man.r_ankle.point(6,2,0) );
-```
-
-Global positions could be used to ground figures &ndash; this is to put them
-down on the ground. However, mannequin.js does not contain any collision
-functionality, thus the user should pick collision points and use their global
-position.
-
-The following example uses four contact points on the left shoe (i.e. `man.l_ankle`).
-The contacts points are shown as red dots. The minimal vertical position of the
-contact points is used to adjust the vertical position of the figure
-([see it](example-touch-ground.html)):
-
-[<img src="snapshots/example-touch-ground.jpg">](example-touch-ground.html)
-
-``` javascript
-// get minimal vertical position of contact points
-var bottom = Math.min(
-    man.l_ankle.point(6,2,0).y,
-    man.l_ankle.point(-2,2.5,0).y,
-    man.l_ankle.point(2,2.5,2).y,
-    man.l_ankle.point(2,2.5,-2).y,
-
-    man.r_ankle.point(6,2,0).y,
-    man.r_ankle.point(-2,2.5,0).y,
-    man.r_ankle.point(2,2.5,2).y,
-    man.r_ankle.point(2,2.5,-2).y
-);
-
-man.position.y += (GROUND_LEVEL-bottom);
-```			
-
-The value of `GROUND_LEVEL` is defined by mannequin.js when `createScene()` is used.
-It contains the vertical offset of the ground.
-
-A figure may use `stepOnGround()` to move it vertically, so that its lower point
-touches the ground.
-
-``` javascript
-man.stepOnGround();
-```	
 
 		
 # Using mannequin.js

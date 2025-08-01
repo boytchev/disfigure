@@ -26,11 +26,16 @@
 
 		// create a man with a posture
 		
-		var man = new Happy.Man( );
+		var man = new Happy.Man( ),
+			manA = new Happy.Man( ),
+			manB = new Happy.Man( );
 
-		var postureA = man.posture;
+		var postureA = man.posture,
+			postureB = { "version": 8, "position": [ 0, 0, 0 ], "rotation": [ 0, 0, 0, "XYZ" ], "angles": [ 8, 0, 0, -4, 4, -6, 3, -34, 0, -5, -60, -8, -7, -1, 25, 0, 0, 0, 52, 0, 0, 0, -4, 0, -32, 0, -23, -23, 0, 0, 49, 26, 40, 0, 45, 0, 88, 0, 0, 0, 6, 0, -16, 0, 5, 0, 0, 0, 0, 7, 7, 0, 140, 0, 0, 0, 0, 0, 0, -25, 5, -20, 12, 0, 50, 0, 50, 0, 0, 0, -5, -17 ] };
+
 		
-		var postureB = { "version": 8, "position": [ 0, -0.29, 0.5 ], "rotation": [ 0, 0, 0, "XYZ" ], "angles": [ 8, 0, 0, -4, 4, -6, 3, -34, 0, -5, -60, -8, -7, -1, 25, 0, 0, 0, 52, 0, 0, 0, -4, 0, -32, 0, -23, -23, 0, 0, 49, 26, 40, 0, 45, 0, 88, 0, 0, 0, 6, 0, -16, 0, 5, 0, 0, 0, 0, 7, 7, 0, 140, 0, 0, 0, 0, 0, 0, -25, 5, -20, 12, 0, 50, 0, 50, 0, 0, 0, -5, -17 ] };
+		manA.material.wireframe = true;
+		manB.material.wireframe = true;
 
 		// man's stick
 
@@ -49,17 +54,25 @@
 		man.l_foot.attach( fixedPos );
 		
 
+		manA.blend( postureA, postureB, 0 );
+		manB.blend( postureA, postureB, 1 );
+
+		
+		manA.position.set( 0.0220, 0.008, -0.138)
+		manB.position.set( -0.222, -0.274, 0.411)
+
+
 		Happy.setAnimationLoop( ( t )=>{
 		
 			var k = Happy.regular( t/400 + Math.sin( t/400 * 2 )/2, 0, 0, 1 );
 			k = Math.min( k, 1 );
 			k = Math.max( k, 0 );
-		
+
 			man.blend( postureA, postureB, k );
 			man.anchor( fixedPos );
 
 		} );
-		
+
 	</script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 v0.0.20
+  - posture, blend, anchor
   - knees can tilt sideways
   - legs have DOF=3
   
