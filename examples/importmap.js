@@ -1,6 +1,6 @@
 ﻿
 
-var THREEJS = 'three@0.178.0';
+var THREEJS = 'three@0.179.0';
 var CDN = 'https://cdn.jsdelivr.net/npm';
 
 
