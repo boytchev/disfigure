@@ -426,13 +426,14 @@ or changing colors.
 
 ## Accessories
 
-### figure.bodypart.**attach**( *accessory*, *x*, *y*, *z* )
+### figure.bodypart.**attach**( *accessory*, *x*, *y*, *z* )<br>figure.bodypart.**attach**( *accessory* )
 
 Accessories are Three.js objects attached to a specific body part.
 They do not deform, but move as if attached to the body. The position
 of *accessory* is defined by the optional parameters *x*, *y* and *z*.
 The position is in respect to the origin point of the body part &ndash;
-[see it](../examples/extras-attach.html).
+[see it](../examples/extras-attach.html). Alternatively, the position
+of an accessory could be set via its Three.js `position` property.
 
 ``` javascript
 figure.l_arm.attach(spike);
@@ -452,15 +453,22 @@ v = figure.l_arm.point(0,0.1,0);
 [<img src="../examples/snapshots/extras-point.jpg" width="48%">](../examples/extras-point.html)
 
 
+### figure.bodypart.**lockTo**( *localX*, *localY*, *localZ*, *globalX*, *globalY*, *globalZ* )
 
-
-<!--
-A figure may use `stepOnGround()` to move it vertically, so that its lower point
-touches the ground.
+The function `lockTo` moves the whole figure so that the local point
+(*localX*, *localY*, *localZ*) of *bodypart* is mapped to the global
+point (*globalX*, *globalY*, *globalZ*). This can be used to keep a
+figure standing on the ground (by locking its feet to level 0). The
+following examples shows two floating figures touching the same spot
+with their fingers &ndash; [see it](../examples/extras-lockto.html).
 
 ``` javascript
-man.stepOnGround();
-```	
+figure.l_wrist.lockTo(0.2,-0.01,0.01, 0, 1.5, 0 );
+```
+
+[<img src="../examples/snapshots/extras-lockto.jpg" width="48%">](../examples/extras-lockto.html)
+
+
 
 <!--
 ### Custom colors

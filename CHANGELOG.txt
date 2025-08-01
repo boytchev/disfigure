@@ -1,5 +1,5 @@
 v0.0.20
-  - posture, blend, anchor
+  - posture, blend, point, lockto
   - knees can tilt sideways
   - legs have DOF=3
   

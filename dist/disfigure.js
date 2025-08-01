@@ -1,6 +1,6 @@
 // disfigure v0.0.19
 
-import { WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, Matrix3, Matrix4, Euler, PlaneGeometry, MeshPhysicalNodeMaterial, MathUtils, Group } from 'three';
+import { WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, Matrix3, Matrix4, Vector4, Euler, PlaneGeometry, MeshPhysicalNodeMaterial, MathUtils, Group } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Fn, mix, If, transformNormalToView, normalGeometry, positionGeometry, min, vec3, float, select, vec2, uniform } from 'three/tsl';
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
@@ -586,9 +586,10 @@ const MODEL_PATH = import.meta.url.replace( '/src/body.js', '/assets/models/' );
 // dummy vars
 var _mat = new Matrix3(),
 	_m = new Matrix3(),
-	_v = new Vector3();
+	_m4 = new Matrix4(),
+	_v = new Vector3(),
+	_v4 = new Vector4();
 
-const V0 = new Vector3();
 
 
 var toDeg = x => x * 180 / Math.PI,
@@ -634,9 +635,12 @@ class Joint {
 	}
 
 
-	attach( mesh ) {
+	attach( mesh, x, y, z ) {
 
 		if ( mesh.parent ) mesh = mesh.clone();
+
+		if ( typeof x !== 'undefined' )
+			mesh.position.set( x, y, z );
 
 		var wrapper = new Group();
 		wrapper.add( mesh );
@@ -647,6 +651,50 @@ class Joint {
 		this.model.accessories.push( wrapper );
 
 	}
+
+
+	point( x, y, z ) {
+
+		var b = this;
+
+		_m.identity();
+		_v.set( x, y, z );
+		_v.add( b.space.pivot );
+
+		for ( ; b; b=b.parent ) {
+
+			_mat.copy( b.matrix.value ).transpose();
+			_m.premultiply( _mat );
+			_v.sub( b.space.pivot ).applyMatrix3( _mat ).add( b.space.pivot );
+
+		}
+
+		_m4.setFromMatrix3( _m );
+		_m4.setPosition( _v );
+
+		_v4.set( 0, 0, 0, 1 );
+		_v4.applyMatrix4( _m4 );
+
+		_v.set( _v4.x, _v4.y, _v4.z );
+
+		return _v;
+
+	}
+
+	lockTo( localX, localY, localZ, globalX, globalY, globalZ ) {
+
+		this.model.position.set( 0, 0, 0 );
+
+		_v = this.point( localX, localY, localZ ); // local
+		this.model.position.sub( _v );
+
+		_v.set( globalX, globalY, globalZ ); // global
+		this.model.position.add( _v );
+
+	} // Joint.lockTo
+
+
+
 
 } // Joint
 
@@ -887,20 +935,11 @@ class Disfigure extends Mesh {
 
 		}
 
+		this.update();
+		this.updateMatrixWorld( true );
+
+
 	} // Disfigure.posture
-
-
-	anchor( object, atPosition=V0 ) {
-
-		object.updateWorldMatrix( true, false );
-
-		_v.setFromMatrixPosition( object.matrixWorld );
-
-		this.position.add( atPosition );
-		this.position.sub( _v );
-
-	} // Disfigure.anchor
-
 
 
 	blend( postureA, postureB, k ) {
@@ -959,7 +998,7 @@ class Man extends Disfigure {
 
 		// ARMS
 		elbow: [[ 0.427, 1.453, -0.072 ], [ 0.413, 0.467 ]],
-		forearm: [[ 0.305, 1.453, -0.068 ], [ 0.083, 0.879 ]],
+		forearm: [[ 0.550, 1.453, -0.068 ], [ 0.083, 0.879 ]],
 		wrist: [[ 0.673, 1.462, -0.072 ], [ 0.635, 0.722 ]],
 		arm: [[ 0.153, 1.408, -0.072 ], [ 0.054, 0.269 ], [ 1.067, 1.616 ]],
 
@@ -1001,7 +1040,7 @@ class Woman extends Disfigure {
 
 		// ARMS
 		elbow: [[ 0.404, 1.375, -0.066 ], [ 0.390, 0.441 ]],
-		forearm: [[ 0.289, 1.375, -0.063 ], [ 0.093, 0.805 ]],
+		forearm: [[ 0.506, 1.375, -0.063 ], [ 0.093, 0.805 ]],
 		wrist: [[ 0.608, 1.375, -0.056 ], [ 0.581, 0.644 ]],
 		arm: [[ 0.137, 1.338, -0.066 ], [ 0.052, 0.233 ], [ 1.011, 1.519 ]],
 
@@ -1043,7 +1082,7 @@ class Child extends Disfigure {
 
 		// ARMS
 		elbow: [[ 0.337, 1.072, -0.09 ], [ 0.311, 0.369 ]],
-		forearm: [[ 0.230, 1.074, -0.094 ], [ 0.073, 0.642 ]],
+		forearm: [[ 0.438, 1.074, -0.094 ], [ 0.073, 0.642 ]],
 		wrist: [[ 0.538, 1.084, -0.091 ], [ 0.519, 0.553 ]],
 		arm: [[ 0.108, 1.072, -0.068 ], [ 0.041, 0.185 ], [ 0.811, 1.217 ]],
 

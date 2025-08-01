@@ -9,6 +9,7 @@ A library to rig boneless and morphless 3D models. **WIP.**
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/poser-prototype.jpg">](https://boytchev.github.io/disfigure/poser)
 
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/extras-attach.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/extras-attach.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/extras-lockto.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/extras-lockto.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/extras-point.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/extras-point.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-create-basic.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/figure-create-basic.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-create-height.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/figure-create-height.html)

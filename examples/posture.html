@@ -36,8 +36,8 @@
 			material = new Three.MeshStandardMaterial( { color: 'crimson' } ),
 			stick = new Three.Mesh( geometry, material );
 
-		stick.rotation.x = Math.PI/2;
-		stick.position.set( -0.1, -0.02, 0 );
+		stick.rotation.set( 1.5, 0, 0 );
+		stick.position.set( -0.1, -0.03, 0 );
 		stick.castShadow = true;
 
 		man.r_wrist.attach( stick );
@@ -48,9 +48,8 @@
 		var child = new Happy.Child( );
 		
 		child.posture = man.posture;
-		child.position.z = -0.5;
-		child.position.y = -0.22;
-		child.rotation.y = Math.PI;
+		child.position.set( 0, -0.23, -0.5 );
+		child.rotation.set( 0, Math.PI, -0.05 );
 
 		// child's stick
 		

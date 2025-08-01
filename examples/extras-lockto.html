@@ -5,7 +5,7 @@
 <body>
 	<header>
 		<h1><b>Disfigure</b></h1>
-		<h3>Extracting coordinates relative to body part</h3></br>
+		<h3>Locking a body part to specific point in space</h3></br>
 	</header>
 
 	<div id="spinner"></div>
@@ -13,48 +13,36 @@
 	<script src="importmap.js"></script>
 	<script type="module">
 
-		import * as Three from 'three';
 		import * as Happy from 'disfigure';
 
 
 		// create a default world
 
 		new Happy.World();
+		Happy.camera.position.y = 1;
+		Happy.camera.position.z = 5;
 
 
 		// create a man
 
-		var man = new Happy.Man( );
-
-
-		var geometry = new Three.BufferGeometry();
-		geometry.setAttribute( 'position', new Three.BufferAttribute( new Float32Array( 18 ), 3 ) );
-		var material = new Three.LineBasicMaterial( { color: 'crimson' } );
-		var positions = geometry.getAttribute( 'position' );
-
-		function setLoopVertex( index, vertex ) {
-
-			positions.setXYZ( index, vertex.x, vertex.y, vertex.z );
-			positions.needsUpdate = true;
-
-		}
-
-		var loop = new Three.Line( geometry, material );
-		loop.castShadow = true;
-		Happy.scene.add( loop );
+		var manA = new Happy.Man( );
+		manA.flip = 0;
 		
+		var manB = new Happy.Man( );
+		manB.flip = 1;
 		
+
 		// animate the scene
 		
-		Happy.setAnimationLoop( ( t )=>{
+		function animate( event ) {
 
-			t=t/4000;
+			var man = event.target;
+		
+			var t = event.time/4000 + man.flip;
 		
 			// animating the man
 
-			man.torso.bend = Happy.chaotic( t, 0, -20, 20 );
-			man.torso.turn = Happy.chaotic( t, 4, -50, 50 );
-			man.torso.tilt = Happy.chaotic( t, 2, -20, 20 );
+			man.torso.turn = 180*man.flip;
 
 			man.head.bend = Happy.chaotic( t, 0, -30, 50 );
 			man.head.turn = Happy.chaotic( t, 4, -60, 60 );
@@ -68,20 +56,20 @@
 			man.waist.turn = Happy.chaotic( t, 5, -60, 60 );
 			man.waist.tilt = Happy.chaotic( t, 6, -30, 30 );
 
-			man.l_elbow.bend = Happy.chaotic( t, 9, 0, 140 );
+			man.l_elbow.bend = Happy.chaotic( t, 9, 20, 60 );
 			man.r_elbow.bend = Happy.chaotic( t, 7, 0, 140 );
 
-			man.l_wrist.bend = Happy.chaotic( t, -2, -60, 60 );
-			man.l_wrist.turn = Happy.chaotic( t, -3, -45, 45 );
-			man.l_wrist.tilt = Happy.chaotic( t, -2, -40, 40 );
+			man.l_wrist.bend = Happy.chaotic( t, -2, -20, 20 );
+			man.l_wrist.turn = Happy.chaotic( t, -3, -25, 25 );
+			man.l_wrist.tilt = Happy.chaotic( t, -2, -20, 20 );
 
 			man.r_wrist.bend = Happy.chaotic( t, -1, -60, 60 );
 			man.r_wrist.turn = Happy.chaotic( t, -4, -45, 45 );
 			man.r_wrist.tilt = Happy.chaotic( t, -1, -40, 40 );
 
-			man.l_arm.straddle = Happy.chaotic( t, 5, -50, 40 );
-			man.l_arm.turn = Happy.chaotic( t, 6, -20, 20 );
-			man.l_arm.foreward = Happy.chaotic( t, 7, -20, 80 );
+			man.l_arm.straddle = Happy.chaotic( t, 5, -20, 20 );
+			man.l_arm.turn = Happy.chaotic( t, 6, -30, 30 );
+			man.l_arm.foreward = Happy.chaotic( t, 7, -20, 20 );
 
 			man.r_arm.straddle = Happy.chaotic( t, -5, -50, 40 );
 			man.r_arm.turn = Happy.chaotic( t, -6, -20, 20 );
@@ -109,16 +97,13 @@
 			man.r_leg.foreward = Happy.chaotic( t, 4, -40, 80 );
 			man.r_thigh.turn = Happy.chaotic( t, -1, -40, 80 );
 
-
-			// attach a string to five points relative to body parts
-			setLoopVertex( 0, man.head.point( 0, 0.065, 0.15 ) );
-			setLoopVertex( 1, man.l_wrist.point( 0.111, -0.053, 0.072 ) );
-			setLoopVertex( 2, man.l_foot.point( 0.056, -0.01, 0.146 ) );
-			setLoopVertex( 3, man.r_foot.point( -0.056, -0.01, 0.146 ) );
-			setLoopVertex( 4, man.r_wrist.point( -0.111, -0.053, 0.072 ) );
-			setLoopVertex( 5, man.head.point( 0, 0.065, 0.15 ) );
-
-		} );
+			// the middle finger touches (0,1.5,0)
+			man.l_wrist.lockTo( 0.195, -0.01, 0.008, 0, 1.5, 0 );
+		
+		}
+		
+		manA.addEventListener( 'animate', animate );
+		manB.addEventListener( 'animate', animate );
 		
 	</script>
 </body>

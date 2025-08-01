@@ -43,33 +43,32 @@
 			material = new Three.MeshStandardMaterial( { color: 'crimson' } ),
 			stick = new Three.Mesh( geometry, material );
 
-		stick.rotation.x = Math.PI/2;
-		stick.position.set( -0.1, -0.02, 0 );
+		stick.rotation.set( 1.5, 0, 0 );
+		stick.position.set( -0.1, -0.03, 0 );
 		stick.castShadow = true;
 
 		man.r_wrist.attach( stick );
 
-		var fixedPos = new Three.Object3D();
-		fixedPos.position.set( -0.1, -0.03, 0.12 );
-		man.l_foot.attach( fixedPos );
+		// set the start position, standing on the floor
+		manA.posture = postureA;
+		manA.l_foot.lockTo( 0, 0, 0.1, 0, 0.02, 0 );
+		postureA = manA.posture;
 		
-
-		manA.blend( postureA, postureB, 0 );
-		manB.blend( postureA, postureB, 1 );
-
+		// set the end position, standing on the floor
+		manB.posture = postureB;
+		manB.l_foot.lockTo( 0, 0, 0.1, 0, 0.02, 0 );
+		postureB = manB.posture;
 		
-		manA.position.set( 0.0220, 0.008, -0.138)
-		manB.position.set( -0.222, -0.274, 0.411)
-
 
 		Happy.setAnimationLoop( ( t )=>{
-		
+
 			var k = Happy.regular( t/400 + Math.sin( t/400 * 2 )/2, 0, 0, 1 );
 			k = Math.min( k, 1 );
 			k = Math.max( k, 0 );
 
+			// make intermediate position, standin on the floor
 			man.blend( postureA, postureB, k );
-			man.anchor( fixedPos );
+			man.l_foot.lockTo( 0, 0, 0.1, 0, 0.02, 0 );
 
 		} );
 

@@ -5,7 +5,7 @@
 
 
 
-import { Vector4, Euler, Group, MathUtils, Matrix3, Matrix4, Mesh, MeshPhysicalNodeMaterial, PlaneGeometry, Vector3 } from 'three';
+import { Euler, Group, MathUtils, Matrix3, Matrix4, Mesh, MeshPhysicalNodeMaterial, PlaneGeometry, Vector3, Vector4 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { uniform, vec3 } from 'three/tsl';
 
@@ -31,7 +31,6 @@ var _mat = new Matrix3(),
 	_v = new Vector3(),
 	_v4 = new Vector4();
 
-const V0 = new Vector3();
 
 
 var toDeg = x => x * 180 / Math.PI,
@@ -77,12 +76,13 @@ class Joint {
 	}
 
 
-	attach( mesh, x=0, y=0, z=0 ) {
+	attach( mesh, x, y, z ) {
 
 		if ( mesh.parent ) mesh = mesh.clone();
 
-		mesh.position.set( x, y, z );
-		
+		if ( typeof x !== 'undefined' )
+			mesh.position.set( x, y, z );
+
 		var wrapper = new Group();
 		wrapper.add( mesh );
 		wrapper.matrixAutoUpdate = false;
@@ -96,11 +96,11 @@ class Joint {
 
 	point( x, y, z ) {
 
-
 		var b = this;
 
 		_m.identity();
-		_v.copy( b.space.pivot );
+		_v.set( x, y, z );
+		_v.add( b.space.pivot );
 
 		for ( ; b; b=b.parent ) {
 
@@ -113,14 +113,29 @@ class Joint {
 		_m4.setFromMatrix3( _m );
 		_m4.setPosition( _v );
 
-		_v4.set( x, y, z, 1 );
+		_v4.set( 0, 0, 0, 1 );
 		_v4.applyMatrix4( _m4 );
 
 		_v.set( _v4.x, _v4.y, _v4.z );
-		
+
 		return _v;
-		
+
 	}
+
+	lockTo( localX, localY, localZ, globalX, globalY, globalZ ) {
+
+		this.model.position.set( 0, 0, 0 );
+
+		_v = this.point( localX, localY, localZ ); // local
+		this.model.position.sub( _v );
+
+		_v.set( globalX, globalY, globalZ ); // global
+		this.model.position.add( _v );
+
+	} // Joint.lockTo
+
+
+
 
 } // Joint
 
@@ -361,20 +376,11 @@ class Disfigure extends Mesh {
 
 		}
 
+		this.update();
+		this.updateMatrixWorld( true );
+
+
 	} // Disfigure.posture
-
-
-	anchor( object, atPosition=V0 ) {
-
-		object.updateWorldMatrix( true, false );
-
-		_v.setFromMatrixPosition( object.matrixWorld );
-
-		this.position.add( atPosition );
-		this.position.sub( _v );
-
-	} // Disfigure.anchor
-
 
 
 	blend( postureA, postureB, k ) {

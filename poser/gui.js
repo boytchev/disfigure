@@ -173,13 +173,13 @@ function updateDebug() {
 
 	if ( debugSpace instanceof LocusX && !( debugSpace instanceof LocusT ) ) {
 
-//		debug.minY = debugSpace.minX.value ?? debugSpace.minX;
-//		debug.maxY = debugSpace.maxX.value ?? debugSpace.maxX;
+		//		debug.minY = debugSpace.minX.value ?? debugSpace.minX;
+		//		debug.maxY = debugSpace.maxX.value ?? debugSpace.maxX;
 
 	} else {
 
-//		debug.minY = debugSpace.minY.value ?? debugSpace.minY;
-//		debug.maxY = debugSpace.maxY.value ?? debugSpace.maxY;
+		//		debug.minY = debugSpace.minY.value ?? debugSpace.minY;
+		//		debug.maxY = debugSpace.maxY.value ?? debugSpace.maxY;
 
 	}
 
@@ -227,8 +227,8 @@ function createGui( ) {
 		folder.add( debug, 'y', -1, 2 ).name( html( '', 'y' ) ).onChange( changePivotPoint );
 		folder.add( debug, 'z', -1, 1 ).name( html( '', 'z' ) ).onChange( changePivotPoint );
 
-//		folder.add( debug, 'minY', -2, 3 ).name( html( 'Range', 'min' ) ).onChange( changePivotPoint );
-//		folder.add( debug, 'maxY', -2, 3 ).name( html( '', 'max' ) ).onChange( changePivotPoint );
+		//		folder.add( debug, 'minY', -2, 3 ).name( html( 'Range', 'min' ) ).onChange( changePivotPoint );
+		//		folder.add( debug, 'maxY', -2, 3 ).name( html( '', 'max' ) ).onChange( changePivotPoint );
 
 	}
 
