@@ -7,7 +7,7 @@
 
 import * as THREE from "three";
 import * as lil from "three/addons/libs/lil-gui.module.min.js";
-import { float, Fn, If, mix, select, uniform, vec3 } from "three/tsl";
+import { float, Fn, If, mix, positionGeometry, select, uniform, vec3 } from "three/tsl";
 import { LocusT, LocusX } from "../src/space.js";
 import { scene, setAnimationLoop, World } from "../src/world.js";
 import { chaotic } from "../src/motion.js";
@@ -679,4 +679,43 @@ createGui( );
 
 model.material.colorNode = tslSelectionNode( { space: model.space } );
 //model.children[0].material.colorNode = vec3( 1 );
-model.material.roughness = 0.2;
+model.material.roughness = 1;//0.2;
+
+
+var daColor = Fn( ()=>{
+
+	var { x, y, z } = positionGeometry;
+	var color = vec3( y.mul( 200 ).cos().add( 1 ).div( 2 ).smoothstep( 0, 1 ).smoothstep( 0, 1 ), 1, 0 ).toVar();
+
+	If( y.lessThan( 0.05 ), ()=>{
+
+		color.assign( vec3( 0, 0, 0 ) );
+
+	} )
+		.ElseIf( y.lessThan( 0.1 ), ()=>{
+
+			color.assign( vec3( 0, 1, 0 ) );
+
+		} )
+		.ElseIf( y.lessThan( 0.3 ), ()=>{
+
+			color.assign( vec3( 0.8, 0.8, 0.8 ) );
+
+		} )
+		.ElseIf( y.lessThan( 0.35 ), ()=>{
+
+			color.assign( vec3( 1, 1, 0 ) );
+
+		} )
+		.ElseIf( y.add( x.abs() ).greaterThan( 1 ), ()=>{
+
+			color.assign( vec3( 1, 0, 0 ) );
+
+		} )
+	;
+
+	return color.debug();
+
+}, { return: 'vec3' } );
+
+model.material.colorNode = daColor();

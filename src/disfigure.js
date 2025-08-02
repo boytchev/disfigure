@@ -39,6 +39,18 @@ export {
 
 export {
 
+	dress,
+	verticalBetween,
+	horizontalBetween,
+	horizontalStripes,
+	velour,
+	latex,
+
+} from './clothes.js';
+
+
+export {
+
 	random,
 	regular,
 	chaotic,
