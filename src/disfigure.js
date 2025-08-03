@@ -40,9 +40,14 @@ export {
 export {
 
 	dress,
-	verticalBetween,
-	horizontalBetween,
-	horizontalStripes,
+	band,
+	bandWave,
+	strip,
+	stripSingle,
+	slice,
+	stripes,
+	stripesAround,
+	bands,
 	velour,
 	latex,
 

@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Custom Star Trek TNG uniform</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Three from 'three';
+		import * as Happy from 'disfigure';
+
+
+		// create a default world
+
+		new Happy.World( );
+		Happy.camera.position.set(0,1,3.5);
+		Happy.controls.target.set(0,0.8,0);
+
+		// create a man
+
+		var man = new Happy.Man( );
+
+
+		// add Star Trek TGN uniform
+		
+		Happy.dress( man, [
+
+			Happy.velour( 'black' ),
+		
+			Happy.band( 1.1, 2, -20 ),
+			Happy.velour( 'red' ),
+		
+			Happy.band( 1.15, 2, 35 ),
+			Happy.velour( 'red' ),
+		
+			Happy.band( 1.45, 2 ),
+			Happy.velour( 'black' ),
+		
+			Happy.bandWave( 0.85, 0.975, 1, 0.5, 0.6 ),
+			Happy.velour( 'red' ),
+		
+			Happy.bandWave( 1.555, 1.8, 0, 0.20, 0.1 ),
+			Happy.velour( 'tan' ),
+
+			Happy.bandWave( 1.55, 1.555, 0, 0.20, 0.1 ),
+			Happy.velour( 'red' ),
+		
+			Happy.bandWave( 1.39, 1.392, 1, 0.30, 0.13 ),
+			Happy.velour( 'red' ),
+		
+			Happy.strip( 0.22, 2 ),
+			Happy.velour( 'red' ),
+		
+			Happy.band( 1.045, 1.2 ).and( Happy.slice( -1, -0.03, 0 ) ),
+			Happy.velour( 'red' ),
+		
+			Happy.strip( 0.66, 2 ),
+			Happy.velour( 'tan' ),
+
+			Happy.bandWave( 1.61, 2, 2, 0.003, 0.05 ),
+			Happy.velour( 'black' ),
+
+			Happy.band( 1.7, 2, 0, -30 )
+				.and( Happy.band( 1.6, 2 ) )
+				.and( Happy.strip( 0, 0.078 ) ),
+			Happy.velour( 'black' ),
+		
+			Happy.slice( 0.11, 0.19, 8 ).and( Happy.band( 1, 1.4 ) ),
+			Happy.velour( 'black' ),
+		
+			Happy.strip( 0, 0.002 )
+				.and( Happy.band( 1.099, 1.45 ) )
+				.and( Happy.slice( 0, 1, 0 ) ),
+			Happy.velour( new Three.Color( 0.8, 0, 0 ) ),
+
+			Happy.bandWave( 0-0.05-0.05, 0.003-0.05-0.05, 1, 0.072, 0.15 )
+				.and( Happy.slice( -0.02, 0.05, 0 ) ),
+			Happy.velour( 'firebrick' ),
+		
+			Happy.band( 0.11-0.055, 0.11-0.055+0.003 )
+				.and( Happy.slice( -0.1, -0.02, 0 ) ),
+			Happy.velour( 'firebrick' ),
+		]);
+
+
+		// the badge
+
+		var shape = new Three.Shape();
+		shape.moveTo( 0, 2 );
+		shape.quadraticCurveTo( 1, 0, 1.001, -2 );
+		shape.lineTo( 1, -2 );
+		shape.quadraticCurveTo( 0.85, 0, 0.15, 0 );
+		shape.quadraticCurveTo( -0.35, 0, -1, -2 );
+		shape.lineTo( -1.001, -2 );
+		shape.quadraticCurveTo( -1, 0, 0, 2 );
+
+		var extrudeSettings = {
+			depth: 0.3,
+			bevelEnabled: true,
+			steps: 2,
+			bevelSegments: 10,
+			bevelSize: 0.02,
+			bevelThickness: 0.05,
+			curveSegments: 20 };
+
+		var badge = new Three.Mesh(
+			new Three.ExtrudeGeometry( shape, extrudeSettings ),
+			new Three.MeshPhysicalMaterial( { roughness: 0.3, metalness: 0.5, color: new Three.Color( 2, 2, 2 ) } )
+		);
+		badge.rotation.x = -0.65;
+		badge.rotation.y = 0.3;
+		badge.scale.setScalar( 0.01 );
+
+		var base = new Three.Mesh(
+			new Three.CylinderGeometry( 1, 1, 1 ),
+			new Three.MeshPhysicalMaterial( { roughness: 0.3, metalness: 0.8, color: new Three.Color( 1.8, 1.4, 0 ) } )
+		);
+		base.scale.set( 1.7, 0.8, 1 );
+		base.rotation.x = Math.PI/2;
+		base.position.y = -0.3;
+		base.position.z = -0.1;
+		badge.add( base );
+		
+		man.chest.attach( badge, 0.1, 0.24, 0.055 );
+		
+		
+		// the four buttons
+		var button = new Three.Mesh(
+			new Three.SphereGeometry( 0.003 ),
+			new Three.MeshPhysicalMaterial( { roughness: 0.6, metalness: 0.4, color: new Three.Color( 1, 0.7, 0 ) } )
+		);
+		man.chest.attach( button, -0.04, 0.32, -0.01 );
+		man.chest.attach( button, -0.046, 0.3233, -0.016 );
+		man.chest.attach( button, -0.052, 0.3267, -0.023 );
+		man.chest.attach( button, -0.058, 0.33, -0.03 );
+		
+		
+		
+		
+		
+		// animate the scene
+		
+		Happy.setAnimationLoop( ( t )=>{
+
+			t=t/4000;
+		
+			var a = Happy.regular( 10*t, -2, 0, 85 );
+			var b = 90-0.8*a;
+		
+			// animating the man
+		
+			man.torso.turn = Happy.chaotic( t, -91, -120, 120 );
+		
+			man.head.bend = Happy.chaotic( t, 0, -10, 30 );
+			man.head.turn = Happy.chaotic( t, 4, -30, 30 );
+			man.head.tilt = Happy.chaotic( t, 2, -20, 20 );
+
+			man.chest.bend = Happy.chaotic( t, 1, b/5-10, b/2 );
+			man.chest.turn = Happy.chaotic( 2*t, 6, -20, 20 );
+			man.chest.tilt = Happy.chaotic( t, 6, -20, 20 );
+
+			man.waist.bend = Happy.chaotic( t, 3, b/5-10, b/2 );
+			man.waist.turn = Happy.chaotic( t, 5, -20, 20 );
+			man.waist.tilt = Happy.chaotic( t, 6, -20, 20 );
+
+			man.l_elbow.bend = Happy.chaotic( t, 9, 0, 140 );
+			man.r_elbow.bend = Happy.chaotic( t, 7, 0, 140 );
+
+			man.l_wrist.bend = Happy.chaotic( t, -2, -60, 60 );
+			man.l_wrist.turn = Happy.chaotic( t, -3, -45, 45 );
+			man.l_wrist.tilt = Happy.chaotic( t, -2, -40, 40 );
+
+			man.r_wrist.bend = Happy.chaotic( t, -1, -60, 60 );
+			man.r_wrist.turn = Happy.chaotic( t, -4, -45, 45 );
+			man.r_wrist.tilt = Happy.chaotic( t, -1, -40, 40 );
+
+			man.l_arm.straddle = Happy.chaotic( t, 5, 20, 70 );
+			man.l_arm.turn = Happy.chaotic( t, 6, -20, 20 );
+			man.l_arm.foreward = Happy.chaotic( t, 7, -20, 80 );
+
+			man.r_arm.straddle = Happy.chaotic( t, -5, 20, 70 );
+			man.r_arm.turn = Happy.chaotic( t, -6, -20, 20 );
+			man.r_arm.foreward = Happy.chaotic( t, -7, -20, 80 );
+
+		
+			man.l_knee.bend = 2*a;
+			man.r_knee.bend = 2*a;
+			man.l_ankle.bend = 5-a;
+			man.r_ankle.bend = 5-a;
+		
+			man.l_leg.straddle = 0.008*a;
+			man.r_leg.straddle = 0.008*a;
+		
+			man.l_shin.turn = -0.0*a;
+			man.r_shin.turn = -0.0*a;
+		
+			man.l_leg.foreward = a;
+			man.r_leg.foreward = a;
+
+			man.l_foot.lockTo( 0, -0.03, 0, 0.08, 0, 0 );
+			man.position.x = 0;
+		
+		} );
+		
+	</script>
+</body>
+</html>

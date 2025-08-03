@@ -1,5 +1,5 @@
 v0.0.20
-  - color clothes
+  - color clothes with bends, strips, slices
   - posture, blend, point, lockto
   - knees can tilt sideways
   - legs have DOF=3
