@@ -469,9 +469,66 @@ figure.l_wrist.lockTo(0.2,-0.01,0.01, 0, 1.5, 0 );
 [<img src="../examples/snapshots/extras-lockto.jpg" width="48%">](../examples/extras-lockto.html)
 
 
+## Custom colors
+
+Disfigure supports a painting interface to draw simple shapes
+directly onto the skin of a figure.
+
+### figure.dress( *clothing* )
+
+This function defines the dressing of a figure. The description
+of the *clothing* is an array of range and material functions.
+The range function selects a portion of the body skin, and the
+material function applies a material to it. The structure of
+the clothing is:
+
+```javascript
+[
+	material₀, // default material
+	zone₁, material₁,
+	zone₂, material₂,
+	...
+	zoneₙ, materialₙ
+]
+```
+
+The *material₀* is the mandatory default material for the whole
+figure. The next optional pairs define zones and materials for each
+zone &ndash; [see it](../examples/extras-clothes-uniform.html).
+
+``` javascript
+figure.dress([
+
+	Happy.velour( 'black' ),
+		
+	Happy.band( 1.1, 2, -20 ),
+	Happy.velour( 'red' ),
+		
+	Happy.band( 1.15, 2, 35 ),
+	Happy.velour( 'red' ),
+	...
+];
+```
+[<img src="../examples/snapshots/extras-clothes-uniform.jpg" width="48%">](../examples/extras-clothes-uniform.html)
+
+
+
+### velour( *color* )<br>latex( *color* )
+
+The functions *velour* and *latex* define matte material &ndash;
+[see it](../examples/extras-clothes-velour.html) and shiny
+material &ndash; [see it](../examples/extras-clothes-latex.html)
+The *color* is either a [Three.js color](https://threejs.org/docs/#api/en/math/Color)
+or a [HTML/CSS color name](https://www.w3schools.com/colors/colors_names.asp).
+
+``` javascript
+velour( 'green' )
+latex( 'red' )
+```
+[<img src="../examples/snapshots/extras-clothes-velour.jpg" width="48%">](../examples/extras-clothes-velour.html)
+[<img src="../examples/snapshots/extras-clothes-latex.jpg" width="48%">](../examples/extras-clothes-latex.html)
 
 <!--
-### Custom colors
 
 By default, all figures use a predefined set of colors for body parts.
 The colors of a specific figure can be set with the method `recolor` with 7 parameters that
@@ -489,33 +546,6 @@ man.recolor(
 	'burlywood'     // nails
 );
 ```
-
-The color of joints and limbs refers to all joints and all limbs. 
-Individual colors of body parts are set via the `recolor` method of each body part ([see it](example-custom-colors.html)):
-
-[<img src="snapshots/example-custom-colors.jpg">](example-custom-colors.html)
-
-``` javascript
-var man = new Male();
-
-// overall colors
-man.recolor( 'lightgreen', 'black', 'black', 'white',
-           'darkolivegreen', 'darkslategray', 'yellow' );
-
-:
-// individual colors
-man.l_elbow.recolor( 'yellow', 'black' );
-man.l_wrist.recolor( 'orange' );
-man.l_fingers.recolor( 'coral' );
-man.r_knee.recolor( 'antiquewhite', 'black' );
-man.l_nails.recolor( 'black' );
-```
-
-The first parameter of `recolor` of a body part is the color of the main section
-of the body part. The second parameter is the color of the spherical section
-(if present).
-
-The tips of the fingers are accessed via `l_fingers.tips` and `r_fingers.tips`.
 
 
 ### Body modification

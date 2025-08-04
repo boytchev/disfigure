@@ -39,7 +39,6 @@ export {
 
 export {
 
-	dress,
 	band,
 	bandWave,
 	strip,

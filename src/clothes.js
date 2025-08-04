@@ -13,7 +13,7 @@
 
 
 import { Color } from "three";
-import { float, Fn, If, mat3, mix, positionGeometry, reciprocal, select, vec3 } from "three/tsl";
+import { float, Fn, If, mat3, mix, positionGeometry, vec3 } from "three/tsl";
 
 
 
@@ -39,6 +39,19 @@ var between = Fn( ( { value, from, to } ) => {
 
 }, { value: 'float', from: 'float', to: 'float', return: 'float' } ); // between
 
+
+
+// mix two mat3'savePreferences
+
+var mixMat3 = Fn( ([ matA, matB, k ]) => {
+
+	return mat3(
+		mix( matA[ 0 ], matB[ 0 ], k ),
+		mix( matA[ 1 ], matB[ 1 ], k ),
+		0, 0, 0,
+	);
+
+}, { matA: 'mat3', matB: 'mat3', k: 'float', return: 'mat3' } ); // mixMat3
 
 
 
@@ -78,24 +91,14 @@ function velour( color ) {
 
 // generates horizontal bands of two materials and band width
 
-var bands = Fn( ([ matA, matB, width ]) => {
+var bands = Fn( ( { matA, matB, width=float( 0.1 ), balance=float( 0 ), blur=float( 0.1 ) } ) => {
 
-	var k = positionGeometry.y.mul( float( Math.PI ).div( width ) )
-		.sin().add( 1 ).div( 2 )
-		.smoothstep( 0, 1 );
+	var k = positionGeometry.y.div( width, 1/Math.PI );
+	k = k.cos().add( 0 ).smoothstep( balance.sub( blur ), balance.add( blur ) );
 
-	var n = width.mul( 300 ).pow( 0.5 ).toVar();
+	return mixMat3( matA, matB, k );
 
-	k = k.pow( select( k.greaterThan( 0.5 ), reciprocal( n ), n ) );
-	k = k.smoothstep( 0, 1 );
-
-	return mat3(
-		mix( matA[ 0 ], matB[ 0 ], k ),
-		mix( matA[ 1 ], matB[ 1 ], k ),
-		0, 0, 0,
-	);
-
-}, { matA: 'mat3', matB: 'mat3', width: 'float', return: 'mat3' } ); // bands
+} ); // bands
 
 
 
@@ -103,20 +106,9 @@ var bands = Fn( ([ matA, matB, width ]) => {
 
 var stripes = Fn( ([ matA, matB, width ]) => {
 
-	var k = positionGeometry.x.mul( float( Math.PI ).div( width ) )
-		.sin().add( 1 ).div( 2 )
-		.smoothstep( 0, 1 );
+	var k = positionGeometry.x.div( width, 1/Math.PI );
 
-	var n = width.mul( 300 ).pow( 0.5 ).toVar();
-
-	k = k.pow( select( k.greaterThan( 0.5 ), reciprocal( n ), n ) );
-	k = k.smoothstep( 0, 1 );
-
-	return mat3(
-		mix( matA[ 0 ], matB[ 0 ], k ),
-		mix( matA[ 1 ], matB[ 1 ], k ),
-		0, 0, 0,
-	);
+	return mixMat3( matA, matB, k.cos().step( 0 ) );
 
 }, { matA: 'mat3', matB: 'mat3', width: 'float', return: 'mat3' } ); // stripes
 
@@ -129,20 +121,9 @@ var stripesAround = Fn( ([ matA, matB, x, z, width ]) => {
 	var px = positionGeometry.x.sub( x ),
 		pz = positionGeometry.z.sub( z );
 
-	var k = pz.atan( px ).mul( width )
-		.sin().add( 1 ).div( 2 )
-		.smoothstep( 0, 1 );
+	var k = pz.atan( px ).mul( width );
 
-	var n = width.mul( 30 ).pow( 0.5 ).toVar();
-
-	k = k.pow( select( k.greaterThan( 0.5 ), reciprocal( n ), n ) );
-	k = k.smoothstep( 0, 1 );
-
-	return mat3(
-		mix( matA[ 0 ], matB[ 0 ], k ),
-		mix( matA[ 1 ], matB[ 1 ], k ),
-		0, 0, 0,
-	);
+	return mixMat3( matA, matB, k.cos().step( 0 ) );
 
 }, { matA: 'mat3', matB: 'mat3', x: 'float', z: 'float', width: 'float', return: 'mat3' } ); // stripesAround
 
@@ -211,44 +192,30 @@ var bandWave = Fn( ([ from, to, sharpness, width, height ])=>{
 
 
 
-// dress a body
+// generates a TSL function that implements custom clothing
 
-function dress( body, clothinData ) {
+var compileClothing = Fn( ([ clothinData ]) => {
 
-	var customClothing = Fn( ( ) => {
+	var mat = mat3( clothinData[ 0 ]);
 
-		var mat = mat3( clothinData[ 0 ]);
+	for ( /*MUST*/let i=1; i<clothinData.length; i+=2 ) {
 
-		for ( /*MUST*/let i=1; i<clothinData.length; i+=2 ) {
+		If( clothinData[ i ], ()=>{
 
-			If( clothinData[ i ], ()=>{
+			mat.assign( clothinData[ i+1 ]);
 
-				mat.assign( clothinData[ i+1 ]);
+		} );
 
-			} );
-			//mat.assign( select( clothinData[ i ], clothinData[ i+1 ], mat ) );
+	}
 
-		}
+	return mat;
 
-		return mat;
-
-	} );
-
-	var clothes = customClothing( ).toVar();
-
-	body.material.colorNode = clothes[ 0 ].xyz;
-	body.material.roughnessNode = clothes[ 1 ].x;
-	body.material.metalnessNode = clothes[ 1 ].y;
-
-	return clothes;
-
-} // dress
-
+} ); // compileClothing
 
 
 export {
 
-	dress,
+	compileClothing,
 
 	// shapes
 	band,

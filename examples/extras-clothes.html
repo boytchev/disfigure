@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Custom Star Trek TNG uniform</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+
+
+		// create a default world
+
+		new Happy.World( );
+		Happy.camera.position.set( 0, 1, 3.5 );
+		Happy.controls.target.set( 0, 0.8, 0 );
+
+		// create a man
+
+		var man = new Happy.Man( );
+
+
+		man.dress([
+			Happy.bands(
+				Happy.velour( 'firebrick' ),
+				Happy.velour( 'white' ),
+				0.01, 0.9, 0.9
+			),
+		
+			Happy.strip( 0.17, 2 ),
+			Happy.stripes(
+				Happy.velour( 'firebrick' ),
+				Happy.velour( 'white' ),
+				0.04
+			),
+		]);
+
+		
+		// animate the scene
+		
+		Happy.setAnimationLoop( ( t )=>{
+
+	return;
+			t=t/4000;
+		
+			var a = Happy.regular( 10*t, -2, 0, 85 );
+			var b = 90-0.8*a;
+		
+			// animating the man
+		
+			man.torso.turn = Happy.chaotic( t, -91, -120, 120 );
+		
+			man.head.bend = Happy.chaotic( t, 0, -10, 30 );
+			man.head.turn = Happy.chaotic( t, 4, -30, 30 );
+			man.head.tilt = Happy.chaotic( t, 2, -20, 20 );
+
+			man.chest.bend = Happy.chaotic( t, 1, b/5-10, b/2 );
+			man.chest.turn = Happy.chaotic( 2*t, 6, -20, 20 );
+			man.chest.tilt = Happy.chaotic( t, 6, -20, 20 );
+
+			man.waist.bend = Happy.chaotic( t, 3, b/5-10, b/2 );
+			man.waist.turn = Happy.chaotic( t, 5, -20, 20 );
+			man.waist.tilt = Happy.chaotic( t, 6, -20, 20 );
+
+			man.l_elbow.bend = Happy.chaotic( t, 9, 0, 140 );
+			man.r_elbow.bend = Happy.chaotic( t, 7, 0, 140 );
+
+			man.l_wrist.bend = Happy.chaotic( t, -2, -60, 60 );
+			man.l_wrist.turn = Happy.chaotic( t, -3, -45, 45 );
+			man.l_wrist.tilt = Happy.chaotic( t, -2, -40, 40 );
+
+			man.r_wrist.bend = Happy.chaotic( t, -1, -60, 60 );
+			man.r_wrist.turn = Happy.chaotic( t, -4, -45, 45 );
+			man.r_wrist.tilt = Happy.chaotic( t, -1, -40, 40 );
+
+			man.l_arm.straddle = Happy.chaotic( t, 5, 20, 70 );
+			man.l_arm.turn = Happy.chaotic( t, 6, -20, 20 );
+			man.l_arm.foreward = Happy.chaotic( t, 7, -20, 80 );
+
+			man.r_arm.straddle = Happy.chaotic( t, -5, 20, 70 );
+			man.r_arm.turn = Happy.chaotic( t, -6, -20, 20 );
+			man.r_arm.foreward = Happy.chaotic( t, -7, -20, 80 );
+
+		
+			man.l_knee.bend = 2*a;
+			man.r_knee.bend = 2*a;
+			man.l_ankle.bend = 5-a;
+			man.r_ankle.bend = 5-a;
+		
+			man.l_leg.straddle = 0.008*a;
+			man.r_leg.straddle = 0.008*a;
+		
+			man.l_shin.turn = -0.0*a;
+			man.r_shin.turn = -0.0*a;
+		
+			man.l_leg.foreward = a;
+			man.r_leg.foreward = a;
+
+			man.l_foot.lockTo( 0, -0.03, 0, 0.08, 0, 0 );
+			man.position.x = 0;
+		
+		} );
+		
+	</script>
+</body>
+</html>

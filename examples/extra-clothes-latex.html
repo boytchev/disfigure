@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Shiny latex materials for clothing</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+		// create three persons
+
+		var man = new Happy.Man(),
+			woman = new Happy.Woman(),
+			child = new Happy.Child();
+
+		man.position.x = 0.75;
+		woman.position.x = -0.75;
+
+
+		// define clothing
+		man.dress( [Happy.latex('royalblue')] );
+		woman.dress( [Happy.latex('crimson')] );
+		child.dress( [Happy.latex('green')] );
+		
+		// animate the arms
+		
+		function animate( event ) {
+
+			var someone = event.target;
+			var t = event.time/2000 + 10*someone.uid;
+
+			// arms
+		
+			someone.l_arm.straddle = Happy.chaotic( t, 5, 40, 50 );
+			someone.l_arm.turn = Happy.chaotic( t, 6, -10, 20 );
+			someone.l_arm.foreward = Happy.chaotic( t, 7, -20, 80 );
+
+			someone.r_arm.straddle = Happy.chaotic( t, -5, 40, 50 );
+			someone.r_arm.turn = Happy.chaotic( t, -6, -10, 20 );
+			someone.r_arm.foreward = Happy.chaotic( t, -7, -20, 80 );
+
+			someone.l_elbow.bend = Happy.chaotic( t, 9, 0, 40 );
+			someone.r_elbow.bend = Happy.chaotic( t, 7, 0, 40 );
+
+			someone.l_forearm.turn = Happy.chaotic( t, 11, -25, 25 );
+			someone.r_forearm.turn = Happy.chaotic( t, -8, -25, 25 );
+
+			someone.l_wrist.bend = Happy.chaotic( t, -2, -30, 30 );
+			someone.l_wrist.tilt = Happy.chaotic( t, -2, -20, 20 );
+
+			someone.r_wrist.bend = Happy.chaotic( t, -1, -30, 30 );
+			someone.r_wrist.tilt = Happy.chaotic( t, -1, -20, 20 );
+
+			// body
+		
+			someone.head.bend = Happy.chaotic( t/5, 3, -30, 30 );
+			someone.head.turn = Happy.chaotic( t, 2, -60, 60 );
+			someone.head.tilt = Happy.chaotic( t/2, 1, -30, 30 );
+			someone.waist.turn = -someone.head.turn;
+		
+		}
+
+		man.addEventListener( 'animate', animate );
+		woman.addEventListener( 'animate', animate );
+		child.addEventListener( 'animate', animate );
+
+	</script>
+</body>
+</html>

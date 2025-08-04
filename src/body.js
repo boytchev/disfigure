@@ -10,6 +10,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { uniform, vec3 } from 'three/tsl';
 
 import { tslNormalNode, tslPositionNode } from './motion.js';
+import { compileClothing } from './clothes.js';
 import { Space } from './space.js';
 import { everybody, scene } from './world.js';
 
@@ -412,6 +413,18 @@ class Disfigure extends Mesh {
 		this.posture = posture;
 
 	} // Disfigure.blend
+
+
+	dress( clothinData ) {
+
+		var clothes = compileClothing( clothinData ).toVar();
+
+		this.material.colorNode = clothes[ 0 ].xyz;
+		this.material.roughnessNode = clothes[ 1 ].x;
+		this.material.metalnessNode = clothes[ 1 ].y;
+
+	} // Disfigure.dress
+
 
 } // Disfigure
 
