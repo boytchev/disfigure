@@ -9,6 +9,8 @@ A library to rig boneless and morphless 3D models. **WIP.**
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/poser-prototype.jpg">](https://boytchev.github.io/disfigure/poser)
 
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/extras-attach.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/extras-attach.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/extras-clothes-bands-polar.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/extras-clothes-bands-polar.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/extras-clothes-bands.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/extras-clothes-bands.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/extras-clothes-latex.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/extras-clothes-latex.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/extras-clothes-uniform.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/extras-clothes-uniform.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/extras-clothes-velour.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/extras-clothes-velour.html)
@@ -40,6 +42,8 @@ A library to rig boneless and morphless 3D models. **WIP.**
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/posture-static.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/posture-static.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/posture.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/posture.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/world-customize.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/world-customize.html)
+
+
 
 ## Social media
 

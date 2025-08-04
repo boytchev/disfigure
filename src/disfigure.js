@@ -44,8 +44,7 @@ export {
 	strip,
 	stripSingle,
 	slice,
-	stripes,
-	stripesAround,
+
 	bands,
 	velour,
 	latex,

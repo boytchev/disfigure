@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Linear and polar bands</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+		// create three persons
+
+		var man1 = new Happy.Man(),
+			man2 = new Happy.Man(),
+			woman1 = new Happy.Woman(),
+			woman2 = new Happy.Woman();
+
+		man1.position.x = 0.4;
+		man1.torso.turn = 90;
+		
+		man2.position.x = -0.4;
+		man2.torso.turn = -90;
+		
+		woman1.position.x = -1;
+		woman1.torso.turn = 90;
+
+		woman2.position.x = 1;
+		woman2.torso.turn = -90;
+
+
+		// define clothing
+		man2.dress([
+			Happy.bands(
+				Happy.velour( 'moccasin' ),
+				Happy.velour( 'tomato' ),
+				0.03, { blur: 0.05, angle: 90 }
+			) ]);
+		
+		woman1.dress([
+			Happy.bands(
+				Happy.velour( 'azure' ),
+				Happy.latex( 'navy' ),
+				0.015, { balance: 0.9, blur: 0.2, angle: 90 }
+			) ]);
+		
+		
+		man1.dress([
+			Happy.bands(
+				Happy.velour( 'moccasin' ),
+				Happy.velour( 'tomato' ),
+				1/20, { blur: 0.05, angle: 90, polar: true, z: -0.06 }
+			) ]);
+		
+		woman2.dress([
+			Happy.bands(
+				Happy.velour( 'azure' ),
+				Happy.latex( 'navy' ),
+				0.015, { balance: 0.9, blur: 0.2, angle: 90, polar: true }
+			) ]);
+		
+		
+		// animate the arms
+		
+		function animate( event ) {
+
+			var someone = event.target;
+			var t = event.time/2000 + 10*someone.uid;
+
+			// arms
+		
+			someone.l_arm.straddle = Happy.chaotic( t, 5, -20, 20 );
+			someone.l_arm.turn = Happy.chaotic( t, 6, -10, 10 );
+
+			someone.r_arm.straddle = Happy.chaotic( t, -5, -20, 20 );
+			someone.r_arm.turn = Happy.chaotic( t, -6, -10, 10 );
+
+			someone.l_elbow.bend = 0;
+			someone.r_elbow.bend = 0;
+
+			someone.l_forearm.turn = Happy.chaotic( t, 11, -15, 15 );
+			someone.r_forearm.turn = Happy.chaotic( t, -8, -15, 15 );
+
+			someone.l_wrist.bend = Happy.chaotic( t, -2, -20, 20 );
+			someone.l_wrist.tilt = Happy.chaotic( t, -5, -20, 20 );
+
+			someone.r_wrist.bend = Happy.chaotic( t, -1, -20, 20 );
+			someone.r_wrist.tilt = Happy.chaotic( t, -4, -20, 20 );
+
+			// body
+		
+			someone.head.bend = Happy.chaotic( t/5, 3, -10, 30 );
+			someone.head.turn = Happy.chaotic( t/2, 2, -25, 25 );
+			someone.head.tilt = Happy.chaotic( t/2, 1, -20, 20 );
+			someone.chest.turn = -someone.head.turn;
+			someone.waist.turn = -someone.head.turn;
+		
+		}
+
+		man1.addEventListener( 'animate', animate );
+		woman1.addEventListener( 'animate', animate );
+		man2.addEventListener( 'animate', animate );
+		woman2.addEventListener( 'animate', animate );
+
+	</script>
+</body>
+</html>

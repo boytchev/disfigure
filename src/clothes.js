@@ -13,7 +13,7 @@
 
 
 import { Color } from "three";
-import { float, Fn, If, mat3, mix, positionGeometry, vec3 } from "three/tsl";
+import { float, Fn, If, mat3, mix, positionGeometry, rotate, vec2, vec3 } from "three/tsl";
 
 
 
@@ -89,43 +89,32 @@ function velour( color ) {
 
 
 
-// generates horizontal bands of two materials and band width
+// generates bands of two materials
 
-var bands = Fn( ( { matA, matB, width=float( 0.1 ), balance=float( 0 ), blur=float( 0.1 ) } ) => {
+var bands = Fn( ( { matA, matB, width=float( 0.1 ), options={} } ) => {
 
-	var k = positionGeometry.y.div( width, 1/Math.PI );
-	k = k.cos().add( 0 ).smoothstep( balance.sub( blur ), balance.add( blur ) );
+	var { balance, blur, angle, polar, x, z } = options;
+
+	var k, p;
+
+	if ( polar ) {
+
+		p = positionGeometry.xz.sub( vec2( x??0, z??0 ) );
+		k = p.y.atan( p.x ).div( float( width ).mul( 2 ) ).cos();
+
+	} else {
+
+		p = rotate( positionGeometry.xy, ( angle??0 ) * Math.PI/180 );
+		k = p.y.div( width, 1/Math.PI ).cos();
+
+	}
+
+	if ( balance??0 ) k = k.add( balance );
+	if ( blur??0.00001 ) k = k.smoothstep( -blur, blur );
 
 	return mixMat3( matA, matB, k );
 
 } ); // bands
-
-
-
-// generates vertical stripes of two materials and stripe width
-
-var stripes = Fn( ([ matA, matB, width ]) => {
-
-	var k = positionGeometry.x.div( width, 1/Math.PI );
-
-	return mixMat3( matA, matB, k.cos().step( 0 ) );
-
-}, { matA: 'mat3', matB: 'mat3', width: 'float', return: 'mat3' } ); // stripes
-
-
-
-// generates vertical stripes of two materials and stripe width
-
-var stripesAround = Fn( ([ matA, matB, x, z, width ]) => {
-
-	var px = positionGeometry.x.sub( x ),
-		pz = positionGeometry.z.sub( z );
-
-	var k = pz.atan( px ).mul( width );
-
-	return mixMat3( matA, matB, k.cos().step( 0 ) );
-
-}, { matA: 'mat3', matB: 'mat3', x: 'float', z: 'float', width: 'float', return: 'mat3' } ); // stripesAround
 
 
 
@@ -218,16 +207,14 @@ export {
 	compileClothing,
 
 	// shapes
-	band,
-	bandWave,
-	strip,
-	stripSingle,
-	slice,
+	band,			// needs docs
+	bandWave,		// needs docs
+	strip,			// needs docs
+	stripSingle,	// needs docs
+	slice,			// needs docs
 
 	// patterns and materials
 	bands,
-	stripes,
-	stripesAround,
 	velour,
 	latex,
 

@@ -2,7 +2,7 @@
 
 import { Color, WebGPURenderer, PCFSoftShadowMap, Scene, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, Matrix3, Matrix4, Vector4, Euler, PlaneGeometry, MeshPhysicalNodeMaterial, MathUtils, Group } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { Fn, mix, If, transformNormalToView, normalGeometry, positionGeometry, mat3, float, vec3, min, select, vec2, uniform } from 'three/tsl';
+import { Fn, mix, If, transformNormalToView, normalGeometry, positionGeometry, mat3, vec2, float, rotate, vec3, min, select, uniform } from 'three/tsl';
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
@@ -205,43 +205,32 @@ function velour( color ) {
 
 
 
-// generates horizontal bands of two materials and band width
+// generates bands of two materials
 
-var bands = Fn( ( { matA, matB, width=float( 0.1 ), balance=float( 0 ), blur=float( 0.1 ) } ) => {
+var bands = Fn( ( { matA, matB, width=float( 0.1 ), options={} } ) => {
 
-	var k = positionGeometry.y.div( width, 1/Math.PI );
-	k = k.cos().add( 0 ).smoothstep( balance.sub( blur ), balance.add( blur ) );
+	var { balance, blur, angle, polar, x, z } = options;
+
+	var k, p;
+
+	if ( polar ) {
+
+		p = positionGeometry.xz.sub( vec2( x??0, z??0 ) );
+		k = p.y.atan( p.x ).div( float( width ).mul( 2 ) ).cos();
+
+	} else {
+
+		p = rotate( positionGeometry.xy, ( angle??0 ) * Math.PI/180 );
+		k = p.y.div( width, 1/Math.PI ).cos();
+
+	}
+
+	if ( balance??0 ) k = k.add( balance );
+	if ( blur??0.00001 ) k = k.smoothstep( -blur, blur );
 
 	return mixMat3( matA, matB, k );
 
 } ); // bands
-
-
-
-// generates vertical stripes of two materials and stripe width
-
-var stripes = Fn( ([ matA, matB, width ]) => {
-
-	var k = positionGeometry.x.div( width, 1/Math.PI );
-
-	return mixMat3( matA, matB, k.cos().step( 0 ) );
-
-}, { matA: 'mat3', matB: 'mat3', width: 'float', return: 'mat3' } ); // stripes
-
-
-
-// generates vertical stripes of two materials and stripe width
-
-var stripesAround = Fn( ([ matA, matB, x, z, width ]) => {
-
-	var px = positionGeometry.x.sub( x ),
-		pz = positionGeometry.z.sub( z );
-
-	var k = pz.atan( px ).mul( width );
-
-	return mixMat3( matA, matB, k.cos().step( 0 ) );
-
-}, { matA: 'mat3', matB: 'mat3', x: 'float', z: 'float', width: 'float', return: 'mat3' } ); // stripesAround
 
 
 
@@ -1314,4 +1303,4 @@ class Child extends Disfigure {
 
 console.log( '\n%c\u22EE\u22EE\u22EE Disfigure\n%chttps://boytchev.github.io/disfigure/\n', 'color: navy', 'font-size:80%' );
 
-export { Child, Man, Woman, World, band, bandWave, bands, camera, cameraLight, chaotic, controls, everybody, ground, latex, light, random, regular, renderer, scene, setAnimationLoop, slice, strip, stripSingle, stripes, stripesAround, velour };
+export { Child, Man, Woman, World, band, bandWave, bands, camera, cameraLight, chaotic, controls, everybody, ground, latex, light, random, regular, renderer, scene, setAnimationLoop, slice, strip, stripSingle, velour };

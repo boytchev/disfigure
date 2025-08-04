@@ -5,7 +5,7 @@
 <body>
 	<header>
 		<h1><b>Disfigure</b></h1>
-		<h3>Velour materials for clothing</h3></br>
+		<h3>Bands of two alternating materials</h3></br>
 	</header>
 
 	<div id="spinner"></div>
@@ -32,9 +32,27 @@
 
 
 		// define clothing
-		man.dress([ Happy.velour( 'royalblue' ) ]);
-		woman.dress([ Happy.velour( 'crimson' ) ]);
-		child.dress([ Happy.velour( 'green' ) ]);
+		man.dress([
+			Happy.bands(
+				Happy.velour( 'royalblue' ),
+				Happy.velour( 'white' ),
+				0.12, { blur: 0.05, angle: 45 }
+			) ]);
+		
+		woman.dress([
+			Happy.bands(
+				Happy.latex( 'crimson' ),
+				Happy.velour( 'azure' ),
+				0.015, { balance: 0.9, blur: 0.2, angle: 90 }
+			) ]);
+		
+		child.dress([
+			Happy.bands(
+				Happy.velour( 'lightgreen' ),
+				Happy.velour( 'black' ),
+				1.5, { blur: 0.5 }
+			) ]);
+		
 		
 		// animate the arms
 		
@@ -45,25 +63,23 @@
 
 			// arms
 		
-			someone.l_arm.straddle = Happy.chaotic( t, 5, 30, 70 );
+			someone.l_arm.straddle = Happy.chaotic( t, 5, 70, 80 );
 			someone.l_arm.turn = Happy.chaotic( t, 6, -10, 70 );
-			someone.l_arm.foreward = Happy.chaotic( t, 7, -20, 80 );
 
-			someone.r_arm.straddle = Happy.chaotic( t, -5, 30, 70 );
+			someone.r_arm.straddle = Happy.chaotic( t, -5, 70, 80 );
 			someone.r_arm.turn = Happy.chaotic( t, -6, -10, 70 );
-			someone.r_arm.foreward = Happy.chaotic( t, -7, -20, 80 );
 
-			someone.l_elbow.bend = Happy.chaotic( t, 9, 0, 140 );
-			someone.r_elbow.bend = Happy.chaotic( t, 7, 0, 140 );
+			someone.l_elbow.bend = Happy.chaotic( t, 9, 0, 40 );
+			someone.r_elbow.bend = Happy.chaotic( t, 7, 0, 40 );
 
-			someone.l_forearm.turn = Happy.chaotic( t, 11, -45, 45 );
-			someone.r_forearm.turn = Happy.chaotic( t, -8, -45, 45 );
+			someone.l_forearm.turn = Happy.chaotic( t, 11, -15, 15 );
+			someone.r_forearm.turn = Happy.chaotic( t, -8, -15, 15 );
 
-			someone.l_wrist.bend = Happy.chaotic( t, -2, -90, 90 );
-			someone.l_wrist.tilt = Happy.chaotic( t, -2, -40, 40 );
+			someone.l_wrist.bend = Happy.chaotic( t, -2, -20, 20 );
+			someone.l_wrist.tilt = Happy.chaotic( t, -5, -20, 20 );
 
-			someone.r_wrist.bend = Happy.chaotic( t, -1, -90, 90 );
-			someone.r_wrist.tilt = Happy.chaotic( t, -1, -40, 40 );
+			someone.r_wrist.bend = Happy.chaotic( t, -1, -20, 20 );
+			someone.r_wrist.tilt = Happy.chaotic( t, -4, -20, 20 );
 
 			// body
 		

@@ -484,15 +484,16 @@ the clothing is:
 
 ```javascript
 [
-	material₀, // default material
-	zone₁, material₁,
-	zone₂, material₂,
-	...
-	zoneₙ, materialₙ
+   material,           // default material
+   
+   zone-1, material-1, // optional materials
+   zone-2, material-2,
+   ...
+   zone-N, material-N
 ]
 ```
 
-The *material₀* is the mandatory default material for the whole
+The *material* is the mandatory default material for the whole
 figure. The next optional pairs define zones and materials for each
 zone &ndash; [see it](../examples/extras-clothes-uniform.html).
 
@@ -528,25 +529,38 @@ latex( 'red' )
 [<img src="../examples/snapshots/extras-clothes-velour.jpg" width="48%">](../examples/extras-clothes-velour.html)
 [<img src="../examples/snapshots/extras-clothes-latex.jpg" width="48%">](../examples/extras-clothes-latex.html)
 
-<!--
+### bands( *material-1*, *material-2*, *width*, *options* )
 
-By default, all figures use a predefined set of colors for body parts.
-The colors of a specific figure can be set with the method `recolor` with 7 parameters that
-are [Three.js colors](https://threejs.org/docs/#api/en/math/Color) or [HTML/CSS color names](https://www.w3schools.com/colors/colors_names.asp). These colors are for the 
-*head*, *shoes*, *pelvis*, *joints*, *limbs*, *torso* and *nails*:
+The *bands* function makes a composite material of alternating horizontal
+bands of *material-1* and *material-2*. The *width* of each band
+is defined in meters.  The optional *options* provide additional properties
+for the band &ndash; [see it](../examples/extras-clothes-bands.html).
+Adequate bluring the bands may improve the visual appearance of the bands,
+especially when they are too close or too far.
 
-``` javascript
-man.recolor(
-    'antiquewhite',	// head
-    'gray',		    // shoes
-    'antiquewhite',	// pelvis
-    'burlywood',	// joints
-    'antiquewhite',	// limbs
-    'bisque',		// torso
-	'burlywood'     // nails
-);
+Polar bands revolve around a vertical axis. They are more suitable for
+vertical bands that go around a body part &ndash; [see it](../examples/extras-clothes-bands-polar.html).
+
+* **balance** &ndash; the relative weight of the two materials from -1 to 1; 0 means they are equally balanced
+* **blur** &ndash; the blurness of the bands' edges from 0 to 1; 0 is no blur, 1 is maximal blur
+* **angle** &ndash; the rotation of bands in degrees, from -360 to 360; 0 is horizontal bands, 90 is vertical bands
+* **polar** &ndash; bands are around a central vertical axis, *angle* is not used and *width* represents portions of a full circle of one band, i.e. 1/10 is 10 bands
+* **x** &ndash; the x-coordinate of a central vertical axis, used only for polar bands
+* **z** &ndash; the z-coordinate of a central vertical axis, used only for polar bands
+
+```javascript
+figure.dress([
+   Happy.bands(
+      Happy.latex( 'crimson' ),
+      Happy.velour( 'azure' ),
+      0.015, { balance: 0.9, blur: 0.2, angle: 90 }
+   ) ]);
 ```
 
+[<img src="../examples/snapshots/extras-clothes-bands.jpg" width="48%">](../examples/extras-clothes-bands.html)
+[<img src="../examples/snapshots/extras-clothes-bands-polar.jpg" width="48%">](../examples/extras-clothes-bands-polar.html)
+
+<!--
 
 ### Body modification
 
