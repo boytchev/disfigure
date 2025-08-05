@@ -39,12 +39,7 @@ export {
 
 export {
 
-	band,
-	bandWave,
-	strip,
-	stripSingle,
 	slice,
-
 	bands,
 	velour,
 	latex,

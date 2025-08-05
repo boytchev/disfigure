@@ -478,34 +478,34 @@ directly onto the skin of a figure.
 
 This function defines the dressing of a figure. The description
 of the *clothing* is an array of range and material functions.
-The range function selects a portion of the body skin, and the
-material function applies a material to it. The structure of
+The range function selects a portion of the body skin, called *slice*,
+and the material function applies a material to it. The structure of
 the clothing is:
 
 ```javascript
 [
-   material,           // default material
+   material,            // default material
    
-   zone-1, material-1, // optional materials
-   zone-2, material-2,
+   slice_1, material_1, // optional materials
+   slice_2, material_2,
    ...
-   zone-N, material-N
+   slice_N, material_N
 ]
 ```
 
 The *material* is the mandatory default material for the whole
-figure. The next optional pairs define zones and materials for each
-zone &ndash; [see it](../examples/extras-clothes-uniform.html).
+figure. The next optional slice-material pairs define slices
+and materials for each slice &ndash; [see it](../examples/extras-clothes-uniform.html).
 
 ``` javascript
 figure.dress([
 
 	Happy.velour( 'black' ),
 		
-	Happy.band( 1.1, 2, -20 ),
+	Happy.slice( 1.1, 2, {angle: -20} ),
 	Happy.velour( 'red' ),
-		
-	Happy.band( 1.15, 2, 35 ),
+
+	Happy.slice( 1.15, 2, {angle: 35} ),
 	Happy.velour( 'red' ),
 	...
 ];
@@ -529,11 +529,11 @@ latex( 'red' )
 [<img src="../examples/snapshots/extras-clothes-velour.jpg" width="48%">](../examples/extras-clothes-velour.html)
 [<img src="../examples/snapshots/extras-clothes-latex.jpg" width="48%">](../examples/extras-clothes-latex.html)
 
-### bands( *material-1*, *material-2*, *width*, *options* )
+### bands( *material_1*, *material_2*, *width*, *options* )
 
 The *bands* function makes a composite material of alternating horizontal
-bands of *material-1* and *material-2*. The *width* of each band
-is defined in meters.  The optional *options* provide additional properties
+bands of *material_1* and *material_2*. The *width* of each band
+is defined in meters.  The optional *options* parameter provides additional properties
 for the band &ndash; [see it](../examples/extras-clothes-bands.html).
 Adequate bluring the bands may improve the visual appearance of the bands,
 especially when they are too close or too far.
@@ -549,16 +549,49 @@ vertical bands that go around a body part &ndash; [see it](../examples/extras-cl
 * **z** &ndash; the z-coordinate of a central vertical axis, used only for polar bands
 
 ```javascript
-figure.dress([
-   Happy.bands(
-      Happy.latex( 'crimson' ),
-      Happy.velour( 'azure' ),
-      0.015, { balance: 0.9, blur: 0.2, angle: 90 }
-   ) ]);
+Happy.bands(
+   Happy.latex( 'crimson' ),
+   Happy.velour( 'azure' ),
+   0.015, { balance: 0.9, blur: 0.2, angle: 90 }
+)
 ```
 
 [<img src="../examples/snapshots/extras-clothes-bands.jpg" width="48%">](../examples/extras-clothes-bands.html)
 [<img src="../examples/snapshots/extras-clothes-bands-polar.jpg" width="48%">](../examples/extras-clothes-bands-polar.html)
+
+### slice( *from*, *to*, *options* )
+
+The *slice* function defines a slice of a figure &ndash; this is a part
+of the figure that is dressed in given material. Parameters *from* and *to*
+define the start and the end of the slice, measure in meters. By default
+a slice is horizontal, thus *from* and *to* denote distance from the ground.
+The optional *options* parameter provides additional properties
+for the slice like their orientation &ndash; [see it](../examples/extras-clothes-slice.html),
+their rotation &ndash; [see it](../examples/extras-clothes-slice-angle.html).
+
+* **side** &ndash; if true, the slice is vertical across the front-back of a figure
+* **front** &ndash; if true, the slice is vertical across the left-right of a figure 
+* **angle** &ndash; the rotation of the slice in degrees around one axis, from -360 to 360
+* **sideAngle** &ndash; the rotation of the slice in degrees around another axis, from -360 to 360
+* **symmetry** &ndash; if true, the slice is symmetrical, i.e. [-to,-from] and [from,to]
+
+```javascript
+Happy.slice( -0.07, 0.03, {front: true} )
+Happy.slice( 0.70, 1.40, {angle:55} )
+```
+
+[<img src="../examples/snapshots/extras-clothes-slice.jpg" width="48%">](../examples/extras-clothes-slice.html)
+[<img src="../examples/snapshots/extras-clothes-slice-angle.jpg" width="48%">](../examples/extras-clothes-slice-angle.html)
+
+
+Additionally, slices could be curved as a wave when a non-zero
+*wave* option is provided &ndash; [see it](../examples/extras-clothes-slice-wave.html)
+
+* **wave** &ndash; height of the weight in meters
+* **width** &ndash; width of a single wave in meters, this defines how sparse or dense is the wave
+* **sharpness** &ndash; defines how sharp are the edges of the wave, 0 is for sharp, 1 is for sinusoidal, intermediate values, as well as less than 0 or greater than 1 are also accepted
+
+[<img src="../examples/snapshots/extras-clothes-slice-wave.jpg" width="48%">](../examples/extras-clothes-slice-wave.html)
 
 <!--
 
@@ -715,6 +748,7 @@ It is a set of the following options:
 - *ground* &ndash; boolean, if true, ground is created
 - *shadows* &ndash; boolean, if true, shadows are created
 - *stats* &ndash; boolean, if true, stats panel is created
+- *antialias* &ndash; boolean, if false, antialias is turned off (this may speed up animations in slow GPUs)
 
 ```js
 new World( {ground: false, stats: true} );

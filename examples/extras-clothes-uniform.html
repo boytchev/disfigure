@@ -34,59 +34,60 @@
 
 			Happy.velour( 'black' ),
 		
-			Happy.band( 1.1, 2, -20 ),
+			Happy.slice( 1.1, 2, { angle: -20 } ),
+			Happy.velour( 'red' ),
+
+			Happy.slice( 1.15, 2, { angle: 35 } ),
 			Happy.velour( 'red' ),
 		
-			Happy.band( 1.15, 2, 35 ),
-			Happy.velour( 'red' ),
-		
-			Happy.band( 1.45, 2 ),
+			Happy.slice( 1.45, 2 ),
 			Happy.velour( 'black' ),
 		
-			Happy.bandWave( 0.85, 0.975, 1, 0.5, 0.6 ),
+			Happy.slice( 0.85, 0.975, { wave: 0.6, width: 0.5, sharpness: 1 } ),
 			Happy.velour( 'red' ),
 		
-			Happy.bandWave( 1.555, 1.8, 0, 0.20, 0.1 ),
+			Happy.slice( 1.555, 1.8, { wave: 0.1, width: 0.20, sharpness: 0 } ),
+			Happy.velour( 'tan' ),
+		
+			Happy.slice( 1.55, 1.555, { wave: 0.1, width: 0.20, sharpness: 0 } ),
+			Happy.velour( 'red' ),
+		
+			Happy.slice( 1.39, 1.392, { wave: 0.13, width: 0.30, sharpness: 1 } ),
+			Happy.velour( 'red' ),
+
+			Happy.slice( 0.22, 2, { side: true, symmetry: true } ),
+			Happy.velour( 'red' ),
+		
+			Happy.slice( 1.045, 1.2 ).and( Happy.slice( -1, -0.03, { front: true } ) ),
+			Happy.velour( 'red' ),
+		
+			Happy.slice( 0.66, 2, { side: true, symmetry: true } ),
 			Happy.velour( 'tan' ),
 
-			Happy.bandWave( 1.55, 1.555, 0, 0.20, 0.1 ),
-			Happy.velour( 'red' ),
-		
-			Happy.bandWave( 1.39, 1.392, 1, 0.30, 0.13 ),
-			Happy.velour( 'red' ),
-		
-			Happy.strip( 0.22, 2 ),
-			Happy.velour( 'red' ),
-		
-			Happy.band( 1.045, 1.2 ).and( Happy.slice( -1, -0.03, 0 ) ),
-			Happy.velour( 'red' ),
-		
-			Happy.strip( 0.66, 2 ),
-			Happy.velour( 'tan' ),
-
-			Happy.bandWave( 1.61, 2, 2, 0.003, 0.05 ),
+			Happy.slice( 1.61, 2, { wave: 0.05, width: 0.003, sharpness: 2 } ),
 			Happy.velour( 'black' ),
 
-			Happy.band( 1.7, 2, 0, -30 )
-				.and( Happy.band( 1.6, 2 ) )
-				.and( Happy.strip( 0, 0.078 ) ),
+			Happy.slice( 1.7, 2, { sideAngle: -30 } )
+				.and( Happy.slice( 1.6, 2 ) )
+				.and( Happy.slice( -0.078, 0.078, { side: true } ) ),
 			Happy.velour( 'black' ),
 		
-			Happy.slice( 0.11, 0.19, 8 ).and( Happy.band( 1, 1.4 ) ),
+			Happy.slice( 0.11, 0.19, { front: true, angle: 8 } ).and( Happy.slice( 1, 1.4 ) ),
 			Happy.velour( 'black' ),
 		
-			Happy.strip( 0, 0.002 )
-				.and( Happy.band( 1.099, 1.45 ) )
-				.and( Happy.slice( 0, 1, 0 ) ),
+			Happy.slice( -0.002, 0.002, { side: true } )
+				.and( Happy.slice( 1.099, 1.45 ) )
+				.and( Happy.slice( 0, 1, { front: true } ) ),
 			Happy.velour( new Three.Color( 0.8, 0, 0 ) ),
 
-			Happy.bandWave( 0-0.05-0.05, 0.003-0.05-0.05, 1, 0.072, 0.15 )
-				.and( Happy.slice( -0.02, 0.05, 0 ) ),
+			Happy.slice( -0.1, 0.003-0.1, { wave: 0.15, width: 0.072, sharpness: 1 } )
+				.and( Happy.slice( -0.02, 0.05, { front: true } ) ),
 			Happy.velour( 'firebrick' ),
 		
-			Happy.band( 0.11-0.055, 0.11-0.055+0.003 )
-				.and( Happy.slice( -0.1, -0.02, 0 ) ),
+			Happy.slice( 0.055, 0.055+0.003 )
+				.and( Happy.slice( -0.1, -0.02, { front: true } ) ),
 			Happy.velour( 'firebrick' ),
+
 		]);
 
 

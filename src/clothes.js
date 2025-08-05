@@ -110,7 +110,9 @@ var bands = Fn( ( { matA, matB, width=float( 0.1 ), options={} } ) => {
 	}
 
 	if ( balance??0 ) k = k.add( balance );
-	if ( blur??0.00001 ) k = k.smoothstep( -blur, blur );
+	
+	blur = blur??0.00001;
+	if ( blur ) k = k.smoothstep( -blur, blur );
 
 	return mixMat3( matA, matB, k );
 
@@ -118,66 +120,37 @@ var bands = Fn( ( { matA, matB, width=float( 0.1 ), options={} } ) => {
 
 
 
-// generates a sloped zone within vertical range
+// generates a slice through a body
 
-var band = Fn( ( { from, to, angleX=float( 0 ), angleZ=float( 0 ) } )=>{
-
-	var p = positionGeometry.toVar();
-
-	p.y.addAssign( p.x.mul( angleX.radians( ).tan() ) );
-	p.y.addAssign( p.z.mul( angleZ.radians( ).tan() ) );
-
-	return between( p.y, from, to );
-
-} ); // band
-
-
-
-// generates two symmetricals zone within horizontal range
-
-var strip = Fn( ([ from, to ])=>{
-
-	return between( positionGeometry.x.abs(), from, to );
-
-}, { from: 'float', to: 'float', return: 'float' } ); // strip
-
-
-
-// generates a zone within z range
-
-var slice = Fn( ([ from, to, angleY=float( 0 ) ])=>{
+var slice = Fn( ( { from, to, options={} } )=>{
 
 	var p = positionGeometry.toVar();
 
-	p.z.addAssign( p.y.mul( angleY.radians( ).tan() ) );
+	var axes = 'yxzyx',
+		idx = 0;
 
-	return between( p.z, from, to );
+	if ( options.side ) idx=1;
+	if ( options.front ) idx=2;
 
-}, { from: 'float', to: 'float', angleY: 'float', return: 'float' } ); // slice
+	if ( options.angle ) p[ axes[ idx ] ].addAssign( p[ axes[ idx+1 ] ].mul( Math.tan( options.angle*Math.PI/180 ) ) );
+	if ( options.sideAngle ) p[ axes[ idx ] ].addAssign( p[ axes[ idx+2 ] ].mul( Math.tan( options.sideAngle*Math.PI/180 ) ) );
 
+	var value = p[ axes[ idx ] ];
 
+	if ( options.wave ) {
 
-// generates a zone within horizontal range
+		var w = p[ axes[ idx+1 ] ].mul( float( Math.PI ).div( options.width??Math.PI ) ).cos().toVar();
+		var dWave = float( options.sharpness??0 ).mix( w, w.acos().mul( -2/Math.PI ).sub( 1 ) ).mul( options.wave, 0.5 );
 
-var stripSingle = Fn( ([ from, to ])=>{
+		value = value.add( dWave );
 
-	return between( positionGeometry.x, from, to );
+	}
 
-}, { from: 'float', to: 'float', return: 'float' } ); // stripSingle
+	if ( options.symmetry ) value = value.abs();
 
+	return between( value, from, to );
 
-
-// generates a wave-like zone within horizontal range
-
-var bandWave = Fn( ([ from, to, sharpness, width, height ])=>{
-
-	var x = positionGeometry.x.mul( float( Math.PI ).div( width ) ).cos();
-
-	var dy = sharpness.mix( x, x.acos().mul( -2/Math.PI ).sub( 1 ) ).mul( height, 0.5 );
-
-	return between( positionGeometry.y.add( dy ), from, to );
-
-}, { from: 'float', to: 'float', sharpness: 'float', width: 'float', height: 'float', return: 'float' } ); // bandWave
+} ); // slice
 
 
 
@@ -205,15 +178,7 @@ var compileClothing = Fn( ([ clothinData ]) => {
 export {
 
 	compileClothing,
-
-	// shapes
-	band,			// needs docs
-	bandWave,		// needs docs
-	strip,			// needs docs
-	stripSingle,	// needs docs
-	slice,			// needs docs
-
-	// patterns and materials
+	slice,
 	bands,
 	velour,
 	latex,

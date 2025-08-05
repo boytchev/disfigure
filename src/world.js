@@ -21,6 +21,7 @@ var renderer, scene, camera, light, cameraLight, controls, ground, userAnimation
 //		lights: true,
 //		controls: true,
 //		ground: true,
+//		antialias: true,
 //		shadows: true,
 //		stats: false,
 // }
