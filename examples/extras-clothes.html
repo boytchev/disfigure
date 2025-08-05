@@ -26,24 +26,24 @@
 
 		var man = new Happy.Man( );
 
-man.l_arm.straddle=0
-man.r_arm.straddle=0
+man.l_arm.straddle=0;
+man.r_arm.straddle=0;
 
 		man.dress([
 			Happy.bands(
 				Happy.velour( 'firebrick' ),
 				Happy.velour( 'white' ),
-				0.01, {balance:0.9, blur:0.9}
+				0.01, { balance: 0.9, blur: 0.9 }
 			),
 		
-			Happy.slice( 0.17, 1, {side:true, symmetry:true} ),
+			Happy.slice( 0.17, 1, { side: true, symmetry: true } ),
 			Happy.bands(
 				Happy.velour( 'firebrick' ),
 				Happy.velour( 'white' ),
-				0.01, {angle:90, balance:0.9, blur:0.9}
+				0.01, { angle: 90, balance: 0.9, blur: 0.9 }
 			),
 
-			
+		
 		]);
 		
 		// animate the scene

@@ -110,7 +110,7 @@ var bands = Fn( ( { matA, matB, width=float( 0.1 ), options={} } ) => {
 	}
 
 	if ( balance??0 ) k = k.add( balance );
-	
+
 	blur = blur??0.00001;
 	if ( blur ) k = k.smoothstep( -blur, blur );
 

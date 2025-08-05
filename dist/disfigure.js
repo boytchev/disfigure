@@ -226,7 +226,9 @@ var bands = Fn( ( { matA, matB, width=float( 0.1 ), options={} } ) => {
 	}
 
 	if ( balance??0 ) k = k.add( balance );
-	if ( blur??0.00001 ) k = k.smoothstep( -blur, blur );
+
+	blur = blur??0.00001;
+	if ( blur ) k = k.smoothstep( -blur, blur );
 
 	return mixMat3( matA, matB, k );
 
@@ -253,7 +255,7 @@ var slice = Fn( ( { from, to, options={} } )=>{
 
 	if ( options.wave ) {
 
-		var w = p[ axes[ idx+1 ] ].mul( float( Math.PI ).div( options.width ) ).cos().toVar();
+		var w = p[ axes[ idx+1 ] ].mul( float( Math.PI ).div( options.width??Math.PI ) ).cos().toVar();
 		var dWave = float( options.sharpness??0 ).mix( w, w.acos().mul( -2/Math.PI ).sub( 1 ) ).mul( options.wave, 0.5 );
 
 		value = value.add( dWave );

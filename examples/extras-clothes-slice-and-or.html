@@ -5,7 +5,7 @@
 <body>
 	<header>
 		<h1><b>Disfigure</b></h1>
-		<h3>Generating different shapes of wave slices</h3></br>
+		<h3>Combining slices into more complex slices</h3></br>
 	</header>
 
 	<div id="spinner"></div>
@@ -13,7 +13,6 @@
 	<script src="importmap.js"></script>
 	<script type="module">
 
-		import { Color } from 'three';
 		import * as Happy from 'disfigure';
 
 
@@ -34,39 +33,51 @@
 
 		// define clothing
 		man.dress([
-			Happy.velour( 'MidnightBlue' ),
+			Happy.velour( 'WhiteSMoke' ),
 		
-			Happy.slice( 1.3, 2, { wave: 0.15, width: 0.1, sharpness: 1 } ),
-			Happy.velour( 'FloralWhite' ),
-		
-			Happy.slice( 1.15, 1.25, { wave: 0.04, width: 0.05, sharpness: 1 } ),
-			Happy.velour( 'MediumSlateBlue' ),
-		
-			Happy.slice( 1.00, 1.10, { wave: 0.03, width: 0.02, sharpness: 1 } ),
-			Happy.latex( 'Magenta' ),
+			Happy.slice( 1-0.1, 1+0.3, { angle:45, wave: 0.3, width:0.02 } )
+			.and( Happy.slice( 1-0.1+0.2, 1+0.3+0.2, { angle:-45, wave: 0.3, width:0.02 } ) ),
+			Happy.latex( 'black' ),
+			
+			Happy.slice( -0.1, 0.8+0.3, { angle:45, wave: 0.3, width:0.02 } )
+			.and( Happy.slice( -0.1-0.2, 0.8+0.3-0.2, { angle:-45, wave: 0.3, width:0.02 } ) )
+			.or( Happy.slice(-0.2,0.2) ),
+			Happy.latex( 'black' ),
+			
 		]);
 		
 		woman.dress([
-			Happy.velour( 'LightSalmon' ),
-		
-			Happy.slice( 1.43, 2, { wave: 0.2, width: 0.2, sharpness: 0 } ),
-			Happy.velour( 'FloralWhite' ),
-		
-			Happy.slice( 1.08, 1.15, { wave: 0.02, width: 0.05, sharpness: 0 } ),
-			Happy.latex( 'dimgray' ),
-		
-			Happy.slice( 0.95, 1.05, { wave: 0.02, width: 0.02, sharpness: 0 } ),
-			Happy.latex( new Color( 2, 2, 1 ) ),
+			Happy.velour( 'WhiteSMoke' ),
+
+			Happy.slice( 1-0.1, 1+0.3, { angle:30, wave: 0.2, width:0.1 } )
+				.or( Happy.slice( 1-0.1, 1+0.3, { angle:-30, wave: 0.2, width:0.1 } ) ),
+			Happy.latex( 'black' ),
 		]);
 		
-		child.dress([
-			Happy.velour( 'LightSeaGreen' ),
+		var left = Happy.slice( 0.2, 0.3, { angle: 45 } )
+				.or( Happy.slice( 0.4, 0.5, { angle: 45 } ) )
+				.or( Happy.slice( 0.6, 0.7, { angle: 45 } ) )
+				.or( Happy.slice( 0.8, 0.9, { angle: 45 } ) )
+				.or( Happy.slice( 1.0, 1.1, { angle: 45 } ) );
+				
+		var right = Happy.slice( 0.2, 0.3, { angle: -45 } )
+				.or( Happy.slice( 0.4, 0.5, { angle: -45 } ) )
+				.or( Happy.slice( 0.6, 0.7, { angle: -45 } ) )
+				.or( Happy.slice( 0.8, 0.9, { angle: -45 } ) )
+				.or( Happy.slice( 1.0, 1.1, { angle: -45 } ) );
 
-			Happy.slice( 1.0, 2, { wave: 0.2, width: 0.02, sharpness: 0 } ),
-			Happy.velour( 'FloralWhite' ),
-		
-			Happy.slice( -1, 0.35, { wave: 0.1, width: 0.15, sharpness: 5 } ),
-			Happy.velour( 'dimgray' ),
+				
+		child.dress([
+			Happy.velour( 'WhiteSMoke' ),
+
+			Happy.slice( 0.74, 0.76, {angle: 45 } )
+				.or( Happy.slice( 0.74, 0.76, {angle: -45 } ) )
+				.and( Happy.slice( 0.5, 1.0 ) ),
+			Happy.velour( 'crimson' ),
+			
+			
+			left.and( right ),
+			Happy.velour( 'black' ),
 		]);
 		
 		

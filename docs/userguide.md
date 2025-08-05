@@ -474,7 +474,7 @@ figure.l_wrist.lockTo(0.2,-0.01,0.01, 0, 1.5, 0 );
 Disfigure supports a painting interface to draw simple shapes
 directly onto the skin of a figure.
 
-### figure.dress( *clothing* )
+### figure.**dress**( *clothing* )
 
 This function defines the dressing of a figure. The description
 of the *clothing* is an array of range and material functions.
@@ -500,21 +500,21 @@ and materials for each slice &ndash; [see it](../examples/extras-clothes-uniform
 ``` javascript
 figure.dress([
 
-	Happy.velour( 'black' ),
-		
-	Happy.slice( 1.1, 2, {angle: -20} ),
-	Happy.velour( 'red' ),
+   Happy.velour( 'black' ),
 
-	Happy.slice( 1.15, 2, {angle: 35} ),
-	Happy.velour( 'red' ),
-	...
+   Happy.slice( 1.1, 2, {angle: -20} ),
+   Happy.velour( 'red' ),
+
+   Happy.slice( 1.15, 2, {angle: 35} ),
+   Happy.velour( 'red' ),
+   ...
 ];
 ```
 [<img src="../examples/snapshots/extras-clothes-uniform.jpg" width="48%">](../examples/extras-clothes-uniform.html)
 
 
 
-### velour( *color* )<br>latex( *color* )
+### **velour**( *color* )<br>**latex**( *color* )
 
 The functions *velour* and *latex* define matte material &ndash;
 [see it](../examples/extras-clothes-velour.html) and shiny
@@ -529,7 +529,7 @@ latex( 'red' )
 [<img src="../examples/snapshots/extras-clothes-velour.jpg" width="48%">](../examples/extras-clothes-velour.html)
 [<img src="../examples/snapshots/extras-clothes-latex.jpg" width="48%">](../examples/extras-clothes-latex.html)
 
-### bands( *material_1*, *material_2*, *width*, *options* )
+### **bands**( *material_1*, *material_2*, *width*, *options* )
 
 The *bands* function makes a composite material of alternating horizontal
 bands of *material_1* and *material_2*. The *width* of each band
@@ -559,7 +559,7 @@ Happy.bands(
 [<img src="../examples/snapshots/extras-clothes-bands.jpg" width="48%">](../examples/extras-clothes-bands.html)
 [<img src="../examples/snapshots/extras-clothes-bands-polar.jpg" width="48%">](../examples/extras-clothes-bands-polar.html)
 
-### slice( *from*, *to*, *options* )
+### **slice**( *from*, *to*, *options* )
 
 The *slice* function defines a slice of a figure &ndash; this is a part
 of the figure that is dressed in given material. Parameters *from* and *to*
@@ -591,7 +591,31 @@ Additionally, slices could be curved as a wave when a non-zero
 * **width** &ndash; width of a single wave in meters, this defines how sparse or dense is the wave
 * **sharpness** &ndash; defines how sharp are the edges of the wave, 0 is for sharp, 1 is for sinusoidal, intermediate values, as well as less than 0 or greater than 1 are also accepted
 
+```javascript
+Happy.slice( 1.3, 2, {wave:0.15, width:0.1, sharpness:1} )
+```
+			
 [<img src="../examples/snapshots/extras-clothes-slice-wave.jpg" width="48%">](../examples/extras-clothes-slice-wave.html)
+
+### slice(...).**and**( *slice* )<br>slice(...).**or**( *slice* )
+
+Slices can be combined into more complex shapes by intersecting or uniting them.
+The function `and` intersects two slices, e.g. *slice_1.and(slice_2)* generates
+a slice containing all points both in *slide_1* **and** in *slide_2*, while `or`
+unites two slices, e.g. *slice_1.or(slice_2)* generates a slice containing all
+points either in *slide_1* **or** in *slide_2*  &ndash;
+[see it](../examples/extras-clothes-slice-and-or.html)
+
+```javascript
+Happy.slice( -0.1, 1.1, {angle:45, wave: 0.3, width:0.02} )
+   .and( Happy.slice( -0.3, 0.9, {angle:-45, wave: 0.3, width:0.02} ) )
+   .or( Happy.slice( -0.2, 0.2 ) ),
+
+```
+
+[<img src="../examples/snapshots/extras-clothes-slice-and-or.jpg" width="48%">](../examples/extras-clothes-slice-and-or.html)
+
+
 
 <!--
 
