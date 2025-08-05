@@ -29,7 +29,7 @@ class World {
 
 	constructor( options ) {
 
-		renderer = new WebGPURenderer( { antialias: true, forceWebGL: true } );
+		renderer = new WebGPURenderer( { antialias: options?.antialias ?? true } );
 		renderer.setSize( innerWidth, innerHeight );
 		renderer.shadowMap.enabled = options?.shadows ?? true;
 		renderer.shadowMap.type = PCFSoftShadowMap;
