@@ -2,7 +2,7 @@
 
 import { Color, WebGPURenderer, PCFSoftShadowMap, Scene, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, Matrix3, Matrix4, Vector4, Euler, PlaneGeometry, MeshPhysicalNodeMaterial, MathUtils, Group } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { Fn, mix, If, transformNormalToView, normalGeometry, positionGeometry, mat3, vec2, float, rotate, vec3, min, select, uniform } from 'three/tsl';
+import { Fn, mix, If, transformNormalToView, normalGeometry, positionGeometry, mat3, vec3, vec2, float, rotate, min, select, uniform } from 'three/tsl';
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
@@ -139,8 +139,8 @@ var tslSimpleMaterial = Fn( ( { color, roughness, metalness } ) => {
 
 	return mat3(
 		color,
-		roughness, metalness, 0,
-		0, 0, 0
+		vec3(roughness, metalness, 0),
+		vec3(0, 0, 0)
 	);
 
 }, { color: 'vec3', roughness: 'float', metalness: 'float', return: 'mat3' } ); // tslSimpleMaterial
@@ -149,11 +149,11 @@ var tslSimpleMaterial = Fn( ( { color, roughness, metalness } ) => {
 
 // check whether a value is between two values
 
-var between = Fn( ( { value, from, to } ) => {
+var between = Fn( ( { value, fromValue, toValue } ) => {
 
-	return value.greaterThanEqual( from ).and( value.lessThanEqual( to ) );
+	return value.greaterThanEqual( fromValue ).and( value.lessThanEqual( toValue ) );
 
-}, { value: 'float', from: 'float', to: 'float', return: 'float' } ); // between
+}, { value: 'float', fromValue: 'float', toValue: 'float', return: 'float' } ); // between
 
 
 
@@ -164,7 +164,7 @@ var mixMat3 = Fn( ([ matA, matB, k ]) => {
 	return mat3(
 		mix( matA[ 0 ], matB[ 0 ], k ),
 		mix( matA[ 1 ], matB[ 1 ], k ),
-		0, 0, 0,
+		vec3(0, 0, 0),
 	);
 
 }, { matA: 'mat3', matB: 'mat3', k: 'float', return: 'mat3' } ); // mixMat3
