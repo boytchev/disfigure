@@ -139,8 +139,8 @@ var tslSimpleMaterial = Fn( ( { color, roughness, metalness } ) => {
 
 	return mat3(
 		color,
-		vec3(roughness, metalness, 0),
-		vec3(0, 0, 0)
+		vec3( roughness, metalness, 0 ),
+		vec3( 0, 0, 0 )
 	);
 
 }, { color: 'vec3', roughness: 'float', metalness: 'float', return: 'mat3' } ); // tslSimpleMaterial
@@ -164,7 +164,7 @@ var mixMat3 = Fn( ([ matA, matB, k ]) => {
 	return mat3(
 		mix( matA[ 0 ], matB[ 0 ], k ),
 		mix( matA[ 1 ], matB[ 1 ], k ),
-		vec3(0, 0, 0),
+		vec3( 0, 0, 0 ),
 	);
 
 }, { matA: 'mat3', matB: 'mat3', k: 'float', return: 'mat3' } ); // mixMat3
