@@ -154,17 +154,15 @@ var slice = Fn( ( { from, to, options={} } )=>{
 
 
 
-// generates a TSL function that implements custom clothing
+var compileClothing = Fn( ([ clothingData ]) => {
 
-var compileClothing = Fn( ([ clothinData ]) => {
+	var mat = mat3( clothingData[ 0 ]);
 
-	var mat = mat3( clothinData[ 0 ]);
+	for ( /*MUST*/let i=1; i<clothingData.length; i+=2 ) {
 
-	for ( /*MUST*/let i=1; i<clothinData.length; i+=2 ) {
+		If( clothingData[ i ], ()=>{
 
-		If( clothinData[ i ], ()=>{
-
-			mat.assign( clothinData[ i+1 ]);
+			mat.assign( clothingData[ i+1 ]);
 
 		} );
 
@@ -172,12 +170,13 @@ var compileClothing = Fn( ([ clothinData ]) => {
 
 	return mat;
 
-} ); // compileClothing
+} );
 
 
 export {
 
 	compileClothing,
+
 	slice,
 	bands,
 	velour,

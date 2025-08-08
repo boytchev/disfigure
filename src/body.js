@@ -9,8 +9,8 @@ import { Euler, Group, MathUtils, Matrix3, Matrix4, Mesh, MeshPhysicalNodeMateri
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { uniform, vec3 } from 'three/tsl';
 
-import { tslNormalNode, tslPositionNode } from './motion.js';
 import { compileClothing } from './clothes.js';
+import { tslNormalNode, tslPositionNode } from './motion.js';
 import { Space } from './space.js';
 import { everybody, scene } from './world.js';
 
@@ -234,30 +234,11 @@ class Disfigure extends Mesh {
 
 	update( ) {
 
-		function anglesToMatrix( joint, sx, sy, sz ) {
+		function anglesToMatrix( joint, sx, sy, sz, order='YZX' ) {
 
-			e.set( sx*joint.angle.x, sy*joint.angle.y, sz*joint.angle.z, 'YZX' );
-			transferMatrix( joint );
-
-		}
-
-		function anglesToMatrixArm( joint, sx, sy, sz ) {
-
-			e.set( 0, 0, sz*joint.angle.z ); // straddle
-
-			e.reorder( 'YZX' );
-			e.set( 0, sy*joint.angle.y, e.z ); // foreward
-
-			e.reorder( 'XYZ' );
-			e.set( e.x+sx*joint.angle.x, e.y, e.z ); // turn
-
-			transferMatrix( joint );
-
-		}
-
-		function transferMatrix( joint ) {
-
+			e.set( sx*joint.angle.x, sy*joint.angle.y, sz*joint.angle.z, order );
 			m.makeRotationFromEuler( e );
+
 			var s = m.elements;
 			joint.matrix.value.set( s[ 0 ], s[ 4 ], s[ 8 ], s[ 1 ], s[ 5 ], s[ 9 ], s[ 2 ], s[ 6 ], s[ 10 ]);
 
@@ -280,8 +261,8 @@ class Disfigure extends Mesh {
 		anglesToMatrix( this.l_forearm, -1, 0, 0 );
 		anglesToMatrix( this.r_forearm, -1, 0, 0 );
 
-		anglesToMatrixArm( this.l_arm, -1, 1, 1 );
-		anglesToMatrixArm( this.r_arm, -1, -1, -1 );
+		anglesToMatrix( this.l_arm, -1, 1, 1, 'XYZ' );
+		anglesToMatrix( this.r_arm, -1, -1, -1, 'XYZ' );
 
 		anglesToMatrix( this.l_knee, -1, 0, 1 );
 		anglesToMatrix( this.r_knee, -1, 0, -1 );
@@ -300,8 +281,8 @@ class Disfigure extends Mesh {
 		anglesToMatrix( this.r_thigh, 0, 1, 0 );
 
 		// leg: foreward ??? straddle
-		anglesToMatrixArm( this.l_leg, 1, -1, -1 );
-		anglesToMatrixArm( this.r_leg, 1, 1, 1 );
+		anglesToMatrix( this.l_leg, 1, -1, -1, 'XYZ' );
+		anglesToMatrix( this.r_leg, 1, 1, 1, 'XYZ' );
 
 		for ( var wrapper of this.accessories ) {
 
@@ -415,9 +396,9 @@ class Disfigure extends Mesh {
 	} // Disfigure.blend
 
 
-	dress( clothinData ) {
+	dress( clothingData ) {
 
-		var clothes = compileClothing( clothinData ).toVar();
+		var clothes = compileClothing( clothingData ).toVar();
 
 		this.material.colorNode = clothes[ 0 ].xyz;
 		this.material.roughnessNode = clothes[ 1 ].x;
@@ -444,11 +425,11 @@ class Man extends Disfigure {
 
 		// LEGS
 		leg: [[ 0.074, 0.970, -0.034 ], [ -0.004, 0.004 ], [ 1.229, 0.782 ]],
-		thigh: [[ 0.070, -0.009, -0.034 ], [ 1.247, 0.242 ]],
+		thigh: [[ 0.070, 0.737/*-0.009*/, -0.034 ], [ 1.247, 0.242 ]],
 		knee: [[ 0.090, 0.504, -0.041 ], [ 0.603, 0.382 ], 20 ],
 		ankle: [[ 0.074, 0.082, -0.002 ], [ 0.165, 0.008 ], -10 ],
 		shin: [[ 0.092, 0.360, -0.052 ], [ 0.762, -0.027 ]],
-		foot: [[ 0, 0.026, 0.022 ], [ 0.190, -0.342 ], 120 ],
+		foot: [[ 0.074/*0*/, 0.026, 0.022 ], [ 0.190, -0.342 ], 120 ],
 
 		// ARMS
 		elbow: [[ 0.427, 1.453, -0.072 ], [ 0.413, 0.467 ]],
@@ -486,11 +467,11 @@ class Woman extends Disfigure {
 
 		// LEGS
 		leg: [[ 0.071, 0.920, -0.031 ], [ -0.002, 0.005 ], [ 1.163, 0.742 ]],
-		thigh: [[ 0.076, -0.003, -0.031 ], [ 1.180, 0.233 ]],
+		thigh: [[ 0.076, 0.7/*-0.003*/, -0.031 ], [ 1.180, 0.233 ]],
 		knee: [[ 0.086, 0.480, -0.037 ], [ 0.573, 0.365 ], 20 ],
 		shin: [[ 0.088, 0.337, -0.047 ], [ 0.724, -0.059 ]],
 		ankle: [[ 0.076, 0.083, -0.005 ], [ 0.161, 0.014 ], -10 ],
-		foot: [[ 0.001, 0.031, 0.022 ], [ 0.184, -0.316 ], 120 ],
+		foot: [[ 0.076/*0.001*/, 0.031, 0.022 ], [ 0.184, -0.316 ], 120 ],
 
 		// ARMS
 		elbow: [[ 0.404, 1.375, -0.066 ], [ 0.390, 0.441 ]],
@@ -528,11 +509,11 @@ class Child extends Disfigure {
 
 		// LEGS
 		leg: [[ 0.054, 0.704, -0.027 ], [ -0.001, 0.001 ], [ 0.845, 0.581 ], 1 ],
-		thigh: [[ 0.062, -0.000, -0.021 ], [ 0.946, 0.189 ]],
+		thigh: [[ 0.062, 0.547/*-0.000*/, -0.021 ], [ 0.946, 0.189 ]],
 		knee: [[ 0.068, 0.389, -0.031 ], [ 0.468, 0.299 ], 20 ],
 		shin: [[ 0.069, 0.272, -0.048 ], [ 0.581, -0.045 ]],
 		ankle: [[ 0.073, 0.065, -0.033 ], [ 0.109, 0.044 ], -10 ],
-		foot: [[ 0, 0.027, -0.006 ], [ 0.112, -0.271 ], 120 ],
+		foot: [[ 0.073/*0*/, 0.027, -0.006 ], [ 0.112, -0.271 ], 120 ],
 
 		// ARMS
 		elbow: [[ 0.337, 1.072, -0.090 ], [ 0.311, 0.369 ]],

@@ -1,3 +1,6 @@
+v0.0.21
+  - fixed pivot points for feet
+  
 v0.0.20
   - color clothes with bends, strips, slices
   - posture, blend, point, lockto
