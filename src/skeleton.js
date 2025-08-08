@@ -18,7 +18,7 @@ class Bone extends AxesHelper {
 
 	constructor( name, parent ) {
 
-		super();
+		super( 0.3 );
 		//super(geometry,material);
 
 		this.name = name;
@@ -81,33 +81,28 @@ class Skeleton extends Object3D {
 
 	update( ) {
 
-		//		this.traverse( bone => {
-		//			var angle = this.model[bone.name]?.angle;
-		//			if( angle) bone.rotation.set(...angle);
-		//		} );
-
 		this.torso.rotation.set(
 			this.model.torso.angle.x,
 			this.model.torso.angle.y,
-			-this.model.torso.angle.z,
+			this.model.torso.angle.z,
 			'XZY' );
 
 		this.chest.rotation.set(
 			this.model.chest.angle.x,
 			this.model.chest.angle.y,
-			-this.model.chest.angle.z,
+			this.model.chest.angle.z,
 			'XZY' );
 
 		this.waist.rotation.set(
 			this.model.waist.angle.x,
 			this.model.waist.angle.y,
-			-this.model.waist.angle.z,
+			this.model.waist.angle.z,
 			'XZY' );
 
 		this.head.rotation.set(
 			this.model.head.angle.x,
 			this.model.head.angle.y,
-			-this.model.head.angle.z,
+			this.model.head.angle.z,
 			'XZY' );
 
 		//
@@ -115,7 +110,7 @@ class Skeleton extends Object3D {
 		this.l_knee.rotation.set(
 			this.model.l_knee.angle.x,
 			0,
-			-this.model.l_knee.angle.z,
+			this.model.l_knee.angle.z,
 			'XZY' );
 
 		this.r_knee.rotation.set(
@@ -133,7 +128,7 @@ class Skeleton extends Object3D {
 		this.r_ankle.rotation.set(
 			this.model.r_ankle.angle.x,
 			0,
-			-this.model.r_ankle.angle.z,
+			this.model.r_ankle.angle.z,
 			'XZY' );
 
 		this.l_shin.rotation.set(
@@ -144,7 +139,7 @@ class Skeleton extends Object3D {
 
 		this.r_shin.rotation.set(
 			0,
-			-this.model.r_shin.angle.y,
+			this.model.r_shin.angle.y,
 			0,
 			'XZY' );
 
@@ -168,28 +163,28 @@ class Skeleton extends Object3D {
 
 		this.r_thigh.rotation.set(
 			0,
-			-this.model.r_thigh.angle.y,
+			this.model.r_thigh.angle.y,
 			0,
 			'XZY' );
 
 		this.l_leg.rotation.set(
-			-this.model.l_leg.angle.x,
+			this.model.l_leg.angle.x,
 			this.model.l_leg.angle.y,
 			this.model.l_leg.angle.z,
 			'ZYX' );
 
 		this.r_leg.rotation.set(
-			-this.model.r_leg.angle.x,
-			-this.model.r_leg.angle.y,
-			-this.model.r_leg.angle.z,
+			this.model.r_leg.angle.x,
+			this.model.r_leg.angle.y,
+			this.model.r_leg.angle.z,
 			'ZYX' );
 
 		//
 
 		this.l_wrist.rotation.set(
 			0,
-			-this.model.l_wrist.angle.y,
-			-this.model.l_wrist.angle.z,
+			this.model.l_wrist.angle.y,
+			this.model.l_wrist.angle.z,
 			'XZY' );//'ZYX');
 
 		this.r_wrist.rotation.set(
@@ -212,7 +207,7 @@ class Skeleton extends Object3D {
 
 		this.l_elbow.rotation.set(
 			0,
-			-this.model.l_elbow.angle.y,
+			this.model.l_elbow.angle.y,
 			0,
 			'XZY' );//'ZYX');
 
@@ -224,8 +219,8 @@ class Skeleton extends Object3D {
 
 		this.l_arm.rotation.set(
 			this.model.l_arm.angle.x,
-			-this.model.l_arm.angle.y,
-			-this.model.l_arm.angle.z,
+			this.model.l_arm.angle.y,
+			this.model.l_arm.angle.z,
 			'ZYX' );
 
 		this.r_arm.rotation.set(

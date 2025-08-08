@@ -793,7 +793,7 @@ function getset( object, name, axis, sign ) {
 
 class Joint {
 
-	constructor( model, parent, space, bendAxis, turnAxis, tiltAxis, bendSign, turnSign, tiltSign, order='YZX' ) {
+	constructor( model, parent, space, bendAxis, turnAxis, tiltAxis, bendSign, turnSign, tiltSign, order='XZY' ) {
 
 		this.model = model;
 		this.model.joints.push( this );
@@ -908,34 +908,34 @@ class Disfigure extends Mesh {
 		// create the space around the model
 		this.space = new Space( space );
 
-		this.torso = new Joint( this, null, this.space.torso, 'x', 'y', 'z', -1, -1, 1 );
-		this.waist = new Joint( this, this.torso, this.space.waist, 'x', 'y', 'z', -1, -1, 1 );
-		this.chest = new Joint( this, this.waist, this.space.chest, 'x', 'y', 'z', -1, -1, 1 );
-		this.head = new Joint( this, this.chest, this.space.head, 'x', 'y', 'z', -1, -1, 1 );
+		this.torso = new Joint( this, null, this.space.torso, 'x', 'y', 'z', 1, 1, -1 );
+		this.waist = new Joint( this, this.torso, this.space.waist, 'x', 'y', 'z', 1, 1, -1 );
+		this.chest = new Joint( this, this.waist, this.space.chest, 'x', 'y', 'z', 1, 1, -1 );
+		this.head = new Joint( this, this.chest, this.space.head, 'x', 'y', 'z', 1, 1, -1 );
 
-		this.l_leg = new Joint( this, this.torso, this.space.l_leg, 'x', 'y', 'z', 1, -1, -1, 'XYZ' );
-		this.l_thigh = new Joint( this, this.l_leg, this.space.l_thigh, 'x', 'y', 'z', 0, -1, 0 );
-		this.l_knee = new Joint( this, this.l_thigh, this.space.l_knee, 'x', 'y', 'z', -1, 0, 1 );
-		this.l_shin = new Joint( this, this.l_knee, this.space.l_shin, 'x', 'y', 'z', 0, -1, 0 );
-		this.l_ankle = new Joint( this, this.l_shin, this.space.l_ankle, 'x', 'y', 'z', -1, 0, -1 );
-		this.l_foot = new Joint( this, this.l_ankle, this.space.l_foot, 'x', 'y', 'z', -1, 0, 0 );
+		this.l_leg = new Joint( this, this.torso, this.space.l_leg, 'x', 'y', 'z', -1, 1, 1, 'ZYX' );
+		this.l_thigh = new Joint( this, this.l_leg, this.space.l_thigh, 'x', 'y', 'z', 0, 1, 0 );
+		this.l_knee = new Joint( this, this.l_thigh, this.space.l_knee, 'x', 'y', 'z', 1, 0, -1 );
+		this.l_shin = new Joint( this, this.l_knee, this.space.l_shin, 'x', 'y', 'z', 0, 1, 0 );
+		this.l_ankle = new Joint( this, this.l_shin, this.space.l_ankle, 'x', 'y', 'z', 1, 0, 1 );
+		this.l_foot = new Joint( this, this.l_ankle, this.space.l_foot, 'x', 'y', 'z', 1, 0, 0 );
 
-		this.r_leg = new Joint( this, this.torso, this.space.r_leg, 'x', 'y', 'z', 1, 1, 1, 'XYZ' );
-		this.r_thigh = new Joint( this, this.r_leg, this.space.r_thigh, 'x', 'y', 'z', 0, 1, 0 );
-		this.r_knee = new Joint( this, this.r_thigh, this.space.r_knee, 'x', 'y', 'z', -1, 0, -1 );
-		this.r_shin = new Joint( this, this.r_knee, this.space.r_shin, 'x', 'y', 'z', 0, 1, 0 );
-		this.r_ankle = new Joint( this, this.r_shin, this.space.r_ankle, 'x', 'y', 'z', -1, 0, 1 );
-		this.r_foot = new Joint( this, this.r_ankle, this.space.r_foot, 'x', 'y', 'z', -1, 0, 0 );
+		this.r_leg = new Joint( this, this.torso, this.space.r_leg, 'x', 'y', 'z', -1, -1, -1, 'ZYX' );
+		this.r_thigh = new Joint( this, this.r_leg, this.space.r_thigh, 'x', 'y', 'z', 0, -1, 0 );
+		this.r_knee = new Joint( this, this.r_thigh, this.space.r_knee, 'x', 'y', 'z', 1, 0, 1 );
+		this.r_shin = new Joint( this, this.r_knee, this.space.r_shin, 'x', 'y', 'z', 0, -1, 0 );
+		this.r_ankle = new Joint( this, this.r_shin, this.space.r_ankle, 'x', 'y', 'z', 1, 0, -1 );
+		this.r_foot = new Joint( this, this.r_ankle, this.space.r_foot, 'x', 'y', 'z', 1, 0, 0 );
 
-		this.l_arm = new Joint( this, this.chest, this.space.l_arm, 'y', 'x', 'z', 1, -1, 1, 'XYZ' );
-		this.l_elbow = new Joint( this, this.l_arm, this.space.l_elbow, 'y', 'x', 'z', 1, 0, 0 );
-		this.l_forearm = new Joint( this, this.l_elbow, this.space.l_forearm, 'z', 'x', 'y', 0, -1, 0 );
-		this.l_wrist = new Joint( this, this.l_forearm, this.space.l_wrist, 'z', 'x', 'y', 1, 0, 1 );
+		this.l_arm = new Joint( this, this.chest, this.space.l_arm, 'y', 'x', 'z', -1, 1, -1, 'ZYX' );
+		this.l_elbow = new Joint( this, this.l_arm, this.space.l_elbow, 'y', 'x', 'z', -1, 0, 0 );
+		this.l_forearm = new Joint( this, this.l_elbow, this.space.l_forearm, 'z', 'x', 'y', 0, 1, 0 );
+		this.l_wrist = new Joint( this, this.l_forearm, this.space.l_wrist, 'z', 'x', 'y', -1, 0, -1 );
 
-		this.r_arm = new Joint( this, this.chest, this.space.r_arm, 'y', 'x', 'z', -1, -1, -1, 'XYZ' );
-		this.r_elbow = new Joint( this, this.r_arm, this.space.r_elbow, 'y', 'x', 'z', -1, 0, 0 );
-		this.r_forearm = new Joint( this, this.r_elbow, this.space.r_forearm, 'z', 'x', 'y', 0, -1, 0 );
-		this.r_wrist = new Joint( this, this.r_forearm, this.space.r_wrist, 'z', 'x', 'y', -1, 0, -1 );
+		this.r_arm = new Joint( this, this.chest, this.space.r_arm, 'y', 'x', 'z', 1, 1, 1, 'ZYX' );
+		this.r_elbow = new Joint( this, this.r_arm, this.space.r_elbow, 'y', 'x', 'z', 1, 0, 0 );
+		this.r_forearm = new Joint( this, this.r_elbow, this.space.r_forearm, 'z', 'x', 'y', 0, 1, 0 );
+		this.r_wrist = new Joint( this, this.r_forearm, this.space.r_wrist, 'z', 'x', 'y', 1, 0, 1 );
 
 		// sets the materials of the model hooking them to TSL functions
 		this.material = new MeshPhysicalNodeMaterial( {
@@ -968,7 +968,7 @@ class Disfigure extends Mesh {
 			m.makeRotationFromEuler( e );
 
 			var s = m.elements;
-			joint.matrix.value.set( s[ 0 ], s[ 4 ], s[ 8 ], s[ 1 ], s[ 5 ], s[ 9 ], s[ 2 ], s[ 6 ], s[ 10 ]);
+			joint.matrix.value.set( s[ 0 ], s[ 1 ], s[ 2 ], s[ 4 ], s[ 5 ], s[ 6 ], s[ 8 ], s[ 9 ], s[ 10 ]);
 
 		}
 
