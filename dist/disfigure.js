@@ -753,6 +753,26 @@ var toDeg = x => x * 180 / Math.PI,
 	toRound = x => Math.round( 100*x )/100;
 
 
+function calcWorldMatrix( b, _v, worldMatrix ) {
+
+	_m.identity();
+
+	for ( ; b; b=b.parent ) {
+
+		_mat.copy( b.matrix.value ).transpose();
+		_m.premultiply( _mat );
+		_v.sub( b.space.pivot ).applyMatrix3( _mat ).add( b.space.pivot );
+
+	}
+
+	worldMatrix.setFromMatrix3( _m );
+	worldMatrix.setPosition( _v );
+
+
+} // calcWorldMatrix
+
+
+
 function getset( object, name, axis, sign ) {
 
 	Object.defineProperty( object, name, {
@@ -814,20 +834,10 @@ class Joint {
 
 		var b = this;
 
-		_m.identity();
 		_v.set( x, y, z );
 		_v.add( b.space.pivot );
 
-		for ( ; b; b=b.parent ) {
-
-			_mat.copy( b.matrix.value ).transpose();
-			_m.premultiply( _mat );
-			_v.sub( b.space.pivot ).applyMatrix3( _mat ).add( b.space.pivot );
-
-		}
-
-		_m4.setFromMatrix3( _m );
-		_m4.setPosition( _v );
+		calcWorldMatrix( b, _v, _m4 );
 
 		_v4.set( 0, 0, 0, 1 );
 		_v4.applyMatrix4( _m4 );
@@ -966,19 +976,9 @@ class Disfigure extends Mesh {
 
 			var b = wrapper.joint;
 
-			_m.identity();
 			_v.copy( b.space.pivot );
 
-			for ( ; b; b=b.parent ) {
-
-				_mat.copy( b.matrix.value ).transpose();
-				_m.premultiply( _mat );
-				_v.sub( b.space.pivot ).applyMatrix3( _mat ).add( b.space.pivot );
-
-			}
-
-			wrapper.matrix.setFromMatrix3( _m );
-			wrapper.matrix.setPosition( _v );
+			calcWorldMatrix( b, _v, wrapper.matrix );
 
 		}
 
