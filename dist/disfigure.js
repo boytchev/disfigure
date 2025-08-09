@@ -1,6 +1,6 @@
 // disfigure v0.0.20
 
-import { Color, WebGPURenderer, PCFSoftShadowMap, Scene, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, Matrix3, Matrix4, Vector4, Euler, PlaneGeometry, MeshPhysicalNodeMaterial, MathUtils, Group } from 'three';
+import { Color, WebGPURenderer, PCFSoftShadowMap, Scene, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, PlaneGeometry, MeshPhysicalNodeMaterial, Euler, MathUtils, Group, Matrix3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Fn, mat3, vec3, mix, positionGeometry, vec2, float, rotate, If, transformNormalToView, normalGeometry, min, select, uniform } from 'three/tsl';
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
@@ -240,7 +240,7 @@ var disfigure = Fn( ([ joints, fn, p ])=>{
 	function chain( items ) {
 
 		for ( var item of items )
-			p.assign( fn( p, space[ item ].pivot, joints[ item ].matrix, space[ item ].locus() ) );
+			p.assign( fn( p, space[ item ].pivot, joints[ item ].umatrix, space[ item ].locus() ) );
 
 	}
 
@@ -740,11 +740,7 @@ const MODEL_PATH = import.meta.url.replace( '/src/body.js', '/assets/models/' );
 
 
 // dummy vars
-var _mat = new Matrix3(),
-	_m = new Matrix3(),
-	_m4 = new Matrix4(),
-	_v = new Vector3(),
-	_v4 = new Vector4();
+var _v = new Vector3();
 
 
 
@@ -753,37 +749,19 @@ var toDeg = x => x * 180 / Math.PI,
 	toRound = x => Math.round( 100*x )/100;
 
 
-function calcWorldMatrix( b, _v, worldMatrix ) {
-
-	_m.identity();
-
-	for ( ; b; b=b.parent ) {
-
-		_mat.copy( b.matrix.value ).transpose();
-		_m.premultiply( _mat );
-		_v.sub( b.space.pivot ).applyMatrix3( _mat ).add( b.space.pivot );
-
-	}
-
-	worldMatrix.setFromMatrix3( _m );
-	worldMatrix.setPosition( _v );
-
-
-} // calcWorldMatrix
-
-
 
 function getset( object, name, axis, sign ) {
 
 	Object.defineProperty( object, name, {
 		get() {
 
-			return toDeg( sign*object.angle[ axis ]);
+			return toDeg( sign*object.rotation[ axis ]);
 
 		},
 		set( value ) {
 
-			object.angle[ axis ] = toRad( sign*value );
+			object.rotation[ axis ] = toRad( sign*value );
+			object.quaternion.setFromEuler( object.rotation, false );
 
 		}
 	} );
@@ -791,23 +769,25 @@ function getset( object, name, axis, sign ) {
 }
 
 
-class Joint {
+class Joint extends Group {
 
 	constructor( model, parent, space, bendAxis, turnAxis, tiltAxis, bendSign, turnSign, tiltSign, order='XZY' ) {
 
+		super();
+
 		this.model = model;
 		this.model.joints.push( this );
-		this.parent = parent;
 		this.space = space;
-		this.angle = new Vector3();
-		this.matrix = uniform( new Matrix3() );
-		this.order = order;
+		this.umatrix = uniform( new Matrix3() );
+		this.rotation.reorder( order );
 
 		getset( this, 'bend', bendAxis, bendSign );
 		getset( this, 'turn', turnAxis, turnSign );
 		getset( this, 'tilt', tiltAxis, tiltSign );
 		getset( this, 'foreward', bendAxis, bendSign );
 		getset( this, 'straddle', tiltAxis, tiltSign );
+
+		( parent??model ).add( this );
 
 	}
 
@@ -819,32 +799,15 @@ class Joint {
 		if ( typeof x !== 'undefined' )
 			mesh.position.set( x, y, z );
 
-		var wrapper = new Group();
-		wrapper.add( mesh );
-		wrapper.matrixAutoUpdate = false;
-		wrapper.joint = this;
-
-		this.model.add( wrapper );
-		this.model.accessories.push( wrapper );
+		this.add( mesh );
 
 	}
 
 
 	point( x, y, z ) {
 
-		var b = this;
-
 		_v.set( x, y, z );
-		_v.add( b.space.pivot );
-
-		calcWorldMatrix( b, _v, _m4 );
-
-		_v4.set( 0, 0, 0, 1 );
-		_v4.applyMatrix4( _m4 );
-
-		_v.set( _v4.x, _v4.y, _v4.z );
-
-		return _v;
+		return this.localToWorld( _v );
 
 	}
 
@@ -868,9 +831,7 @@ class Joint {
 
 
 
-var m = new Matrix4(),
-	e = new Euler(),
-	dummyGeometry = new PlaneGeometry(),
+var dummyGeometry = new PlaneGeometry(),
 	_uid = 1;
 
 
@@ -893,7 +854,6 @@ class Disfigure extends Mesh {
 		this.castShadow = true;
 		this.receiveShadow = true;
 
-		this.accessories = [];
 		this.joints = [];
 		this.height = height??geometryHeight;
 
@@ -958,27 +918,34 @@ class Disfigure extends Mesh {
 		this.l_arm.straddle = this.r_arm.straddle = 65;
 		this.l_elbow.bend = this.r_elbow.bend = 20;
 
+
+		// define bones positions
+		for ( var name in this.space )
+			if ( this[ name ])
+				this[ name ].position.copy( this.space[ name ].pivot );
+
+		// fix positions, because they are accumulated
+		this.reposition( this.torso );
+
 	} // Disfigure.constructor
+
+
+	reposition( bone ) {
+
+		for ( var child of bone.children )
+			this.reposition( child );
+
+		bone.position.sub( bone.parent.position );
+
+	} // Skeleton.reposition
+
 
 	update( ) {
 
 		for ( var joint of this.joints ) {
 
-			e.set( joint.angle.x, joint.angle.y, joint.angle.z, joint.order );
-			m.makeRotationFromEuler( e );
-
-			var s = m.elements;
-			joint.matrix.value.set( s[ 0 ], s[ 1 ], s[ 2 ], s[ 4 ], s[ 5 ], s[ 6 ], s[ 8 ], s[ 9 ], s[ 10 ]);
-
-		}
-
-		for ( var wrapper of this.accessories ) {
-
-			var b = wrapper.joint;
-
-			_v.copy( b.space.pivot );
-
-			calcWorldMatrix( b, _v, wrapper.matrix );
+			var s = joint.matrix.elements;
+			joint.umatrix.value.set( s[ 0 ], s[ 1 ], s[ 2 ], s[ 4 ], s[ 5 ], s[ 6 ], s[ 8 ], s[ 9 ], s[ 10 ]);
 
 		}
 
@@ -991,7 +958,7 @@ class Disfigure extends Mesh {
 		var angles = [];
 
 		for ( var joint of this.joints )
-			angles.push( ...joint.angle );
+			angles.push( joint.rotation.x, joint.rotation.y, joint.rotation.z );
 
 		var position = [ ...this.position ];
 		var rotation = [ ...this.rotation ];
@@ -1019,15 +986,14 @@ class Disfigure extends Mesh {
 		if ( data.version !=8 )
 			console.error( 'Incompatible posture version' );
 
-		var i = 0;
-
 		var angles = data.angles.map( x=>toRad( x ) );
 
 		this.position.set( ...data.position );
 		this.rotation.set( ...data.rotation );
 
+		var i = 0;
 		for ( var joint of this.joints )
-			joint.angle.set( angles[ i++ ], angles[ i++ ], angles[ i++ ]);
+			joint.rotation.set( angles[ i++ ], angles[ i++ ], angles[ i++ ]);
 
 		this.update();
 		this.updateMatrixWorld( true );
@@ -1050,14 +1016,14 @@ class Disfigure extends Mesh {
 
 		var eulerA = new Euler( ...postureA.rotation ),
 			eulerB = new Euler( ...postureB.rotation );
-		eulerA.reorder( eulerB._order );
+		eulerA.reorder( eulerB.order );
 
 		var posture = {
 			version: postureA.version,
 			position: lerp( postureA.position, postureB.position ),
 			rotation: new Euler(
-				...lerp([ eulerA._x, eulerA._y, eulerA._z ],
-							 [ eulerB._x, eulerB._y, eulerB._z ])
+				...lerp([ eulerA.x, eulerA.y, eulerA.z ],
+							 [ eulerB.x, eulerB.y, eulerB.z ])
 			),
 			angles: lerp( postureA.angles, postureB.angles ),
 		};

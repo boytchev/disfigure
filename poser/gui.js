@@ -13,16 +13,11 @@ import { scene, setAnimationLoop, World } from "../src/world.js";
 import { chaotic } from "../src/motion.js";
 import { Joint, Man } from "../src/body.js";
 import { DEBUG, DEBUG_JOINT, DEBUG_NAME } from "./debug.js";
-//import { Skeleton } from '../src/skeleton.js';
 
 
 
 new World();
 var model = new Man();
-
-//var skeleton = new Skeleton( model );
-//skeleton.update( );
-//scene.add( skeleton );
 
 
 
@@ -451,6 +446,7 @@ function rigResetModel( ) {
 	model.rotation.y = 0;
 	for ( var name of Object.keys( model ) ) {
 
+		if ( model[ name ]?.rotation ) model[ name ].rotation.set( 0, 0, 0 ); //.//
 		if ( model[ name ]?.angle?.isVector3 )
 			model[ name ].angle.set( 0, 0, 0 );
 
@@ -593,7 +589,6 @@ function updateGUI( ) {
 function animationLoop( t ) {
 
 	if ( options.animate ) rigModel( t );
-	//skeleton.update( );
 
 }
 

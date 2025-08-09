@@ -1,4 +1,6 @@
 v0.0.21
+  - use Three.js internal matrix flow
+  - eliminated negation of angles
   - fixed pivot points for feet
   
 v0.0.20

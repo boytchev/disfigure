@@ -88,7 +88,7 @@ var disfigure = Fn( ([ joints, fn, p ])=>{
 	function chain( items ) {
 
 		for ( var item of items )
-			p.assign( fn( p, space[ item ].pivot, joints[ item ].matrix, space[ item ].locus() ) );
+			p.assign( fn( p, space[ item ].pivot, joints[ item ].umatrix, space[ item ].locus() ) );
 
 	}
 
