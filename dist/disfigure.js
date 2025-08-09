@@ -1,4 +1,4 @@
-// disfigure v0.0.20
+// disfigure v0.0.21
 
 import { Color, WebGPURenderer, PCFSoftShadowMap, Scene, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, PlaneGeometry, MeshPhysicalNodeMaterial, Euler, MathUtils, Group, Matrix3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -331,7 +331,7 @@ class World {
 
 		if ( options?.lights ?? true ) {
 
-			light = new DirectionalLight( 'white', 1.5 );
+			light = new DirectionalLight( 'white', 1.4 );
 			light.position.set( 0, 14, 7 );
 			if ( options?.shadows ?? true ) {
 
@@ -351,7 +351,8 @@ class World {
 
 			scene.add( light );
 
-			cameraLight = new DirectionalLight( 'white', 1.5 );
+			cameraLight = new DirectionalLight( 'white', 1.4 );
+			cameraLight.position.z = 100;
 			cameraLight.target = scene;
 			camera.add( cameraLight );
 			scene.add( camera );
@@ -906,8 +907,6 @@ class Disfigure extends Mesh {
 			roughness: 0.6,
 		} );
 
-		this.position.y = 0;
-
 		this.castShadow = true;
 		this.receiveShadow = true;
 
@@ -917,7 +916,6 @@ class Disfigure extends Mesh {
 
 		this.l_arm.straddle = this.r_arm.straddle = 65;
 		this.l_elbow.bend = this.r_elbow.bend = 20;
-
 
 		// define bones positions
 		for ( var name in this.space )

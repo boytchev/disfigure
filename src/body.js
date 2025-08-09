@@ -192,8 +192,6 @@ class Disfigure extends Mesh {
 			roughness: 0.6,
 		} );
 
-		this.position.y = 0;
-
 		this.castShadow = true;
 		this.receiveShadow = true;
 
@@ -203,7 +201,6 @@ class Disfigure extends Mesh {
 
 		this.l_arm.straddle = this.r_arm.straddle = 65;
 		this.l_elbow.bend = this.r_elbow.bend = 20;
-
 
 		// define bones positions
 		for ( var name in this.space )

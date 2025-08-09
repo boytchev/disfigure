@@ -54,7 +54,7 @@ class World {
 
 		if ( options?.lights ?? true ) {
 
-			light = new DirectionalLight( 'white', 1.5 );
+			light = new DirectionalLight( 'white', 1.4 );
 			light.position.set( 0, 14, 7 );
 			if ( options?.shadows ?? true ) {
 
@@ -74,7 +74,8 @@ class World {
 
 			scene.add( light );
 
-			cameraLight = new DirectionalLight( 'white', 1.5 );
+			cameraLight = new DirectionalLight( 'white', 1.4 );
+			cameraLight.position.z = 100;
 			cameraLight.target = scene;
 			camera.add( cameraLight );
 			scene.add( camera );

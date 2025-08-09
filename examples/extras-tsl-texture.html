@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Applying TSL texture on a figure</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		
+		import { Color, DoubleSide } from "three";
+		import { uniform, vec3 } from "three/tsl";
+		import { entangled, processedWood, voronoiCells } from "https://cdn.jsdelivr.net/npm/tsl-textures@2.1.2/dist/tsl-textures.min.js";
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+		// create three persons
+
+		var man = new Happy.Man(),
+			woman = new Happy.Woman(),
+			child = new Happy.Child();
+
+		man.position.x = 0.75;
+		man.l_leg.straddle = man.r_leg.straddle = -2;
+		
+		woman.position.x = -0.75;
+
+		child.l_leg.straddle = child.r_leg.straddle = -2;
+		
+
+		// put sparkling texture on the man
+		
+		man.material.transparent = true;
+		man.material.side = DoubleSide;
+		man.material.metalness = 1;
+		man.material.roughness = 1;
+		man.material.colorNode = vec3( 0, 0, 1 );
+		man.material.opacityNode = entangled( {
+			scale: 3,
+			density: 14,
+			color: new Color( 8256 ),
+			background: new Color( 16777215 ),
+		} );
+		man.dress([ Happy.latex( 'royalblue' ) ]);
+
+
+		// put wooden texture on the woman
+		
+		woman.material.colorNode = processedWood( {
+			scale: 3,
+			length: 10,
+			strength: 0.48,
+			angle: 0,
+			color: new Color( 'black' ),
+			background: new Color( 'chocolate' ),
+		} );
+
+
+		// put Voronoi texture on the child,
+		// but make it dynamically changing
+		
+		var voro = {
+			scale: 4,
+			variation: 0.5,
+			facet: 0,
+			color: new Color( 16777215 ),
+			background: new Color( 34360 ),
+			seed: uniform( 0 ),
+		};
+
+		child.material.colorNode = voronoiCells( voro );
+
+
+		// animate the arms
+		
+		function animate( event ) {
+
+			var someone = event.target;
+			var t = event.time/2000 + 10*someone.uid;
+
+			voro.seed.value = 3*t;
+
+			// arms
+		
+			someone.l_arm.straddle = Happy.chaotic( t, 5, 30, 70 );
+			someone.l_arm.turn = Happy.chaotic( t, 6, -10, 70 );
+			someone.l_arm.foreward = Happy.chaotic( t, 7, -20, 80 );
+
+			someone.r_arm.straddle = Happy.chaotic( t, -5, 30, 70 );
+			someone.r_arm.turn = Happy.chaotic( t, -6, -10, 70 );
+			someone.r_arm.foreward = Happy.chaotic( t, -7, -20, 80 );
+
+			someone.l_elbow.bend = Happy.chaotic( t, 9, 0, 140 );
+			someone.r_elbow.bend = Happy.chaotic( t, 7, 0, 140 );
+
+			someone.l_forearm.turn = Happy.chaotic( t, 11, -45, 45 );
+			someone.r_forearm.turn = Happy.chaotic( t, -8, -45, 45 );
+
+			someone.l_wrist.bend = Happy.chaotic( t, -2, -90, 90 );
+			someone.l_wrist.tilt = Happy.chaotic( t, -2, -40, 40 );
+
+			someone.r_wrist.bend = Happy.chaotic( t, -1, -90, 90 );
+			someone.r_wrist.tilt = Happy.chaotic( t, -1, -40, 40 );
+
+			// body
+		
+			someone.head.bend = Happy.chaotic( t/5, 3, -10, 10 );
+			someone.head.turn = Happy.chaotic( t/2, 2, -40, 40 );
+			someone.head.tilt = Happy.chaotic( t/2, 1, -20, 20 );
+			someone.waist.turn = -someone.head.turn;
+
+			someone.waist.bend = Happy.chaotic( t/5, 4, 0, 20 );
+			someone.waist.turn = Happy.chaotic( t/2, 5, -30, 30 );
+			someone.waist.tilt = Happy.chaotic( t/2, 6, -10, 10 );
+
+			someone.chest.turn = Happy.chaotic( t/2, 5, -30, 30 );
+
+			var m = Happy.regular( 3*t+Happy.chaotic( t/3, someone.uid, 0, 10 ), 16, -60, 60 );
+			var n = Math.max( Math.min( m, 60 ), 0 );
+			someone.l_leg.foreward = n;
+			someone.l_knee.bend = 2*n;
+	//			someone.r_shin.turn = -30+n;
+		
+			n = Math.max( Math.min( -m, 60 ), 0 );
+			someone.r_leg.foreward = n;
+			someone.r_knee.bend = 2*n;
+		
+			someone.torso.turn = m/2;
+			if ( m>0 )
+				someone.l_shin.turn = m/2;
+			else
+				someone.r_shin.turn = -m/2;
+		
+		}
+
+		man.addEventListener( 'animate', animate );
+		woman.addEventListener( 'animate', animate );
+		child.addEventListener( 'animate', animate );
+
+	</script>
+</body>
+</html>
