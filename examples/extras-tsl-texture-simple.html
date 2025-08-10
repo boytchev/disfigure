@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Applying a TSL texture on a figure</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		
+		import * as Three from "three";
+		import * as TSLTexture from "https://cdn.jsdelivr.net/npm/tsl-textures@2.1.2/dist/tsl-textures.min.js";
+
+
+		// create a default world
+
+		new Happy.World( );
+		Happy.camera.position.set( 2, 1, 2 );
+		Happy.controls.target.set( 0, 0.6, 0 );
+
+
+		// create a person
+
+		var man = new Happy.Man();
+		man.l_leg.foreward = 90;
+		man.r_leg.foreward = 10;
+		man.l_leg.turn = 30;
+		man.l_knee.bend = 110;
+		man.l_ankle.bend = -15;
+		man.r_knee.bend = 105;
+		man.r_ankle.bend = 55;
+		man.position.y = -0.485;
+		
+		// put a camouflage TSL texture
+		
+		man.material.colorNode = TSLTexture.camouflage ( {
+			scale: 3,
+			colorA: new Three.Color(12762792),
+			colorB: new Three.Color(10258782),
+			colorC: new Three.Color(9610101),
+			colorD: new Three.Color(7435617),
+		} );
+
+
+		// animate the man
+		
+		function animate( event ) {
+
+			var someone = event.target;
+			var t = event.time/2000 + 10*someone.uid;
+
+			// arms
+		
+			someone.l_arm.straddle = Happy.chaotic( t, 5, -20, 40 );
+			someone.l_arm.turn = Happy.chaotic( t, 6, -10, 70 );
+			someone.l_arm.foreward = Happy.chaotic( t, 7, -20, 80 );
+
+			someone.r_arm.straddle = Happy.chaotic( t, -5, 30, 70 );
+			someone.r_arm.turn = Happy.chaotic( t, -6, -10, 70 );
+			someone.r_arm.foreward = Happy.chaotic( t, -7, -20, 80 );
+
+			someone.l_elbow.bend = Happy.chaotic( t, 9, 0, 140 );
+			someone.r_elbow.bend = Happy.chaotic( t, 7, 0, 140 );
+
+			someone.l_forearm.turn = Happy.chaotic( t, 11, -45, 45 );
+			someone.r_forearm.turn = Happy.chaotic( t, -8, -45, 45 );
+
+			someone.l_wrist.bend = Happy.chaotic( t, -2, -90, 90 );
+			someone.l_wrist.tilt = Happy.chaotic( t, -2, -40, 40 );
+
+			someone.r_wrist.bend = Happy.chaotic( t, -1, -90, 90 );
+			someone.r_wrist.tilt = Happy.chaotic( t, -1, -40, 40 );
+
+			// body
+		
+			someone.head.bend = Happy.chaotic( t/5, 3, -10, 10 );
+			someone.head.turn = Happy.chaotic( t/2, 2, -40, 40 );
+			someone.head.tilt = Happy.chaotic( t/2, 1, -20, 20 );
+			someone.waist.turn = -someone.head.turn;
+
+			someone.waist.bend = Happy.chaotic( t/5, 4, 0, 20 );
+			someone.waist.turn = Happy.chaotic( t/2, 5, -30, 30 );
+			someone.waist.tilt = Happy.chaotic( t/2, 6, -10, 10 );
+
+			someone.chest.turn = Happy.chaotic( t/2, 5, -30, 30 );
+		
+		}
+
+		man.addEventListener( 'animate', animate );
+
+	</script>
+</body>
+</html>

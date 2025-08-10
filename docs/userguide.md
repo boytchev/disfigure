@@ -616,6 +616,34 @@ Happy.slice( -0.1, 1.1, {angle:45, wave: 0.3, width:0.02} )
 [<img src="../examples/snapshots/extras-clothes-slice-and-or.jpg" width="48%">](../examples/extras-clothes-slice-and-or.html)
 
 
+## TSL textures
+
+Disfigure is compatible with most [TSL Textures](https://boytchev.github.io/tsl-textures/)
+&ndash; real-time textures generated via TSL. However, textures are currently
+not compatible with figure dressing. To use a TSL Texture it must be imported.
+As textures use Three.js color objects, Three.js should also be imported.
+
+Each texture is activated with a function, assigned to the figure's
+`material.colorNode` property &ndash;
+[see it](../examples/extras-tsl-texture-simple.html). Different figures may
+have individual TSL textures &ndash;
+[see it](../examples/extras-tsl-texture.html).
+
+```javascript
+import * as Three from "three";
+import * as TSLTexture from "https://cdn.jsdelivr.net/npm/tsl-textures@2.1.2/dist/tsl-textures.min.js";
+:
+figure.material.colorNode = TSLTexture.camouflage ( {
+	scale: 3,
+	colorA: new Three.Color(12762792),
+	colorB: new Three.Color(10258782),
+	colorC: new Three.Color(9610101),
+	colorD: new Three.Color(7435617),
+} );
+```
+
+[<img src="../examples/snapshots/extras-tsl-texture-simple.jpg" width="48%">](../examples/extras-tsl-texture-simple.html)
+[<img src="../examples/snapshots/extras-tsl-texture.jpg" width="48%">](../examples/extras-tsl-texture.html)
 
 <!--
 

@@ -20,6 +20,8 @@ A library to rig boneless and morphless 3D models. **WIP.**
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/extras-clothes-velour.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/extras-clothes-velour.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/extras-lockto.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/extras-lockto.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/extras-point.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/extras-point.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/extras-tsl-texture-simple.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/extras-tsl-texture-simple.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/extras-tsl-texture.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/extras-tsl-texture.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-create-basic.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/figure-create-basic.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-create-height.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/figure-create-height.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-parts.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/figure-parts.html)
