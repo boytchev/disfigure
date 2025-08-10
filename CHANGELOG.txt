@@ -1,3 +1,6 @@
+v0.0.22
+  - changed spinner to 4x4 dots
+
 v0.0.21
   - use Three.js internal matrix flow
   - eliminated negation of angles

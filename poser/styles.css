@@ -78,7 +78,8 @@ header img {
 	border-right: 0.5px solid lightgray;
 	border-radius: 0.25em;
 }
-#spinner::before {content:'\0022EE\0022EE\0022EE'}
+/*#spinner::before {content:'\0022EE\0022EE\0022EE'}*/
+#spinner::before {content:'\002999\002999\002999\002999'}
 @keyframes flash{
 	100% {opacity:0;transform:scale(4);}
 }
