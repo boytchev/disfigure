@@ -1,0 +1,848 @@
+﻿
+// disfigure
+//
+// module for interactive posture
+
+
+
+import * as THREE from "three";
+import { float, Fn, mix, positionGeometry, select, vec3 } from "three/tsl";
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { camera, controls, renderer, scene } from "../src/world.js";
+
+
+
+var model;
+
+
+
+// prepare materials
+
+var princeRupertsDrop = new THREE.MeshPhysicalMaterial( {
+	color: new THREE.Color( 2, 2, 2 ),
+	wireframe: !true,
+	transmission: 1,
+	roughness: 0,
+	metalness: 0.2,
+	ior: 2,
+	thickness: 0.2,
+} );
+
+var vantaBlack = new THREE.MeshBasicMaterial( {
+	color: new THREE.Color( 'black' ),
+} );
+
+
+
+// create 3D cross handle
+
+var gltf = await ( new GLTFLoader() ).loadAsync( 'handle.glb' ),
+	geometry = gltf.scene.children[ 0 ].geometry.scale( 0.05, 0.05, 0.05 );
+
+var handle = new THREE.Mesh(
+	geometry,
+	//princeRupertsDrop,
+	vantaBlack,
+);
+handle.castShadow = true;
+handle.visible = false;
+
+var handle2 = new THREE.Mesh(
+	geometry,
+	princeRupertsDrop.clone(),
+	//vantaBlack.clone(),
+);
+handle2.material.transparent = true;
+handle2.material.opacity = 0.3;
+handle2.castShadow = false;
+handle2.material.depthTest = false;
+//handle2.visible = false;
+handle.add( handle2 );
+
+
+
+// spheres to collect mouse clicks on grips - the endpoint of the handle
+
+var gripGeometry = new THREE.IcosahedronGeometry( 0.08*0.6 ),
+	gripMaterial = new THREE.MeshBasicMaterial( { color: 'black', wireframe: true } ),
+	gripCoords = [[ 0.50, 0, 0 ], [ -0.50, 0, 0 ], [ 0, 0.50, 0 ], [ 0, -0.50, 0 ], [ 0, 0, 0.50 ], [ 0, 0, -0.50 ]],
+	allGrips = [];
+
+for ( var coords of gripCoords ) {
+
+	gripMaterial = new THREE.MeshBasicMaterial( { color: new THREE.Color( coords[ 0 ]+0.5, coords[ 1 ]+0.5, coords[ 2 ]+0.5 ) } );
+
+	var grip = new THREE.Mesh( gripGeometry, gripMaterial );
+	grip.position.set( ...coords );
+	grip.visible = false;
+	grip.isHandleGrip = true;
+	grip.isBodyGrip = false;
+	allGrips.push( grip );
+	handle.add( grip );
+
+	grip.visible = !false;
+
+}
+
+
+// interceptor -- a lens-like invisible camera-facing structure
+// used to track mouse moves when they are away from the handle
+
+function interceptorGeometry( ) {
+
+	var r, points, b, alpha, shape;
+
+	r = 0.5;
+	alpha = Math.asin( 2/3 );
+	b = 0.1;
+	let s5 = r*Math.sqrt( 5 );
+
+	shape = new THREE.Shape();
+
+	// a bit of math to make a double-sided UFO-like structure,
+	// sorry, if you read this and get no idea what's going on
+
+	shape.moveTo( 0, r );
+	shape.absarc( 0, 0, r, Math.PI/2, alpha, !false );
+	shape.absarc( s5, 2*r, 2*r, Math.PI+alpha, 3*Math.PI/2-b, !true );
+	shape.lineTo( s5-( 2*r*Math.sin( b ) ), 2*r-2*r*Math.cos( b ) );
+	shape.lineTo( /*1*/5*r, 2*r-2*r*Math.cos( b ) );
+
+	shape.lineTo( /*1*/5*r, -( 2*r-2*r*Math.cos( b ) ) );
+	shape.lineTo( s5-( 2*r*Math.sin( b ) ), -( 2*r-2*r*Math.cos( b ) ) );
+	shape.absarc( s5, -2*r, 2*r, -( 3*Math.PI/2-b ), -( Math.PI+alpha ), !true );
+	shape.absarc( 0, 0, r, -alpha, -Math.PI/2, !false );
+	shape.lineTo( 0, -r );
+
+	points = shape.getPoints( 3 );
+	return new THREE.LatheGeometry( points, 32 ).rotateX( Math.PI/2 );
+
+} // interceptorGeometry
+
+var interceptor = new THREE.Mesh(
+	interceptorGeometry(),
+	new THREE.MeshPhysicalMaterial( { side: THREE.DoubleSide } ) // must be double sided for the raycaster
+);
+interceptor.visible = false;
+
+var interceptorIndex = 0; // 0=front, 1=back
+
+
+
+// the body grips - cylinders over body parts to capture
+// mouse clicks when selecting body parts
+
+var grip = {
+
+	//  idx	      scale			position		rotation || restriction || TSL-selector
+	torso: [[ 0.14, 0.08, 0.12 ], [ 0.00, -0.05, -0.01 ], [ 0, 0, 0 ],
+		[ -300, 300, -300, 300, -300, 300 ],
+		Fn( ()=>{
+
+			return smooth( positionGeometry.y, -1, 3 );
+
+		} ),
+	],
+	head: [[ 0.09, 0.14, 0.11 ], [ 0, 0.09, 0.04 ], [ 0, 0, 0 ],
+		[ -60, 35, -60, 60, -35, 35 ],
+		Fn( ()=>{
+
+			return smooth( positionGeometry.y.add( positionGeometry.z.div( 2 ) ), 1.48, 1.9 );
+
+		} ),
+	],
+	chest: [[ 0.2, 0.22, 0.13 ], [ 0, 0.18, -0.025 ], [ -0.4, 0, 0 ],
+		[ -20, 40, -60, 60, -30, 30 ],
+		Fn( ()=>{
+
+			return smooth( positionGeometry.y, 1.1, 1.61 )
+				.mul( smooth( positionGeometry.x, -0.25, 0.25 ) );
+
+		} ),
+	],
+	waist: [[ 0.15, 0.18, 0.10 ], [ 0, 0.1, -0 ], [ 0.1, 0, 0 ],
+		[ -20, 40, -60, 60, -30, 30 ],
+		Fn( ()=>{
+
+			return smooth( positionGeometry.y, 0.85, 1.25 );
+
+		} ),
+	],
+	l_arm: [[ 0.08, 0.18, 0.06 ], [ 0.09, 0.05, -0.015 ], [ Math.PI/2, -0.1, Math.PI/2 ],
+		[ -80, 80, -80, 30, -90, 80 ],
+		Fn( ()=>{
+
+			return smooth( positionGeometry.x, 0.1, 0.4 )
+				.mul( smooth( positionGeometry.x.add( positionGeometry.y.div( 1.5 ) ), 1, 1.7 ) );
+
+		} ),
+	],
+	r_arm: [[ 0.08, 0.18, 0.06 ], [ -0.09, 0.05, -0.015 ], [ Math.PI/2, 0.1, -Math.PI/2 ],
+		[ -80, 80, -30, 80, -80, 90 ],
+		Fn( ()=>{
+
+			return smooth( positionGeometry.x.negate(), 0.1, 0.4 )
+				.mul( smooth( positionGeometry.x.negate().add( positionGeometry.y.div( 1.5 ) ), 1, 1.7 ) );
+
+		} ),
+	],
+	l_elbow: [[ 0.05, 0.08, 0.05 ], [ 0, 0.005, -0.01 ], [ Math.PI/2, 0, Math.PI/2 ],
+		[ 0, 0, -140, 0, 0, 0 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.x, 0.35, 0.5 );
+
+		} ),
+			 ],
+	r_elbow: [[ 0.05, 0.08, 0.05 ], [ 0, 0.005, -0.01 ], [ Math.PI/2, 0, -Math.PI/2 ],
+		[ 0, 0, 0, 140, 0, 0 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.x.negate(), 0.35, 0.5 );
+
+		} ),
+			 ],
+	l_forearm: [[ 0.04, 0.13, 0.05 ], [ 0.025, 0.005, -0.01 ], [ Math.PI/2, 0, Math.PI/2 ],
+		[ -70, 70, 0, 0, 0, 0 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.x, 0.45, 0.68 );
+
+		} ),
+			 ],
+	r_forearm: [[ 0.04, 0.13, 0.05 ], [ -0.025, 0.005, -0.01 ], [ Math.PI/2, 0, -Math.PI/2 ],
+		[ -70, 70, 0, 0, 0, 0 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.x.negate(), 0.45, 0.68 );
+
+		} ),
+			 ],
+	l_wrist: [[ 0.07, 0.1, 0.03 ], [ 0.09, -0.01, 0.01 ], [ Math.PI/2, 0, Math.PI/2 ],
+		[ 0, 0, -45, 45, -90, 90 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.x, 0.6, 0.93	);
+
+		} ),
+			 ],
+	r_wrist: [[ 0.07, 0.1, 0.03 ], [ -0.09, -0.01, 0.01 ], [ Math.PI/2, 0, Math.PI/2 ],
+		[ 0, 0, -45, 45, -90, 90 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.x.negate(), 0.6, 0.93	);
+
+		} ),
+			 ],
+	l_leg: [[ 0.09, 0.14, 0.12 ], [ 0.01, -0.06, 0.0 ], [ 0, 0.3, 0 ],
+		[ -120, 40, -40, 80, -20, 90 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.y, 0.80, 1.1 )
+				.mul( positionGeometry.x.step( 0 ) )
+				.mul( smooth( positionGeometry.x.sub( positionGeometry.y.div( 1.5 ) ), -0.64, -0.2 ) );
+
+		} ) ],
+	r_leg: [[ 0.09, 0.14, 0.12 ], [ -0.01, -0.06, 0.0 ], [ 0, -0.3, 0 ],
+		[ -120, 40, -80, 40, -90, 20 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.y, 0.80, 1.1 )
+				.mul( positionGeometry.x.negate().step( 0 ) )
+				.mul( smooth( positionGeometry.x.negate().sub( positionGeometry.y.div( 1.5 ) ), -0.64, -0.2 ) );
+
+		} ) ],
+	l_thigh: [[ 0.1, 0.22, 0.1 ], [ 0.01, 0.02, 0.01 ], [ 0, 0, 0 ],
+		[ 0, 0, -60, 60, 0, 0 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.y, 0.55, 0.9 )
+				.mul( positionGeometry.x.step( 0 ) );
+
+		} ) ],
+	r_thigh: [[ 0.1, 0.22, 0.1 ], [ -0.01, 0.02, 0.01 ], [ 0, 0, 0 ],
+		[ 0, 0, -60, 60, 0, 0 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.y, 0.55, 0.9 )
+				.mul( positionGeometry.x.negate().step( 0 ) );
+
+		} ) ],
+	l_knee: [[ 0.07, 0.1, 0.07 ], [ -0.005, 0.01, 0.01 ], [ 0.2, 0, 0 ],
+		[ 0, 140, 0, 0, -10, 10 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.y, 0.4, 0.65 )
+				.mul( positionGeometry.x.step( 0 ) );
+
+		} ) ],
+	r_knee: [[ 0.07, 0.1, 0.07 ], [ 0.005, 0.01, 0.01 ], [ 0.2, 0, 0 ],
+		[ 0, 140, 0, 0, -10, 10 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.y, 0.4, 0.65	 )
+				.mul( positionGeometry.x.negate().step( 0 ) );
+
+		} ) ],
+	l_shin: [[ 0.07, 0.18, 0.08 ], [ -0.005, -0.06, 0.0 ], [ -0.1, 0, 0 ],
+		[ 0, 0, -60, 60, 0, 0 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.y, 0.1, 0.5 )
+				.mul( positionGeometry.x.step( 0 ) );
+
+		} ) ],
+	r_shin: [[ 0.07, 0.18, 0.08 ], [ 0.005, -0.06, 0.0 ], [ -0.1, 0, 0 ],
+		[ 0, 0, -60, 60, 0, 0 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.y, 0.1, 0.5 )
+				.mul( positionGeometry.x.negate().step( 0 ) );
+
+		} ) ],
+	l_ankle: [[ 0.05, 0.07, 0.09 ], [ 0, -0.01, -0.02 ], [ Math.PI/2-0.1, 0, 0 ],
+		[ -40, 70, 0, 0, -40, 40 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.y, -0.3, 0.2 )
+				.mul( positionGeometry.x.step( 0 ) )
+				.mul( smooth( positionGeometry.z, -0.3, 0.1 ) );
+
+		} ) ],
+	r_ankle: [[ 0.05, 0.07, 0.09 ], [ 0, -0.01, -0.02 ], [ Math.PI/2-0.1, 0, 0 ],
+		[ -40, 70, 0, 0, -40, 40 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.y, -0.3, 0.2 )
+				.mul( positionGeometry.x.negate().step( 0 ) )
+				.mul( smooth( positionGeometry.z, -0.3, 0.1 ) );
+
+		} ) ],
+
+	l_foot: [[ 0.05, 0.09, 0.04 ], [ 0, 0.0, 0.07 ], [ Math.PI/2, 0, 0 ],
+		[ -40, 40, 0, 0, 0, 0 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.y, -0.3, 0.1 )
+				.mul( smooth( positionGeometry.z, -0.0, 0.3 ) )
+				.mul( positionGeometry.x.step( 0 ) );
+
+		} ) ],
+	r_foot: [[ 0.05, 0.09, 0.04 ], [ 0, 0.0, 0.07 ], [ Math.PI/2, 0, 0 ],
+		[ -40, 40, 0, 0, 0, 0 ],
+				 Fn( ()=>{
+
+			return smooth( positionGeometry.y, -0.3, 0.1 )
+				.mul( smooth( positionGeometry.z, 0.0, 0.3 ) )
+				.mul( positionGeometry.x.negate().step( 0 ) );
+
+		} ) ],
+}; // grip
+
+var bodyGrips = [];
+
+
+
+// custom lookAt that uses own's Y axis as up direction
+
+var up = new THREE.Vector4();
+
+function lookAt( object, target ) {
+
+	up.set( 0, 1, 0, 0 );
+	up.applyMatrix4( object.matrixWorld );
+	object.up.set( up.x, up.y, up.z );
+
+	object.lookAt( target );
+
+} // lookAt
+
+
+
+// capture mouse clicks on the grips
+
+var raycaster = new THREE.Raycaster(),
+	pointer = new THREE.Vector2( Infinity, Infinity );
+
+
+
+// initialize all elements, needs a model and scene to be ready,
+// so initialization is triggered by gui.js, which loads the model
+
+function init( readyModel ) {
+
+	// store a local copy of the model and fix its material
+	model = readyModel;
+	model.material.colorNode = tslSelectionNodeNew( { space: model.space } );
+	model.material.roughness = 0;
+	model.material.metalness = 0;
+	model.material.needsUpdate = true;
+
+	// make body grips from the grip data
+	var idx = 0;
+	for ( var name in grip ) {
+
+		var bodyGeometry = new THREE.IcosahedronGeometry( 1, 1 )//( 1, 1, 1, 8, 1 )
+			.scale( ...grip[ name ][ 0 ])
+			.rotateX( grip[ name ][ 2 ][ 0 ])
+			.rotateY( grip[ name ][ 2 ][ 1 ])
+			.rotateY( grip[ name ][ 2 ][ 2 ])
+			.translate( ...grip[ name ][ 1 ]);
+
+		var g = new THREE.Mesh( bodyGeometry, new THREE.MeshBasicMaterial( { color: 'black', wireframe: true, depthTest: false, depthWrite: false, transparent: true, opacity: 0.25 } ) );
+
+		g.gripIndex = ++idx;
+		g.gripSelector = grip[ name ][ 4 ];
+		g.bodyPart = model[ name ];
+		g.bodyPart.gripLimits = grip[ name ][ 3 ].map( x=>x*Math.PI/180 );
+		g.visible = false;
+		g.isHandleGrip = false;
+		g.isBodyGrip = true;
+
+		model[ name ].attach( g );
+		bodyGrips.push( g );
+
+
+	} // for name
+
+	// attach 3D objects to the scene
+	scene.add( interceptor, handle, startPositionGlobal, endPositionGlobal );
+
+	// hooks pointer events
+	renderer.domElement.addEventListener( 'pointerdown', pointerDown );
+	renderer.domElement.addEventListener( 'pointerup', pointerUp );
+	renderer.domElement.addEventListener( 'pointermove', pointerMove );
+
+}
+
+
+
+// smooths the coloring at the boundary of selected body part
+
+var smooth = Fn( ([ value, fromV, toV ])=>{
+
+	return value.smoothstep( fromV, mix( fromV, toV, 0.2 ) )
+		.min(
+			value.smoothstep( toV, mix( toV, fromV, 0.2 ) )
+		);
+
+}, { value: 'float', fromV: 'float', toV: 'float', return: 'float' } );
+
+
+
+// colors body part depending on the body grip index
+
+var tslSelectionNodeNew = Fn( ( { space } )=>{
+
+	var s = space.select,
+		k = float( 0 );
+
+	for ( var grip of bodyGrips )
+		k = k.add( grip.gripSelector().mul( select( s.equal( grip.gripIndex ), 1, 0 ) ) );
+
+	k =	k.clamp( 0, 1 ).toVar( );
+
+
+	var color = vec3( 1, k.oneMinus(), k.oneMinus().mul( 0.9 ) ).toVar();
+
+	return color;
+
+} );
+
+
+
+var activeHandleGrip = null,
+	activeBodyPart = null;
+
+var startQuaternion = new THREE.Quaternion(),
+	startPositionGlobal = new THREE.Mesh( new THREE.BoxGeometry( 0.08, 0.04, 0.04 ), new THREE.MeshBasicMaterial( { color: 'green' } ) ), // start position
+	endPositionGlobal = new THREE.Mesh( new THREE.BoxGeometry( 0.04, 0.08, 0.04 ), new THREE.MeshBasicMaterial( { color: 'red' } ) ); // end position
+
+startPositionGlobal.visible = false;
+endPositionGlobal.visible = false;
+
+
+var clickX, clickY, clickTime;
+var pointerDrag = false;
+
+function pointerDown( event ) {
+
+	pointerDrag = true;
+
+	pointer.x = 2*event.clientX/innerWidth - 1;
+	pointer.y = -2*event.clientY/innerHeight + 1;
+
+	raycaster.setFromCamera( pointer, camera );
+
+	var intersects;
+
+	intersects = raycaster.intersectObjects([ ...bodyGrips, ...allGrips ]);
+
+	if ( handle.visible ) {
+
+		// check for handle grips
+		if ( intersects.length && intersects[ 0 ].object.isHandleGrip ) {
+
+			activeHandleGrip = intersects[ 0 ].object;
+
+			controls.enabled = false;
+
+			// vector camera-handle
+			var vch = new THREE.Vector3();
+			handle.getWorldPosition( vch );
+			vch.sub( camera.position );
+
+			// vector handle-grip (or click point)
+			var vhg = new THREE.Vector3();
+			handle.getWorldPosition( vhg );
+			vhg.sub( intersects[ 0 ].point );
+
+			if ( vch.dot( vhg )>=0 )
+				interceptorIndex = 0;
+			else
+				interceptorIndex = 1;
+
+			raycaster.setFromCamera( pointer, camera );
+
+			var intersects = raycaster.intersectObject( interceptor );
+			if ( intersects.length>0 ) {
+
+				startPositionGlobal.position.copy( intersects[ interceptorIndex ].point );
+				endPositionGlobal.position.copy( intersects[ interceptorIndex ].point );
+				startQuaternion.copy( activeBodyPart.quaternion );
+
+			}
+
+			return;
+
+		}
+
+	}
+
+	if ( activeHandleGrip ) {
+
+		activeHandleGrip = null;
+		controls.enabled = true;
+
+	}
+
+	// test click on body parts
+	if ( intersects.length && intersects[ 0 ].object.isBodyGrip ) {
+
+		if ( intersects[ 0 ].object.gripIndex ) {
+
+			model.space.select.value = intersects[ 0 ].object.gripIndex;
+
+			handle.removeFromParent(); // needed otherwise activeBodyPart.attach will clone it
+
+			activeBodyPart = intersects[ 0 ].object.bodyPart;
+			activeBodyPart.attach( handle );
+
+			startQuaternion.copy( activeBodyPart.quaternion );
+
+			handle.visible = true;
+
+			return;
+
+		}
+
+	}
+
+	clickX = event.clientX;
+	clickY = event.clientY;
+	clickTime = Date.now();
+
+
+}
+
+
+
+function pointerUp( /*event*/ ) {
+
+	pointerDrag = false;
+
+	model.space.select.value = 0;
+
+	if ( activeHandleGrip ) {
+
+		//activeHandleGrip.visible = false;
+		activeHandleGrip = null;
+		controls.enabled = true;
+
+	}
+
+	if ( ( clickX-event.clientX )**2<50 && ( clickY-event.clientY )**2<50 && Date.now()-clickTime<300 ) {
+
+		handle.visible = false;
+		model.space.select.value = 0;
+
+	}
+
+}
+
+
+function reset() {
+
+	handle.visible = false;
+	if ( model.space.select ) model.space.select.value = 0;
+	if ( activeHandleGrip ) activeHandleGrip.visible = false;
+	activeHandleGrip = null;
+	controls.enabled = true;
+
+}
+
+
+function pointerMove( event ) {
+
+	handle.getWorldPosition( interceptor.position );
+	lookAt( interceptor, camera.position );
+	interceptor.updateMatrixWorld( true, true );
+
+
+	pointer.x = 2*event.clientX/innerWidth - 1;
+	pointer.y = -2*event.clientY/innerHeight + 1;
+
+	raycaster.setFromCamera( pointer, camera );
+
+	// test click on body parts
+	model.space.select.value = 0;
+	if ( !activeHandleGrip && !pointerDrag ) {
+
+		intersects = raycaster.intersectObjects( bodyGrips );
+		if ( intersects.length ) {
+
+			if ( intersects[ 0 ].object.gripIndex ) {
+
+				model.space.select.value = intersects[ 0 ].object.gripIndex;
+
+			}
+
+		}
+
+	}
+
+
+	if ( !activeHandleGrip ) return;
+
+
+	var intersects = raycaster.intersectObject( interceptor );
+	if ( intersects.length>0 ) {
+
+		endPositionGlobal.position.copy( intersects[ interceptorIndex ].point );
+
+	}
+
+}
+
+
+
+var quaternion = new THREE.Quaternion();
+
+function update() {
+
+	// This function was developed with assistance from xAI's Grok AI.
+
+	handle.getWorldPosition( interceptor.position );
+	lookAt( interceptor, camera.position );
+	interceptor.updateMatrixWorld( true, true );
+
+	if ( !activeHandleGrip ) return;
+
+	// restore body part original position
+
+	activeBodyPart.quaternion.copy( startQuaternion );
+	activeBodyPart.updateMatrixWorld( true, true );
+
+	// compute vectors and their dot product
+
+	var OP = handle.worldToLocal( startPositionGlobal.position.clone() ).normalize(),
+		OQ = handle.worldToLocal( endPositionGlobal.position.clone() ).normalize();
+
+	var dotProduct = Math.min( Math.max( OP.dot( OQ ), -1 ), 1 );
+
+	// check if vectors are already aligned - no need to rotate
+
+	if ( Math.abs( dotProduct - 1 ) < 1e-10 ) {
+
+		return;
+
+	}
+
+	// check if vectors are already opposite
+
+
+	var angle;
+
+	if ( Math.abs( dotProduct + 1 ) < 1e-10 ) {
+
+		// rotate 180 degrees around an arbitrary perpendicular axis
+
+		var rotationAxis = OP.clone().cross( new THREE.Vector3( 1, 0, 0 ) );
+		if ( rotationAxis.length() < 1e-10 ) {
+
+			rotationAxis.crossVectors( OP, new THREE.Vector3( 0, 1, 0 ) );
+
+		}
+
+		angle = Math.PI;
+		rotationAxis.normalize();
+
+	} else {
+
+		// compute the rotation axis (cross product) and angle
+
+		var rotationAxis = OP.clone().cross( OQ ).normalize();
+		angle = Math.acos( dotProduct );
+
+	}
+
+	// create quaternion for the rotation
+
+	quaternion.setFromAxisAngle( rotationAxis, angle );
+
+	// apply the rotation
+
+	activeBodyPart.quaternion.multiply( quaternion );
+	activeBodyPart.updateMatrixWorld( true, true );
+
+	const constrainedEuler = findClosestConstrainedEuler2( activeBodyPart, ...activeBodyPart.gripLimits, 10*Math.PI/180, 0.1*Math.PI/180 );
+	activeBodyPart.rotation.copy( constrainedEuler );
+
+	activeBodyPart.updateMatrixWorld( true, true );
+
+}
+
+
+
+/**
+
+ * This function was developed with assistance from xAI's Grok AI.
+
+ * Finds the closest Euler orientation to (x, y, z, order) within the specified intervals
+ * using iterative optimization with perturbations in six directions.
+ * Each component is constrained: x' in [xmin, xmax], y' in [ymin, ymax], z' in [zmin, zmax].
+ * @param {THREE.Object3D} OBJ - The Object3D with current Euler angles.
+ * @param {number} xmin - Minimum x angle (radians).
+ * @param {number} xmax - Maximum x angle (radians).
+ * @param {number} ymin - Minimum y angle (radians).
+ * @param {number} ymax - Maximum y angle (radians).
+ * @param {number} zmin - Minimum z angle (radians).
+ * @param {number} zmax - Maximum z angle (radians).
+ * @param {number} [initialStep=0.1] - Initial step size for perturbations (radians).
+ * @param {number} [epsilon=0.001] - Minimum step size for convergence (radians).
+ * @returns {THREE.Euler} - The closest Euler angles within the constraints.
+ */
+function findClosestConstrainedEuler2( OBJ, xmin, xmax, ymin, ymax, zmin, zmax, initialStep = 0.1, epsilon = 0.001 ) {
+
+	// Get current Euler angles and order
+	const currentEuler = OBJ.rotation.clone();
+	const order = currentEuler.order;
+	const originalQuaternion = OBJ.quaternion.clone();
+
+	// Helper: Convert Euler angles to quaternion
+	function eulerToQuaternion( x, y, z, order ) {
+
+		const euler = new THREE.Euler( x, y, z, order );
+		const quaternion = new THREE.Quaternion();
+		quaternion.setFromEuler( euler );
+		return quaternion.normalize();
+
+	}
+
+	// Helper: Compute angular difference between two quaternions
+	function getAngularDifference( q1, q2 ) {
+
+		const qRel = q1.clone().invert().multiply( q2 );
+		return 2 * Math.acos( Math.min( Math.max( Math.abs( qRel.w ), -1 ), 1 ) ); // Angle in radians
+
+	}
+
+	// Helper: Clamp angle to interval
+	function clamp( value, min, max ) {
+
+		return Math.min( Math.max( value, min ), max );
+
+	}
+
+	// Initialize current Euler angles (start with current angles clamped to intervals)
+	let bestX = clamp( currentEuler.x, xmin, xmax );
+	let bestY = clamp( currentEuler.y, ymin, ymax );
+	let bestZ = clamp( currentEuler.z, zmin, zmax );
+	let minAngle = getAngularDifference( originalQuaternion, eulerToQuaternion( bestX, bestY, bestZ, order ) );
+
+	// Iterative optimization
+	let step = initialStep;
+	while ( step >= epsilon ) {
+
+		let improved = false;
+		let newBestX = bestX;
+		let newBestY = bestY;
+		let newBestZ = bestZ;
+		let newMinAngle = minAngle;
+
+		// Test six directions: +x, -x, +y, -y, +z, -z
+		const directions = [
+			{ dx: step, dy: 0, dz: 0 }, // +x
+			{ dx: -step, dy: 0, dz: 0 }, // -x
+			{ dx: 0, dy: step, dz: 0 }, // +y
+			{ dx: 0, dy: -step, dz: 0 }, // -y
+			{ dx: 0, dy: 0, dz: step }, // +z
+			{ dx: 0, dy: 0, dz: -step } // -z
+		];
+
+		for ( const dir of directions ) {
+
+			// Skip directions if axis is fixed (e.g., zmin = zmax for z)
+			if ( dir.dx !== 0 && xmin === xmax ) continue;
+			if ( dir.dy !== 0 && ymin === ymax ) continue;
+			if ( dir.dz !== 0 && zmin === zmax ) continue;
+
+			// Compute perturbed angles and clamp to intervals
+			const x = clamp( bestX + dir.dx, xmin, xmax );
+			const y = clamp( bestY + dir.dy, ymin, ymax );
+			const z = clamp( bestZ + dir.dz, zmin, zmax );
+
+			// Evaluate angular difference
+			const candidateQuaternion = eulerToQuaternion( x, y, z, order );
+			const angleDiff = getAngularDifference( originalQuaternion, candidateQuaternion );
+
+			// Update best orientation if better
+			if ( angleDiff < newMinAngle ) {
+
+				newMinAngle = angleDiff;
+				newBestX = x;
+				newBestY = y;
+				newBestZ = z;
+				improved = true;
+
+			}
+
+		}
+
+		// Update current best orientation
+		if ( improved ) {
+
+			bestX = newBestX;
+			bestY = newBestY;
+			bestZ = newBestZ;
+			minAngle = newMinAngle;
+
+		} else {
+
+			// No improvement; reduce step size
+			step /= 2;
+
+		}
+
+	}
+
+	// Create the constrained Euler angles
+	const constrainedEuler = new THREE.Euler( bestX, bestY, bestZ, order );
+
+	return constrainedEuler;
+
+}
+
+
+
+export { init, update, reset };

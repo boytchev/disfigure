@@ -22,49 +22,29 @@
 	font-size: 1em;
 }
 
-header {
-	position: absolute;
+.header {
+	margin: 0 0 0 0.5em;
+	padding: 0;
+	position: fixed;
+	height: 100%;
+	top: 0;
+	left: 0;
 	z-index: 10;
-	margin-top: 0;
-	margin-left: 1em;
-	text-shadow: 0 0 2px gainsboro;
+	pointer-events: none;
 }
 
-header h1 {
-	font-size: 1.25em;
+h1 {
+	position: absolute;
+	top: 0;
+	font-size: 0.65cm;
+	margin-top: 0.25em;
 	margin-bottom: 0.15em;
 	font-weight: normal;
-}
-
-header h2 {
-	font-size: 1em;
-	margin: 0;
-	font-weight: 500;
-}
-
-header h3 {
-	color: dimgray;
-	font-size: 0.85em;
-	margin: 0;
-	font-weight: 300;
-	text-shadow: none;
-}
-
-header h3 a {
-	color: dimgray;
-	text-decoration: none;
-	border-bottom: dotted 1px dimgray;
-}
-
-header h3 a:hover {
-	color: black;
-}
-
-header img {
-	height: 1em;
-	position: relative;
-	top: 0.15em;
-	opacity: 0.75;
+	opacity: 0;
+	animation: disappear 3s 1;
+	text-align: center;
+	width: 100%;
+	pointer-events: none;
 }
 
 #spinner {
@@ -82,4 +62,41 @@ header img {
 #spinner::before {content:'\002999\002999\002999\002999'}
 @keyframes flash{
 	100% {opacity:0;transform:scale(4);}
+}
+
+img.button {
+	display: inline-block;
+	position: relative;
+	width: 2cm;
+	height: 2cm;
+	left: -0.5em;
+	border: none;
+	opacity: 0.25;
+	pointer-events: auto;
+	border-radius: 1cm;
+}
+
+img.button:hover {
+	cursor: pointer;
+	opacity: 1;
+}
+
+img.menu {
+	left: 0;
+	width: 1cm;
+	height: 1cm;
+}
+
+.temporary-icon {
+	display: inline;
+	width: auto;
+	animation: disappear 3s 1;
+	pointer-events: none;
+	opacity: 0;
+}
+
+@keyframes disappear{
+  0% { opacity: 1; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
 }

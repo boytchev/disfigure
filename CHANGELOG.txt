@@ -1,5 +1,6 @@
 v0.0.22
   - changed spinner to 4x4 dots
+  - the poser is much more intuitive
 
 v0.0.21
   - use Three.js internal matrix flow

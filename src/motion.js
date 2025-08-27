@@ -47,7 +47,7 @@ var jointRotateMat= Fn( ([ pos, pivot, matrix, locus ])=>{
 	var p = pos.sub( pivot ).mul( matrix ).add( pivot );
 	return mix( pos, p, locus );
 
-} );
+} );//, {pos:'vec3',pivot:'vec3',matrix:'mat3',locus:'float',return:'vec3'} );
 
 
 
@@ -57,7 +57,7 @@ var jointNormalMat= Fn( ([ pos, pivot, matrix, locus ])=>{ // eslint-disable-lin
 	var p = pos.mul( matrix );
 	return mix( pos, p, locus );
 
-} );
+} );//, {pos:'vec3',pivot:'vec3',matrix:'mat3',locus:'float',return:'vec3'} );
 
 
 
@@ -73,7 +73,7 @@ function tslPositionNode( joints ) {
 // calculate normals of bent body surface
 function tslNormalNode( joints ) {
 
-	return transformNormalToView( disfigure( joints, jointNormalMat, normalGeometry ) );
+	return transformNormalToView( disfigure( joints, jointNormalMat, normalGeometry ).normalize() );
 
 }
 
@@ -91,6 +91,7 @@ var disfigure = Fn( ([ joints, fn, p ])=>{
 			p.assign( fn( p, space[ item ].pivot, joints[ item ].umatrix, space[ item ].locus() ) );
 
 	}
+
 
 	// LEFT-UPPER BODY
 

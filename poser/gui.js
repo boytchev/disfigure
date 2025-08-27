@@ -7,47 +7,67 @@
 
 import * as THREE from "three";
 import * as lil from "three/addons/libs/lil-gui.module.min.js";
-import { float, Fn, If, mix, select, uniform, vec3 } from "three/tsl";
+import { /*float, Fn, If, mix, select,*/ uniform/*, vec3 */ } from "three/tsl";
 import { LocusT, LocusX } from "../src/space.js";
 import { scene, setAnimationLoop, World } from "../src/world.js";
 import { chaotic } from "../src/motion.js";
 import { Joint, Man } from "../src/body.js";
 import { DEBUG, DEBUG_JOINT, DEBUG_NAME } from "./debug.js";
+import { init as initHandlers, reset as resetHandlers, update as updateHandlers } from "./handles.js";
 
 
 
 new World();
 var model = new Man();
 
+initHandlers( model );
 
 
 var debugSpace;
 
+var menu = document.getElementById( 'menu' );
+var buttons = document.getElementById( 'buttons' );
+
+menu.addEventListener( 'click', showMenu );
+
+function showMenu() {
+
+	menu.style.display='none';
+	buttons.style.display='block';
+
+}
+
+function hideMenu() {
+
+	menu.style.display='block';
+	buttons.style.display='none';
+
+}
 
 // extract credits and place them in DOM element
 // replaces the resource url extension with "txt"
 // e.g. my-model.glb -> my-model.txt
-function credits( url, id ) {
+// function credits( url, id ) {
 
-	var xhttp = new XMLHttpRequest();
-	xhttp.onreadystatechange = function () {
+// var xhttp = new XMLHttpRequest();
+// xhttp.onreadystatechange = function () {
 
-		if ( this.readyState == 4 && this.status == 200 )
-			document.getElementById( id ).innerHTML = this.responseText.split( '||' )[ 0 ];
+// if ( this.readyState == 4 && this.status == 200 )
+// document.getElementById( id ).innerHTML = this.responseText.split( '||' )[ 0 ];
 
-	};
+// };
 
-	url = url.split( '.' );
-	url.pop();
-	url.push( 'txt' );
-	url = url.join( '.' );
+// url = url.split( '.' );
+// url.pop();
+// url.push( 'txt' );
+// url = url.join( '.' );
 
-	xhttp.open( "GET", url, true );
-	xhttp.send();
+// xhttp.open( "GET", url, true );
+// xhttp.send();
 
-}
+// }
 
-credits( model.url, 'credits1' );
+// credits( model.url, 'credits1' );
 
 
 
@@ -118,7 +138,11 @@ var debug = {
 var gui;
 
 
-rigResetModel( );
+document.getElementById( 'reset' ).addEventListener( 'click', rigResetModel );
+document.getElementById( 'get' ).addEventListener( 'click', rigGetModel );
+document.getElementById( 'set' ).addEventListener( 'click', rigSetModel );
+
+rigResetModel( false );
 
 
 var planes = new THREE.Group();
@@ -205,6 +229,7 @@ function createGui( ) {
 
 	gui = new lil.GUI(); // global gui
 	gui.domElement.style.marginRight = 0;
+	gui.domElement.style.display = 'none';
 
 	var folder = gui.addFolder( 'DEBUG' );
 
@@ -246,7 +271,9 @@ function createGui( ) {
 	}
 
 
-	folder = gui.addFolder( 'TORSO' );//.close();
+	gui.close();
+
+	folder = gui.addFolder( 'TORSO' ).close();
 	{
 
 		folder.add( model.torso, 'bend', -200, 200 ).name( html( 'Torso', 'bend' ) );
@@ -271,7 +298,7 @@ function createGui( ) {
 	{
 
 		folder.add( model.l_leg, 'foreward', -40, 120 ).name( html( 'Leg', 'foreward' ) );
-		folder.add( model.l_leg, 'turn', -10, 90 ).name( html( '', 'turn' ) );
+		/*folder.add( model.l_leg, 'turn', -10, 90 ).name( html( '', 'turn' ) );-@@*/
 		folder.add( model.l_leg, 'straddle', -10, 90 ).name( html( '', 'straddle' ) );
 
 		folder.add( model.l_thigh, 'turn', -40, 80 ).name( html( 'Thigh', 'turn', 'border' ) );
@@ -292,7 +319,7 @@ function createGui( ) {
 	{
 
 		folder.add( model.r_leg, 'foreward', -40, 120 ).name( html( 'Leg', 'foreward' ) );
-		folder.add( model.r_leg, 'turn', -10, 90 ).name( html( '', 'turn' ) );
+		/*folder.add( model.r_leg, 'turn', -10, 90 ).name( html( '', 'turn' ) );-@@*/
 		folder.add( model.r_leg, 'straddle', -10, 90 ).name( html( '', 'straddle' ) );
 
 		folder.add( model.r_thigh, 'turn', -40, 80 ).name( html( 'Thigh', 'turn', 'border' ) );
@@ -404,11 +431,11 @@ function rigModel( t ) {
 	model.r_ankle.turn = chaotic( t, -11, 0, 70 );
 	model.r_ankle.tilt = chaotic( t, -13, -40, 40 );
 
-	model.l_leg.turn = chaotic( t, 8, -40, 80 );
+	model.l_thigh.turn = chaotic( t, 8, -40, 80 );
 	model.l_leg.straddle = chaotic( t, -8, 0, 40 );
 	model.l_leg.foreward = chaotic( t, -2, -40, 80 );
 
-	model.r_leg.turn = chaotic( t, -1, -40, 80 );
+	model.r_thigh.turn = chaotic( t, -1, -40, 80 );
 	model.r_leg.straddle = chaotic( t, -3, 0, 40 );
 	model.r_leg.foreward = chaotic( t, 4, -40, 80 );
 
@@ -441,18 +468,79 @@ function rigRandomModel( ) {
 
 
 
-function rigResetModel( ) {
+function rigResetModel( ask=true ) {
 
-	model.rotation.y = 0;
-	for ( var name of Object.keys( model ) ) {
+	hideMenu();
 
-		if ( model[ name ]?.rotation ) model[ name ].rotation.set( 0, 0, 0 ); //.//
-		if ( model[ name ]?.angle?.isVector3 )
-			model[ name ].angle.set( 0, 0, 0 );
+	if ( !ask || confirm( 'Reset the posture to the default T-pose?' ) == true ) {
+
+		//camera.position.set( 0, 1.5, 4 );
+
+		model.rotation.y = 0;
+		for ( var name of Object.keys( model ) ) {
+
+			if ( model[ name ]?.rotation ) model[ name ].rotation.set( 0, 0, 0 ); //.//
+			if ( model[ name ]?.angle?.isVector3 )
+				model[ name ].angle.set( 0, 0, 0 );
+
+		}
+
+		resetHandlers( );
+		updateGUI( );
 
 	}
 
-	updateGUI( );
+}
+
+
+
+function rigGetModel( ) {
+
+	hideMenu();
+
+	if ( !model ) return;
+
+	if ( navigator.clipboard.writeText ) {
+
+		navigator.clipboard.writeText( model.postureString );
+		alert( 'The current posture is copied to the clipboard.' );
+
+	} else {
+
+		prompt( 'The current posture is shown below. Copy it to the clipboard.', model.postureString );
+
+	}
+
+}
+
+
+
+function rigSetModel( ) {
+
+	hideMenu();
+
+	if ( !model ) return;
+
+	var string = prompt( 'Set the posture to:', '{"version":8,"position":...}' );
+
+	if ( string ) {
+
+		var oldPosture = model.posture;
+
+		try {
+
+			model.posture = JSON.parse( string );
+
+		} catch {
+
+			model.posture = oldPosture;
+			alert( 'The provided posture was either invalid or impossible to understand.' );
+
+		}
+
+		//renderer.render( scene, camera );
+
+	}
 
 }
 
@@ -589,6 +677,8 @@ function updateGUI( ) {
 function animationLoop( t ) {
 
 	if ( options.animate ) rigModel( t );
+	updateHandlers();
+	updateGUI( );
 
 }
 
@@ -615,7 +705,7 @@ if ( DEBUG ) {
 
 
 // dubug function used to mark areas on the 3D model
-
+/*
 var tslSelectionNode = Fn( ( { space } )=>{
 
 	var s = space.select;
@@ -676,13 +766,13 @@ var tslSelectionNode = Fn( ( { space } )=>{
 	return color;
 
 } );
-
+*/
 
 
 createGui( );
 
 
-model.material.colorNode = tslSelectionNode( { space: model.space } );
-//model.children[0].material.colorNode = vec3( 1 );
-model.material.roughness = 1;//0.2;
+
+//model.material.colorNode = tslSelectionNode( { space: model.space } );
+//model.material.roughness = 1;//0.2;
 

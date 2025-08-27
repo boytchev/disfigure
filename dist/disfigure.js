@@ -199,7 +199,7 @@ var jointRotateMat= Fn( ([ pos, pivot, matrix, locus ])=>{
 	var p = pos.sub( pivot ).mul( matrix ).add( pivot );
 	return mix( pos, p, locus );
 
-} );
+} );//, {pos:'vec3',pivot:'vec3',matrix:'mat3',locus:'float',return:'vec3'} );
 
 
 
@@ -209,7 +209,7 @@ var jointNormalMat= Fn( ([ pos, pivot, matrix, locus ])=>{ // eslint-disable-lin
 	var p = pos.mul( matrix );
 	return mix( pos, p, locus );
 
-} );
+} );//, {pos:'vec3',pivot:'vec3',matrix:'mat3',locus:'float',return:'vec3'} );
 
 
 
@@ -225,7 +225,7 @@ function tslPositionNode( joints ) {
 // calculate normals of bent body surface
 function tslNormalNode( joints ) {
 
-	return transformNormalToView( disfigure( joints, jointNormalMat, normalGeometry ) );
+	return transformNormalToView( disfigure( joints, jointNormalMat, normalGeometry ).normalize() );
 
 }
 
@@ -243,6 +243,7 @@ var disfigure = Fn( ([ joints, fn, p ])=>{
 			p.assign( fn( p, space[ item ].pivot, joints[ item ].umatrix, space[ item ].locus() ) );
 
 	}
+
 
 	// LEFT-UPPER BODY
 
@@ -874,14 +875,14 @@ class Disfigure extends Mesh {
 		this.chest = new Joint( this, this.waist, this.space.chest, 'x', 'y', 'z', 1, 1, -1 );
 		this.head = new Joint( this, this.chest, this.space.head, 'x', 'y', 'z', 1, 1, -1 );
 
-		this.l_leg = new Joint( this, this.torso, this.space.l_leg, 'x', 'y', 'z', -1, 1, 1, 'ZYX' );
+		this.l_leg = new Joint( this, this.torso, this.space.l_leg, 'x', 'y', 'z', -1, 0/*1-@@*/, 1, 'ZYX' );
 		this.l_thigh = new Joint( this, this.l_leg, this.space.l_thigh, 'x', 'y', 'z', 0, 1, 0 );
 		this.l_knee = new Joint( this, this.l_thigh, this.space.l_knee, 'x', 'y', 'z', 1, 0, -1 );
 		this.l_shin = new Joint( this, this.l_knee, this.space.l_shin, 'x', 'y', 'z', 0, 1, 0 );
 		this.l_ankle = new Joint( this, this.l_shin, this.space.l_ankle, 'x', 'y', 'z', 1, 0, 1 );
 		this.l_foot = new Joint( this, this.l_ankle, this.space.l_foot, 'x', 'y', 'z', 1, 0, 0 );
 
-		this.r_leg = new Joint( this, this.torso, this.space.r_leg, 'x', 'y', 'z', -1, -1, -1, 'ZYX' );
+		this.r_leg = new Joint( this, this.torso, this.space.r_leg, 'x', 'y', 'z', -1, 0/*-1:@@*/, -1, 'ZYX' );
 		this.r_thigh = new Joint( this, this.r_leg, this.space.r_thigh, 'x', 'y', 'z', 0, -1, 0 );
 		this.r_knee = new Joint( this, this.r_thigh, this.space.r_knee, 'x', 'y', 'z', 1, 0, 1 );
 		this.r_shin = new Joint( this, this.r_knee, this.space.r_shin, 'x', 'y', 'z', 0, -1, 0 );
