@@ -17,7 +17,7 @@ document.querySelector( 'head' ).appendChild( favicon );
 var css = document.createElement( 'link' );
 css.type = 'text/css';
 css.rel = 'stylesheet';
-css.href = '../poser/styles.css';
+css.href = '../examples/styles.css';
 
 document.head.appendChild( css );
 
