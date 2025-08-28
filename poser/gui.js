@@ -9,11 +9,11 @@ import * as THREE from "three";
 import * as lil from "three/addons/libs/lil-gui.module.min.js";
 import { /*float, Fn, If, mix, select,*/ uniform/*, vec3 */ } from "three/tsl";
 import { LocusT, LocusX } from "../src/space.js";
-import { scene, setAnimationLoop, World } from "../src/world.js";
+import { scene, setAnimationLoop, World, light } from "../src/world.js";
 import { chaotic } from "../src/motion.js";
 import { Joint, Man } from "../src/body.js";
 import { DEBUG, DEBUG_JOINT, DEBUG_NAME } from "./debug.js";
-import { init as initHandlers, reset as resetHandlers, update as updateHandlers } from "./handles.js";
+import { init as initHandlers, reset as resetHandlers, update as updateHandlers, toggleRotPos } from "./handles.js";
 
 
 
@@ -141,6 +141,7 @@ var gui;
 document.getElementById( 'reset' ).addEventListener( 'click', rigResetModel );
 document.getElementById( 'get' ).addEventListener( 'click', rigGetModel );
 document.getElementById( 'set' ).addEventListener( 'click', rigSetModel );
+document.getElementById( 'rotpos' ).addEventListener( 'click', ()=>{hideMenu(); toggleRotPos();} );
 
 rigResetModel( false );
 
@@ -774,5 +775,6 @@ createGui( );
 
 
 //model.material.colorNode = tslSelectionNode( { space: model.space } );
-//model.material.roughness = 1;//0.2;
-
+model.material.roughness = -1;//0.2;
+model.material.metalness = 0.2;//0.2;
+//light.intensity = 0.5;

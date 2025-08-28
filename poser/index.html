@@ -31,17 +31,33 @@
 
 
 <body>
-	<h1><b>Disfigure</b> Posture Editor</h1>
+	<h1 id="title" class="disappear"><b>Disfigure</b> Posture Editor</h1>
 
 	<table class="header">
 		<tr><td>
 		<img id="menu" class="button menu" src="../assets/logo/icon-menu.png">
 		<div id="buttons" style="display:none;">
-			<img id="get" class="button" src="../assets/logo/icon-get.png">
-			<br>
-			<img id="reset" class="button" src="../assets/logo/icon-new.png">
-			<br>
-			<img id="set" class="button" src="../assets/logo/icon-put.png">
+		
+			<div class="tooltip">
+				<img id="get" class="button" src="../assets/logo/icon-get.png">
+				<span class="tooltip-text">Get text <br> of posture</span>
+			</div>
+			
+			<div class="tooltip">
+				<img id="reset" class="button" src="../assets/logo/icon-new.png">
+				<span class="tooltip-text">Reset <br> posture</span>
+			</div>
+			
+			<div class="tooltip">
+				<img id="set" class="button" src="../assets/logo/icon-put.png">
+				<span class="tooltip-text">Put text <br> as posture</span>
+			</div>
+			
+			<div class="tooltip">
+				<img id="rotpos" class="button" src="../assets/logo/icon-pos.png">
+				<span id="rotpos-hint" class="tooltip-text">Switch to <br> positioning</span>
+			</div>
+			
 		</div>
 		</td></tr>
 	</table>

@@ -6,13 +6,15 @@
 
 
 import * as THREE from "three";
-import { float, Fn, mix, positionGeometry, select, vec3 } from "three/tsl";
+import { If,float, Fn, mix, positionGeometry, select, vec3 } from "three/tsl";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { camera, controls, renderer, scene } from "../src/world.js";
 
 
 
 var model;
+var moveMode = false;
+var moveModel = false;
 
 
 
@@ -169,7 +171,7 @@ var grip = {
 		} ),
 	],
 	l_arm: [[ 0.08, 0.18, 0.06 ], [ 0.09, 0.05, -0.015 ], [ Math.PI/2, -0.1, Math.PI/2 ],
-		[ -80, 80, -80, 30, -90, 80 ],
+		[ -80, 80, -90, 30, -90, 80 ],
 		Fn( ()=>{
 
 			return smooth( positionGeometry.x, 0.1, 0.4 )
@@ -178,7 +180,7 @@ var grip = {
 		} ),
 	],
 	r_arm: [[ 0.08, 0.18, 0.06 ], [ -0.09, 0.05, -0.015 ], [ Math.PI/2, 0.1, -Math.PI/2 ],
-		[ -80, 80, -30, 80, -80, 90 ],
+		[ -80, 80, -30, 90, -80, 90 ],
 		Fn( ()=>{
 
 			return smooth( positionGeometry.x.negate(), 0.1, 0.4 )
@@ -362,7 +364,9 @@ function lookAt( object, target ) {
 // capture mouse clicks on the grips
 
 var raycaster = new THREE.Raycaster(),
-	pointer = new THREE.Vector2( Infinity, Infinity );
+	pointer = new THREE.Vector2( ),
+	oldClientX,
+	oldClientY;
 
 
 
@@ -444,6 +448,8 @@ var tslSelectionNodeNew = Fn( ( { space } )=>{
 
 
 	var color = vec3( 1, k.oneMinus(), k.oneMinus().mul( 0.9 ) ).toVar();
+	
+	If( s.equal(-1), ()=> { color.assign( vec3(0,0.25,1) ) } )
 
 	return color;
 
@@ -478,6 +484,18 @@ function pointerDown( event ) {
 
 	intersects = raycaster.intersectObjects([ ...bodyGrips, ...allGrips ]);
 
+
+	if( moveMode && intersects.length>0 ) {
+		
+		model.space.select.value = -1;
+		moveModel = true;
+		oldClientX = event.clientX;
+		oldClientY = event.clientY;
+		controls.enabled = false;
+		return;
+		
+	}
+	
 	if ( handle.visible ) {
 
 		// check for handle grips
@@ -563,6 +581,12 @@ function pointerUp( /*event*/ ) {
 
 	model.space.select.value = 0;
 
+	if( moveMode )
+	{
+		controls.enabled = true;
+		moveModel = false;
+	}
+
 	if ( activeHandleGrip ) {
 
 		//activeHandleGrip.visible = false;
@@ -588,6 +612,7 @@ function reset() {
 	if ( activeHandleGrip ) activeHandleGrip.visible = false;
 	activeHandleGrip = null;
 	controls.enabled = true;
+	document.getElementById('buttons').display = 'none';
 
 }
 
@@ -602,13 +627,35 @@ function pointerMove( event ) {
 	pointer.x = 2*event.clientX/innerWidth - 1;
 	pointer.y = -2*event.clientY/innerHeight + 1;
 
+	if( moveMode && moveModel ) {
+		
+		var dX = event.clientX-oldClientX;
+		var dY = event.clientY-oldClientY;
+		
+		model.position.y -= 0.000625*dY*camera.position.distanceTo(model.position);
+		
+		oldClientX = event.clientX
+		oldClientY = event.clientY;
+		return;
+		
+	}
+	
 	raycaster.setFromCamera( pointer, camera );
-
+	intersects = raycaster.intersectObjects( bodyGrips );
+	
+	// if in move mode just translate the model, do not rotate any body part
+	if( moveMode && intersects.length>0  )
+	{
+		
+		model.space.select.value = -1;
+		return;
+		
+	}
+	
 	// test click on body parts
 	model.space.select.value = 0;
 	if ( !activeHandleGrip && !pointerDrag ) {
 
-		intersects = raycaster.intersectObjects( bodyGrips );
 		if ( intersects.length ) {
 
 			if ( intersects[ 0 ].object.gripIndex ) {
@@ -844,5 +891,27 @@ function findClosestConstrainedEuler2( OBJ, xmin, xmax, ymin, ymax, zmin, zmax, 
 }
 
 
+function toggleRotPos( ) {
+	
+	document.getElementById('buttons').display = 'none';
 
-export { init, update, reset };
+	if( moveMode ) {
+		model.space.select.value = 0;
+		document.getElementById('title').innerHTML = 'Vertical translation mode';
+		document.getElementById('rotpos').src = '../assets/logo/icon-pos.png';
+		document.getElementById('rotpos-hint').innerHTML = 'Switch to <br> positioning</span>';
+		moveMode = false;
+		handle.visible = false;
+	} else {
+		model.space.select.value = 0;
+		document.getElementById('title').innerHTML = 'Rotation mode';
+		document.getElementById('rotpos').src = '../assets/logo/icon-rot.png';
+		document.getElementById('rotpos-hint').innerHTML = 'Switch to <br> rotating</span>';
+		moveMode = true;
+		handle.visible = false;
+	}
+	
+}
+
+
+export { init, update, reset, toggleRotPos };

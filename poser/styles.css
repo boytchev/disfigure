@@ -41,10 +41,13 @@ h1 {
 	margin-bottom: 0.15em;
 	font-weight: normal;
 	opacity: 0;
-	animation: disappear 3s 1;
 	text-align: center;
 	width: 100%;
 	pointer-events: none;
+}
+
+.disappear {
+	animation: disappear 3s 1;
 }
 
 #spinner {
@@ -99,4 +102,25 @@ img.menu {
   0% { opacity: 1; }
   50% { opacity: 1; }
   100% { opacity: 0; }
+}
+
+.tooltip {
+  position: relative;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 120px;
+  color: dimgray;
+  text-align: left;
+  padding: 1em 0;
+  left: 1.75cm;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
 }
