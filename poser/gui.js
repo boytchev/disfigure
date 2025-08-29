@@ -21,6 +21,7 @@ new World();
 
 var model = new Man();
 //var model = new Woman();
+//var model = new Child();
 
 initHandlers( model );
 

@@ -9,7 +9,7 @@ import * as THREE from "three";
 import { If,float, Fn, mix, positionGeometry, select, vec3 } from "three/tsl";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { camera, controls, renderer, scene } from "../src/world.js";
-import { manGrips, womanGrips } from "./bodygrips.js";
+import { manGrips, womanGrips, childGrips } from "./bodygrips.js";
 
 
 const DEBUG_SHOW_BODY_GRIPS = false;
@@ -18,8 +18,9 @@ var model;
 var moveMode = false;
 var moveModel = false;
 
-//var gripDef = womanGrips; // body grip
 var gripDef = manGrips; // body grip
+//var gripDef = womanGrips; // body grip
+//var gripDef = childGrips; // body grip
 
 // prepare materials
 
