@@ -9,14 +9,17 @@ import * as THREE from "three";
 import { If,float, Fn, mix, positionGeometry, select, vec3 } from "three/tsl";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { camera, controls, renderer, scene } from "../src/world.js";
+import { manGrips, womanGrips } from "./bodygrips.js";
 
 
+const DEBUG_SHOW_BODY_GRIPS = false;
 
 var model;
 var moveMode = false;
 var moveModel = false;
 
-
+//var gripDef = womanGrips; // body grip
+var gripDef = manGrips; // body grip
 
 // prepare materials
 
@@ -76,13 +79,12 @@ for ( var coords of gripCoords ) {
 
 	var grip = new THREE.Mesh( gripGeometry, gripMaterial );
 	grip.position.set( ...coords );
-	grip.visible = false;
 	grip.isHandleGrip = true;
+	grip.visible = !false;
 	grip.isBodyGrip = false;
 	allGrips.push( grip );
 	handle.add( grip );
 
-	grip.visible = !false;
 
 }
 
@@ -134,212 +136,7 @@ var interceptorIndex = 0; // 0=front, 1=back
 // the body grips - cylinders over body parts to capture
 // mouse clicks when selecting body parts
 
-var grip = {
 
-	//  idx	      scale			position		rotation || restriction || TSL-selector
-	torso: [[ 0.14, 0.08, 0.12 ], [ 0.00, -0.05, -0.01 ], [ 0, 0, 0 ],
-		[ -300, 300, -300, 300, -300, 300 ],
-		Fn( ()=>{
-
-			return smooth( positionGeometry.y, -1, 3 );
-
-		} ),
-	],
-	head: [[ 0.09, 0.14, 0.11 ], [ 0, 0.09, 0.04 ], [ 0, 0, 0 ],
-		[ -60, 35, -60, 60, -35, 35 ],
-		Fn( ()=>{
-
-			return smooth( positionGeometry.y.add( positionGeometry.z.div( 2 ) ), 1.48, 1.9 );
-
-		} ),
-	],
-	chest: [[ 0.2, 0.22, 0.13 ], [ 0, 0.18, -0.025 ], [ -0.4, 0, 0 ],
-		[ -20, 40, -60, 60, -30, 30 ],
-		Fn( ()=>{
-
-			return smooth( positionGeometry.y, 1.1, 1.61 )
-				.mul( smooth( positionGeometry.x, -0.25, 0.25 ) );
-
-		} ),
-	],
-	waist: [[ 0.15, 0.18, 0.10 ], [ 0, 0.1, -0 ], [ 0.1, 0, 0 ],
-		[ -20, 40, -60, 60, -30, 30 ],
-		Fn( ()=>{
-
-			return smooth( positionGeometry.y, 0.85, 1.25 );
-
-		} ),
-	],
-	l_arm: [[ 0.08, 0.18, 0.06 ], [ 0.09, 0.05, -0.015 ], [ Math.PI/2, -0.1, Math.PI/2 ],
-		[ -80, 80, -90, 30, -90, 80 ],
-		Fn( ()=>{
-
-			return smooth( positionGeometry.x, 0.1, 0.4 )
-				.mul( smooth( positionGeometry.x.add( positionGeometry.y.div( 1.5 ) ), 1, 1.7 ) );
-
-		} ),
-	],
-	r_arm: [[ 0.08, 0.18, 0.06 ], [ -0.09, 0.05, -0.015 ], [ Math.PI/2, 0.1, -Math.PI/2 ],
-		[ -80, 80, -30, 90, -80, 90 ],
-		Fn( ()=>{
-
-			return smooth( positionGeometry.x.negate(), 0.1, 0.4 )
-				.mul( smooth( positionGeometry.x.negate().add( positionGeometry.y.div( 1.5 ) ), 1, 1.7 ) );
-
-		} ),
-	],
-	l_elbow: [[ 0.05, 0.08, 0.05 ], [ 0, 0.005, -0.01 ], [ Math.PI/2, 0, Math.PI/2 ],
-		[ 0, 0, -140, 0, 0, 0 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.x, 0.35, 0.5 );
-
-		} ),
-			 ],
-	r_elbow: [[ 0.05, 0.08, 0.05 ], [ 0, 0.005, -0.01 ], [ Math.PI/2, 0, -Math.PI/2 ],
-		[ 0, 0, 0, 140, 0, 0 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.x.negate(), 0.35, 0.5 );
-
-		} ),
-			 ],
-	l_forearm: [[ 0.04, 0.13, 0.05 ], [ 0.025, 0.005, -0.01 ], [ Math.PI/2, 0, Math.PI/2 ],
-		[ -70, 70, 0, 0, 0, 0 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.x, 0.45, 0.68 );
-
-		} ),
-			 ],
-	r_forearm: [[ 0.04, 0.13, 0.05 ], [ -0.025, 0.005, -0.01 ], [ Math.PI/2, 0, -Math.PI/2 ],
-		[ -70, 70, 0, 0, 0, 0 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.x.negate(), 0.45, 0.68 );
-
-		} ),
-			 ],
-	l_wrist: [[ 0.07, 0.1, 0.03 ], [ 0.09, -0.01, 0.01 ], [ Math.PI/2, 0, Math.PI/2 ],
-		[ 0, 0, -45, 45, -90, 90 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.x, 0.6, 0.93	);
-
-		} ),
-			 ],
-	r_wrist: [[ 0.07, 0.1, 0.03 ], [ -0.09, -0.01, 0.01 ], [ Math.PI/2, 0, Math.PI/2 ],
-		[ 0, 0, -45, 45, -90, 90 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.x.negate(), 0.6, 0.93	);
-
-		} ),
-			 ],
-	l_leg: [[ 0.09, 0.14, 0.12 ], [ 0.01, -0.06, 0.0 ], [ 0, 0.3, 0 ],
-		[ -120, 40, -40, 80, -20, 90 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.y, 0.80, 1.1 )
-				.mul( positionGeometry.x.step( 0 ) )
-				.mul( smooth( positionGeometry.x.sub( positionGeometry.y.div( 1.5 ) ), -0.64, -0.2 ) );
-
-		} ) ],
-	r_leg: [[ 0.09, 0.14, 0.12 ], [ -0.01, -0.06, 0.0 ], [ 0, -0.3, 0 ],
-		[ -120, 40, -80, 40, -90, 20 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.y, 0.80, 1.1 )
-				.mul( positionGeometry.x.negate().step( 0 ) )
-				.mul( smooth( positionGeometry.x.negate().sub( positionGeometry.y.div( 1.5 ) ), -0.64, -0.2 ) );
-
-		} ) ],
-	l_thigh: [[ 0.1, 0.22, 0.1 ], [ 0.01, 0.02, 0.01 ], [ 0, 0, 0 ],
-		[ 0, 0, -60, 60, 0, 0 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.y, 0.55, 0.9 )
-				.mul( positionGeometry.x.step( 0 ) );
-
-		} ) ],
-	r_thigh: [[ 0.1, 0.22, 0.1 ], [ -0.01, 0.02, 0.01 ], [ 0, 0, 0 ],
-		[ 0, 0, -60, 60, 0, 0 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.y, 0.55, 0.9 )
-				.mul( positionGeometry.x.negate().step( 0 ) );
-
-		} ) ],
-	l_knee: [[ 0.07, 0.1, 0.07 ], [ -0.005, 0.01, 0.01 ], [ 0.2, 0, 0 ],
-		[ 0, 140, 0, 0, -10, 10 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.y, 0.4, 0.65 )
-				.mul( positionGeometry.x.step( 0 ) );
-
-		} ) ],
-	r_knee: [[ 0.07, 0.1, 0.07 ], [ 0.005, 0.01, 0.01 ], [ 0.2, 0, 0 ],
-		[ 0, 140, 0, 0, -10, 10 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.y, 0.4, 0.65	 )
-				.mul( positionGeometry.x.negate().step( 0 ) );
-
-		} ) ],
-	l_shin: [[ 0.07, 0.18, 0.08 ], [ -0.005, -0.06, 0.0 ], [ -0.1, 0, 0 ],
-		[ 0, 0, -60, 60, 0, 0 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.y, 0.1, 0.5 )
-				.mul( positionGeometry.x.step( 0 ) );
-
-		} ) ],
-	r_shin: [[ 0.07, 0.18, 0.08 ], [ 0.005, -0.06, 0.0 ], [ -0.1, 0, 0 ],
-		[ 0, 0, -60, 60, 0, 0 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.y, 0.1, 0.5 )
-				.mul( positionGeometry.x.negate().step( 0 ) );
-
-		} ) ],
-	l_ankle: [[ 0.05, 0.07, 0.09 ], [ 0, -0.01, -0.02 ], [ Math.PI/2-0.1, 0, 0 ],
-		[ -40, 70, 0, 0, -40, 40 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.y, -0.3, 0.2 )
-				.mul( positionGeometry.x.step( 0 ) )
-				.mul( smooth( positionGeometry.z, -0.3, 0.1 ) );
-
-		} ) ],
-	r_ankle: [[ 0.05, 0.07, 0.09 ], [ 0, -0.01, -0.02 ], [ Math.PI/2-0.1, 0, 0 ],
-		[ -40, 70, 0, 0, -40, 40 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.y, -0.3, 0.2 )
-				.mul( positionGeometry.x.negate().step( 0 ) )
-				.mul( smooth( positionGeometry.z, -0.3, 0.1 ) );
-
-		} ) ],
-
-	l_foot: [[ 0.05, 0.09, 0.04 ], [ 0, 0.0, 0.07 ], [ Math.PI/2, 0, 0 ],
-		[ -40, 40, 0, 0, 0, 0 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.y, -0.3, 0.1 )
-				.mul( smooth( positionGeometry.z, -0.0, 0.3 ) )
-				.mul( positionGeometry.x.step( 0 ) );
-
-		} ) ],
-	r_foot: [[ 0.05, 0.09, 0.04 ], [ 0, 0.0, 0.07 ], [ Math.PI/2, 0, 0 ],
-		[ -40, 40, 0, 0, 0, 0 ],
-				 Fn( ()=>{
-
-			return smooth( positionGeometry.y, -0.3, 0.1 )
-				.mul( smooth( positionGeometry.z, 0.0, 0.3 ) )
-				.mul( positionGeometry.x.negate().step( 0 ) );
-
-		} ) ],
-}; // grip
 
 var bodyGrips = [];
 
@@ -384,22 +181,22 @@ function init( readyModel ) {
 
 	// make body grips from the grip data
 	var idx = 0;
-	for ( var name in grip ) {
+	for ( var name in gripDef ) {
 
 		var bodyGeometry = new THREE.IcosahedronGeometry( 1, 1 )//( 1, 1, 1, 8, 1 )
-			.scale( ...grip[ name ][ 0 ])
-			.rotateX( grip[ name ][ 2 ][ 0 ])
-			.rotateY( grip[ name ][ 2 ][ 1 ])
-			.rotateY( grip[ name ][ 2 ][ 2 ])
-			.translate( ...grip[ name ][ 1 ]);
+			.scale( ...gripDef[ name ][ 0 ])
+			.rotateX( gripDef[ name ][ 2 ][ 0 ])
+			.rotateY( gripDef[ name ][ 2 ][ 1 ])
+			.rotateY( gripDef[ name ][ 2 ][ 2 ])
+			.translate( ...gripDef[ name ][ 1 ]);
 
-		var g = new THREE.Mesh( bodyGeometry, new THREE.MeshBasicMaterial( { color: 'black', wireframe: true, depthTest: false, depthWrite: false, transparent: true, opacity: 0.25 } ) );
+		var g = new THREE.Mesh( bodyGeometry, new THREE.MeshBasicMaterial( { color: new THREE.Color().setHSL(idx/Math.PI,1,0.5), wireframe: true, depthTest: false, depthWrite: false, transparent: true, opacity: 0.25 } ) );
 
 		g.gripIndex = ++idx;
-		g.gripSelector = grip[ name ][ 4 ];
+		g.gripSelector = gripDef[ name ][ 4 ];
 		g.bodyPart = model[ name ];
-		g.bodyPart.gripLimits = grip[ name ][ 3 ].map( x=>x*Math.PI/180 );
-		g.visible = false;
+		g.bodyPart.gripLimits = gripDef[ name ][ 3 ].map( x=>x*Math.PI/180 );
+		g.visible = DEBUG_SHOW_BODY_GRIPS;
 		g.isHandleGrip = false;
 		g.isBodyGrip = true;
 
@@ -418,19 +215,6 @@ function init( readyModel ) {
 	renderer.domElement.addEventListener( 'pointermove', pointerMove );
 
 }
-
-
-
-// smooths the coloring at the boundary of selected body part
-
-var smooth = Fn( ([ value, fromV, toV ])=>{
-
-	return value.smoothstep( fromV, mix( fromV, toV, 0.2 ) )
-		.min(
-			value.smoothstep( toV, mix( toV, fromV, 0.2 ) )
-		);
-
-}, { value: 'float', fromV: 'float', toV: 'float', return: 'float' } );
 
 
 

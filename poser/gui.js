@@ -11,14 +11,16 @@ import { /*float, Fn, If, mix, select,*/ uniform/*, vec3 */ } from "three/tsl";
 import { LocusT, LocusX } from "../src/space.js";
 import { scene, setAnimationLoop, World, light } from "../src/world.js";
 import { chaotic } from "../src/motion.js";
-import { Joint, Man } from "../src/body.js";
+import { Joint, Man, Woman, Child } from "../src/body.js";
 import { DEBUG, DEBUG_JOINT, DEBUG_NAME } from "./debug.js";
 import { init as initHandlers, reset as resetHandlers, update as updateHandlers, toggleRotPos } from "./handles.js";
 
 
 
 new World();
+
 var model = new Man();
+//var model = new Woman();
 
 initHandlers( model );
 
