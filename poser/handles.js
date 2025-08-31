@@ -2,14 +2,14 @@
 // disfigure
 //
 // module for interactive posture
-
+//
+// horrible code, do not look at it
 
 
 import * as THREE from "three";
-import { If,float, Fn, mix, positionGeometry, select, vec3 } from "three/tsl";
+import { float, Fn, If, select, vec3 } from "three/tsl";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { camera, controls, renderer, scene } from "../src/world.js";
-import { manGrips, womanGrips, childGrips } from "./bodygrips.js";
 
 
 const DEBUG_SHOW_BODY_GRIPS = false;
@@ -18,9 +18,6 @@ var model;
 var moveMode = false;
 var moveModel = false;
 
-var gripDef = manGrips; // body grip
-//var gripDef = womanGrips; // body grip
-//var gripDef = childGrips; // body grip
 
 // prepare materials
 
@@ -139,7 +136,6 @@ var interceptorIndex = 0; // 0=front, 1=back
 
 
 
-var bodyGrips = [];
 
 
 
@@ -163,7 +159,7 @@ function lookAt( object, target ) {
 
 var raycaster = new THREE.Raycaster(),
 	pointer = new THREE.Vector2( ),
-	oldClientX,
+	//oldClientX,
 	oldClientY;
 
 
@@ -171,41 +167,7 @@ var raycaster = new THREE.Raycaster(),
 // initialize all elements, needs a model and scene to be ready,
 // so initialization is triggered by gui.js, which loads the model
 
-function init( readyModel ) {
-
-	// store a local copy of the model and fix its material
-	model = readyModel;
-	model.material.colorNode = tslSelectionNodeNew( { space: model.space } );
-	model.material.roughness = 0;
-	model.material.metalness = 0;
-	model.material.needsUpdate = true;
-
-	// make body grips from the grip data
-	var idx = 0;
-	for ( var name in gripDef ) {
-
-		var bodyGeometry = new THREE.IcosahedronGeometry( 1, 1 )//( 1, 1, 1, 8, 1 )
-			.scale( ...gripDef[ name ][ 0 ])
-			.rotateX( gripDef[ name ][ 2 ][ 0 ])
-			.rotateY( gripDef[ name ][ 2 ][ 1 ])
-			.rotateY( gripDef[ name ][ 2 ][ 2 ])
-			.translate( ...gripDef[ name ][ 1 ]);
-
-		var g = new THREE.Mesh( bodyGeometry, new THREE.MeshBasicMaterial( { color: new THREE.Color().setHSL(idx/Math.PI,1,0.5), wireframe: true, depthTest: false, depthWrite: false, transparent: true, opacity: 0.25 } ) );
-
-		g.gripIndex = ++idx;
-		g.gripSelector = gripDef[ name ][ 4 ];
-		g.bodyPart = model[ name ];
-		g.bodyPart.gripLimits = gripDef[ name ][ 3 ].map( x=>x*Math.PI/180 );
-		g.visible = DEBUG_SHOW_BODY_GRIPS;
-		g.isHandleGrip = false;
-		g.isBodyGrip = true;
-
-		model[ name ].attach( g );
-		bodyGrips.push( g );
-
-
-	} // for name
+function initScene( ) {
 
 	// attach 3D objects to the scene
 	scene.add( interceptor, handle, startPositionGlobal, endPositionGlobal );
@@ -218,6 +180,56 @@ function init( readyModel ) {
 }
 
 
+function useModel( newModel ) {
+
+	model = newModel;
+
+}
+
+function initModel( readyModel, gripDef ) {
+
+	// store a local copy of the model and fix its material
+	model = readyModel;
+	model.material.colorNode = tslSelectionNodeNew( { space: model.space } );
+	model.material.roughness = 0;
+	model.material.metalness = 0;
+	model.material.needsUpdate = true;
+	model.visible = false;
+
+	model.bodyGrips = [];
+
+	// make body grips from the grip data
+	var idx = 0;
+	for ( var name in gripDef ) {
+
+		var bodyGeometry = new THREE.IcosahedronGeometry( 1, 1 )//( 1, 1, 1, 8, 1 )
+			.scale( ...gripDef[ name ][ 0 ])
+			.rotateX( gripDef[ name ][ 2 ][ 0 ])
+			.rotateY( gripDef[ name ][ 2 ][ 1 ])
+			.rotateY( gripDef[ name ][ 2 ][ 2 ])
+			.translate( ...gripDef[ name ][ 1 ]);
+
+		var g = new THREE.Mesh( bodyGeometry, new THREE.MeshBasicMaterial( { color: new THREE.Color().setHSL( idx/Math.PI, 1, 0.5 ), wireframe: true, depthTest: false, depthWrite: false, transparent: true, opacity: 0.25 } ) );
+
+		g.gripIndex = ++idx;
+		g.gripSelector = gripDef[ name ][ 4 ];
+		g.bodyPart = model[ name ];
+		g.bodyPart.gripLimits = gripDef[ name ][ 3 ].map( x=>x*Math.PI/180 );
+		g.visible = DEBUG_SHOW_BODY_GRIPS;
+		g.isHandleGrip = false;
+		g.isBodyGrip = true;
+
+		model[ name ].attach( g );
+		model.bodyGrips.push( g );
+
+
+	} // for name
+
+	return model;
+
+}
+
+
 
 // colors body part depending on the body grip index
 
@@ -226,15 +238,19 @@ var tslSelectionNodeNew = Fn( ( { space } )=>{
 	var s = space.select,
 		k = float( 0 );
 
-	for ( var grip of bodyGrips )
+	for ( var grip of model.bodyGrips )
 		k = k.add( grip.gripSelector().mul( select( s.equal( grip.gripIndex ), 1, 0 ) ) );
 
 	k =	k.clamp( 0, 1 ).toVar( );
 
 
 	var color = vec3( 1, k.oneMinus(), k.oneMinus().mul( 0.9 ) ).toVar();
-	
-	If( s.equal(-1), ()=> { color.assign( vec3(0,0.25,1) ) } )
+
+	If( s.equal( -1 ), ()=> {
+
+		color.assign( vec3( 0, 0.25, 1 ) );
+
+	} );
 
 	return color;
 
@@ -267,20 +283,20 @@ function pointerDown( event ) {
 
 	var intersects;
 
-	intersects = raycaster.intersectObjects([ ...bodyGrips, ...allGrips ]);
+	intersects = raycaster.intersectObjects([ ...model.bodyGrips, ...allGrips ]);
 
 
-	if( moveMode && intersects.length>0 ) {
-		
+	if ( moveMode && intersects.length>0 ) {
+
 		model.space.select.value = -1;
 		moveModel = true;
-		oldClientX = event.clientX;
+		//oldClientX = event.clientX;
 		oldClientY = event.clientY;
 		controls.enabled = false;
 		return;
-		
+
 	}
-	
+
 	if ( handle.visible ) {
 
 		// check for handle grips
@@ -366,10 +382,11 @@ function pointerUp( /*event*/ ) {
 
 	model.space.select.value = 0;
 
-	if( moveMode )
-	{
+	if ( moveMode ) {
+
 		controls.enabled = true;
 		moveModel = false;
+
 	}
 
 	if ( activeHandleGrip ) {
@@ -397,7 +414,7 @@ function reset() {
 	if ( activeHandleGrip ) activeHandleGrip.visible = false;
 	activeHandleGrip = null;
 	controls.enabled = true;
-	document.getElementById('buttons').display = 'none';
+	document.getElementById( 'left-buttons' ).display = 'none';
 
 }
 
@@ -412,31 +429,30 @@ function pointerMove( event ) {
 	pointer.x = 2*event.clientX/innerWidth - 1;
 	pointer.y = -2*event.clientY/innerHeight + 1;
 
-	if( moveMode && moveModel ) {
-		
-		var dX = event.clientX-oldClientX;
+	if ( moveMode && moveModel ) {
+
+		//var dX = event.clientX-oldClientX;
 		var dY = event.clientY-oldClientY;
-		
-		model.position.y -= 0.000625*dY*camera.position.distanceTo(model.position);
-		
-		oldClientX = event.clientX
+
+		model.position.y -= 0.000625*dY*camera.position.distanceTo( model.position );
+
+		//oldClientX = event.clientX;
 		oldClientY = event.clientY;
 		return;
-		
+
 	}
-	
+
 	raycaster.setFromCamera( pointer, camera );
-	intersects = raycaster.intersectObjects( bodyGrips );
-	
+	intersects = raycaster.intersectObjects( model.bodyGrips );
+
 	// if in move mode just translate the model, do not rotate any body part
-	if( moveMode && intersects.length>0  )
-	{
-		
+	if ( moveMode && intersects.length>0 ) {
+
 		model.space.select.value = -1;
 		return;
-		
+
 	}
-	
+
 	// test click on body parts
 	model.space.select.value = 0;
 	if ( !activeHandleGrip && !pointerDrag ) {
@@ -676,27 +692,63 @@ function findClosestConstrainedEuler2( OBJ, xmin, xmax, ymin, ymax, zmin, zmax, 
 }
 
 
-function toggleRotPos( ) {
-	
-	document.getElementById('buttons').display = 'none';
+var title = document.getElementById( 'title' );
 
-	if( moveMode ) {
-		model.space.select.value = 0;
-		document.getElementById('title').innerHTML = 'Vertical translation mode';
-		document.getElementById('rotpos').src = '../assets/logo/icon-pos.png';
-		document.getElementById('rotpos-hint').innerHTML = 'Switch to <br> positioning</span>';
-		moveMode = false;
-		handle.visible = false;
-	} else {
-		model.space.select.value = 0;
-		document.getElementById('title').innerHTML = 'Rotation mode';
-		document.getElementById('rotpos').src = '../assets/logo/icon-rot.png';
-		document.getElementById('rotpos-hint').innerHTML = 'Switch to <br> rotating</span>';
-		moveMode = true;
-		handle.visible = false;
-	}
-	
+function setPoseMode( ) {
+
+	model.space.select.value = 0;
+	title.innerHTML = '<b>Posing</b> mode';
+	title.classList.remove( 'autohide' );
+	void title.offsetWidth;
+	title.classList.add( 'autohide' );
+	moveMode = false;
+	handle.visible = false;
+
 }
 
 
-export { init, update, reset, toggleRotPos };
+function setMoveMode( ) {
+
+	model.space.select.value = 0;
+	title.innerHTML = '<b>Moving</b> mode';
+	title.classList.remove( 'autohide' );
+	void title.offsetWidth;
+	title.classList.add( 'autohide' );
+	moveMode = true;
+	handle.visible = false;
+
+}
+
+
+function swapModel( model, models ) {
+
+	if ( model==models[ 0 ]) {
+
+		title.innerHTML = '<b>Woman</b> figure';
+		title.classList.remove( 'autohide' );
+		void title.offsetWidth;
+		title.classList.add( 'autohide' );
+		return models[ 1 ];
+
+	}
+
+	if ( model==models[ 1 ]) {
+
+		title.innerHTML = '<b>Child</b> figure';
+		title.classList.remove( 'autohide' );
+		void title.offsetWidth;
+		title.classList.add( 'autohide' );
+		return models[ 2 ];
+
+	}
+
+	title.innerHTML = '<b>Man</b> figure';
+	title.classList.remove( 'autohide' );
+	void title.offsetWidth;
+	title.classList.add( 'autohide' );
+	return models[ 0 ];
+
+}
+
+
+export { initScene, initModel, update, reset, setMoveMode, setPoseMode, swapModel, useModel };

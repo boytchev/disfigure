@@ -1,17 +1,8 @@
-﻿body {
+﻿
+body {
 	margin: 0;
 	font-family:Roboto;
 	overflow: hidden;
-}
-
-.padded {
-	text-align: right;
-	padding-right: 0.5em;
-	color: gray;
-}
-
-.border {
-	border-top: dotted #404040 1px;
 }
 
 .icon {
@@ -22,18 +13,17 @@
 	font-size: 1em;
 }
 
-.header {
-	margin: 0 0 0 0.5em;
+.panel {
+	margin: 0;
 	padding: 0;
 	position: fixed;
 	height: 100%;
 	top: 0;
-	left: 0;
 	z-index: 10;
 	pointer-events: none;
 }
 
-h1 {
+.autohide {
 	position: absolute;
 	top: 0;
 	font-size: 0.65cm;
@@ -44,9 +34,6 @@ h1 {
 	text-align: center;
 	width: 100%;
 	pointer-events: none;
-}
-
-.disappear {
 	animation: disappear 3s 1;
 }
 
@@ -104,23 +91,27 @@ img.menu {
   100% { opacity: 0; }
 }
 
-.tooltip {
-  position: relative;
+
+div.button {
+	display: block;
+	width: 4em;
+	height: 4em;
+	border: none;
+	border-radius: 2em;
+	text-align: center;
+	line-height: 4em;
+	background: rgba(255,255,255,0.7);
+	text-transform: uppercase;
+	box-shadow: 0 0 0.2em gray;
+	text-shadow: 0 0 0.1em white;
+	margin: 1em;
+	color: black;
+	pointer-events: auto;
+	opacity: 0.25;
 }
 
-.tooltip .tooltip-text {
-  visibility: hidden;
-  width: 120px;
-  color: dimgray;
-  text-align: left;
-  padding: 1em 0;
-  left: 1.75cm;
-
-  /* Position the tooltip */
-  position: absolute;
-  z-index: 1;
-}
-
-.tooltip:hover .tooltip-text {
-  visibility: visible;
+div.button:hover {
+	opacity: 1;
+	cursor: pointer;
+	text-shadow: 0 0 0.05em black;
 }

@@ -31,39 +31,30 @@
 
 
 <body>
-	<h1 id="title" class="disappear"><b>Disfigure</b> Posture Editor</h1>
 
-	<table class="header">
-		<tr><td>
-		<img id="menu" class="button menu" src="../assets/logo/icon-menu.png">
-		<div id="buttons" style="display:none;">
-		
-			<div class="tooltip">
-				<img id="get" class="button" src="../assets/logo/icon-get.png">
-				<span class="tooltip-text">Get text <br> of posture</span>
-			</div>
-			
-			<div class="tooltip">
-				<img id="reset" class="button" src="../assets/logo/icon-new.png">
-				<span class="tooltip-text">Reset <br> posture</span>
-			</div>
-			
-			<div class="tooltip">
-				<img id="set" class="button" src="../assets/logo/icon-put.png">
-				<span class="tooltip-text">Put text <br> as posture</span>
-			</div>
-			
-			<div class="tooltip">
-				<img id="rotpos" class="button" src="../assets/logo/icon-pos.png">
-				<span id="rotpos-hint" class="tooltip-text">Switch to <br> positioning</span>
-			</div>
-			
+	<h1 id="title" class="autohide disappear"><b>Disfigure</b> Posture Editor</h1>
+
+	<table id="left-panel" class="panel" style="left:0"><tr><td>
+		<img id="left-menu" class="button menu" src="../assets/logo/icon-menu.png">
+		<div id="left-buttons" style="display:none;">
+			<div id="get" class="button">Get</div>
+			<div id="set" class="button">Set</div>
+			<div id="reset" class="button">Reset</div>
 		</div>
-		</td></tr>
-	</table>
+	</td></tr></table>
+
+	<table id="right-panel" class="panel" style="right:0"><tr><td>
+		<img id="right-menu" class="button menu" src="../assets/logo/icon-menu.png">
+		<div id="right-buttons" style="display:none;">
+			<div id="move" class="button">Move</div>
+			<div id="pose" class="button">Pose</div>
+			<div id="swap" class="button">Swap</div>
+		</div>
+		
+	</td></tr></table>
 	
 
-	<div id="spinner"></div>
+	<!--div id="spinner"></div-->
 	
 	<script type="module">
 

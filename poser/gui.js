@@ -2,6 +2,9 @@
 // disfigure
 //
 // module to construct gui
+//
+// horrible code, do not look at it
+
 
 
 
@@ -9,95 +12,137 @@ import * as THREE from "three";
 import * as lil from "three/addons/libs/lil-gui.module.min.js";
 import { /*float, Fn, If, mix, select,*/ uniform/*, vec3 */ } from "three/tsl";
 import { LocusT, LocusX } from "../src/space.js";
-import { scene, setAnimationLoop, World, light } from "../src/world.js";
+import { controls, scene, setAnimationLoop, World } from "../src/world.js";
 import { chaotic } from "../src/motion.js";
-import { Joint, Man, Woman, Child } from "../src/body.js";
+import { Child, Joint, Man, Woman } from "../src/body.js";
 import { DEBUG, DEBUG_JOINT, DEBUG_NAME } from "./debug.js";
-import { init as initHandlers, reset as resetHandlers, update as updateHandlers, toggleRotPos } from "./handles.js";
+import { initModel, initScene, reset as resetHandlers, setMoveMode, setPoseMode, swapModel, update as updateHandlers, useModel } from "./handles.js";
+import { childGrips, manGrips, womanGrips } from './models.js';
 
 
 
 new World();
+controls.zoomSpeed = 5;
+controls.damping = 0.01;
+initScene();
 
-var model = new Man();
-//var model = new Woman();
-//var model = new Child();
+//var model = new Man();
 
-initHandlers( model );
+var man = initModel( new Man(), manGrips );
+man.space.select = uniform( DEBUG?DEBUG_JOINT:0, 'int' ); // 0..24
+
+var woman = initModel( new Woman(), womanGrips );
+woman.space.select = uniform( DEBUG?DEBUG_JOINT:0, 'int' ); // 0..24
+
+var child = initModel( new Child(), childGrips );
+child.space.select = uniform( DEBUG?DEBUG_JOINT:0, 'int' ); // 0..24
+
+var models = [
+	man,
+	woman,
+	child
+];
+
+var model = man;
+model.visible = true;
+useModel( model );
 
 
 var debugSpace;
 
-var menu = document.getElementById( 'menu' );
-var buttons = document.getElementById( 'buttons' );
+var eLeftMenu = document.getElementById( 'left-menu' );
+var eLeftButtons = document.getElementById( 'left-buttons' );
+var eRightMenu = document.getElementById( 'right-menu' );
+var eRightButtons = document.getElementById( 'right-buttons' );
 
-menu.addEventListener( 'click', showMenu );
+eLeftMenu.addEventListener( 'click', showLeftMenu );
+eRightMenu.addEventListener( 'click', showRightMenu );
 
-function showMenu() {
+document.getElementById( 'reset' ).addEventListener( 'click', rigResetModel );
+document.getElementById( 'get' ).addEventListener( 'click', rigGetModel );
+document.getElementById( 'set' ).addEventListener( 'click', rigSetModel );
+document.getElementById( 'move' ).addEventListener( 'click', rigMoveMode );
+document.getElementById( 'pose' ).addEventListener( 'click', rigPoseMode );
+document.getElementById( 'swap' ).addEventListener( 'click', rigSwapModel );
 
-	menu.style.display='none';
-	buttons.style.display='block';
+function rigMoveMode() {
+
+	hideMenus();
+	setMoveMode();
 
 }
 
-function hideMenu() {
+function rigPoseMode() {
 
-	menu.style.display='block';
-	buttons.style.display='none';
+	hideMenus();
+	setPoseMode();
 
 }
 
-// extract credits and place them in DOM element
-// replaces the resource url extension with "txt"
-// e.g. my-model.glb -> my-model.txt
-// function credits( url, id ) {
+function rigSwapModel() {
 
-// var xhttp = new XMLHttpRequest();
-// xhttp.onreadystatechange = function () {
+	hideMenus();
+	var posture = model.posture;
+	model.visible = false;
+	model = swapModel( model, models );
+	model.visible = true;
+	model.posture = posture;
+	useModel( model );
 
-// if ( this.readyState == 4 && this.status == 200 )
-// document.getElementById( id ).innerHTML = this.responseText.split( '||' )[ 0 ];
+}
 
-// };
+function showLeftMenu() {
 
-// url = url.split( '.' );
-// url.pop();
-// url.push( 'txt' );
-// url = url.join( '.' );
+	eLeftMenu.style.display='none';
+	eLeftButtons.style.display='block';
+	eRightMenu.style.display='block';
+	eRightButtons.style.display='none';
 
-// xhttp.open( "GET", url, true );
-// xhttp.send();
+}
+
+function showRightMenu() {
+
+	eLeftMenu.style.display='block';
+	eLeftButtons.style.display='none';
+	eRightMenu.style.display='none';
+	eRightButtons.style.display='block';
+
+}
+
+function hideMenus() {
+
+	eLeftMenu.style.display='block';
+	eLeftButtons.style.display='none';
+	eRightMenu.style.display='block';
+	eRightButtons.style.display='none';
+
+}
+
+
+//for ( var name of Object.keys( model.space ) ) {
+//
+//	if ( model.space[ name ]?.pivot )
+//		model.space[ name ].pivot = uniform( model.space[ name ].pivot );
+//
+//}
+
+// if ( DEBUG_NAME ) {
+
+// debugSpace = model.space[ DEBUG_NAME ];
+
+// if ( debugSpace instanceof LocusX && !( debugSpace instanceof LocusT ) ) {
+
+// debugSpace.minX = uniform( debugSpace.minX );
+// debugSpace.maxX = uniform( debugSpace.maxX );
+
+// } else {
+
+// debugSpace.minY = uniform( debugSpace.minY );
+// debugSpace.maxY = uniform( debugSpace.maxY );
 
 // }
 
-// credits( model.url, 'credits1' );
-
-
-
-for ( var name of Object.keys( model.space ) ) {
-
-	if ( model.space[ name ]?.pivot )
-		model.space[ name ].pivot = uniform( model.space[ name ].pivot );
-
-}
-
-if ( DEBUG_NAME ) {
-
-	debugSpace = model.space[ DEBUG_NAME ];
-
-	if ( debugSpace instanceof LocusX && !( debugSpace instanceof LocusT ) ) {
-
-		debugSpace.minX = uniform( debugSpace.minX );
-		debugSpace.maxX = uniform( debugSpace.maxX );
-
-	} else {
-
-		debugSpace.minY = uniform( debugSpace.minY );
-		debugSpace.maxY = uniform( debugSpace.maxY );
-
-	}
-
-} // DEBUG_NAME
+// } // DEBUG_NAME
 
 
 
@@ -141,10 +186,6 @@ var debug = {
 var gui;
 
 
-document.getElementById( 'reset' ).addEventListener( 'click', rigResetModel );
-document.getElementById( 'get' ).addEventListener( 'click', rigGetModel );
-document.getElementById( 'set' ).addEventListener( 'click', rigSetModel );
-document.getElementById( 'rotpos' ).addEventListener( 'click', ()=>{hideMenu(); toggleRotPos();} );
 
 rigResetModel( false );
 
@@ -221,7 +262,6 @@ function updateDebug() {
 
 function createGui( ) {
 
-	model.space.select = uniform( DEBUG?DEBUG_JOINT:0, 'int' ); // 0..24
 
 
 	if ( DEBUG ) {
@@ -474,7 +514,7 @@ function rigRandomModel( ) {
 
 function rigResetModel( ask=true ) {
 
-	hideMenu();
+	hideMenus();
 
 	if ( !ask || confirm( 'Reset the posture to the default T-pose?' ) == true ) {
 
@@ -498,16 +538,21 @@ function rigResetModel( ask=true ) {
 
 
 
+var title = document.getElementById( 'title' );
+
 function rigGetModel( ) {
 
-	hideMenu();
+	hideMenus();
 
 	if ( !model ) return;
 
 	if ( navigator.clipboard.writeText ) {
 
 		navigator.clipboard.writeText( model.postureString );
-		alert( 'The current posture is copied to the clipboard.' );
+		title.innerHTML = 'Posture is in the <b>clipboard</b>';
+		title.classList.remove( 'autohide' );
+		void title.offsetWidth;
+		title.classList.add( 'autohide' );
 
 	} else {
 
@@ -521,7 +566,7 @@ function rigGetModel( ) {
 
 function rigSetModel( ) {
 
-	hideMenu();
+	hideMenus();
 
 	if ( !model ) return;
 
@@ -777,7 +822,3 @@ createGui( );
 
 
 
-//model.material.colorNode = tslSelectionNode( { space: model.space } );
-model.material.roughness = -1;//0.2;
-model.material.metalness = 0.2;//0.2;
-//light.intensity = 0.5;
