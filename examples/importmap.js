@@ -33,7 +33,7 @@ var importMap = `
 			"three/webgpu": "${CDN}/${THREEJS}/build/three.webgpu.min.js",
 			"three/tsl": "${CDN}/${THREEJS}/build/three.tsl.min.js",
 			"three/addons/": "${CDN}/${THREEJS}/examples/jsm/",
-			"disfigure": "../src/disfigure.js",
+			"disfigure": "../dist/disfigure.min.js",
 			"label": "./font.js"
 		}
 	}
