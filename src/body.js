@@ -21,7 +21,10 @@ var loader = new GLTFLoader();
 
 
 // path to models as GLB files
-const MODEL_PATH = import.meta.url.replace( '/src/body.js', '/assets/models/' );
+const MODEL_PATH = import.meta.url
+	.replace( '/src/body.js', '/assets/models/' )
+	.replace( '/dist/disfigure.js', '/assets/models/' )
+	.replace( '/dist/disfigure.min.js', '/assets/models/' );
 
 
 

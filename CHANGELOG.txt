@@ -1,3 +1,7 @@
+
+v0.0.23
+  - access to models via dist folder
+  
 v0.0.22
   - changed spinner to 4x4 dots
   - the poser is much more intuitive
@@ -25,7 +29,7 @@ v0.0.18
   - removed src\models\*.js
   - added torso with bend, turn, tilt
 
-v0.0.17
+v0.0.17 
   - minor fixes in links
   
 v0.0.16
