@@ -73,7 +73,7 @@ function latex( color ) {
 
 function velour( color ) {
 
-	return tslSimpleMaterial( toVec3( color ).mul( 3 ), 1, 1 );
+	return tslSimpleMaterial( toVec3( color ).mul( 1.5 ), 1, 1 );
 
 } // velour
 
@@ -606,8 +606,19 @@ class Locus {
 
 		if ( this.rangeX ) {
 
-			this.rangeX.value.x *= -1;
-			this.rangeX.value.y *= -1;
+			if ( Object.hasOwn( this.rangeX, 'value' ) ) {
+
+				// for Three.js r180 and earlier
+				this.rangeX.value.x *= -1;
+				this.rangeX.value.y *= -1;
+
+			} else {
+
+				// for Three.js r181 and possibly later
+				this.rangeX.node.value.x *= -1;
+				this.rangeX.node.value.y *= -1;
+
+			}
 
 		}
 
@@ -1039,7 +1050,7 @@ class Disfigure extends Mesh {
 
 		var clothes = compileClothing( clothingData ).toVar();
 
-		this.material.colorNode = clothes[ 0 ].xyz;
+		this.material.colorNode = clothes[ 0 ].xyz.clamp( 0, 1 );
 		this.material.roughnessNode = clothes[ 1 ].x;
 		this.material.metalnessNode = clothes[ 1 ].y;
 

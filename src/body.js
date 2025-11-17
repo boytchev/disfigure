@@ -323,7 +323,7 @@ class Disfigure extends Mesh {
 
 		var clothes = compileClothing( clothingData ).toVar();
 
-		this.material.colorNode = clothes[ 0 ].xyz;
+		this.material.colorNode = clothes[ 0 ].xyz.clamp( 0, 1 );
 		this.material.roughnessNode = clothes[ 1 ].x;
 		this.material.metalnessNode = clothes[ 1 ].y;
 

@@ -1,4 +1,7 @@
 
+v0.0.24
+  - fixed compatibility issue with Three.js r181
+  
 v0.0.23
   - access to models via dist folder
   

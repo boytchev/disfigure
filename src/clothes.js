@@ -83,7 +83,7 @@ function latex( color ) {
 
 function velour( color ) {
 
-	return tslSimpleMaterial( toVec3( color ).mul( 3 ), 1, 1 );
+	return tslSimpleMaterial( toVec3( color ).mul( 1.5 ), 1, 1 );
 
 } // velour
 

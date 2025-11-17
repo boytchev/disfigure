@@ -134,8 +134,19 @@ class Locus {
 
 		if ( this.rangeX ) {
 
-			this.rangeX.value.x *= -1;
-			this.rangeX.value.y *= -1;
+			if ( Object.hasOwn( this.rangeX, 'value' ) ) {
+
+				// for Three.js r180 and earlier
+				this.rangeX.value.x *= -1;
+				this.rangeX.value.y *= -1;
+
+			} else {
+
+				// for Three.js r181 and possibly later
+				this.rangeX.node.value.x *= -1;
+				this.rangeX.node.value.y *= -1;
+
+			}
 
 		}
 
