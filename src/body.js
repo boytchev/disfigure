@@ -73,7 +73,7 @@ class Joint extends Group {
 		getset( this, 'bend', bendAxis, bendSign );
 		getset( this, 'turn', turnAxis, turnSign );
 		getset( this, 'tilt', tiltAxis, tiltSign );
-		getset( this, 'foreward', bendAxis, bendSign );
+		getset( this, 'forward', bendAxis, bendSign );
 		getset( this, 'straddle', tiltAxis, tiltSign );
 
 		( parent??model ).add( this );

@@ -29,7 +29,7 @@ Disfigure defines figures as instances of classes `Man`, `Woman`
 and `Child` &ndash; [see it](../examples/figure-create-basic.html).
 The optional parameter *height* defines the height of a figure
 in meters &ndash; [see it](../examples/figure-create-height.html).
-By default a man is 1.80m, a woman is 1.70m and a child is 1.35m.
+By default, a man is 1.80m, a woman is 1.70m and a child is 1.35m.
 
 ```js
 var man = new Happy.Man( 1.90 );
@@ -71,7 +71,7 @@ body parts are `head`, `chest` and `waist`. They have the
 same set of properties as the torso &ndash;
 [see it](../examples/motion-central.html).
 
-* `bend` &ndash; bends foreward or backward
+* `bend` &ndash; bends forward or backward
 * `turn` &ndash; turns to the left or right
 * `tilt` &ndash; tilts sideways to the left or right
 
@@ -95,15 +95,15 @@ figure.waist.tilt = 35;
 The upper limbs are symmetrical body parts with multiple joints
 and rotation properties that recreate a complex and flexible
 motion &ndash; [see it](../examples/motion-limbs-upper.html).
-Arms have `foreward`, `turn` and `straddle` &ndash;
+Arms have `forward`, `turn` and `straddle` &ndash;
 [see it](../examples/motion-arm.html).
 
-* `foreward` &ndash; moves an arm foreward (or backward)
+* `forward` &ndash; moves an arm forward (or backward)
 * `turn` &ndash; turns an arm inwards (or outwards)
 * `straddle` &ndash; moves an arm sideways to the body (or away from the body)
 
 ``` javascript
-figure.r_arm.foreward = 70;
+figure.r_arm.forward = 70;
 figure.r_arm.straddle = -30;
 figure.r_arm.turn = 5;
 ```
@@ -149,7 +149,7 @@ as turning is done in the forearm or the arm.
 Motions of `l_wrist` and `r_wrist`:
 
 * `bend` &ndash; bends a wrist down or up
-* `turn` &ndash; turns a wrist foreward or backward
+* `turn` &ndash; turns a wrist forward or backward
 
 ``` javascript
 man.r_wrist.bend = -60;
@@ -167,14 +167,14 @@ man.r_wrist.tilt = 10;
 The lower limbs are symmetrical body parts with multiple joints
 and rotation properties that recreate a complex and flexible
 motion &ndash; [see it](../examples/motion-limbs-lower.html).
-Legs have `foreward`, `straddle` and `turn` &ndash; [see it](../examples/motion-leg.html).
+Legs have `forward`, `straddle` and `turn` &ndash; [see it](../examples/motion-leg.html).
 
-* `foreward` &ndash; moves a leg foreward (or backward)
+* `forward` &ndash; moves a leg forward (or backward)
 * `straddle` &ndash; moves a leg sideways away from the body (or to the body)
 * `turn` &ndash; turns a leg inward (or outward)
 
 ``` javascript
-figure.r_leg.foreward = -10;
+figure.r_leg.forward = -10;
 figure.r_leg.straddle = 50;
 figure.r_leg.turn = 20;
 ```
@@ -245,7 +245,7 @@ as turning is done in the shin.
 
 Motions of `l_ankle` and `r_ankle`:
 
-* `bend` &ndash; bends an ankle foreward or backward
+* `bend` &ndash; bends an ankle forward or backward
 * `tilt` &ndash; tilts a ankle outward or inward
 
 ``` javascript
@@ -316,13 +316,13 @@ is used, it manages posture animation in two ways &ndash; via animation
 loop function or via timer events. In both ways the user program should
 provide angles at a given time.
 
-The function `setAnimationLoop` registers a user-defind function that is
+The function `setAnimationLoop` registers a user-defined function that is
 called automatically each frame. This user function accepts a parameter
-*time* with the current time in miliseconds
+*time* with the current time in milliseconds
 &ndash; [see it](../examples/posture-dynamic.html). The alternative
 approach is to let the `window` object listen to the `animate`
 events via the `addEventListener` method. The `event.time`
-holds the current time in miliseconds &ndash;
+holds the current time in milliseconds &ndash;
 [see it](../examples/posture-events-global.html).
 
 ```javascript
@@ -377,7 +377,7 @@ function animate ( event ) {
 
 A posture could be extracted from a figure with the `posture` property.
 The posture object contains properties `version` of the posture data
-format, `positio` for the coordinates of the figure, `rotation` for its
+format, `position` for the coordinates of the figure, `rotation` for its
 orientation and `data` with joint angles. The `posture` property can be
 used to push a posture to a figure &ndash; [see it](../examples/posture.html).
 
@@ -535,14 +535,14 @@ The *bands* function makes a composite material of alternating horizontal
 bands of *material_1* and *material_2*. The *width* of each band
 is defined in meters.  The optional *options* parameter provides additional properties
 for the band &ndash; [see it](../examples/extras-clothes-bands.html).
-Adequate bluring the bands may improve the visual appearance of the bands,
+Adequate blurring the bands may improve the visual appearance of the bands,
 especially when they are too close or too far.
 
 Polar bands revolve around a vertical axis. They are more suitable for
 vertical bands that go around a body part &ndash; [see it](../examples/extras-clothes-bands-polar.html).
 
 * **balance** &ndash; the relative weight of the two materials from -1 to 1; 0 means they are equally balanced
-* **blur** &ndash; the blurness of the bands' edges from 0 to 1; 0 is no blur, 1 is maximal blur
+* **blur** &ndash; the blurrness of the bands' edges from 0 to 1; 0 is no blur, 1 is maximal blur
 * **angle** &ndash; the rotation of bands in degrees, from -360 to 360; 0 is horizontal bands, 90 is vertical bands
 * **polar** &ndash; bands are around a central vertical axis, *angle* is not used and *width* represents portions of a full circle of one band, i.e. 1/10 is 10 bands
 * **x** &ndash; the x-coordinate of a central vertical axis, used only for polar bands
@@ -563,7 +563,7 @@ Happy.bands(
 
 The *slice* function defines a slice of a figure &ndash; this is a part
 of the figure that is dressed in given material. Parameters *from* and *to*
-define the start and the end of the slice, measure in meters. By default
+define the start and the end of the slice, measure in meters. By default,
 a slice is horizontal, thus *from* and *to* denote distance from the ground.
 The optional *options* parameter provides additional properties
 for the slice like their orientation &ndash; [see it](../examples/extras-clothes-slice.html),
@@ -879,7 +879,7 @@ Generates an oscilating sequence of numbers in the interval [*min*,*max*]
 &ndash; [see it](../examples/number-generators.html).
 By default *offset*=0, *min*=-1 and *max*=1. Internally uses
 the sine function. Parameter *offset* shifts the oscillation
-foreward or backward in time.
+forward or backward in time.
 
 ```js
 figure.head.turn = regular( time, 0, -60, 60 );

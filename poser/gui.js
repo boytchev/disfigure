@@ -341,7 +341,7 @@ function createGui( ) {
 	folder = gui.addFolder( 'LEFT LEG' ).close();
 	{
 
-		folder.add( model.l_leg, 'foreward', -40, 120 ).name( html( 'Leg', 'foreward' ) );
+		folder.add( model.l_leg, 'forward', -40, 120 ).name( html( 'Leg', 'forward' ) );
 		/*folder.add( model.l_leg, 'turn', -10, 90 ).name( html( '', 'turn' ) );-@@*/
 		folder.add( model.l_leg, 'straddle', -10, 90 ).name( html( '', 'straddle' ) );
 
@@ -362,7 +362,7 @@ function createGui( ) {
 	folder = gui.addFolder( 'RIGHT LEG' ).close();
 	{
 
-		folder.add( model.r_leg, 'foreward', -40, 120 ).name( html( 'Leg', 'foreward' ) );
+		folder.add( model.r_leg, 'forward', -40, 120 ).name( html( 'Leg', 'forward' ) );
 		/*folder.add( model.r_leg, 'turn', -10, 90 ).name( html( '', 'turn' ) );-@@*/
 		folder.add( model.r_leg, 'straddle', -10, 90 ).name( html( '', 'straddle' ) );
 
@@ -385,7 +385,7 @@ function createGui( ) {
 
 		folder.add( model.l_arm, 'straddle', -45, 80 ).name( html( 'Arm', 'straddle' ) );
 		folder.add( model.l_arm, 'turn', -40, 40 ).name( html( '', 'turn' ) );
-		folder.add( model.l_arm, 'foreward', -30, 80 ).name( html( '', 'foreward' ) );
+		folder.add( model.l_arm, 'forward', -30, 80 ).name( html( '', 'forward' ) );
 
 		folder.add( model.l_elbow, 'bend', 0, 140 ).name( html( 'Elbow', 'bend', 'border' ) );
 
@@ -401,7 +401,7 @@ function createGui( ) {
 
 		folder.add( model.r_arm, 'straddle', -45, 80 ).name( html( 'Arm', 'straddle' ) );
 		folder.add( model.r_arm, 'turn', -40, 40 ).name( html( '', 'turn' ) );
-		folder.add( model.r_arm, 'foreward', -30, 80 ).name( html( '', 'foreward' ) );
+		folder.add( model.r_arm, 'forward', -30, 80 ).name( html( '', 'forward' ) );
 
 		folder.add( model.r_elbow, 'bend', 0, 140 ).name( html( 'Elbow', 'bend', 'border' ) );
 
@@ -453,11 +453,11 @@ function rigModel( t ) {
 
 	model.l_arm.straddle = chaotic( t, 5, -50, 40 );
 	model.l_arm.turn = chaotic( t, 6, -20, 20 );
-	model.l_arm.foreward = chaotic( t, 7, -20, 80 );
+	model.l_arm.forward = chaotic( t, 7, -20, 80 );
 
 	model.r_arm.straddle = chaotic( t, -5, -50, 40 );
 	model.r_arm.turn = chaotic( t, -6, -20, 20 );
-	model.r_arm.foreward = chaotic( t, -7, -20, 80 );
+	model.r_arm.forward = chaotic( t, -7, -20, 80 );
 
 
 
@@ -477,11 +477,11 @@ function rigModel( t ) {
 
 	model.l_thigh.turn = chaotic( t, 8, -40, 80 );
 	model.l_leg.straddle = chaotic( t, -8, 0, 40 );
-	model.l_leg.foreward = chaotic( t, -2, -40, 80 );
+	model.l_leg.forward = chaotic( t, -2, -40, 80 );
 
 	model.r_thigh.turn = chaotic( t, -1, -40, 80 );
 	model.r_leg.straddle = chaotic( t, -3, 0, 40 );
-	model.r_leg.foreward = chaotic( t, 4, -40, 80 );
+	model.r_leg.forward = chaotic( t, 4, -40, 80 );
 
 	updateGUI( );
 
