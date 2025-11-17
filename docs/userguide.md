@@ -616,6 +616,7 @@ Happy.slice( -0.1, 1.1, {angle:45, wave: 0.3, width:0.02} )
 [<img src="../examples/snapshots/extras-clothes-slice-and-or.jpg" width="48%">](../examples/extras-clothes-slice-and-or.html)
 
 
+<!--
 ## TSL textures
 
 Disfigure is compatible with most [TSL Textures](https://boytchev.github.io/tsl-textures/)
@@ -644,6 +645,7 @@ figure.material.colorNode = TSLTexture.camouflage ( {
 
 [<img src="../examples/snapshots/extras-tsl-texture-simple.jpg" width="48%">](../examples/extras-tsl-texture-simple.html)
 [<img src="../examples/snapshots/extras-tsl-texture.jpg" width="48%">](../examples/extras-tsl-texture.html)
+-->
 
 <!--
 
