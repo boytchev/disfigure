@@ -184,11 +184,11 @@
 
 			man.l_arm.straddle = Happy.chaotic( t, 5, 20, 70 );
 			man.l_arm.turn = Happy.chaotic( t, 6, -20, 20 );
-			man.l_arm.foreward = Happy.chaotic( t, 7, -20, 80 );
+			man.l_arm.forward = Happy.chaotic( t, 7, -20, 80 );
 
 			man.r_arm.straddle = Happy.chaotic( t, -5, 20, 70 );
 			man.r_arm.turn = Happy.chaotic( t, -6, -20, 20 );
-			man.r_arm.foreward = Happy.chaotic( t, -7, -20, 80 );
+			man.r_arm.forward = Happy.chaotic( t, -7, -20, 80 );
 
 		
 			man.l_knee.bend = 2*a;
@@ -202,8 +202,8 @@
 			man.l_shin.turn = -0.0*a;
 			man.r_shin.turn = -0.0*a;
 		
-			man.l_leg.foreward = a;
-			man.r_leg.foreward = a;
+			man.l_leg.forward = a;
+			man.r_leg.forward = a;
 
 			man.l_foot.lockTo( 0, -0.03, 0, 0.08, 0, 0 );
 			man.position.x = 0;

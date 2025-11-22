@@ -37,8 +37,8 @@
 		man.l_leg.attach( new Red.Label( 'turn', 0.8, 0.17, -0.21, 0, -1 ) );
 		man.r_leg.attach( new Red.Label( 'turn', 0.8, -0.17, -0.21, 0, 1 ) );
 		
-		woman.l_leg.attach( new Red.Label( 'foreward', 0.8, 0.17, -0.21, 0, -1 ) );
-		woman.r_leg.attach( new Red.Label( 'foreward', 0.8, -0.17, -0.21, 0, 1 ) );
+		woman.l_leg.attach( new Red.Label( 'forward', 0.8, 0.17, -0.21, 0, -1 ) );
+		woman.r_leg.attach( new Red.Label( 'forward', 0.8, -0.17, -0.21, 0, 1 ) );
 		
 		child.l_leg.attach( new Red.Label( 'straddle', 0.7, 0.12, -0.31, 0, -1 ) );
 		child.r_leg.attach( new Red.Label( 'straddle', 0.6, -0.12, -0.31, 0, 1 ) );
@@ -55,8 +55,8 @@
 			man.l_leg.turn = Happy.chaotic( t, 0, -60, 60 );
 			man.r_leg.turn = man.l_leg.turn;
 
-			woman.l_leg.foreward = Happy.chaotic( t, 2, -40, 80 );
-			woman.r_leg.foreward = Happy.chaotic( t, 3, -40, 80 );
+			woman.l_leg.forward = Happy.chaotic( t, 2, -40, 80 );
+			woman.r_leg.forward = Happy.chaotic( t, 3, -40, 80 );
 
 			child.l_leg.straddle = Happy.chaotic( t, 4, 0, 40 );
 			child.r_leg.straddle = Happy.chaotic( t, 5, 0, 40 );
