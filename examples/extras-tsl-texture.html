@@ -95,11 +95,11 @@
 		
 			someone.l_arm.straddle = Happy.chaotic( t, 5, 30, 70 );
 			someone.l_arm.turn = Happy.chaotic( t, 6, -10, 70 );
-			someone.l_arm.foreward = Happy.chaotic( t, 7, -20, 80 );
+			someone.l_arm.forward = Happy.chaotic( t, 7, -20, 80 );
 
 			someone.r_arm.straddle = Happy.chaotic( t, -5, 30, 70 );
 			someone.r_arm.turn = Happy.chaotic( t, -6, -10, 70 );
-			someone.r_arm.foreward = Happy.chaotic( t, -7, -20, 80 );
+			someone.r_arm.forward = Happy.chaotic( t, -7, -20, 80 );
 
 			someone.l_elbow.bend = Happy.chaotic( t, 9, 0, 140 );
 			someone.r_elbow.bend = Happy.chaotic( t, 7, 0, 140 );
@@ -128,12 +128,12 @@
 
 			var m = Happy.regular( 3*t+Happy.chaotic( t/3, someone.uid, 0, 10 ), 16, -60, 60 );
 			var n = Math.max( Math.min( m, 60 ), 0 );
-			someone.l_leg.foreward = n;
+			someone.l_leg.forward = n;
 			someone.l_knee.bend = 2*n;
 	//			someone.r_shin.turn = -30+n;
 		
 			n = Math.max( Math.min( -m, 60 ), 0 );
-			someone.r_leg.foreward = n;
+			someone.r_leg.forward = n;
 			someone.r_knee.bend = 2*n;
 		
 			someone.torso.turn = m/2;
