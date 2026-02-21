@@ -1,4 +1,7 @@
 
+v0.0.25
+  - updated Three.js to r183
+  
 v0.0.24
   - fixed compatibility issue with Three.js r181
   
