@@ -14,6 +14,23 @@ import { camera, controls, renderer, scene } from "../src/world.js";
 
 const DEBUG_SHOW_BODY_GRIPS = false;
 
+const HANDLE_SIZES = {
+	wrist : 0.5,
+	forearm : 0.7,
+	elbow : 0.5,
+	arm : 0.8,
+	foot : 0.4,
+	ankle : 0.5,
+	shin : 0.6,
+	knee : 0.6,
+	thigh : 0.8,
+	leg : 0.9,
+	head : 0.8,
+	chest : 1.0,
+	waist : 1.0,
+	torso : 1.0,
+};
+
 var model;
 var moveMode = false;
 var moveModel = false;
@@ -219,6 +236,8 @@ function initModel( readyModel, gripDef ) {
 		g.isHandleGrip = false;
 		g.isBodyGrip = true;
 
+		g.handleSize = HANDLE_SIZES[ name.split('_').pop() ];
+		
 		model[ name ].attach( g );
 		model.bodyGrips.push( g );
 
@@ -359,8 +378,8 @@ function pointerDown( event ) {
 
 			startQuaternion.copy( activeBodyPart.quaternion );
 
+			handle.scale.setScalar( intersects[ 0 ].object.handleSize );
 			handle.visible = true;
-
 			return;
 
 		}

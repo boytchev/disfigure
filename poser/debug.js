@@ -18,4 +18,8 @@ const DEBUG_NAME = DEBUG ? {
 
 
 
-export { DEBUG, DEBUG_NAME, DEBUG_JOINT };
+const DEBUG_SHOW_GUI = false;
+
+
+
+export { DEBUG, DEBUG_NAME, DEBUG_JOINT, DEBUG_SHOW_GUI };

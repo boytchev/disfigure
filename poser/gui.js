@@ -15,7 +15,7 @@ import { LocusT, LocusX } from "../src/space.js";
 import { controls, scene, setAnimationLoop, World } from "../src/world.js";
 import { chaotic } from "../src/motion.js";
 import { Child, Joint, Man, Woman } from "../src/body.js";
-import { DEBUG, DEBUG_JOINT, DEBUG_NAME } from "./debug.js";
+import { DEBUG, DEBUG_JOINT, DEBUG_NAME, DEBUG_SHOW_GUI } from "./debug.js";
 import { initModel, initScene, reset as resetHandlers, setMoveMode, setPoseMode, swapModel, update as updateHandlers, useModel } from "./handles.js";
 import { childGrips, manGrips, womanGrips } from './models.js';
 
@@ -273,7 +273,7 @@ function createGui( ) {
 
 	gui = new lil.GUI(); // global gui
 	gui.domElement.style.marginRight = 0;
-	gui.domElement.style.display = 'none';
+	gui.domElement.style.display = DEBUG_SHOW_GUI?'block':'none';
 
 	var folder = gui.addFolder( 'DEBUG' );
 
