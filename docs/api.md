@@ -89,6 +89,37 @@ Numeric property. Gets or sets the rotation angle in degrees around the Z
 "chest" axis.
 
 
+
+## Functions
+
+### **setAnimationLoop**(callback)<br>callback(*time*)
+
+Function. Sets animation function called once every frame. The *callback*
+function receives the time in miliseconds.
+
+
+
+## Events
+
+### window.addEventListener('**animate**',callback)
+
+Global animate event. Triggered once on every frame.
+
+### figure.addEventListener('**animate**',callback)
+
+Local animate event. Triggered once on every frame for each figure.
+
+### event.**time**
+
+Animate event property. Time in miliseconds in global and local animate events.
+
+### event.**target**
+
+Animate event property. Figure for which a local animate event is triggered.
+
+
+
+
 <div class="footnote">
 	<a href="../">Home</a> &middot;
 	<a href="https://github.com/boytchev/disfigure">GitHub</a> &middot; 

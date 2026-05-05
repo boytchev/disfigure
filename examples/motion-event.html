@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Motion via animation event</h3></br>
+	</header>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+
+		// create a man and a woman
+		
+		var man = new Happy.Man( );
+		var woman = new Happy.Woman( );
+
+		man.l_ankle.z = 0;
+		woman.l_ankle.z = 0;
+
+
+		// listen to the global animate event
+		
+		window.addEventListener( 'animate', animate );
+
+
+		// create 10 children
+		
+		for( var i=0; i<10; i++ ) {
+		
+			var child = new Happy.Child( );
+
+			child.l_ankle.z = 0;
+			child.position.z = -i/3;
+			
+			// listen to the local animate event
+			child.addEventListener( 'animate', animateChild );
+			
+		}
+
+
+		// animate man and woman
+		
+		function animate( event ) {
+		
+			// get time from the event
+		
+			var time = event.time/2000;
+
+			// animate the people
+
+			var mang = Happy.chaotic( time, man.id, -10, 10 ),
+				mabs = Math.abs( mang );
+
+			var wang = Happy.chaotic( time, woman.id, -10, 10 ),
+				wabs = Math.abs( wang );
+
+			man.torso.z = mang;
+			woman.torso.z = wang;
+
+			man.l_leg.z = mabs;
+			woman.l_leg.z = wabs;
+
+			man.r_leg.z = mabs;
+			woman.r_leg.z = wabs;
+
+			man.chest.z = -mang;
+			woman.chest.z = -wang;
+
+			man.waist.z = 2*mang;
+			woman.waist.z = 2*wang;
+
+			man.head.z = -2*mang;
+			woman.head.z = -2*wang;
+
+			man.position.x = -0.7 + 1.8*mang/1000;
+			woman.position.x = 0.7 + 1.7*wang/1000;
+
+			man.position.y = 1.8*mabs/2000;
+			woman.position.y = 1.7*wabs/2000;
+
+		}
+
+		
+		// animate child
+		
+		function animateChild( event ) {
+		
+			// get time and figure from the event
+		
+			var time = event.time/2000,
+				figure = event.target;
+
+			// animate the figure
+			
+			var ang = Happy.chaotic( time, figure.id, -15, 15 ),
+				abs = Math.abs( ang );
+				
+			figure.torso.z = ang;
+			figure.l_leg.z = abs;
+			figure.r_leg.z = abs;
+			figure.chest.z = -ang;
+			figure.waist.z = 2*ang;
+			figure.head.z = -2*ang;
+			figure.head.y = -ang;
+			figure.position.x = 1.35*ang/1500;
+			figure.position.y = 1.35*abs/2000-0.01;
+
+		}
+
+		
+	</script>
+</body>
+</html>
