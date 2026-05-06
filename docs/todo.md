@@ -366,18 +366,6 @@ It is a set of the following options:
 new World( {ground: false, stats: true} );
 ```
 
-### **userAnimationLoop**( *animate* )
-
-Sets the user-defined function *animate* to be called from the main
-animation loop at every frame. This function has one parameter
-of the elapsed time, measured in milliseconds (one second is
-1000 milliseconds).
-
-```js
-function animate( ms ) {...}
-
-setAnimationLoop( animate );
-```
 
 ### **renderer**<br>**scene**<br>**camera**<br>**light**<br>**cameraLight**
 
@@ -410,57 +398,3 @@ an instance of [`OrbitControls`](https://threejs.org/docs/#examples/en/controls/
 
 A statistics panel used to show the current the performance
 of rendering the default world. It is an instance of [`Stats`](https://mrdoob.github.io/stats.js/).
-
-
-
-
-# Others
-
-
-
-### **random**( )<br>**random**( *min*, *max* )
-
-Generates uniformly distributed random numbers in the interval [*min*,*max*)
-&ndash; [see it](../examples/number-generators.html).
-By default *min*=-1 and *max*=1. Internally uses a
-pseudo-random function.
-
-```js
-figure.head.turn = random( -60, 60 );
-```
-
-
-
-### **regular**( *time* )<br>**regular**( *time*, *offset* )<br>**regular**( *time*, *offset*, *min*, *max* )
-
-Generates an oscilating sequence of numbers in the interval [*min*,*max*]
-&ndash; [see it](../examples/number-generators.html).
-By default *offset*=0, *min*=-1 and *max*=1. Internally uses
-the sine function. Parameter *offset* shifts the oscillation
-forward or backward in time.
-
-```js
-figure.head.turn = regular( time, 0, -60, 60 );
-```
-
-
-
-### **chaotic**( *time* )<br>**chaotic**( *time*, *offset* )<br>**chaotic**( *time*, *offset*, *min*, *max* )
-
-Generates a chaotic (random, but gradually changing) sequence
-of numbers in the interval [*min*,*max*] &ndash;
-[see it](../examples/number-generators.html). By default *offset*=0,
-*min*=-1 and *max*=1. Internally uses a simplex noise function.
-Parameter *offset* shifts the sequence across the time, i.e. two
-generators with different offsets produce different sequences.
-
-```js
-figure.head.turn = chaotic( time, 0, -60, 60 );
-```
-
-
-
-### **everybody**
-
-An array of all created bodies. Usually used to traverse them
-and do some operation on all bodies.

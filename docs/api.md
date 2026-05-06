@@ -97,6 +97,25 @@ Numeric property. Gets or sets the rotation angle in degrees around the Z
 Function. Sets animation function called once every frame. The *callback*
 function receives the time in miliseconds.
 
+### **random**( )<br>**random**( *min*, *max* )
+
+Function. Generates uniformly distributed random number in interval [*min*,*max*).
+By default the optional parameters are *min*=-1 and *max*=1.
+
+### **regular**( *time* )<br>**regular**( *time*, *offset* )<br>**regular**( *time*, *offset*, *min*, *max* )
+
+Function. Generates an oscilating sine sequence of numbers in interval
+[*min*,*max*]. By default the optional parameters are *offset*=0, *min*=-1 and
+*max*=1. Parameter *offset* shifts the oscillation forward or backward in time.
+
+### **chaotic**( *time* )<br>**chaotic**( *time*, *offset* )<br>**chaotic**( *time*, *offset*, *min*, *max* )
+
+Function. Generates a chaotic oscilating sequence of numbers in interval
+[*min*,*max*]. By default the optional parameters are *offset*=0, *min*=-1 and
+*max*=1. Internally uses a simplex noise function. Parameter *offset* shifts the
+sequence across the time, i.e. two generators with different offsets produce
+different sequences.
+
 
 
 ## Events
@@ -117,6 +136,15 @@ Animate event property. Time in miliseconds in global and local animate events.
 
 Animate event property. Figure for which a local animate event is triggered.
 
+
+
+
+## Variables
+
+### **everybody**
+
+Global array. Contains all created figures. Usually used to traverse them and do
+some operation on all figures.
 
 
 

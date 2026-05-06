@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Motion with number generators</h3></br>
+	</header>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		import * as Red from 'label';
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+
+		// create groups of men, women and children
+		
+		for( var i=0; i<10; i++ ) {
+		
+			var man = new Happy.Man( );
+			man.position.x = -1;
+			man.position.z = -i;
+			man.addEventListener( 'animate', animateMan );
+			
+			var woman = new Happy.Woman( );
+			woman.position.x = 1;
+			woman.position.z = -i;
+			woman.addEventListener( 'animate', animateWoman );
+			
+			var child = new Happy.Child( );
+			child.position.z = -i;
+			child.addEventListener( 'animate', animateChild );
+			
+			if( i==0 || i==9 ) {
+
+				man.head.attach( new Red.Label( 'random', 0.8, [0, 0.27, 0.1] ) );
+				woman.head.attach( new Red.Label( 'chaotic', 0.8, [0, 0.27, 0.1] ) );
+				child.head.attach( new Red.Label( 'regular', 0.8, [0, 0.27, 0.1] ) );
+
+			}
+		}
+
+
+		
+		// animate man
+		
+		function animateMan( event ) {
+		
+			var time = event.time/500,
+				figure = event.target;
+
+			animate( figure, Happy.random( -25, 25 ) );
+			
+		}
+
+
+		
+		// animate woman
+		
+		function animateWoman( event ) {
+		
+			var time = event.time/2500,
+				figure = event.target;
+
+			animate( figure, Happy.chaotic( time, figure.id, -25, 25 ) );
+			
+		}
+
+
+		
+		// animate child
+		
+		function animateChild( event, generator ) {
+		
+			var time = event.time/500,
+				figure = event.target;
+
+			animate( figure, Happy.regular( time, figure.id/12, -25, 25 ) );
+			
+		}
+
+		
+		function animate( figure, ang ) {
+		
+			figure.chest.y = ang;
+			figure.waist.y = ang;
+			figure.head.y = -ang;
+
+			figure.waist.x = ang+30;
+			figure.head.x = -ang-30;
+			figure.head.z = ang;
+			
+			figure.l_arm.z = 2*ang-30;
+			figure.r_arm.z = -2*ang-30;
+
+			figure.l_elbow.y = -ang+55;
+			figure.r_elbow.y = ang+55;
+		}
+
+		
+	</script>
+</body>
+</html>

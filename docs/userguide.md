@@ -9,7 +9,7 @@
 
 
 
-[**Figures**](#figures) <small>([creating](#creating-a-figure) &middot;  [anatomy](#anatomy-of-a-figure) &middot; [posture](#figure-posture))</small> [**Motions**](#motions) <small>([figure](#figure-motion) &middot; [animation](#figure-animation) )</small>
+[**Figures**](#figures) <small>([creating](#creating-a-figure) &middot;  [anatomy](#anatomy-of-a-figure) &middot; [posture](#figure-posture))</small> [**Motions**](#motions) <small>([figure](#figure-motion) &middot; [animation](#figure-animation)  &middot; [generators](#number-generators) )</small>
 
 
 # Figures
@@ -209,7 +209,8 @@ function animate( time ) {
 
 Alternatively the `window` object may listen to `animate` events that are
 generated every frame with property `event.time` holds the current time in
-milliseconds.
+milliseconds. The `animate` event is also sent to individual figures and in this
+case the figure itself is in `event.target`.
 
 ```javascript
 window.addEventListener( 'animate', animate );
@@ -221,6 +222,17 @@ function animate ( event ) {
    // executed once per frame
    
 }
+
+figure.addEventListener( 'animate', animate );
+
+function animate ( event ) {
+
+   var time = event.time,
+       figure = event.target;
+
+   // executed once per frame
+   
+}
 ```
 
 Live examples: [animation loop](../examples/motion-loop.html) and [animation event](../examples/motion-event.html):
@@ -228,28 +240,32 @@ Live examples: [animation loop](../examples/motion-loop.html) and [animation eve
 [<img src="../examples/snapshots/motion-loop.jpg" width="48%">](../examples/motion-loop.html)
 [<img src="../examples/snapshots/motion-event.jpg" width="48%">](../examples/motion-event.html)
 
-<!--
-The *animate* event is triggered to each figure. In this case
-the activating figure is stored in the property `event.target`.
-This allows the same animation to be applied to several figures
-&ndash; [see it](../examples/posture-events-local.html).
+
+
+## Number generators
+
+Disfiure provide three number generators &ndash; these are functions that
+generate sequences of numbers used in animations. The `random` generator creates
+uniformly distributed random numbers within interval. The `regular` generator
+creates oscillation of values within interval. The `chaotic` generator combines
+randomness and smoothness &ndash; it creates smoothe sequence of numbers that
+gradually oscillate between randomly selected values in interval.
+
+Random generator needs only interval, while regular and chaotic generators need
+time, offset and interval.
 
 ```javascript
-figure.addEventListener( 'animate', animate );
-
-function animate ( event ) {
-		
-   // executed once per frame
-   
-   var time = event.time;
-   var figure = event.target;
-
-}
+figure1.head.y = random( -30, 30 );
+figure2.head.y = regular( time, 0, -30, 30 );
+figure3.head.y = chaotic( time, 0, -30, 30 );
 ```
 
-[<img src="../examples/snapshots/posture-events-local.jpg" width="48%">](../examples/posture-events-local.html)
+Live examples: [generators graphs](../examples/motion-generators-graphs.html) and [generators animations](../examples/motion-generators.html):
 
--->
+[<img src="../examples/snapshots/motion-generators-graphs.jpg" width="48%">](../examples/motion-generators-graphs.html)
+[<img src="../examples/snapshots/motion-generators.jpg" width="48%">](../examples/motion-generators.html)
+
+
 
 
 <div class="footnote">

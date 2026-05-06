@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Graphs of number generator sequences</h3></br>
+	</header>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Three from 'three';
+		import * as Happy from 'disfigure';
+		import * as Red from 'label';
+
+
+		// create a default world
+
+		new Happy.World( {ground: false} );
+		Happy.camera.position.y = Happy.controls.target.y;
+
+
+		const N = 500;
+		
+		// random
+		var material = new Three.LineBasicMaterial( { color: new Three.Color(-100,-100,-100) } ),
+			points = [];
+		
+		for( var i=0; i<N; i++ )
+			points.push( new Three.Vector3( (i/N-0.5)*5, Happy.random(1.2,1.7), 0 ) );
+			
+		var geometry = new Three.BufferGeometry().setFromPoints( points );
+		var line = new Three.Line( geometry, material );
+		Happy.scene.add( line, new Red.Label( 'random', 1, [0, 1.45, 0] ) );
+		
+		// regular
+		for( var i=0; i<N; i++ ) {
+			var x = (i/N-0.5)*5;
+			points[i].set( x, Happy.regular(10*x,0,0.6,1.1), 0 );
+		}
+				
+		geometry = new Three.BufferGeometry().setFromPoints( points );
+		line = new Three.Line( geometry, material );
+		Happy.scene.add( line, new Red.Label( 'regular', 1, [0, 0.85, 0] ) );
+		
+		// chaotic
+		for( var i=0; i<N; i++ ) {
+			var x = (i/N-0.5)*5;
+			points[i].set( x, Happy.chaotic(3*x,0,0,0.5), 0 );
+		}
+				
+		geometry = new Three.BufferGeometry().setFromPoints( points );
+		line = new Three.Line( geometry, material );
+		Happy.scene.add( line, new Red.Label( 'chaotic', 1, [0, 0.25, 0] ) );
+
+
+	</script>
+</body>
+</html>
