@@ -5,8 +5,7 @@
 
 import { Euler, MathUtils, Object3D, Quaternion, Vector3 } from 'three';
 import { everybody } from './world.js';
-import { EQ_DATA, JOINTS } from './assets.js';
-import { pivots } from './assets.js';
+import { pivots, EQ, EQ_DATA, JOINTS } from './assets.js';
 import { Pool } from './pool.js';
 import { quatTextureNode } from './quats.js';
 
@@ -172,6 +171,8 @@ class Body extends Object3D {
 
 		if ( !pivots ) return;
 
+		var offset = this.quaternionOffset;
+		
 		for ( var i=0; i<EQ_DATA; i++ ) {
 
 			var _euler = this.eulers[ i ];
@@ -180,7 +181,7 @@ class Body extends Object3D {
 
 				var euler = _euler;
 
-				pivot.set( ...pivots.array[ euler.index ]);
+				pivot.set( ...pivots.array[ euler.index+offset ]);
 
 				_p.copy( object.initialPosition );
 				_p.add( pivot );
@@ -190,7 +191,7 @@ class Body extends Object3D {
 
 				scan: while ( euler ) {
 
-					pivot.set( ...pivots.array[ euler.index ]);
+					pivot.set( ...pivots.array[ euler.index+offset ]);
 
 					_p.sub( pivot ).applyQuaternion( euler.quaternion ).add( pivot );
 					_q.premultiply( euler.quaternion );
@@ -350,6 +351,8 @@ class Man extends Body {
 		this.material = Man.pool.material; // expose to outside
 
 		this.scale.setScalar( height/1.795 ); // 1.795 is 3D model height
+		
+		this.quaternionOffset = 0*EQ_DATA; // custom property
 
 		this.l_arm.z = this.r_arm.z = -75;
 		this.l_elbow.y = this.r_elbow.y = 20;
@@ -384,6 +387,8 @@ class Woman extends Body {
 
 		this.scale.setScalar( height/1.691 ); // 1.691 is 3D model height
 
+		this.quaternionOffset = 1*EQ_DATA; // custom property
+
 		this.l_arm.z = this.r_arm.z = -90;
 		this.l_elbow.y = this.r_elbow.y = 0;
 		this.l_leg.z = this.r_leg.z = -3;
@@ -414,6 +419,8 @@ class Child extends Body {
 		this.material = Child.pool.material; // expose to outside
 
 		this.scale.setScalar( height/1.352 ); // 1.352 is 3D model height
+
+		this.quaternionOffset = 2*EQ_DATA; // custom property
 
 		this.l_arm.x = this.r_arm.x = -10;
 		this.l_arm.z = this.r_arm.z = -80;
