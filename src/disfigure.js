@@ -13,5 +13,4 @@ console.log( '\n%c\u22EE\u22EE\u22EE Disfigure\n%chttps://boytchev.github.io/dis
 export * from './body.js';
 export * from './world.js';
 export * from './pool.js';
-
 export * from './tsl.js';

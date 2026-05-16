@@ -1,6 +1,6 @@
 // disfigure v0.0.25
 
-import { Vector3, Vector4, TextureNode, DataTexture, RGBAFormat, FloatType, WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Object3D, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, InstancedMesh, MeshStandardNodeMaterial, InstancedBufferAttribute, Quaternion, MathUtils, Euler } from 'three';
+import { TextureNode, DataTexture, RGBAFormat, FloatType, WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Object3D, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, Vector4, InstancedMesh, MeshStandardNodeMaterial, InstancedBufferAttribute, Quaternion, MathUtils, Euler } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
@@ -8,200 +8,118 @@ import { uniformArray, Fn, vec4, If, select, ivec2, mat3, positionGeometry, norm
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
 
-// path to GLB models
+/**
+ * disfigure / quats.js
+ *
+ * -----------------------------------------------------------------------------
+ *
+ * Module responsible for managing quaternion data for all figures using a data
+ * texture. Each RGBA pixel represents one quaternion. A figure uses EQ pixels.
+ * The texture grows dynamically in height keeping width fixed at TEXTURE_WIDTH.
+ *
+ * A full 2048x2048 texture supports ~79k figures (38 per row).
+ *
+ *
+ * TEXTURE_WIDTH - data texture width (2048)
+ * EQ		- total number of quaternions (pixels) per figure (53 )
+ * EQ_DATA	- index of the data quaternion (52)
+ *
+ * quatTextureNode - a single unique instance of QuatTextureNode for all figures
+ *
+ *   .dataArray			- direct reference to the underlying raw data (Float32Array)
+ *   .quatTexture		- the active DataTexture object (DataTexture)
+ *   .count				- current maximum number of figures the texture can hold (number)
+ *   .isQuatTextureNode	- flag identifying this custom node (boolean)
+ *
+ *   .setQ(figure,joint,vec4)		- sets a full quaternion for a figure joint
+ *   .setXYZ(figure,joint,x,y,z,w)	- sets quaternion components directly
+ *
+ *
+ * AI Disclosure: Grok 4.3 assistance was used for proper texture resizing logic,
+ * cloning behavior in TSL TextureNode, and fine-tuning code comments.
+ */
 
-const ASSETS_PATH = import.meta.url
-	.replace( '/src/assets.js', '/assets/models/' )
-	.replace( '/dist/disfigure.js', '/assets/models/' )
-	.replace( '/dist/disfigure.min.js', '/assets/models/' )
-	.replace( '/misc/firefox/assets.js', '/assets/models/' );
 
 
 
-const EQ = 53; // number of vec4 per figure, 0..51 are quaternions, 52 is user data
+/**
+ * Data texture width - 2048 is well supported across systems
+ */
+const TEXTURE_WIDTH = 2048;
+
+
+
+/**
+ * Number of vec4 per figure, 0..51 are quaternions, 52 is user data
+ */
+const EQ = 53; 
+
+
+
+/**
+ * Index of the data quaternion. It is not used as quaternion.
+ * Could be used a loop of pure quaternions: for (i=0; i<EQ_DATA; i++)...
+ *		x - the type of the figure (man=0, woman=1, child=2)
+ *		y - unused, set to 0
+ *		z - unused, set to 0
+ *		w - unused, set to 0
+ */
 const EQ_DATA = 52; // 52 is vec4 for user data
 
 
 
-// preload figure metadata
-var pivots, ranges, extras;
-
-//console.time( 'metadata' );
-
-await Promise.all([
-	loadJSON( 'man.json' ),
-	loadJSON( 'woman.json' ),
-	loadJSON( 'child.json' ),
-]).then( ([ dataMan, dataWoman, dataChild ])=>{
-
-	var data1 = [
-		...dataMan.pivots.map( v=>new Vector3( ...v ) ).flat(),
-		...dataWoman.pivots.map( v=>new Vector3( ...v ) ).flat(),
-		...dataChild.pivots.map( v=>new Vector3( ...v ) ).flat(),
-	];
-	var data2 = [
-		...dataMan.ranges.map( v=>new Vector4( ...v ) ).flat(),
-		...dataWoman.ranges.map( v=>new Vector4( ...v ) ).flat(),
-		...dataChild.ranges.map( v=>new Vector4( ...v ) ).flat(),
-	];
-	var data3 = [
-		...dataMan.extras.map( v=>new Vector4( ...v ) ).flat(),
-		...dataWoman.extras.map( v=>new Vector4( ...v ) ).flat(),
-		...dataChild.extras.map( v=>new Vector4( ...v ) ).flat(),
-	];
-
-	pivots = uniformArray( data1, 'vec3' ).setName( 'pivots' );
-	ranges = uniformArray( data2, 'vec4' ).setName( 'ranges' );
-	extras = uniformArray( data3, 'vec4' ).setName( 'extras' );
-
-	//console.timeEnd( 'metadata' );
-
-} );
-
-
-// preloading names of skeleton joints
-
-//console.time( 'body.json' );
-
-const JOINTS = ( await fetch( ASSETS_PATH+'body.json' ).then( r => r.json() ) ).joints;
-JOINTS.forEach( x => {
-
-	x.parentIndex = JOINTS.findIndex( y => y.name==x.parent ); // set parent index for each joint
-	x.signs = new Vector3( ...x.signs ); // convert angle directions into Vector3
-
-} );
-
-//console.timeEnd( 'body.json' );
-
-
 
 /**
- * Loads a GLB model and optionally simplifies its geometry.
- *
- * The model must have a single mesh with geometry as the first child
- * of `gltf.scene`.
- *
- * @param {string} url - Full URL of the GLB model file.
- * @param {number} [lowpoly=0] - Geometry simplification factor.
- *        Mapped linearly [0 to 1]→[0% to 75%]
- *        - `lowpoly = 0` → keeps the original geometry
- *        - `lowpoly = 1` → removes ~75% of the geometry
- * @returns {Promise<BufferGeometry>} Promise for the geometry.
+ * Custom TextureNode optimized for storing and accessing quaternion data.
+ * Grows automatically. Extends TextureNode but disables all automatic UV
+ * transformations and flipY logic that Three.js/TSL normally applies.
  */
-function loadGLTF( url, lowpoly = 0 ) {
-
-	//	console.time( url );
-
-	return new GLTFLoader().loadAsync( ASSETS_PATH+url ).then( gltf => {
-
-		// get the geometry and vertex count to remove
-
-		var geometry = gltf.scene.children[ 0 ].geometry,
-			vertices = Math.floor( geometry.attributes.position.count * lowpoly * 0.75 );
-
-		// simplify the geometry if needed
-
-		if ( vertices > 0 ) {
-
-			var simplified = new SimplifyModifier().modify( geometry, vertices );
-			geometry.dispose();
-			geometry = simplified;
-
-		}
-
-		//		console.timeEnd( url );
-
-		return geometry;
-
-	} ); // then
-
-} // loadGLTF
-
-
-
-/**
- * Loads a JSON model description (skeleton data).
- *
- * Loads pivot points, ranges and extra data. All coordinate arrays
- * are automatically converted to Three.js TSL vectors (`vec3` / `vec4`).
- *
- * @param {string} url - Full URL of the JSON file.
- * @returns {Promise<object>} Promise for an object with:
- *                            - `pivots`: `vec3[]`
- *                            - `ranges`: `vec4[]`
- *                            - `extras`: `vec4[]`
- */
-function loadJSON( url ) {
-
-	return fetch( ASSETS_PATH+url ).then( r => r.json() );
-
-} // loadJSON
-
-// disfigure quats.js
-
-
-
-
-
-
-const TEXTURE_WIDTH = 2048;
-
-
-/**
- * A custom version of TextureNode that eliminates TSL code for `flipY` and
- * all UV transformations, including multiplication with UV matrix. I didn't
- * find a better way to do this. Sorry.
- *
- * @augments TextureNode
- */
-
-
 class QuatTextureNode extends TextureNode {
 
-	constructor( texture = null ) { // <-- allow passing texture
+	constructor( texture = null ) {
 
-		const INITIAL_HEIGHT = 1;
+		// Create an empty texture if not provided
 
 		if ( !texture ) {
 
-			// fallback for manual creation
-			const dataArray = new Float32Array( 4 * INITIAL_HEIGHT * TEXTURE_WIDTH );
-			texture = new DataTexture( dataArray, TEXTURE_WIDTH, INITIAL_HEIGHT, RGBAFormat, FloatType );
+			var dataArray = new Float32Array( 0 );
+			texture = new DataTexture( dataArray, 0, 0, RGBAFormat, FloatType );
 
 		}
 
 		super( texture );
 
 		this.isQuatTextureNode = true;
-		this.dataArray = texture.image.data; // better
+
+		this.dataArray = texture.image.data;
 		this.quatTexture = texture;
-		this.count = Math.floor( texture.image.height * texture.image.width / EQ );
 
-	}
-
-	updateTexture( newTexture ) {
-
-		this.value = newTexture;
-		this.quatTexture = newTexture;
-		this.dataArray = newTexture.image.data;
-
-		// Optional: force all existing clones to update (aggressive but safe)
-		this.version = ( this.version || 0 ) + 1; // can help TSL notice change
+		this.count = 0;
 
 	}
 
 
-	// === THIS IS THE MOST IMPORTANT PART ===
+
+	/**
+	 * Critical: shares the same underlying texture for all figures [AI]
+	 */
 	clone() {
 
-		const cloned = new this.constructor( this.value ); // share the SAME texture
+		var cloned = new this.constructor( this.value ); // same texture
+
 		cloned.uvNode = this.uvNode;
 		cloned.levelNode = this.levelNode;
 		cloned.sampler = this.sampler;
+
 		return cloned;
 
 	}
 
+
+
+	/**
+	 * Custom uniform hash to help Three.js/TSL caching. [AI]
+	 */
 	getUniformHash( /* builder */ ) {
 
 		return `QuatTexture-${this.value?.uuid || 'default'}`;
@@ -209,101 +127,120 @@ class QuatTextureNode extends TextureNode {
 	}
 
 
-	// increases the texture to fit at least count elements
+
+	/**
+	 * Increases texture capacity when more figures are added.
+	 */
 	setCapacity( count ) {
 
-		if ( count <= this.count ) return; // already big enough
+		if ( count <= this.count ) return; // already sufficient
 
-		// makes sure the texture hold data for count figures
-		var doubleHeight = Math.min( 2*this.quatTexture.image.height, TEXTURE_WIDTH ),
-			preciseHeight = Math.ceil( count*EQ/TEXTURE_WIDTH );
+		// Calculate the new height of the data texture
 
+		var doubleHeight = Math.min( 2*this.quatTexture.image.height, TEXTURE_WIDTH );
+		var preciseHeight = Math.ceil( count*EQ/TEXTURE_WIDTH );
 		var newHeight = Math.max( doubleHeight, preciseHeight );
+
 		if ( newHeight > TEXTURE_WIDTH )
-			throw "Too many figures (data texture)";
+			throw new Error( 'Too many figures — DataTexture limit exceeded' );
 
-		// create new data array, forget the old, let GC deal with it
+		// Create new larger array and copy existing data
+
 		var newDataArray = new Float32Array( 4*newHeight*TEXTURE_WIDTH );
-		// === CRITICAL: Copy old data ===
-		newDataArray.set( this.dataArray ); // copies old data to the beginning of new array
+		newDataArray.set( this.dataArray );
 
-		// create new data texture, dispose the old one
+		// Create new data texture
+
 		var newQuatTexture = new DataTexture(
 			newDataArray,
-			TEXTURE_WIDTH, // width
-			newHeight, // height
+			TEXTURE_WIDTH,
+			newHeight,
 			RGBAFormat,
 			FloatType
 		);
 
+		// Dispose old texture
+
+		this.quatTexture.dispose();
+
+		// Update internal references
 
 		this.dataArray = newDataArray;
 		this.quatTexture = newQuatTexture;
-		// update the texture node to be linked with the new texture
-		this.value = this.quatTexture;
+		this.value = newQuatTexture;
 
-		this.quatTexture.dispose();
-		// recalculate the new possible count of figures
-		//		this.count = Math.floor(height*TEXTURE_WIDTH/EQ);
-		this.count = Math.floor( newQuatTexture.image.height * newQuatTexture.image.width / EQ );
+		this.count = Math.floor( newHeight * TEXTURE_WIDTH / EQ );
 
+		// Increment version [AI]
 
-		// Tell TSL the texture changed
-		this.updateTexture( newQuatTexture );
-		console.log( 'QUATTEX: new size', this.dataArray.length, 'for', this.count, 'figures' );
-		// === CRITICAL: Force material rebuild ===
-		if ( this._material ) {
+		this.version = ( this.version || 0 ) + 1;
 
-			this._material.needsUpdate = true;
-			// Stronger option if needed:
-			// this._material.dispose(); // then re-assign the full node graph
+		// Force material update if we have a reference to it [AI]
 
-		}
+		if ( this._material ) this._material.needsUpdate = true;
 
-	} // QuatTexNode.setCapacity
+		console.log( `QUATTEX: resized → ${this.dataArray.length} floats (${this.count} figures)` );
+
+	}
 
 
 
-	// prevents TSL from generating flipY and texture transform code for WebGL2
+	/**
+	 * Disables TSL's automatic UV transformation (including flipY).
+	 */
+
 	getTransformedUV( uvNode ) {
 
 		return uvNode;
 
-	} // QuatTexNode.getTransformedUV
+	}
 
 
 
-	// prevents TSL from generating flipY and texture transform code for WebGL2
+	/**
+	 * Disables TSL's automatic UV setup (including flipY).
+	 */
 	setupUV( builder, uvNode ) {
 
 		return uvNode;
 
-	} // QuatTexNode.setupUV
+	}
 
 
 
+	/**
+	 * Sets a full quaternion for a given figure and joint.
+	 */
 	setQ( figure, joint, vec4 ) {
 
 		vec4.toArray( this.dataArray, ( EQ*figure+joint )*4 );
 
-	} // QuatTexNode.setQ
+	}
 
 
 
-	setXYZ( figure, joint, x, y, z, w=1 ) {
+	/**
+     * Sets quaternion components directly (x, y, z, w).
+     */
+	setXYZ( figure, joint, x, y, z, w ) {
 
 		var base = ( EQ*figure+joint )*4;
+
 		this.dataArray[ base++ ] = x;
 		this.dataArray[ base++ ] = y;
 		this.dataArray[ base++ ] = z;
 		this.dataArray[ base++ ] = w;
 
-	} // QuatTexNode.setXYZ
+	}
 
 
 } // QuatTexNode
 
 
+
+/**
+ * Global shared instance used across the application
+ */
 var quatTextureNode = new QuatTextureNode( );
 
 // number generators
@@ -571,6 +508,130 @@ function setAnimationLoop( animationLoop ) {
 	userAnimationLoop = animationLoop;
 
 }
+
+// path to GLB models
+
+const ASSETS_PATH = import.meta.url
+	.replace( '/src/assets.js', '/assets/models/' )
+	.replace( '/dist/disfigure.js', '/assets/models/' )
+	.replace( '/dist/disfigure.min.js', '/assets/models/' )
+	.replace( '/misc/firefox/assets.js', '/assets/models/' );
+
+
+
+// preload figure metadata
+var pivots, ranges, extras;
+
+//console.time( 'metadata' );
+
+await Promise.all([
+	loadJSON( 'man.json' ),
+	loadJSON( 'woman.json' ),
+	loadJSON( 'child.json' ),
+]).then( ([ dataMan, dataWoman, dataChild ])=>{
+
+	var data1 = [
+		...dataMan.pivots.map( v=>new Vector3( ...v ) ).flat(),
+		...dataWoman.pivots.map( v=>new Vector3( ...v ) ).flat(),
+		...dataChild.pivots.map( v=>new Vector3( ...v ) ).flat(),
+	];
+	var data2 = [
+		...dataMan.ranges.map( v=>new Vector4( ...v ) ).flat(),
+		...dataWoman.ranges.map( v=>new Vector4( ...v ) ).flat(),
+		...dataChild.ranges.map( v=>new Vector4( ...v ) ).flat(),
+	];
+	var data3 = [
+		...dataMan.extras.map( v=>new Vector4( ...v ) ).flat(),
+		...dataWoman.extras.map( v=>new Vector4( ...v ) ).flat(),
+		...dataChild.extras.map( v=>new Vector4( ...v ) ).flat(),
+	];
+
+	pivots = uniformArray( data1, 'vec3' ).setName( 'pivots' );
+	ranges = uniformArray( data2, 'vec4' ).setName( 'ranges' );
+	extras = uniformArray( data3, 'vec4' ).setName( 'extras' );
+
+	//console.timeEnd( 'metadata' );
+
+} );
+
+
+// preloading names of skeleton joints
+
+//console.time( 'body.json' );
+
+const JOINTS = ( await fetch( ASSETS_PATH+'body.json' ).then( r => r.json() ) ).joints;
+JOINTS.forEach( x => {
+
+	x.parentIndex = JOINTS.findIndex( y => y.name==x.parent ); // set parent index for each joint
+	x.signs = new Vector3( ...x.signs ); // convert angle directions into Vector3
+
+} );
+
+//console.timeEnd( 'body.json' );
+
+
+
+/**
+ * Loads a GLB model and optionally simplifies its geometry.
+ *
+ * The model must have a single mesh with geometry as the first child
+ * of `gltf.scene`.
+ *
+ * @param {string} url - Full URL of the GLB model file.
+ * @param {number} [lowpoly=0] - Geometry simplification factor.
+ *        Mapped linearly [0 to 1]→[0% to 75%]
+ *        - `lowpoly = 0` → keeps the original geometry
+ *        - `lowpoly = 1` → removes ~75% of the geometry
+ * @returns {Promise<BufferGeometry>} Promise for the geometry.
+ */
+function loadGLTF( url, lowpoly = 0 ) {
+
+	//	console.time( url );
+
+	return new GLTFLoader().loadAsync( ASSETS_PATH+url ).then( gltf => {
+
+		// get the geometry and vertex count to remove
+
+		var geometry = gltf.scene.children[ 0 ].geometry,
+			vertices = Math.floor( geometry.attributes.position.count * lowpoly * 0.75 );
+
+		// simplify the geometry if needed
+
+		if ( vertices > 0 ) {
+
+			var simplified = new SimplifyModifier().modify( geometry, vertices );
+			geometry.dispose();
+			geometry = simplified;
+
+		}
+
+		//		console.timeEnd( url );
+
+		return geometry;
+
+	} ); // then
+
+} // loadGLTF
+
+
+
+/**
+ * Loads a JSON model description (skeleton data).
+ *
+ * Loads pivot points, ranges and extra data. All coordinate arrays
+ * are automatically converted to Three.js TSL vectors (`vec3` / `vec4`).
+ *
+ * @param {string} url - Full URL of the JSON file.
+ * @returns {Promise<object>} Promise for an object with:
+ *                            - `pivots`: `vec3[]`
+ *                            - `ranges`: `vec4[]`
+ *                            - `extras`: `vec4[]`
+ */
+function loadJSON( url ) {
+
+	return fetch( ASSETS_PATH+url ).then( r => r.json() );
+
+} // loadJSON
 
 var rotateByQuaternion = Fn( ([ p, q ])=>{
 
@@ -1052,6 +1113,8 @@ class Body extends Object3D {
 
 		if ( !pivots ) return;
 
+		var offset = this.quaternionOffset;
+
 		for ( var i=0; i<EQ_DATA; i++ ) {
 
 			var _euler = this.eulers[ i ];
@@ -1060,7 +1123,7 @@ class Body extends Object3D {
 
 				var euler = _euler;
 
-				pivot.set( ...pivots.array[ euler.index ]);
+				pivot.set( ...pivots.array[ euler.index+offset ]);
 
 				_p.copy( object.initialPosition );
 				_p.add( pivot );
@@ -1070,7 +1133,7 @@ class Body extends Object3D {
 
 				scan: while ( euler ) {
 
-					pivot.set( ...pivots.array[ euler.index ]);
+					pivot.set( ...pivots.array[ euler.index+offset ]);
 
 					_p.sub( pivot ).applyQuaternion( euler.quaternion ).add( pivot );
 					_q.premultiply( euler.quaternion );
@@ -1195,7 +1258,14 @@ function preparePool( Class, name ) {
 		var newPool = new Pool( name, Class.count, Class.lowpoly, Class.vertexStage );
 		oldPool.addToScene = false;
 		oldPool.removeFromParent();
-		for ( var body of everybody ) if ( body.pool == oldPool ) body.pool = newPool;
+		for ( var body of everybody ) {
+
+			if ( body.pool == oldPool ) body.pool = newPool;
+
+		}
+
+		if ( oldPool.children.length>0 )
+			newPool.add( ...oldPool.children ); // move attached objects
 
 		console.log( name+':: pool is full, size', oldPool.uidsArray.length, '->', newPool.uidsArray.length );
 
@@ -1227,6 +1297,8 @@ class Man extends Body {
 		this.material = Man.pool.material; // expose to outside
 
 		this.scale.setScalar( height/1.795 ); // 1.795 is 3D model height
+
+		this.quaternionOffset = 0*EQ_DATA; // custom property
 
 		this.l_arm.z = this.r_arm.z = -75;
 		this.l_elbow.y = this.r_elbow.y = 20;
@@ -1261,6 +1333,8 @@ class Woman extends Body {
 
 		this.scale.setScalar( height/1.691 ); // 1.691 is 3D model height
 
+		this.quaternionOffset = 1*EQ_DATA; // custom property
+
 		this.l_arm.z = this.r_arm.z = -90;
 		this.l_elbow.y = this.r_elbow.y = 0;
 		this.l_leg.z = this.r_leg.z = -3;
@@ -1291,6 +1365,8 @@ class Child extends Body {
 		this.material = Child.pool.material; // expose to outside
 
 		this.scale.setScalar( height/1.352 ); // 1.352 is 3D model height
+
+		this.quaternionOffset = 2*EQ_DATA; // custom property
 
 		this.l_arm.x = this.r_arm.x = -10;
 		this.l_arm.z = this.r_arm.z = -80;

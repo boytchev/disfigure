@@ -1,70 +1,126 @@
-﻿// disfigure quats.js
-
-import { DataTexture, FloatType, RGBAFormat, TextureNode } from 'three';
-import { EQ } from './assets.js';
-
-
-
-
-
-const TEXTURE_WIDTH = 2048;
-
-
-/**
- * A custom version of TextureNode that eliminates TSL code for `flipY` and
- * all UV transformations, including multiplication with UV matrix. I didn't
- * find a better way to do this. Sorry.
+﻿/**
+ * disfigure / quats.js
  *
- * @augments TextureNode
+ * -----------------------------------------------------------------------------
+ *
+ * Module responsible for managing quaternion data for all figures using a data
+ * texture. Each RGBA pixel represents one quaternion. A figure uses QUATS_PER_BODY pixels.
+ * The texture grows dynamically in height keeping width fixed at QUAT_TEXTURE_WIDTH.
+ *
+ * A full 2048x2048 texture supports ~79k figures (38 per row).
+ *
+ *
+ * QUAT_TEXTURE_WIDTH	- data texture width (2048)
+ * QUATS_PER_BODY		- total number of quaternions (pixels) per figure (53)
+ * PURE_QUATS_PER_BODY	- number of pure/proper/joint quaternions (52)
+ * QUAT_DATA_INDEX		- index of the data quaternion (52)
+ *
+ * quatTextureNode - a single unique instance of QuatTextureNode for all figures
+ *
+ *   .dataArray			- direct reference to the underlying raw data (Float32Array)
+ *   .quatTexture		- the active DataTexture object (DataTexture)
+ *   .count				- current maximum number of figures the texture can hold (number)
+ *   .isQuatTextureNode	- flag identifying this custom node (boolean)
+ *
+ *   .setQ(figure,joint,vec4)		- sets a full quaternion for a figure joint
+ *   .setXYZ(figure,joint,x,y,z,w)	- sets quaternion components directly
+ *
+ *
+ * AI Disclosure: Grok 4.3 assistance was used for proper texture resizing logic,
+ * cloning behavior in TSL TextureNode, and fine-tuning code comments.
  */
 
 
+
+import { DataTexture, FloatType, RGBAFormat, TextureNode } from 'three';
+
+
+
+/**
+ * Data texture width - 2048 is well supported across systems
+ */
+const QUAT_TEXTURE_WIDTH = 2048;
+
+
+
+/**
+ * Number of vec4 per figure, 0..51 are quaternions, 52 is user data
+ */
+const QUATS_PER_BODY = 53;
+
+
+
+/**
+ * Number of quaternions per body that are used as quaternions
+ */
+const PURE_QUATS_PER_BODY = 52;
+
+
+
+/**
+ * Index of the data quaternion. It is not used as quaternion.
+ * Could be used a loop of pure quaternions: for (i=0; i<QUAT_DATA_INDEX; i++)...
+ *		x - the type of the figure (man=0, woman=1, child=2)
+ *		y - unused, set to 0
+ *		z - unused, set to 0
+ *		w - unused, set to 0
+ */
+const QUAT_DATA_INDEX = 52; // 52 is vec4 for user data
+
+
+
+
+/**
+ * Custom TextureNode optimized for storing and accessing quaternion data.
+ * Grows automatically. Extends TextureNode but disables all automatic UV
+ * transformations and flipY logic that Three.js/TSL normally applies.
+ */
 class QuatTextureNode extends TextureNode {
 
-	constructor( texture = null ) { // <-- allow passing texture
+	constructor( texture = null ) {
 
-		const INITIAL_HEIGHT = 1;
+		// Create an empty texture if not provided
 
 		if ( !texture ) {
 
-			// fallback for manual creation
-			const dataArray = new Float32Array( 4 * INITIAL_HEIGHT * TEXTURE_WIDTH );
-			texture = new DataTexture( dataArray, TEXTURE_WIDTH, INITIAL_HEIGHT, RGBAFormat, FloatType );
+			var dataArray = new Float32Array( 0 );
+			texture = new DataTexture( dataArray, 0, 0, RGBAFormat, FloatType );
 
 		}
 
 		super( texture );
 
 		this.isQuatTextureNode = true;
-		this.dataArray = texture.image.data; // better
+
+		this.dataArray = texture.image.data;
 		this.quatTexture = texture;
-		this.count = Math.floor( texture.image.height * texture.image.width / EQ );
 
-	}
-
-	updateTexture( newTexture ) {
-
-		this.value = newTexture;
-		this.quatTexture = newTexture;
-		this.dataArray = newTexture.image.data;
-
-		// Optional: force all existing clones to update (aggressive but safe)
-		this.version = ( this.version || 0 ) + 1; // can help TSL notice change
+		this.count = 0;
 
 	}
 
 
-	// === THIS IS THE MOST IMPORTANT PART ===
+
+	/**
+	 * Critical: shares the same underlying texture for all figures [AI]
+	 */
 	clone() {
 
-		const cloned = new this.constructor( this.value ); // share the SAME texture
+		var cloned = new this.constructor( this.value ); // same texture
+
 		cloned.uvNode = this.uvNode;
 		cloned.levelNode = this.levelNode;
 		cloned.sampler = this.sampler;
+
 		return cloned;
 
 	}
 
+
+
+	/**
+	 * Custom uniform hash to help Three.js/TSL caching. [AI]
+	 */
 	getUniformHash( /* builder */ ) {
 
 		return `QuatTexture-${this.value?.uuid || 'default'}`;
@@ -72,103 +128,122 @@ class QuatTextureNode extends TextureNode {
 	}
 
 
-	// increases the texture to fit at least count elements
+
+	/**
+	 * Increases texture capacity when more figures are added.
+	 */
 	setCapacity( count ) {
 
-		if ( count <= this.count ) return; // already big enough
+		if ( count <= this.count ) return; // already sufficient
 
-		// makes sure the texture hold data for count figures
-		var doubleHeight = Math.min( 2*this.quatTexture.image.height, TEXTURE_WIDTH ),
-			preciseHeight = Math.ceil( count*EQ/TEXTURE_WIDTH );
+		// Calculate the new height of the data texture
 
+		var doubleHeight = Math.min( 2*this.quatTexture.image.height, QUAT_TEXTURE_WIDTH );
+		var preciseHeight = Math.ceil( count*QUATS_PER_BODY/QUAT_TEXTURE_WIDTH );
 		var newHeight = Math.max( doubleHeight, preciseHeight );
-		if ( newHeight > TEXTURE_WIDTH )
-			throw "Too many figures (data texture)";
 
-		// create new data array, forget the old, let GC deal with it
-		var newDataArray = new Float32Array( 4*newHeight*TEXTURE_WIDTH );
-		// === CRITICAL: Copy old data ===
-		newDataArray.set( this.dataArray ); // copies old data to the beginning of new array
+		if ( newHeight > QUAT_TEXTURE_WIDTH )
+			throw new Error( 'Too many figures — DataTexture limit exceeded' );
 
-		// create new data texture, dispose the old one
+		// Create new larger array and copy existing data
+
+		var newDataArray = new Float32Array( 4*newHeight*QUAT_TEXTURE_WIDTH );
+		newDataArray.set( this.dataArray );
+
+		// Create new data texture
+
 		var newQuatTexture = new DataTexture(
 			newDataArray,
-			TEXTURE_WIDTH, // width
-			newHeight, // height
+			QUAT_TEXTURE_WIDTH,
+			newHeight,
 			RGBAFormat,
 			FloatType
 		);
 
+		// Dispose old texture
+
+		this.quatTexture.dispose();
+
+		// Update internal references
 
 		this.dataArray = newDataArray;
 		this.quatTexture = newQuatTexture;
-		// update the texture node to be linked with the new texture
-		this.value = this.quatTexture;
+		this.value = newQuatTexture;
 
-		this.quatTexture.dispose();
-		// recalculate the new possible count of figures
-		//		this.count = Math.floor(height*TEXTURE_WIDTH/EQ);
-		this.count = Math.floor( newQuatTexture.image.height * newQuatTexture.image.width / EQ );
+		this.count = Math.floor( newHeight * QUAT_TEXTURE_WIDTH / QUATS_PER_BODY );
 
+		// Increment version [AI]
 
-		// Tell TSL the texture changed
-		this.updateTexture( newQuatTexture );
-		console.log( 'QUATTEX: new size', this.dataArray.length, 'for', this.count, 'figures' );
-		// === CRITICAL: Force material rebuild ===
-		if ( this._material ) {
+		this.version = ( this.version || 0 ) + 1;
 
-			this._material.needsUpdate = true;
-			// Stronger option if needed:
-			// this._material.dispose(); // then re-assign the full node graph
+		// Force material update if we have a reference to it [AI]
 
-		}
+		if ( this._material ) this._material.needsUpdate = true;
 
-	} // QuatTexNode.setCapacity
+		console.log( `QUATTEX: resized → ${this.dataArray.length} floats (${this.count} figures)` );
+
+	}
 
 
 
-	// prevents TSL from generating flipY and texture transform code for WebGL2
+	/**
+	 * Disables TSL's automatic UV transformation (including flipY).
+	 */
+
 	getTransformedUV( uvNode ) {
 
 		return uvNode;
 
-	} // QuatTexNode.getTransformedUV
+	}
 
 
 
-	// prevents TSL from generating flipY and texture transform code for WebGL2
+	/**
+	 * Disables TSL's automatic UV setup (including flipY).
+	 */
 	setupUV( builder, uvNode ) {
 
 		return uvNode;
 
-	} // QuatTexNode.setupUV
+	}
 
 
 
+	/**
+	 * Sets a full quaternion for a given figure and joint.
+	 */
 	setQ( figure, joint, vec4 ) {
 
-		vec4.toArray( this.dataArray, ( EQ*figure+joint )*4 );
+		vec4.toArray( this.dataArray, ( QUATS_PER_BODY*figure+joint )*4 );
 
-	} // QuatTexNode.setQ
+	}
 
 
 
-	setXYZ( figure, joint, x, y, z, w=1 ) {
+	/**
+     * Sets quaternion components directly (x, y, z, w).
+     */
+	setXYZ( figure, joint, x, y, z, w ) {
 
-		var base = ( EQ*figure+joint )*4;
+		var base = ( QUATS_PER_BODY*figure+joint )*4;
+
 		this.dataArray[ base++ ] = x;
 		this.dataArray[ base++ ] = y;
 		this.dataArray[ base++ ] = z;
 		this.dataArray[ base++ ] = w;
 
-	} // QuatTexNode.setXYZ
+	}
 
 
 } // QuatTexNode
 
 
+
+/**
+ * Global shared instance used across the application
+ */
 var quatTextureNode = new QuatTextureNode( );
 
 
 
-export { quatTextureNode, TEXTURE_WIDTH };
+export { quatTextureNode, QUAT_TEXTURE_WIDTH, QUATS_PER_BODY, QUAT_DATA_INDEX, PURE_QUATS_PER_BODY };

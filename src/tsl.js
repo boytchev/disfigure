@@ -4,8 +4,8 @@
 
 
 import { attribute, Fn, If, int, ivec2, Loop, mat3, normalGeometry, positionGeometry, select, step, transformNormalToView, vec3, vec4 } from 'three/tsl';
-import { EQ, EQ_DATA, extras, pivots, ranges } from './assets.js';
-import { quatTextureNode, TEXTURE_WIDTH } from './quats.js';
+import { extras, pivots, ranges } from './assets.js';
+import { QUAT_DATA_INDEX, QUAT_TEXTURE_WIDTH, QUATS_PER_BODY, quatTextureNode } from './quats.js';
 
 
 
@@ -129,8 +129,8 @@ var gradientXT = Fn( ([ pos, range, slope ])=>
 
 var getQuatAddr = Fn( ([ figureIndex, propIndex ])=>{
 
-	var offset = figureIndex.mul( EQ ).add( propIndex );//.toVar();
-	return ivec2( offset.mod( TEXTURE_WIDTH ), offset.div( TEXTURE_WIDTH ) );
+	var offset = figureIndex.mul( QUATS_PER_BODY ).add( propIndex );//.toVar();
+	return ivec2( offset.mod( QUAT_TEXTURE_WIDTH ), offset.div( QUAT_TEXTURE_WIDTH ) );
 
 }, { return: 'ivec2', figureIndex: 'uint', propIndex: 'int' } );
 
@@ -151,8 +151,8 @@ var disfigureBody = Fn( ( )=>{
 
 	var figureIndex = attribute( 'uids', 'int' );
 
-	var gender = q( figureIndex, EQ_DATA ).x.mul( 52 ).toVar(); // 52 pivots
-	var gender2 = q( figureIndex, EQ_DATA ).x.mul( 4 ).toVar(); // 4 extras
+	var gender = q( figureIndex, QUAT_DATA_INDEX ).x.mul( 52 ).toVar(); // 52 pivots
+	var gender2 = q( figureIndex, QUAT_DATA_INDEX ).x.mul( 4 ).toVar(); // 4 extras
 
 	var disP = ( i, gradient ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradient ) ),
 		disY = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientY( p, ranges.element( i.add( gender ) ) ) ) ),

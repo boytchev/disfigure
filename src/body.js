@@ -5,9 +5,9 @@
 
 import { Euler, MathUtils, Object3D, Quaternion, Vector3 } from 'three';
 import { everybody } from './world.js';
-import { pivots, EQ, EQ_DATA, JOINTS } from './assets.js';
+import { JOINTS, pivots } from './assets.js';
 import { Pool } from './pool.js';
-import { quatTextureNode } from './quats.js';
+import { PURE_QUATS_PER_BODY, QUAT_DATA_INDEX, quatTextureNode } from './quats.js';
 
 
 
@@ -137,7 +137,7 @@ class Body extends Object3D {
 
 		this.eulers = [];
 
-		for ( var i=0; i<EQ_DATA; i++ ) {
+		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
 			this.eulers.push( new EulerDegrees( this, i, JOINTS[ i ].parentIndex, JOINTS[ i ].signs ) );
 
@@ -155,7 +155,7 @@ class Body extends Object3D {
 		this.pool.setMatrixAt( this.pid, this.matrix );
 		this.pool.instanceMatrix.needsUpdate = true;
 
-		for ( var i=0; i<EQ_DATA; i++ ) {
+		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
 			var euler = this.eulers[ i ];
 
@@ -172,8 +172,8 @@ class Body extends Object3D {
 		if ( !pivots ) return;
 
 		var offset = this.quaternionOffset;
-		
-		for ( var i=0; i<EQ_DATA; i++ ) {
+
+		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
 			var _euler = this.eulers[ i ];
 
@@ -317,9 +317,13 @@ function preparePool( Class, name ) {
 		oldPool.addToScene = false;
 		oldPool.removeFromParent();
 		for ( var body of everybody ) {
+
 			if ( body.pool == oldPool ) body.pool = newPool;
+
 		}
-		newPool.add( ...oldPool.children ); // move attached objects
+
+		if ( oldPool.children.length>0 )
+			newPool.add( ...oldPool.children ); // move attached objects
 
 		console.log( name+':: pool is full, size', oldPool.uidsArray.length, '->', newPool.uidsArray.length );
 
@@ -346,13 +350,13 @@ class Man extends Body {
 
 		super( Man.pool );
 
-		quatTextureNode.setXYZ( this.uid, EQ_DATA, 0, 0, 0, 0 );
+		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, 0, 0, 0, 0 );
 
 		this.material = Man.pool.material; // expose to outside
 
 		this.scale.setScalar( height/1.795 ); // 1.795 is 3D model height
-		
-		this.quaternionOffset = 0*EQ_DATA; // custom property
+
+		this.quaternionOffset = 0*PURE_QUATS_PER_BODY; // custom property
 
 		this.l_arm.z = this.r_arm.z = -75;
 		this.l_elbow.y = this.r_elbow.y = 20;
@@ -381,13 +385,13 @@ class Woman extends Body {
 
 		super( Woman.pool );
 
-		quatTextureNode.setXYZ( this.uid, EQ_DATA, 1, 0, 0, 0 );
+		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, 1, 0, 0, 0 );
 
 		this.material = Woman.pool.material; // expose to outside
 
 		this.scale.setScalar( height/1.691 ); // 1.691 is 3D model height
 
-		this.quaternionOffset = 1*EQ_DATA; // custom property
+		this.quaternionOffset = 1*PURE_QUATS_PER_BODY; // custom property
 
 		this.l_arm.z = this.r_arm.z = -90;
 		this.l_elbow.y = this.r_elbow.y = 0;
@@ -414,13 +418,13 @@ class Child extends Body {
 
 		super( Child.pool );
 
-		quatTextureNode.setXYZ( this.uid, EQ_DATA, 2, 0, 0, 0 );
+		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, 2, 0, 0, 0 );
 
 		this.material = Child.pool.material; // expose to outside
 
 		this.scale.setScalar( height/1.352 ); // 1.352 is 3D model height
 
-		this.quaternionOffset = 2*EQ_DATA; // custom property
+		this.quaternionOffset = 2*PURE_QUATS_PER_BODY; // custom property
 
 		this.l_arm.x = this.r_arm.x = -10;
 		this.l_arm.z = this.r_arm.z = -80;

@@ -26,11 +26,6 @@ const ASSETS_PATH = import.meta.url
 
 
 
-const EQ = 53; // number of vec4 per figure, 0..51 are quaternions, 52 is user data
-const EQ_DATA = 52; // 52 is vec4 for user data
-
-
-
 // preload figure metadata
 var pivots, ranges, extras;
 
@@ -147,4 +142,4 @@ function loadJSON( url ) {
 
 
 
-export { EQ, EQ_DATA, JOINTS, loadGLTF, loadJSON, pivots, ranges, extras };
+export { JOINTS, loadGLTF, loadJSON, pivots, ranges, extras };
