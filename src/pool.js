@@ -1,40 +1,17 @@
 ﻿
 import { vertexStage } from 'three/tsl';
-import { DataTexture, FloatType, InstancedMesh, MeshStandardNodeMaterial, RGBAFormat, TextureNode } from 'three';
-import { disfigureBody, EQ } from './tsl.js';
-import { loadGLTF, loadJSON } from './assets.js';
-import { camera, renderer, scene } from './world.js';
+import { InstancedBufferAttribute, InstancedMesh, MeshStandardNodeMaterial } from 'three';
+import { disfigureBody } from './tsl.js';
+import { loadGLTF } from './assets.js';
+import { scene } from './world.js';
 
 
 
-/**
- * A custom version of TextureNode that eliminates TSL code for `flipY` and
- * all UV transformations, including multiplication with UV matrix. I didn't
- * find a better way to do this. Sorry.
- *
- * @augments TextureNode
- */
-class DataTextureNode extends TextureNode {
-
-	getTransformedUV( uvNode ) {
-
-		return uvNode;
-
-	}
-
-	setupUV( builder, uvNode ) {
-
-		return uvNode;
-
-	}
-
-} // DataTextureNode
 
 
-
-/* to do when I figure out how to pass poolData to disfigureBody as uniforms
-var tslCache = new Map();
-*/
+var disfigure = disfigureBody( );
+var disfigurePosition = disfigure.element( 0 );
+var disfigureNormal = disfigure.element( 1 );
 
 
 /**
@@ -58,88 +35,43 @@ class Pool extends InstancedMesh {
 		this.receiveShadow = true;
 		this.frustumCulled = false;
 
-		// create a square data texture that can hold data for at least
-		// MAX_BODIES bodies - each body needs EQ number of vec4-s
+		this.uidsArray = new Int32Array( MAX_BODIES ); // the global body index (uid) of each instance
 
-		this.TEXTURE_SIZE = Math.ceil( Math.sqrt( MAX_BODIES*EQ ) );
+		this.addToScene = true;
 
-		this.dataArray = new Float32Array( 4*this.TEXTURE_SIZE**2 );
-
-		this.quatTexture = new DataTexture(
-			this.dataArray,
-			this.TEXTURE_SIZE, // width
-			this.TEXTURE_SIZE, // height
-			RGBAFormat,
-			FloatType
-		);
-
-		this.quatTexNode = new DataTextureNode( this.quatTexture );
+		console.log( 'Pool:created count', MAX_BODIES );
 
 		// asynchronously load the geometry, the skeleton data, hook
 		// shaders to material nodes and add the instance to the scene
 
-		Promise.all([
-			loadGLTF( url+'.glb', lowpoly ),
-			loadJSON( url+'.json' )
-		]).then( ([ geometry, data ])=>{
+		loadGLTF( url+'.glb', lowpoly ).then( ( geometry )=>{
 
 			this.geometry = geometry;
-			this.data = data;
+			this.geometry.setAttribute( 'uids', new InstancedBufferAttribute( this.uidsArray, 1 ) );
+			this.uidsAttr = this.geometry.getAttribute( 'uids' );
+			this.uidsAttr.needsUpdate = true;
 
-/* to do when I figure out how to pass poolData to disfigureBody as uniforms
+			material.positionNode = disfigurePosition;
 
-			var disfigure;
-			if( tslCache.has(url) ) {
-				disfigure = tslCache.get(url);
-			} else {
-				disfigure = disfigureBody( this, data );
-				tslCache.set(url,disfigure);
-			}
-*/	
-			var disfigure = disfigureBody( this, data );
-			
-			
-			setTimeout( ()=>{
-				
-				material.positionNode = disfigure.element( 0 );
-				
-				if ( useVertexStage )
-					material.normalNode = vertexStage( disfigure.element( 1 ) );
-				else
-					material.normalNode = disfigure.element( 1 );
-			
+			if ( useVertexStage )
+				material.normalNode = vertexStage( disfigureNormal );
+			else
+				material.normalNode = disfigureNormal;
+			material.needsUpdate = true;
+
+			// safe only for webgl <-- causes extra shader compilation, so better to remove it
+			//if( renderer.backend.isWebGLBackend ) renderer.render( this, camera )
+
+			if ( this.addToScene ) {
+
+				this.onLoad();
 				scene.add( this );
-				
-				// safe only for webgl
-				if( renderer.backend.isWebGLBackend ) renderer.render( this, camera )
-			}, 10 );
-	
-			
-			this.onLoad();
+
+			}
 
 		} );
 
 	} // Pool.constructor
-
-
-
-	setQ( figure, joint, vec4 ) {
-
-		vec4.toArray( this.dataArray, ( EQ*figure+joint )*4 );
-
-	} // Pool.setQ
-
-
-
-	setXYZ( figure, joint, x, y, z, w=1 ) {
-
-		var base = ( EQ*figure+joint )*4;
-		this.dataArray[ base++ ] = x;
-		this.dataArray[ base++ ] = y;
-		this.dataArray[ base++ ] = z;
-		this.dataArray[ base++ ] = w;
-
-	} // Pool.setXYZ
 
 
 
@@ -148,13 +80,34 @@ class Pool extends InstancedMesh {
 
 
 
+	isFull( ) {
+
+		return ( this.count >= this.instanceMatrix.count );
+
+	} // Pool.isFull
+
+
 	getBody( ) {
 
-		if ( this.count >= this.instanceMatrix.count ) throw ( 'Too many bodies' );
+		if ( this.isFull() ) throw 'Too many figures (instance pool)';
 
 		return this.count++;
 
 	} // Pool.getBody
+
+
+	// copy another pool to this pool
+	copy( sourcePool ) {
+
+		// copy matrices
+		this.instanceMatrix.array.set( sourcePool.instanceMatrix.array );
+		this.instanceMatrix.needsUpdate = true;
+
+		// copy uids
+		this.uidsArray.set( sourcePool.uidsArray );
+		this.geometry.getAttribute( 'uids' ).needsUpdate = true;
+
+	} // Pool.copy
 
 }
 

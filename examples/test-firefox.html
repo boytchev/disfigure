@@ -14,55 +14,15 @@
 
 			new Happy.World({ground:true, stats:true, shadows:true});
 
-			Happy.camera.position.set(6,2,0);
-			Happy.controls.update();
+			var body = new Happy.Man(  );
 
-			Happy.Man.count = 50;
-			Happy.Woman.count = 50;
-			Happy.Child.count = 50;
-
-			/*
-			Happy.Man.lowpoly = 1;
-			Happy.Man.vertexStage = true;
-
-			Happy.Woman.lowpoly = 1;
-			Happy.Woman.vertexStage = true;
-
-			Happy.Child.lowpoly = 1;
-			Happy.Child.vertexStage = true;
-			*/			
-
-			for( var i=0; i<10; i++ ) {
-			
-				var body = Math.random()<1/3?new Happy.Child(  ):( Math.random()<1/2?new Happy.Woman(  ):new Happy.Man(  ) );
-
-				var r = ( i**0.5 )*0.5,
-					a = 2*Math.PI*i*(1 - 2/(1+Math.sqrt(5)));
-
-				body.position.set( r*Math.cos(a), 0, r*Math.sin(a), 1 );
-				body.material.emissiveIntensity = 1;
-				body.material.metalness = 0.2;
-
-				var hair = new THREE.Mesh(
-					new THREE.IcosahedronGeometry( 0.1, 3 ),
-					new THREE.MeshLambertMaterial( {color: 'black'} )
-				);
-				hair.position.set( 0, 0.15, 0.01 );
-				
-				body.head.attach( hair );
-				body.l_wrist.attach( new THREE.AxesHelper(0.1) );
-				body.r_wrist.attach( new THREE.AxesHelper(0.1) );
-				body.l_middle_tip.attach( new THREE.AxesHelper(0.1) );
-				body.r_middle_tip.attach( new THREE.AxesHelper(0.1) );
-			}
-
-/*
-			Happy.Man.pool.material.color = new THREE.Color(0,1,5);
-			Happy.Woman.pool.material.color = new THREE.Color(2,0,0.2);
-			Happy.Child.pool.material.color = new THREE.Color(2,1.2,-0.2);
-*/
+console.time();
+var frame=0;
 
 			Happy.setAnimationLoop((t) => {
+
+frame++;
+if( frame<10 ) console.timeLog();
 
 				t = t/3000;
 

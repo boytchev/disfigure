@@ -1,12 +1,310 @@
 // disfigure v0.0.25
 
-import { WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Object3D, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, InstancedMesh, MeshStandardNodeMaterial, DataTexture, RGBAFormat, FloatType, TextureNode, Quaternion, Euler } from 'three';
+import { Vector3, Vector4, TextureNode, DataTexture, RGBAFormat, FloatType, WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Object3D, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, InstancedMesh, MeshStandardNodeMaterial, InstancedBufferAttribute, Quaternion, MathUtils, Euler } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
-import { Fn, If, vec4, select, positionGeometry, mat3, normalGeometry, vec3, array, instanceIndex, ivec2, step, Loop, int, transformNormalToView, vertexStage } from 'three/tsl';
+import { uniformArray, Fn, vec4, If, select, ivec2, mat3, positionGeometry, normalGeometry, vec3, attribute, int, step, Loop, transformNormalToView, vertexStage } from 'three/tsl';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
+
+// path to GLB models
+
+const ASSETS_PATH = import.meta.url
+	.replace( '/src/assets.js', '/assets/models/' )
+	.replace( '/dist/disfigure.js', '/assets/models/' )
+	.replace( '/dist/disfigure.min.js', '/assets/models/' )
+	.replace( '/misc/firefox/assets.js', '/assets/models/' );
+
+
+
+const EQ = 53; // number of vec4 per figure, 0..51 are quaternions, 52 is user data
+const EQ_DATA = 52; // 52 is vec4 for user data
+
+
+
+// preload figure metadata
+var pivots, ranges, extras;
+
+//console.time( 'metadata' );
+
+await Promise.all([
+	loadJSON( 'man.json' ),
+	loadJSON( 'woman.json' ),
+	loadJSON( 'child.json' ),
+]).then( ([ dataMan, dataWoman, dataChild ])=>{
+
+	var data1 = [
+		...dataMan.pivots.map( v=>new Vector3( ...v ) ).flat(),
+		...dataWoman.pivots.map( v=>new Vector3( ...v ) ).flat(),
+		...dataChild.pivots.map( v=>new Vector3( ...v ) ).flat(),
+	];
+	var data2 = [
+		...dataMan.ranges.map( v=>new Vector4( ...v ) ).flat(),
+		...dataWoman.ranges.map( v=>new Vector4( ...v ) ).flat(),
+		...dataChild.ranges.map( v=>new Vector4( ...v ) ).flat(),
+	];
+	var data3 = [
+		...dataMan.extras.map( v=>new Vector4( ...v ) ).flat(),
+		...dataWoman.extras.map( v=>new Vector4( ...v ) ).flat(),
+		...dataChild.extras.map( v=>new Vector4( ...v ) ).flat(),
+	];
+
+	pivots = uniformArray( data1, 'vec3' ).setName( 'pivots' );
+	ranges = uniformArray( data2, 'vec4' ).setName( 'ranges' );
+	extras = uniformArray( data3, 'vec4' ).setName( 'extras' );
+
+	//console.timeEnd( 'metadata' );
+
+} );
+
+
+// preloading names of skeleton joints
+
+//console.time( 'body.json' );
+
+const JOINTS = ( await fetch( ASSETS_PATH+'body.json' ).then( r => r.json() ) ).joints;
+JOINTS.forEach( x => {
+
+	x.parentIndex = JOINTS.findIndex( y => y.name==x.parent ); // set parent index for each joint
+	x.signs = new Vector3( ...x.signs ); // convert angle directions into Vector3
+
+} );
+
+//console.timeEnd( 'body.json' );
+
+
+
+/**
+ * Loads a GLB model and optionally simplifies its geometry.
+ *
+ * The model must have a single mesh with geometry as the first child
+ * of `gltf.scene`.
+ *
+ * @param {string} url - Full URL of the GLB model file.
+ * @param {number} [lowpoly=0] - Geometry simplification factor.
+ *        Mapped linearly [0 to 1]→[0% to 75%]
+ *        - `lowpoly = 0` → keeps the original geometry
+ *        - `lowpoly = 1` → removes ~75% of the geometry
+ * @returns {Promise<BufferGeometry>} Promise for the geometry.
+ */
+function loadGLTF( url, lowpoly = 0 ) {
+
+	//	console.time( url );
+
+	return new GLTFLoader().loadAsync( ASSETS_PATH+url ).then( gltf => {
+
+		// get the geometry and vertex count to remove
+
+		var geometry = gltf.scene.children[ 0 ].geometry,
+			vertices = Math.floor( geometry.attributes.position.count * lowpoly * 0.75 );
+
+		// simplify the geometry if needed
+
+		if ( vertices > 0 ) {
+
+			var simplified = new SimplifyModifier().modify( geometry, vertices );
+			geometry.dispose();
+			geometry = simplified;
+
+		}
+
+		//		console.timeEnd( url );
+
+		return geometry;
+
+	} ); // then
+
+} // loadGLTF
+
+
+
+/**
+ * Loads a JSON model description (skeleton data).
+ *
+ * Loads pivot points, ranges and extra data. All coordinate arrays
+ * are automatically converted to Three.js TSL vectors (`vec3` / `vec4`).
+ *
+ * @param {string} url - Full URL of the JSON file.
+ * @returns {Promise<object>} Promise for an object with:
+ *                            - `pivots`: `vec3[]`
+ *                            - `ranges`: `vec4[]`
+ *                            - `extras`: `vec4[]`
+ */
+function loadJSON( url ) {
+
+	return fetch( ASSETS_PATH+url ).then( r => r.json() );
+
+} // loadJSON
+
+// disfigure quats.js
+
+
+
+
+
+
+const TEXTURE_WIDTH = 2048;
+
+
+/**
+ * A custom version of TextureNode that eliminates TSL code for `flipY` and
+ * all UV transformations, including multiplication with UV matrix. I didn't
+ * find a better way to do this. Sorry.
+ *
+ * @augments TextureNode
+ */
+
+
+class QuatTextureNode extends TextureNode {
+
+	constructor( texture = null ) { // <-- allow passing texture
+
+		const INITIAL_HEIGHT = 1;
+
+		if ( !texture ) {
+
+			// fallback for manual creation
+			const dataArray = new Float32Array( 4 * INITIAL_HEIGHT * TEXTURE_WIDTH );
+			texture = new DataTexture( dataArray, TEXTURE_WIDTH, INITIAL_HEIGHT, RGBAFormat, FloatType );
+
+		}
+
+		super( texture );
+
+		this.isQuatTextureNode = true;
+		this.dataArray = texture.image.data; // better
+		this.quatTexture = texture;
+		this.count = Math.floor( texture.image.height * texture.image.width / EQ );
+
+	}
+
+	updateTexture( newTexture ) {
+
+		this.value = newTexture;
+		this.quatTexture = newTexture;
+		this.dataArray = newTexture.image.data;
+
+		// Optional: force all existing clones to update (aggressive but safe)
+		this.version = ( this.version || 0 ) + 1; // can help TSL notice change
+
+	}
+
+
+	// === THIS IS THE MOST IMPORTANT PART ===
+	clone() {
+
+		const cloned = new this.constructor( this.value ); // share the SAME texture
+		cloned.uvNode = this.uvNode;
+		cloned.levelNode = this.levelNode;
+		cloned.sampler = this.sampler;
+		return cloned;
+
+	}
+
+	getUniformHash( /* builder */ ) {
+
+		return `QuatTexture-${this.value?.uuid || 'default'}`;
+
+	}
+
+
+	// increases the texture to fit at least count elements
+	setCapacity( count ) {
+
+		if ( count <= this.count ) return; // already big enough
+
+		// makes sure the texture hold data for count figures
+		var doubleHeight = Math.min( 2*this.quatTexture.image.height, TEXTURE_WIDTH ),
+			preciseHeight = Math.ceil( count*EQ/TEXTURE_WIDTH );
+
+		var newHeight = Math.max( doubleHeight, preciseHeight );
+		if ( newHeight > TEXTURE_WIDTH )
+			throw "Too many figures (data texture)";
+
+		// create new data array, forget the old, let GC deal with it
+		var newDataArray = new Float32Array( 4*newHeight*TEXTURE_WIDTH );
+		// === CRITICAL: Copy old data ===
+		newDataArray.set( this.dataArray ); // copies old data to the beginning of new array
+
+		// create new data texture, dispose the old one
+		var newQuatTexture = new DataTexture(
+			newDataArray,
+			TEXTURE_WIDTH, // width
+			newHeight, // height
+			RGBAFormat,
+			FloatType
+		);
+
+
+		this.dataArray = newDataArray;
+		this.quatTexture = newQuatTexture;
+		// update the texture node to be linked with the new texture
+		this.value = this.quatTexture;
+
+		this.quatTexture.dispose();
+		// recalculate the new possible count of figures
+		//		this.count = Math.floor(height*TEXTURE_WIDTH/EQ);
+		this.count = Math.floor( newQuatTexture.image.height * newQuatTexture.image.width / EQ );
+
+
+		// Tell TSL the texture changed
+		this.updateTexture( newQuatTexture );
+		console.log( 'QUATTEX: new size', this.dataArray.length, 'for', this.count, 'figures' );
+		// === CRITICAL: Force material rebuild ===
+		if ( this._material ) {
+
+			this._material.needsUpdate = true;
+			// Stronger option if needed:
+			// this._material.dispose(); // then re-assign the full node graph
+
+		}
+
+	} // QuatTexNode.setCapacity
+
+
+
+	// prevents TSL from generating flipY and texture transform code for WebGL2
+	getTransformedUV( uvNode ) {
+
+		return uvNode;
+
+	} // QuatTexNode.getTransformedUV
+
+
+
+	// prevents TSL from generating flipY and texture transform code for WebGL2
+	setupUV( builder, uvNode ) {
+
+		return uvNode;
+
+	} // QuatTexNode.setupUV
+
+
+
+	setQ( figure, joint, vec4 ) {
+
+		vec4.toArray( this.dataArray, ( EQ*figure+joint )*4 );
+
+	} // QuatTexNode.setQ
+
+
+
+	setXYZ( figure, joint, x, y, z, w=1 ) {
+
+		var base = ( EQ*figure+joint )*4;
+		this.dataArray[ base++ ] = x;
+		this.dataArray[ base++ ] = y;
+		this.dataArray[ base++ ] = z;
+		this.dataArray[ base++ ] = w;
+
+	} // QuatTexNode.setXYZ
+
+
+} // QuatTexNode
+
+
+var quatTextureNode = new QuatTextureNode( );
 
 // number generators
 
@@ -61,8 +359,6 @@ class World {
 		renderer.shadowMap.enabled = options?.shadows ?? true;
 		renderer.shadowMap.type = PCFSoftShadowMap;
 
-
-
 		document.body.appendChild( renderer.domElement );
 		document.body.style.overflow = 'hidden';
 		document.body.style.margin = '0';
@@ -74,6 +370,32 @@ class World {
 		camera.position.set( 0, 1.5, 4 );
 
 		renderer.compileAsync( scene, camera );
+
+		if ( options?.men ) {
+
+			Man.count = options.men;
+
+		} // men
+
+		if ( options?.women ) {
+
+			Woman.count = options.women;
+
+		} // women
+
+		if ( options?.children ) {
+
+			Child.count = options.children;
+
+		} // children
+
+		quatTextureNode.setCapacity( Man.count+Woman.count+Child.count );
+
+		if ( options?.population ) {
+
+			quatTextureNode.setCapacity( options.population );
+
+		} // population
 
 		if ( options?.stats ?? false ) {
 
@@ -250,16 +572,35 @@ function setAnimationLoop( animationLoop ) {
 
 }
 
-const EQ = 54; // number of vec4 per figure, 0..51 are quaternions, 52 is position, 53 is user data
-const EQ_POS = 52; // 52 is vec4 for position
-
-
-
 var rotateByQuaternion = Fn( ([ p, q ])=>{
 
 	return p.add( q.xyz.cross( q.xyz.cross( p ).add( q.w.mul( p ) ) ).mul( 2 ) );
 
 }, { return: 'vec3', p: 'vec3', q: 'vec4' } );
+
+
+
+var scaleQuaternion = Fn( ([ quat, k ])=>{
+
+	var q = vec4();
+	var len = quat.xyz.length().toVar();
+
+	If( len.lessThan( 1e-5 ), ()=>{
+
+		q.assign( vec4( 0, 0, 0, 1 ) );
+
+	} ).
+
+		Else( ()=>{
+
+			var acos = k.mul( quat.w.acos() ).toVar();
+			q.assign( vec4( quat.xyz.div( len ).mul( acos.sin() ), acos.cos() ) );
+
+		} );
+
+	return q;
+
+}, { return: 'vec4', quat: 'vec4', k: 'float' } );
 
 
 
@@ -275,20 +616,7 @@ var disfigureMatrix = Fn( ([ mat, pivot, quat, k ])=>{
 		// if k<1 the quaternion's rotation must be 'divided'
 		If( k.lessThan( 1 ), ()=>{
 
-			var len = quat.xyz.length().toVar();
-
-			If( len.lessThan( 1e-5 ), ()=>{
-
-				q.assign( vec4( 0, 0, 0, 1 ) );
-
-			} ).
-
-				Else( ()=>{
-
-					var acos = k.mul( quat.w.acos() ).toVar();
-					q.assign( vec4( quat.xyz.div( len ).mul( acos.sin() ), acos.cos() ) );
-
-				} );
+			q.assign( scaleQuaternion( q, k ) );
 
 		} ); // k<1
 
@@ -362,40 +690,44 @@ var gradientXT = Fn( ([ pos, range, slope ])=>
 , { pos: 'vec3', range: 'vec4', slope: 'float', return: 'float' } );
 
 
+var getQuatAddr = Fn( ([ figureIndex, propIndex ])=>{
 
-var disfigureBody = Fn( ([ poolData, figureData ])=>{
+	var offset = figureIndex.mul( EQ ).add( propIndex );//.toVar();
+	return ivec2( offset.mod( TEXTURE_WIDTH ), offset.div( TEXTURE_WIDTH ) );
 
-	var p = positionGeometry.toVar( ),
+}, { return: 'ivec2', figureIndex: 'uint', propIndex: 'int' } );
+
+
+
+var q = ( figureIndex, propIndex )=> {
+
+	return quatTextureNode.load( getQuatAddr( figureIndex, propIndex ) );
+
+};
+
+
+
+var disfigureBody = Fn( ( )=>{
+
+	var p = positionGeometry,
 		m = mat3( p, normalGeometry.normalize(), vec3( 0 ) ).toVar( );
 
-	var pivots = array( figureData.pivots ).toConst( 'pivots' ),
-		ranges = array( figureData.ranges ).toConst( 'ranges' ),
-		extras = array( figureData.extras ).toConst( 'extras' );
+	var figureIndex = attribute( 'uids', 'int' );
 
-	var instanceIndexEQ = instanceIndex.mul( EQ ).toVar();
+	var gender = q( figureIndex, EQ_DATA ).x.mul( 52 ).toVar(); // 52 pivots
+	var gender2 = q( figureIndex, EQ_DATA ).x.mul( 4 ).toVar(); // 4 extras
 
-	var getQuatAddr = Fn( ([ instanceIndexEQ, propIndex, texSize ])=>{
+	var disP = ( i, gradient ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradient ) ),
+		disY = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientY( p, ranges.element( i.add( gender ) ) ) ) ),
+		disX = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientX( p, ranges.element( i.add( gender ) ) ) ) ),
+		disT = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientXT( p, ranges.element( i.add( gender ) ), 0 ) ) );
 
-		var offset = instanceIndexEQ.add( propIndex ).toVar();
-		return ivec2( offset.mod( texSize ), offset.div( texSize ) );
-
-	}, { return: 'ivec2', instanceIndex: 'int', propIndex: 'int', texSize: 'int' } );
-
-	var q = Fn( ([ propIndex ])=> poolData.quatTexNode.load( getQuatAddr( instanceIndexEQ, propIndex, poolData.TEXTURE_SIZE ) ) );
-
-
-	var isLeft = step( p.x, 0 ).toVar( ),
-		isDown = p.y.lessThan( pivots.element( 2 ).y ).toVar( ), //chest
-		isHand = p.x.abs().greaterThan( pivots.element( 16 ).x ); // wrist
-
-
-	var disP = ( i, gradient ) => m.assign( disfigureMatrix( m, pivots.element( i ), q( i ), gradient ) ),
-		disY = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i ), q( i ), gradientY( p, ranges.element( i ) ) ) ),
-		disX = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i ), q( i ), gradientX( p, ranges.element( i ) ) ) ),
-		disT = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i ), q( i ), gradientXT( p, ranges.element( i ), 0 ) ) );
+	var isLeft = int( step( p.x, 0 ) ).toVar( ),
+		isDown = p.y.lessThan( pivots.element( int( 2 ).add( gender ) ).y ).toVar( ), //chest
+		isHand = p.x.abs().greaterThan( pivots.element( int( 16 ).add( gender ) ).x ); // wrist
 
 	var pick = ( left, right )=>isLeft.mul( right-left ).add( left ).toVar();
-	//	var pick = (left,right)=>select(p.x.greaterThan(0),left,right).toVar();
+
 
 	If( isDown, ()=>{
 
@@ -409,7 +741,7 @@ var disfigureBody = Fn( ([ poolData, figureData ])=>{
 		Loop( { start: start, end: end }, ( { i } ) => disY( i ) );
 
 		// leg
-		disP( end, gradientLeg( p, ranges.element( end ), extras.element( leg ).xy ) );
+		disP( end, gradientLeg( p, ranges.element( end.add( gender ) ), extras.element( leg.add( gender2 ) ).xy ) );
 
 	} ).Else( ()=>{
 
@@ -419,9 +751,9 @@ var disfigureBody = Fn( ([ poolData, figureData ])=>{
 			let thumb = pick( 24, 26 );
 			let thumb2 = pick( 2, 3 );
 
-			disP( thumb, gradientXT( p, ranges.element( thumb ), extras.element( thumb2 ).x ) );
+			disP( thumb, gradientXT( p, ranges.element( thumb.add( gender ) ), extras.element( thumb2.add( gender2 ) ).x ) );
 			thumb.addAssign( 1 );
-			disP( thumb, gradientYT( p, ranges.element( thumb ), extras.element( thumb2 ).y ) );
+			disP( thumb, gradientYT( p, ranges.element( thumb.add( gender ) ), extras.element( thumb2.add( gender2 ) ).y ) );
 
 			let start = pick( 28, 40 ),
 				end = start.add( 12 );
@@ -440,7 +772,7 @@ var disfigureBody = Fn( ([ poolData, figureData ])=>{
 		Loop( { start: start, end: end }, ( { i } ) => disX( i ) );
 
 		// arm
-		disP( end, gradientArm( p, pivots.element( end ), ranges.element( end ) ) );
+		disP( end, gradientArm( p, pivots.element( int( end ).add( gender ) ), ranges.element( end.add( gender ) ) ) );
 
 	} );
 
@@ -450,143 +782,17 @@ var disfigureBody = Fn( ([ poolData, figureData ])=>{
 
 	Loop( { end: int( 4 ) }, ( { i } ) => disY( i ) );
 
-
 	// footer
-	//m.element( 0 ).addAssign( q( EQ_POS ) );
 	m.element( 1 ).assign( transformNormalToView( m.element( 1 ) ).normalize() );
 
+	//	console.log( 'DODO==============================' );
 	return m;//.debug();
 
 } );
 
-// path to GLB models
-
-const ASSETS_PATH = import.meta.url
-	.replace( '/src/assets.js', '/assets/models/' )
-	.replace( '/dist/disfigure.js', '/assets/models/' )
-	.replace( '/dist/disfigure.min.js', '/assets/models/' );
-
-
-
-// preloading names of skeleton joints
-
-//console.time( 'body.json' );
-
-const JOINTS = ( await fetch( ASSETS_PATH+'body.json' ).then( r => r.json() ) ).joints;
-JOINTS.forEach( x => {
-
-	x.parentIndex = JOINTS.findIndex( y => y.name==x.parent ); // set parent index for each joint
-	x.signs = new Vector3( ...x.signs ); // convert angle directions into Vector3
-
-} );
-
-//console.timeEnd( 'body.json' );
-
-
-
-/**
- * Loads a GLB model and optionally simplifies its geometry.
- *
- * The model must have a single mesh with geometry as the first child
- * of `gltf.scene`.
- *
- * @param {string} url - Full URL of the GLB model file.
- * @param {number} [lowpoly=0] - Geometry simplification factor.
- *        Mapped linearly [0 to 1]→[0% to 75%]
- *        - `lowpoly = 0` → keeps the original geometry
- *        - `lowpoly = 1` → removes ~75% of the geometry
- * @returns {Promise<BufferGeometry>} Promise for the geometry.
- */
-function loadGLTF( url, lowpoly = 0 ) {
-
-	console.time( url );
-
-	return new GLTFLoader().loadAsync( ASSETS_PATH+url ).then( gltf => {
-
-		// get the geometry and vertex count to remove
-
-		var geometry = gltf.scene.children[ 0 ].geometry,
-			vertices = Math.floor( geometry.attributes.position.count * lowpoly * 0.75 );
-
-		// simplify the geometry if needed
-
-		if ( vertices > 0 ) {
-
-			var simplified = new SimplifyModifier().modify( geometry, vertices );
-			geometry.dispose();
-			geometry = simplified;
-
-		}
-
-		console.timeEnd( url );
-
-		return geometry;
-
-	} ); // then
-
-} // loadGLTF
-
-
-
-/**
- * Loads a JSON model description (skeleton data).
- *
- * Loads pivot points, ranges and extra data. All coordinate arrays
- * are automatically converted to Three.js TSL vectors (`vec3` / `vec4`).
- *
- * @param {string} url - Full URL of the JSON file.
- * @returns {Promise<object>} Promise for an object with:
- *                            - `pivots`: `vec3[]`
- *                            - `ranges`: `vec4[]`
- *                            - `extras`: `vec4[]`
- */
-function loadJSON( url ) {
-
-	//console.time( url );
-
-	return fetch( ASSETS_PATH+url ).then( r =>
-
-		r.json().then( data => {
-
-			// convert arrays into array of vectors
-
-			data.pivots = data.pivots.map( x => vec3( ...x ) );
-			data.ranges = data.ranges.map( x => vec4( ...x ) );
-			data.extras = data.extras.map( x => vec4( ...x ) );
-
-			//console.timeEnd( url );
-
-			return data;
-
-		} )
-
-	); // then
-
-} // loadJSON
-
-/**
- * A custom version of TextureNode that eliminates TSL code for `flipY` and
- * all UV transformations, including multiplication with UV matrix. I didn't
- * find a better way to do this. Sorry.
- *
- * @augments TextureNode
- */
-class DataTextureNode extends TextureNode {
-
-	getTransformedUV( uvNode ) {
-
-		return uvNode;
-
-	}
-
-	setupUV( builder, uvNode ) {
-
-		return uvNode;
-
-	}
-
-} // DataTextureNode
-
+var disfigure = disfigureBody( );
+var disfigurePosition = disfigure.element( 0 );
+var disfigureNormal = disfigure.element( 1 );
 
 
 /**
@@ -610,72 +816,43 @@ class Pool extends InstancedMesh {
 		this.receiveShadow = true;
 		this.frustumCulled = false;
 
-		// create a square data texture that can hold data for at least
-		// MAX_BODIES bodies - each body needs EQ number of vec4-s
+		this.uidsArray = new Int32Array( MAX_BODIES ); // the global body index (uid) of each instance
 
-		this.TEXTURE_SIZE = Math.ceil( Math.sqrt( MAX_BODIES*EQ ) );
+		this.addToScene = true;
 
-		this.dataArray = new Float32Array( 4*this.TEXTURE_SIZE**2 );
-
-		this.quatTexture = new DataTexture(
-			this.dataArray,
-			this.TEXTURE_SIZE, // width
-			this.TEXTURE_SIZE, // height
-			RGBAFormat,
-			FloatType
-		);
-
-		this.quatTexNode = new DataTextureNode( this.quatTexture );
+		console.log( 'Pool:created count', MAX_BODIES );
 
 		// asynchronously load the geometry, the skeleton data, hook
 		// shaders to material nodes and add the instance to the scene
 
-		Promise.all([
-			loadGLTF( url+'.glb', lowpoly ),
-			loadJSON( url+'.json' )
-		]).then( ([ geometry, data ])=>{
+		loadGLTF( url+'.glb', lowpoly ).then( ( geometry )=>{
 
 			this.geometry = geometry;
-			this.data = data;
-			console.time( 'TSL shaders' );
-			var disfigure = disfigureBody( this, data );
-			material.positionNode = disfigure.element( 0 );
+			this.geometry.setAttribute( 'uids', new InstancedBufferAttribute( this.uidsArray, 1 ) );
+			this.uidsAttr = this.geometry.getAttribute( 'uids' );
+			this.uidsAttr.needsUpdate = true;
+
+			material.positionNode = disfigurePosition;
+
 			if ( useVertexStage )
-				material.normalNode = vertexStage( disfigure.element( 1 ) );
+				material.normalNode = vertexStage( disfigureNormal );
 			else
-				material.normalNode = disfigure.element( 1 );
+				material.normalNode = disfigureNormal;
+			material.needsUpdate = true;
 
-			this.onLoad();
+			// safe only for webgl <-- causes extra shader compilation, so better to remove it
+			//if( renderer.backend.isWebGLBackend ) renderer.render( this, camera )
 
-			scene.add( this );
-			renderer.compile( scene, camera );
+			if ( this.addToScene ) {
 
-			console.timeEnd( 'TSL shaders' );
+				this.onLoad();
+				scene.add( this );
 
+			}
 
 		} );
 
 	} // Pool.constructor
-
-
-
-	setQ( figure, joint, vec4 ) {
-
-		vec4.toArray( this.dataArray, ( EQ*figure+joint )*4 );
-
-	} // Pool.setQ
-
-
-
-	setXYZ( figure, joint, x, y, z, w=1 ) {
-
-		var base = ( EQ*figure+joint )*4;
-		this.dataArray[ base++ ] = x;
-		this.dataArray[ base++ ] = y;
-		this.dataArray[ base++ ] = z;
-		this.dataArray[ base++ ] = w;
-
-	} // Pool.setXYZ
 
 
 
@@ -684,13 +861,34 @@ class Pool extends InstancedMesh {
 
 
 
+	isFull( ) {
+
+		return ( this.count >= this.instanceMatrix.count );
+
+	} // Pool.isFull
+
+
 	getBody( ) {
 
-		if ( this.count >= this.instanceMatrix.count ) throw ( 'Too many bodies' );
+		if ( this.isFull() ) throw 'Too many figures (instance pool)';
 
 		return this.count++;
 
 	} // Pool.getBody
+
+
+	// copy another pool to this pool
+	copy( sourcePool ) {
+
+		// copy matrices
+		this.instanceMatrix.array.set( sourcePool.instanceMatrix.array );
+		this.instanceMatrix.needsUpdate = true;
+
+		// copy uids
+		this.uidsArray.set( sourcePool.uidsArray );
+		this.geometry.getAttribute( 'uids' ).needsUpdate = true;
+
+	} // Pool.copy
 
 }
 
@@ -707,7 +905,8 @@ var uid = 0;
 
 // dummy variables
 var _p = new Vector3(),
-	_q = new Quaternion();
+	_q = new Quaternion(),
+	pivot = new Vector3();
 
 
 class EulerDegrees extends Euler {
@@ -806,15 +1005,20 @@ class Body extends Object3D {
 
 	constructor( pool ) {
 
+		quatTextureNode.setCapacity( uid+1 );
+		pool.material.needsUpdate = true;
+
 		super();
 
 		this.pool = pool;
 		this.pid = pool.getBody(); // instance index within the pool
-		this.uid = uid++; // global index
+		this.uid = uid++; // global body index
+
+		pool.uidsArray[ this.pid ] = this.uid;
 
 		this.eulers = [];
 
-		for ( var i=0; i<EQ; i++ ) {
+		for ( var i=0; i<EQ_DATA; i++ ) {
 
 			this.eulers.push( new EulerDegrees( this, i, JOINTS[ i ].parentIndex, JOINTS[ i ].signs ) );
 
@@ -832,38 +1036,41 @@ class Body extends Object3D {
 		this.pool.setMatrixAt( this.pid, this.matrix );
 		this.pool.instanceMatrix.needsUpdate = true;
 
-		for ( var i=0; i<EQ-2; i++ ) {
+		for ( var i=0; i<EQ_DATA; i++ ) {
 
 			var euler = this.eulers[ i ];
 
-			this.pool.setQ( this.pid, i, euler.q );
+			quatTextureNode.setQ( this.uid, i, euler.q );
 
 		} // for i
 
-		this.pool.quatTexture.needsUpdate = true;
+		quatTextureNode.quatTexture.needsUpdate = true;
 
 	} // Body.update
 
 	updateAttached( ) {
 
-		var pivots = this.pool.data?.pivots; // in Firefox pool.data is created later
-
 		if ( !pivots ) return;
 
-		for ( var i=0; i<EQ-2; i++ ) {
+		for ( var i=0; i<EQ_DATA; i++ ) {
 
-			var euler = this.eulers[ i ];
+			var _euler = this.eulers[ i ];
 
-			for ( var object of euler.attached ) {
+			for ( var object of _euler.attached ) {
+
+				var euler = _euler;
+
+				pivot.set( ...pivots.array[ euler.index ]);
 
 				_p.copy( object.initialPosition );
-				_p.add( pivots[ euler.index ].node.value );
+				_p.add( pivot );
 
 				_q.identity();
 
+
 				scan: while ( euler ) {
 
-					var pivot = pivots[ euler.index ].node.value;
+					pivot.set( ...pivots.array[ euler.index ]);
 
 					_p.sub( pivot ).applyQuaternion( euler.quaternion ).add( pivot );
 					_q.premultiply( euler.quaternion );
@@ -881,32 +1088,141 @@ class Body extends Object3D {
 				object.quaternion.copy( _q );
 				object.updateMatrix();
 
+
 			} // for object
 
 		} // for i
 
 	} // Body.updateAttached
 
+
+
+	get posture() {
+
+		var r = x=>Math.round( 100*( Object.is( x, -0 )?0:x ) )/100; // round a number
+
+		return {
+			version: 9,
+			position: [ ...this.position ],
+			angles: this.eulers.map( e=>[ r( e.x ), r( e.y ), r( e.z ) ]),
+		};
+
+	} // Body.get.posture
+
+
+
+	get posture() {
+
+		var r = x=>Math.round( 100*( Object.is( x, -0 )?0:x ) )/100; // round a number
+
+		return {
+			version: 9,
+			//position: [...this.position],
+			angles: this.eulers.map( e=>[ r( e.x ), r( e.y ), r( e.z ) ]),
+		};
+
+	} // Body.get.posture
+
+
+
+	get postureString() {
+
+		return JSON.stringify( this.posture );
+
+	} // Body.get.postureString
+
+
+
+	set posture( data ) {
+
+		if ( data.version !=9 )
+			throw 'Incompatible posture version';
+
+		//this.position.set( ...data.position );
+
+		for ( var i in data.angles ) {
+
+			this.eulers[ i ].x = data.angles[ i ][ 0 ];
+			this.eulers[ i ].y = data.angles[ i ][ 1 ];
+			this.eulers[ i ].z = data.angles[ i ][ 2 ];
+
+		}
+
+	} // Body.posture
+
+
+	blend( postureA, postureB, k ) {
+
+		function lerp( a, b ) {
+
+			var c = [];
+			for ( var i=0; i<a.length; i++ )
+				c[ i ] = MathUtils.lerp( a[ i ], b[ i ], k );
+
+			return c;
+
+		}
+
+		if ( postureA.version !=9 || postureB.version !=9 )
+			throw 'Incompatible posture version';
+
+		this.posture = {
+			version: 9,
+			angles: postureA.angles.map( ( a, i ) => lerp( a, postureB.angles[ i ]) ),
+		};
+
+	} // blend
+
+
 } // Body
 
 
+function preparePool( Class, name ) {
+
+	if ( Class.pool == null ) {
+
+		Class.pool = new Pool( name, Class.count, Class.lowpoly, Class.vertexStage );
+
+	}
+
+	if ( Class.pool.isFull() ) {
+
+
+		// get a larger pool
+		Class.count = Math.round( 2*Class.count );
+
+		var oldPool = Class.pool;
+		var newPool = new Pool( name, Class.count, Class.lowpoly, Class.vertexStage );
+		oldPool.addToScene = false;
+		oldPool.removeFromParent();
+		for ( var body of everybody ) if ( body.pool == oldPool ) body.pool = newPool;
+
+		console.log( name+':: pool is full, size', oldPool.uidsArray.length, '->', newPool.uidsArray.length );
+
+		newPool.count = oldPool.count;
+		newPool.instanceMatrix.array.set( oldPool.instanceMatrix.array );
+		newPool.uidsArray.set( oldPool.uidsArray );
+
+		Class.pool = newPool;
+
+	}
+
+}
 
 class Man extends Body {
 
 	static pool = null;
-	static count = 10; // max number of men
+	static count = 2; // max number of men
 	static lowpoly = 0; // lowpoly-ness, 0=original, 1.0 remove 75%
 	static vertexStage = false; // true for faster but uglier normals
 
 	constructor( height = 1.80 ) {
 
-		if ( Man.pool == null ) {
-
-			Man.pool = new Pool( 'man', Man.count, Man.lowpoly, Man.vertexStage );
-
-		}
+		preparePool( Man, 'man' );
 
 		super( Man.pool );
+
+		quatTextureNode.setXYZ( this.uid, EQ_DATA, 0, 0, 0, 0 );
 
 		this.material = Man.pool.material; // expose to outside
 
@@ -929,19 +1245,17 @@ class Man extends Body {
 class Woman extends Body {
 
 	static pool = null;
-	static count = 10; // max number of women
+	static count = 2; // max number of women
 	static lowpoly = 0; // lowpoly-ness, 0=original, 1.0 remove 75%
 	static vertexStage = false; // true for faster but uglier normals
 
 	constructor( height = 1.70 ) {
 
-		if ( Woman.pool == null ) {
-
-			Woman.pool = new Pool( 'woman', Woman.count, Woman.lowpoly, Woman.vertexStage );
-
-		}
+		preparePool( Woman, 'woman' );
 
 		super( Woman.pool );
+
+		quatTextureNode.setXYZ( this.uid, EQ_DATA, 1, 0, 0, 0 );
 
 		this.material = Woman.pool.material; // expose to outside
 
@@ -962,19 +1276,17 @@ class Woman extends Body {
 class Child extends Body {
 
 	static pool = null;
-	static count = 10; // max number of children
+	static count = 2; // max number of children
 	static lowpoly = 0; // lowpoly-ness, 0=original, 1.0 remove 75%
 	static vertexStage = false; // true for faster but uglier normals
 
 	constructor( height = 1.35 ) {
 
-		if ( Child.pool == null ) {
-
-			Child.pool = new Pool( 'child', Child.count, Child.lowpoly, Child.vertexStage );
-
-		}
+		preparePool( Child, 'child' );
 
 		super( Child.pool );
+
+		quatTextureNode.setXYZ( this.uid, EQ_DATA, 2, 0, 0, 0 );
 
 		this.material = Child.pool.material; // expose to outside
 
@@ -999,4 +1311,4 @@ class Child extends Body {
 
 console.log( '\n%c\u22EE\u22EE\u22EE Disfigure\n%chttps://boytchev.github.io/disfigure/\n', 'color: navy', 'font-size:80%' );
 
-export { Child, EQ, EQ_POS, Man, Pool, Woman, World, camera, cameraLight, chaotic, controls, disfigureBody, disfigureMatrix, everybody, gradientArm, gradientLeg, gradientX, gradientXT, gradientY, gradientYT, ground, light, random, regular, renderer, scene, setAnimationLoop };
+export { Child, Man, Pool, Woman, World, camera, cameraLight, chaotic, controls, disfigureBody, disfigureMatrix, everybody, gradientArm, gradientLeg, gradientX, gradientXT, gradientY, gradientYT, ground, light, random, regular, renderer, scene, setAnimationLoop };

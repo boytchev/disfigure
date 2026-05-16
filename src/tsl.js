@@ -3,14 +3,9 @@
 
 
 
-import { array, Fn, If, instanceIndex, int, ivec2, Loop, mat3, normalGeometry, positionGeometry, select, step, transformNormalToView, vec3, vec4 } from 'three/tsl';
-
-
-
-
-const EQ = 54; // number of vec4 per figure, 0..51 are quaternions, 52 is position, 53 is user data
-const EQ_POS = 52; // 52 is vec4 for position
-const EQ_DATA = 53; // 53 is vec4 for user data
+import { attribute, Fn, If, int, ivec2, Loop, mat3, normalGeometry, positionGeometry, select, step, transformNormalToView, vec3, vec4 } from 'three/tsl';
+import { EQ, EQ_DATA, extras, pivots, ranges } from './assets.js';
+import { quatTextureNode, TEXTURE_WIDTH } from './quats.js';
 
 
 
@@ -19,6 +14,30 @@ var rotateByQuaternion = Fn( ([ p, q ])=>{
 	return p.add( q.xyz.cross( q.xyz.cross( p ).add( q.w.mul( p ) ) ).mul( 2 ) );
 
 }, { return: 'vec3', p: 'vec3', q: 'vec4' } );
+
+
+
+var scaleQuaternion = Fn( ([ quat, k ])=>{
+
+	var q = vec4();
+	var len = quat.xyz.length().toVar();
+
+	If( len.lessThan( 1e-5 ), ()=>{
+
+		q.assign( vec4( 0, 0, 0, 1 ) );
+
+	} ).
+
+		Else( ()=>{
+
+			var acos = k.mul( quat.w.acos() ).toVar();
+			q.assign( vec4( quat.xyz.div( len ).mul( acos.sin() ), acos.cos() ) );
+
+		} );
+
+	return q;
+
+}, { return: 'vec4', quat: 'vec4', k: 'float' } );
 
 
 
@@ -34,20 +53,7 @@ var disfigureMatrix = Fn( ([ mat, pivot, quat, k ])=>{
 		// if k<1 the quaternion's rotation must be 'divided'
 		If( k.lessThan( 1 ), ()=>{
 
-			var len = quat.xyz.length().toVar();
-
-			If( len.lessThan( 1e-5 ), ()=>{
-
-				q.assign( vec4( 0, 0, 0, 1 ) );
-
-			} ).
-
-				Else( ()=>{
-
-					var acos = k.mul( quat.w.acos() ).toVar();
-					q.assign( vec4( quat.xyz.div( len ).mul( acos.sin() ), acos.cos() ) );
-
-				} );
+			q.assign( scaleQuaternion( q, k ) );
 
 		} ); // k<1
 
@@ -121,40 +127,44 @@ var gradientXT = Fn( ([ pos, range, slope ])=>
 , { pos: 'vec3', range: 'vec4', slope: 'float', return: 'float' } );
 
 
+var getQuatAddr = Fn( ([ figureIndex, propIndex ])=>{
 
-var disfigureBody = Fn( ([ poolData, figureData ])=>{
+	var offset = figureIndex.mul( EQ ).add( propIndex );//.toVar();
+	return ivec2( offset.mod( TEXTURE_WIDTH ), offset.div( TEXTURE_WIDTH ) );
 
-	var p = positionGeometry.toVar( ),
+}, { return: 'ivec2', figureIndex: 'uint', propIndex: 'int' } );
+
+
+
+var q = ( figureIndex, propIndex )=> {
+
+	return quatTextureNode.load( getQuatAddr( figureIndex, propIndex ) );
+
+};
+
+
+
+var disfigureBody = Fn( ( )=>{
+
+	var p = positionGeometry,
 		m = mat3( p, normalGeometry.normalize(), vec3( 0 ) ).toVar( );
 
-	var pivots = array( figureData.pivots ).toConst( 'pivots' ),
-		ranges = array( figureData.ranges ).toConst( 'ranges' ),
-		extras = array( figureData.extras ).toConst( 'extras' );
+	var figureIndex = attribute( 'uids', 'int' );
 
-	var instanceIndexEQ = instanceIndex.mul( EQ ).toVar();
+	var gender = q( figureIndex, EQ_DATA ).x.mul( 52 ).toVar(); // 52 pivots
+	var gender2 = q( figureIndex, EQ_DATA ).x.mul( 4 ).toVar(); // 4 extras
 
-	var getQuatAddr = Fn( ([ instanceIndexEQ, propIndex, texSize ])=>{
+	var disP = ( i, gradient ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradient ) ),
+		disY = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientY( p, ranges.element( i.add( gender ) ) ) ) ),
+		disX = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientX( p, ranges.element( i.add( gender ) ) ) ) ),
+		disT = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientXT( p, ranges.element( i.add( gender ) ), 0 ) ) );
 
-		var offset = instanceIndexEQ.add( propIndex ).toVar();
-		return ivec2( offset.mod( texSize ), offset.div( texSize ) );
-
-	}, { return: 'ivec2', instanceIndex: 'int', propIndex: 'int', texSize: 'int' } );
-
-	var q = Fn( ([ propIndex ])=> poolData.quatTexNode.load( getQuatAddr( instanceIndexEQ, propIndex, poolData.TEXTURE_SIZE ) ) );
-
-
-	var isLeft = step( p.x, 0 ).toVar( ),
-		isDown = p.y.lessThan( pivots.element( 2 ).y ).toVar( ), //chest
-		isHand = p.x.abs().greaterThan( pivots.element( 16 ).x ); // wrist
-
-
-	var disP = ( i, gradient ) => m.assign( disfigureMatrix( m, pivots.element( i ), q( i ), gradient ) ),
-		disY = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i ), q( i ), gradientY( p, ranges.element( i ) ) ) ),
-		disX = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i ), q( i ), gradientX( p, ranges.element( i ) ) ) ),
-		disT = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i ), q( i ), gradientXT( p, ranges.element( i ), 0 ) ) );
+	var isLeft = int( step( p.x, 0 ) ).toVar( ),
+		isDown = p.y.lessThan( pivots.element( int( 2 ).add( gender ) ).y ).toVar( ), //chest
+		isHand = p.x.abs().greaterThan( pivots.element( int( 16 ).add( gender ) ).x ); // wrist
 
 	var pick = ( left, right )=>isLeft.mul( right-left ).add( left ).toVar();
-	//	var pick = (left,right)=>select(p.x.greaterThan(0),left,right).toVar();
+
 
 	If( isDown, ()=>{
 
@@ -168,7 +178,7 @@ var disfigureBody = Fn( ([ poolData, figureData ])=>{
 		Loop( { start: start, end: end }, ( { i } ) => disY( i ) );
 
 		// leg
-		disP( end, gradientLeg( p, ranges.element( end ), extras.element( leg ).xy ) );
+		disP( end, gradientLeg( p, ranges.element( end.add( gender ) ), extras.element( leg.add( gender2 ) ).xy ) );
 
 	} ).Else( ()=>{
 
@@ -178,9 +188,9 @@ var disfigureBody = Fn( ([ poolData, figureData ])=>{
 			let thumb = pick( 24, 26 );
 			let thumb2 = pick( 2, 3 );
 
-			disP( thumb, gradientXT( p, ranges.element( thumb ), extras.element( thumb2 ).x ) );
+			disP( thumb, gradientXT( p, ranges.element( thumb.add( gender ) ), extras.element( thumb2.add( gender2 ) ).x ) );
 			thumb.addAssign( 1 );
-			disP( thumb, gradientYT( p, ranges.element( thumb ), extras.element( thumb2 ).y ) );
+			disP( thumb, gradientYT( p, ranges.element( thumb.add( gender ) ), extras.element( thumb2.add( gender2 ) ).y ) );
 
 			let start = pick( 28, 40 ),
 				end = start.add( 12 );
@@ -199,7 +209,7 @@ var disfigureBody = Fn( ([ poolData, figureData ])=>{
 		Loop( { start: start, end: end }, ( { i } ) => disX( i ) );
 
 		// arm
-		disP( end, gradientArm( p, pivots.element( end ), ranges.element( end ) ) );
+		disP( end, gradientArm( p, pivots.element( int( end ).add( gender ) ), ranges.element( end.add( gender ) ) ) );
 
 	} );
 
@@ -209,16 +219,14 @@ var disfigureBody = Fn( ([ poolData, figureData ])=>{
 
 	Loop( { end: int( 4 ) }, ( { i } ) => disY( i ) );
 
-
 	// footer
-	//m.element( 0 ).addAssign( q( EQ_POS ) );
 	m.element( 1 ).assign( transformNormalToView( m.element( 1 ) ).normalize() );
 
-	return m//.debug();
+	//	console.log( 'DODO==============================' );
+	return m;//.debug();
 
 } );
 
 
 
-
-export { EQ, EQ_POS, disfigureMatrix, disfigureBody, gradientX, gradientY, gradientYT, gradientXT, gradientLeg, gradientArm };
+export { disfigureMatrix, disfigureBody, gradientX, gradientY, gradientYT, gradientXT, gradientLeg, gradientArm };

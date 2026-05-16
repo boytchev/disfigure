@@ -8,6 +8,8 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import Stats from 'three/addons/libs/stats.module.js';
 
 import { SimplexNoise } from "three/addons/math/SimplexNoise.js";
+import { quatTextureNode } from "./quats.js";
+import { Child, Man, Woman } from "./body.js";
 
 
 
@@ -64,7 +66,7 @@ class World {
 		renderer.setSize( innerWidth, innerHeight );
 		renderer.shadowMap.enabled = options?.shadows ?? true;
 		renderer.shadowMap.type = PCFSoftShadowMap;
-		
+
 		document.body.appendChild( renderer.domElement );
 		document.body.style.overflow = 'hidden';
 		document.body.style.margin = '0';
@@ -76,6 +78,32 @@ class World {
 		camera.position.set( 0, 1.5, 4 );
 
 		renderer.compileAsync( scene, camera );
+
+		if ( options?.men ) {
+
+			Man.count = options.men;
+
+		} // men
+
+		if ( options?.women ) {
+
+			Woman.count = options.women;
+
+		} // women
+
+		if ( options?.children ) {
+
+			Child.count = options.children;
+
+		} // children
+
+		quatTextureNode.setCapacity( Man.count+Woman.count+Child.count );
+
+		if ( options?.population ) {
+
+			quatTextureNode.setCapacity( options.population );
+
+		} // population
 
 		if ( options?.stats ?? false ) {
 

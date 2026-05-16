@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Supported types of figures</h3>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as THREE from 'three';
+		import * as Happy from 'disfigure';
+
+
+		// create a default world
+
+		new Happy.World( )//{men:1000, women:1000, children:1000, stats:true} );
+
+/*
+Happy.Man.lowpoly = 1;
+Happy.Woman.lowpoly = 1;
+Happy.Child.lowpoly = 1;
+Happy.Man.vertexStage = true;
+Happy.Woman.vertexStage = true;
+Happy.Child.vertexStage = true;
+*/
+
+		// create a man, a woman and a child
+
+		for( var i=0; i<100; i++ ) {
+		
+			var man = new Happy.Man( );
+			
+			var r = ( i**0.5 )*0.25*3,
+				a = 2*Math.PI*i*(1 - 2/(1+Math.sqrt(5)));
+
+			man.position.set( r*Math.cos(a), 0, r*Math.sin(a), 1 );
+	
+			var woman = new Happy.Woman( );
+			
+			var r = ( (i+1/3)**0.5 )*0.25*3,
+				a = 2*Math.PI*(i+1/3)*(1 - 2/(1+Math.sqrt(5)));
+
+			woman.position.set( r*Math.cos(a), 0, r*Math.sin(a), 1 );
+			woman.torso.y = -a*180/3.14;
+		
+			var child = new Happy.Child( );
+			
+			var r = ( (i+2/3)**0.5 )*0.25*3,
+				a = 2*Math.PI*(i+2/3)*(1 - 2/(1+Math.sqrt(5)));
+
+			child.position.set( r*Math.cos(a), 0, r*Math.sin(a), 1 );
+			child.torso.y = -a*180/3.14;
+
+		}
+
+man.material.color = new THREE.Color('royalblue');
+woman.material.color = new THREE.Color('crimson');
+child.material.color = new THREE.Color('gold');
+man.material.roughness = 0.4;
+man.material.metalness = 0.6;
+woman.material.roughness = 0.4;
+woman.material.metalness = 0.6;
+child.material.roughness = 0.4;
+child.material.metalness = 0.6;
+
+		// move the people
+		
+setTimeout( ()=>console.log(Happy.scene.children), 2000 );		
+		Happy.setAnimationLoop( ( t )=>{
+
+			for ( var somebody of Happy.everybody ) {
+				somebody.head.y = Happy.chaotic( t/2000, somebody.uid, -50, 50 );
+				somebody.head.x = Happy.chaotic( t/1500, -somebody.uid, -40, 40 );
+				somebody.waist.x = -somebody.head.x/2;
+				somebody.waist.y = somebody.head.y;
+
+			}
+
+		} );
+		
+	</script>
+</body>
+</html>

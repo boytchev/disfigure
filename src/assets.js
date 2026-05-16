@@ -9,8 +9,8 @@
 
 
 
-import { Vector3 } from 'three';
-import { vec3, vec4 } from 'three/tsl';
+import { Vector3, Vector4 } from 'three';
+import { uniformArray } from 'three/tsl';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
 
@@ -21,8 +21,50 @@ import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
 const ASSETS_PATH = import.meta.url
 	.replace( '/src/assets.js', '/assets/models/' )
 	.replace( '/dist/disfigure.js', '/assets/models/' )
-	.replace( '/dist/disfigure.min.js', '/assets/models/' );
+	.replace( '/dist/disfigure.min.js', '/assets/models/' )
+	.replace( '/misc/firefox/assets.js', '/assets/models/' );
 
+
+
+const EQ = 53; // number of vec4 per figure, 0..51 are quaternions, 52 is user data
+const EQ_DATA = 52; // 52 is vec4 for user data
+
+
+
+// preload figure metadata
+var pivots, ranges, extras;
+
+//console.time( 'metadata' );
+
+await Promise.all([
+	loadJSON( 'man.json' ),
+	loadJSON( 'woman.json' ),
+	loadJSON( 'child.json' ),
+]).then( ([ dataMan, dataWoman, dataChild ])=>{
+
+	var data1 = [
+		...dataMan.pivots.map( v=>new Vector3( ...v ) ).flat(),
+		...dataWoman.pivots.map( v=>new Vector3( ...v ) ).flat(),
+		...dataChild.pivots.map( v=>new Vector3( ...v ) ).flat(),
+	];
+	var data2 = [
+		...dataMan.ranges.map( v=>new Vector4( ...v ) ).flat(),
+		...dataWoman.ranges.map( v=>new Vector4( ...v ) ).flat(),
+		...dataChild.ranges.map( v=>new Vector4( ...v ) ).flat(),
+	];
+	var data3 = [
+		...dataMan.extras.map( v=>new Vector4( ...v ) ).flat(),
+		...dataWoman.extras.map( v=>new Vector4( ...v ) ).flat(),
+		...dataChild.extras.map( v=>new Vector4( ...v ) ).flat(),
+	];
+
+	pivots = uniformArray( data1, 'vec3' ).setName( 'pivots' );
+	ranges = uniformArray( data2, 'vec4' ).setName( 'ranges' );
+	extras = uniformArray( data3, 'vec4' ).setName( 'extras' );
+
+	//console.timeEnd( 'metadata' );
+
+} );
 
 
 // preloading names of skeleton joints
@@ -56,7 +98,7 @@ JOINTS.forEach( x => {
  */
 function loadGLTF( url, lowpoly = 0 ) {
 
-//	console.time( url );
+	//	console.time( url );
 
 	return new GLTFLoader().loadAsync( ASSETS_PATH+url ).then( gltf => {
 
@@ -75,7 +117,7 @@ function loadGLTF( url, lowpoly = 0 ) {
 
 		}
 
-//		console.timeEnd( url );
+		//		console.timeEnd( url );
 
 		return geometry;
 
@@ -99,28 +141,10 @@ function loadGLTF( url, lowpoly = 0 ) {
  */
 function loadJSON( url ) {
 
-	//console.time( url );
-
-	return fetch( ASSETS_PATH+url ).then( r =>
-
-		r.json().then( data => {
-
-			// convert arrays into array of vectors
-
-			data.pivots = data.pivots.map( x => vec3( ...x ) );
-			data.ranges = data.ranges.map( x => vec4( ...x ) );
-			data.extras = data.extras.map( x => vec4( ...x ) );
-
-			//console.timeEnd( url );
-
-			return data;
-
-		} )
-
-	); // then
+	return fetch( ASSETS_PATH+url ).then( r => r.json() );
 
 } // loadJSON
 
 
 
-export { JOINTS, loadGLTF, loadJSON };
+export { EQ, EQ_DATA, JOINTS, loadGLTF, loadJSON, pivots, ranges, extras };

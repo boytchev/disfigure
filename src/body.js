@@ -3,11 +3,12 @@
 
 
 
-import { MathUtils, Euler, Object3D, Quaternion, Vector3 } from 'three';
-import { everybody, renderer } from './world.js';
-import { EQ, EQ_POS } from './tsl.js';
-import { JOINTS } from './assets.js';
+import { Euler, MathUtils, Object3D, Quaternion, Vector3 } from 'three';
+import { everybody } from './world.js';
+import { EQ_DATA, JOINTS } from './assets.js';
+import { pivots } from './assets.js';
 import { Pool } from './pool.js';
+import { quatTextureNode } from './quats.js';
 
 
 
@@ -24,7 +25,8 @@ var uid = 0;
 
 // dummy variables
 var _p = new Vector3(),
-	_q = new Quaternion();
+	_q = new Quaternion(),
+	pivot = new Vector3();
 
 
 class EulerDegrees extends Euler {
@@ -123,15 +125,20 @@ class Body extends Object3D {
 
 	constructor( pool ) {
 
+		quatTextureNode.setCapacity( uid+1 );
+		pool.material.needsUpdate = true;
+
 		super();
 
 		this.pool = pool;
 		this.pid = pool.getBody(); // instance index within the pool
-		this.uid = uid++; // global index
+		this.uid = uid++; // global body index
+
+		pool.uidsArray[ this.pid ] = this.uid;
 
 		this.eulers = [];
 
-		for ( var i=0; i<EQ; i++ ) {
+		for ( var i=0; i<EQ_DATA; i++ ) {
 
 			this.eulers.push( new EulerDegrees( this, i, JOINTS[ i ].parentIndex, JOINTS[ i ].signs ) );
 
@@ -149,25 +156,23 @@ class Body extends Object3D {
 		this.pool.setMatrixAt( this.pid, this.matrix );
 		this.pool.instanceMatrix.needsUpdate = true;
 
-		for ( var i=0; i<EQ-2; i++ ) {
+		for ( var i=0; i<EQ_DATA; i++ ) {
 
 			var euler = this.eulers[ i ];
 
-			this.pool.setQ( this.pid, i, euler.q );
+			quatTextureNode.setQ( this.uid, i, euler.q );
 
 		} // for i
 
-		this.pool.quatTexture.needsUpdate = true;
+		quatTextureNode.quatTexture.needsUpdate = true;
 
 	} // Body.update
 
 	updateAttached( ) {
 
-		var pivots = this.pool.data?.pivots; // in Firefox pool.data is created later
-
 		if ( !pivots ) return;
 
-		for ( var i=0; i<EQ-2; i++ ) {
+		for ( var i=0; i<EQ_DATA; i++ ) {
 
 			var _euler = this.eulers[ i ];
 
@@ -175,14 +180,17 @@ class Body extends Object3D {
 
 				var euler = _euler;
 
+				pivot.set( ...pivots.array[ euler.index ]);
+
 				_p.copy( object.initialPosition );
-				_p.add( pivots[ euler.index ].node.value );
+				_p.add( pivot );
 
 				_q.identity();
 
-				
+
 				scan: while ( euler ) {
-					var pivot = pivots[ euler.index ].node.value;
+
+					pivot.set( ...pivots.array[ euler.index ]);
 
 					_p.sub( pivot ).applyQuaternion( euler.quaternion ).add( pivot );
 					_q.premultiply( euler.quaternion );
@@ -210,30 +218,30 @@ class Body extends Object3D {
 
 
 	get posture() {
-		
-		var r = x=>Math.round(100*(Object.is(x,-0)?0:x))/100; // round a number
+
+		var r = x=>Math.round( 100*( Object.is( x, -0 )?0:x ) )/100; // round a number
 
 		return {
 			version: 9,
-			position: [...this.position],
-			angles: this.eulers.map( e=>[r(e.x), r(e.y), r(e.z)] ),
+			position: [ ...this.position ],
+			angles: this.eulers.map( e=>[ r( e.x ), r( e.y ), r( e.z ) ]),
 		};
 
-	} // Body.get.posture 
+	} // Body.get.posture
 
 
-	
+
 	get posture() {
-		
-		var r = x=>Math.round(100*(Object.is(x,-0)?0:x))/100; // round a number
+
+		var r = x=>Math.round( 100*( Object.is( x, -0 )?0:x ) )/100; // round a number
 
 		return {
 			version: 9,
 			//position: [...this.position],
-			angles: this.eulers.map( e=>[r(e.x), r(e.y), r(e.z)] ),
+			angles: this.eulers.map( e=>[ r( e.x ), r( e.y ), r( e.z ) ]),
 		};
 
-	} // Body.get.posture 
+	} // Body.get.posture
 
 
 
@@ -244,18 +252,20 @@ class Body extends Object3D {
 	} // Body.get.postureString
 
 
-	
+
 	set posture( data ) {
 
 		if ( data.version !=9 )
-			throw error( 'Incompatible posture version' );
+			throw 'Incompatible posture version';
 
 		//this.position.set( ...data.position );
 
 		for ( var i in data.angles ) {
-			this.eulers[i].x = data.angles[i][0];
-			this.eulers[i].y = data.angles[i][1];
-			this.eulers[i].z = data.angles[i][2];
+
+			this.eulers[ i ].x = data.angles[ i ][ 0 ];
+			this.eulers[ i ].y = data.angles[ i ][ 1 ];
+			this.eulers[ i ].z = data.angles[ i ][ 2 ];
+
 		}
 
 	} // Body.posture
@@ -274,11 +284,11 @@ class Body extends Object3D {
 		}
 
 		if ( postureA.version !=9 || postureB.version !=9 )
-			throw error( 'Incompatible posture version' );
+			throw 'Incompatible posture version';
 
 		this.posture = {
 			version: 9,
-			angles: postureA.angles.map((a, i) => lerp(a,postureB.angles[i])),
+			angles: postureA.angles.map( ( a, i ) => lerp( a, postureB.angles[ i ]) ),
 		};
 
 	} // blend
@@ -287,23 +297,52 @@ class Body extends Object3D {
 } // Body
 
 
+function preparePool( Class, name ) {
+
+	if ( Class.pool == null ) {
+
+		Class.pool = new Pool( name, Class.count, Class.lowpoly, Class.vertexStage );
+
+	}
+
+	if ( Class.pool.isFull() ) {
+
+
+		// get a larger pool
+		Class.count = Math.round( 2*Class.count );
+
+		var oldPool = Class.pool;
+		var newPool = new Pool( name, Class.count, Class.lowpoly, Class.vertexStage );
+		oldPool.addToScene = false;
+		oldPool.removeFromParent();
+		for ( var body of everybody ) if ( body.pool == oldPool ) body.pool = newPool;
+
+		console.log( name+':: pool is full, size', oldPool.uidsArray.length, '->', newPool.uidsArray.length );
+
+		newPool.count = oldPool.count;
+		newPool.instanceMatrix.array.set( oldPool.instanceMatrix.array );
+		newPool.uidsArray.set( oldPool.uidsArray );
+
+		Class.pool = newPool;
+
+	}
+
+}
 
 class Man extends Body {
 
 	static pool = null;
-	static count = 10; // max number of men
+	static count = 2; // max number of men
 	static lowpoly = 0; // lowpoly-ness, 0=original, 1.0 remove 75%
 	static vertexStage = false; // true for faster but uglier normals
 
 	constructor( height = 1.80 ) {
 
-		if ( Man.pool == null ) {
-
-			Man.pool = new Pool( 'man', Man.count, Man.lowpoly, Man.vertexStage );
-
-		}
+		preparePool( Man, 'man' );
 
 		super( Man.pool );
+
+		quatTextureNode.setXYZ( this.uid, EQ_DATA, 0, 0, 0, 0 );
 
 		this.material = Man.pool.material; // expose to outside
 
@@ -326,19 +365,17 @@ class Man extends Body {
 class Woman extends Body {
 
 	static pool = null;
-	static count = 10; // max number of women
+	static count = 2; // max number of women
 	static lowpoly = 0; // lowpoly-ness, 0=original, 1.0 remove 75%
 	static vertexStage = false; // true for faster but uglier normals
 
 	constructor( height = 1.70 ) {
 
-		if ( Woman.pool == null ) {
-
-			Woman.pool = new Pool( 'woman', Woman.count, Woman.lowpoly, Woman.vertexStage );
-
-		}
+		preparePool( Woman, 'woman' );
 
 		super( Woman.pool );
+
+		quatTextureNode.setXYZ( this.uid, EQ_DATA, 1, 0, 0, 0 );
 
 		this.material = Woman.pool.material; // expose to outside
 
@@ -359,19 +396,17 @@ class Woman extends Body {
 class Child extends Body {
 
 	static pool = null;
-	static count = 10; // max number of children
+	static count = 2; // max number of children
 	static lowpoly = 0; // lowpoly-ness, 0=original, 1.0 remove 75%
 	static vertexStage = false; // true for faster but uglier normals
 
 	constructor( height = 1.35 ) {
 
-		if ( Child.pool == null ) {
-
-			Child.pool = new Pool( 'child', Child.count, Child.lowpoly, Child.vertexStage );
-
-		}
+		preparePool( Child, 'child' );
 
 		super( Child.pool );
+
+		quatTextureNode.setXYZ( this.uid, EQ_DATA, 2, 0, 0, 0 );
 
 		this.material = Child.pool.material; // expose to outside
 
@@ -386,6 +421,6 @@ class Child extends Body {
 	}
 
 } // Child
-	
-	
+
+
 export { Man, Woman, Child };
