@@ -315,7 +315,10 @@ function preparePool( Class, name ) {
 		var newPool = new Pool( name, Class.count, Class.lowpoly, Class.vertexStage );
 		oldPool.addToScene = false;
 		oldPool.removeFromParent();
-		for ( var body of everybody ) if ( body.pool == oldPool ) body.pool = newPool;
+		for ( var body of everybody ) {
+			if ( body.pool == oldPool ) body.pool = newPool;
+		}
+		newPool.add( ...oldPool.children ); // move attached objects
 
 		console.log( name+':: pool is full, size', oldPool.uidsArray.length, '->', newPool.uidsArray.length );
 
