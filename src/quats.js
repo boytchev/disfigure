@@ -1,5 +1,5 @@
 ﻿/**
- * disfigure / quats.js
+ * Disfigure Quaterion Data Texture
  *
  * -----------------------------------------------------------------------------
  *
@@ -9,6 +9,7 @@
  *
  * A full 2048x2048 texture supports ~79k figures (38 per row).
  *
+ * -----------------------------------------------------------------------------
  *
  * QUAT_TEXTURE_WIDTH	- data texture width (2048)
  * QUATS_PER_BODY		- total number of quaternions (pixels) per figure (53)
@@ -25,6 +26,7 @@
  *   .setQ(figure,joint,vec4)		- sets a full quaternion for a figure joint
  *   .setXYZ(figure,joint,x,y,z,w)	- sets quaternion components directly
  *
+ * -----------------------------------------------------------------------------
  *
  * AI Disclosure: Grok 4.3 assistance was used for proper texture resizing logic,
  * cloning behavior in TSL TextureNode, and fine-tuning code comments.
@@ -120,12 +122,13 @@ class QuatTextureNode extends TextureNode {
 
 	/**
 	 * Custom uniform hash to help Three.js/TSL caching. [AI]
+	 * Commented because seams to be not needed. [PB]
 	 */
-	getUniformHash( /* builder */ ) {
-
-		return `QuatTexture-${this.value?.uuid || 'default'}`;
-
-	}
+	//	getUniformHash( /* builder */ ) {
+	//
+	//		return `QuatTexture-${this.value?.uuid || 'default'}`;
+	//
+	//	}
 
 
 
@@ -172,6 +175,9 @@ class QuatTextureNode extends TextureNode {
 
 		this.count = Math.floor( newHeight * QUAT_TEXTURE_WIDTH / QUATS_PER_BODY );
 
+		// Commented because seams to be not needed. [PB]
+
+		/**
 		// Increment version [AI]
 
 		this.version = ( this.version || 0 ) + 1;
@@ -179,6 +185,7 @@ class QuatTextureNode extends TextureNode {
 		// Force material update if we have a reference to it [AI]
 
 		if ( this._material ) this._material.needsUpdate = true;
+		*/
 
 		console.log( `QUATTEX: resized → ${this.dataArray.length} floats (${this.count} figures)` );
 

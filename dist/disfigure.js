@@ -1,28 +1,216 @@
 // disfigure v0.0.25
 
-import { TextureNode, DataTexture, RGBAFormat, FloatType, WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Object3D, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, Vector3, Vector4, InstancedMesh, MeshStandardNodeMaterial, InstancedBufferAttribute, Quaternion, MathUtils, Euler } from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import Stats from 'three/addons/libs/stats.module.js';
-import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
+import { Vector3, Vector4, TextureNode, DataTexture, RGBAFormat, FloatType, WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Object3D, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, InstancedMesh, MeshStandardNodeMaterial, InstancedBufferAttribute, Quaternion, MathUtils, Euler } from 'three';
 import { uniformArray, Fn, vec4, If, select, ivec2, mat3, positionGeometry, normalGeometry, vec3, attribute, int, step, Loop, transformNormalToView, vertexStage } from 'three/tsl';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import Stats from 'three/addons/libs/stats.module.js';
+import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 
 /**
- * disfigure / quats.js
+ * Disfigure Assets Loader
+ *
+ * -----------------------------------------------------------------------------
+ *
+ * This module handles the preload of skeleton metadata and the asynchronous
+ * loading of 3D assets and skeleton metadata.
+ *
+ * All models and metadata are expected to be in `/assets/models/`.
+ *
+ * -----------------------------------------------------------------------------
+ *
+ * JOINTS	- array of JS objects with joint names, hierarchy and orientation
+ * pivots	- uniform array of vec3 with coordinates of joint pivot points
+ * ranges	- uniform array of vec4 with joint selection ranges
+ * extras	- uniform array of vec4 with additional selection data
+ *
+ * -----------------------------------------------------------------------------
+ *
+ * AI Disclosure: Grok 4.3 assistance was used for fine-tuning code comments.
+ */
+
+
+
+
+/**
+ * Preloaded metadata for joint names and rotation directions.
+ * The same metadata is used for all fibure types.
+ * 		.name - name of joint
+ *		.parentIndex - index of parent joint (calculated)
+ *		.signs - rotation direction for joints (calculated)
+ */
+var JOINTS;
+
+
+
+/**
+ * Preloaded skeleton data. Defined are uniformArray to make the TSL shader code
+ * shorter. Once created, they are not modified.
+ *
+ * pivots - array of vec3 = [52 for man, 52 for woman, 52 for child]
+ * ranges - array of vec4 = [52 for man, 52 for woman, 52 for child]
+ * extras - array of few vec4 [4 for man, 4 for woman, 4 for child]
+ */
+var pivots, ranges, extras;
+
+
+
+/**
+ * Base path for all model and metadata files
+ */
+const ASSETS_PATH = import.meta.url
+	.replace( '/src/assets.js', '/assets/models/' )
+	.replace( '/dist/disfigure.js', '/assets/models/' )
+	.replace( '/dist/disfigure.min.js', '/assets/models/' );
+
+
+
+/**
+ * Simple JSON loader for metadata files. Returns a promise. Used internally.
+ */
+function loadJSON( url ) {
+
+	return fetch( ASSETS_PATH + url ).then( r => {
+
+		if ( !r.ok ) throw new Error( `Failed to load metadata: ${url}` ); // [AI]
+
+		return r.json();
+
+	} );
+
+}
+
+
+
+/**
+ * Cache for loaded and simplified geometries: "url|lowpoly" → geometry promise
+ */
+var geometryCache = new Map(); // [AI]
+
+
+
+/**
+ * Loads a GLB model and optionally simplifies its geometry.
+ *
+ * The model must have a single mesh as the first child of `gltf.scene`.
+ * Returns a promise for the geometry.
+ *
+ * Caching code suggested by AI.
+ *
+ * @param {string} url - Filename with .glb extension
+ * @param {number} lowpoly - Simplification factor (0=original, 1≈75% reduction)
+ */
+function loadGLTF( url, lowpoly = 0 ) {
+
+	var cacheKey = `${url}|${lowpoly}`;
+
+	// Return cached promise if available (prevents duplicate loading/simplification)
+
+	if ( geometryCache.has( cacheKey ) ) {
+
+		return geometryCache.get( cacheKey );
+
+	}
+
+	// Load and optionally simplify the geometry of a model
+
+	var promise = new GLTFLoader().loadAsync( ASSETS_PATH+url ).then( gltf => {
+
+		var geometry = gltf.scene.children[ 0 ].geometry;
+
+		// Simplify the geometry if requested
+
+		if ( lowpoly > 0 ) {
+
+			var existingVertices = geometry.attributes.position.count,
+				removedVertices = Math.floor( existingVertices * lowpoly * 0.75 );
+
+			var simplified = new SimplifyModifier().modify( geometry, removedVertices );
+
+			geometry.dispose();
+			geometry = simplified;
+
+		}
+
+		return geometry;
+
+	} ); // promise then
+
+	// Store the promise in the cache
+
+	geometryCache.set( cacheKey, promise );
+
+	return promise;
+
+}
+
+
+
+/**
+ * Preload and process all skeleton metadata
+ */
+await Promise.all([
+	loadJSON( 'body.json' ),
+	loadJSON( 'man.json' ),
+	loadJSON( 'woman.json' ),
+	loadJSON( 'child.json' ),
+]).then( ([ dataJoints, dataMan, dataWoman, dataChild ])=>{
+
+	// process JOINTS: find parent indices, convert angle directions to Vector3
+
+	JOINTS = dataJoints.joints;
+	JOINTS.forEach( x => {
+
+		x.parentIndex = JOINTS.findIndex( y => y.name==x.parent );
+		x.signs = new Vector3( ...x.signs );
+
+	} );
+
+	// process pivots: merge data for figures, convert to vec3 uniform array
+
+	pivots = uniformArray([
+		...dataMan.pivots.map( v=>new Vector3( ...v ) ),
+		...dataWoman.pivots.map( v=>new Vector3( ...v ) ),
+		...dataChild.pivots.map( v=>new Vector3( ...v ) ),
+	], 'vec3' ).setName( 'pivots' );
+
+	// process ranges: merge data for figures, convert to vec4 uniform array
+
+	ranges = uniformArray([
+		...dataMan.ranges.map( v=>new Vector4( ...v ) ),
+		...dataWoman.ranges.map( v=>new Vector4( ...v ) ),
+		...dataChild.ranges.map( v=>new Vector4( ...v ) ),
+	], 'vec4' ).setName( 'ranges' );
+
+	// process extras: merge data for figures, convert to vec4 uniform array
+
+	extras = uniformArray([
+		...dataMan.extras.map( v=>new Vector4( ...v ) ),
+		...dataWoman.extras.map( v=>new Vector4( ...v ) ),
+		...dataChild.extras.map( v=>new Vector4( ...v ) ),
+	], 'vec4' ).setName( 'extras' );
+
+
+} );
+
+/**
+ * Disfigure Quaterion Data Texture
  *
  * -----------------------------------------------------------------------------
  *
  * Module responsible for managing quaternion data for all figures using a data
- * texture. Each RGBA pixel represents one quaternion. A figure uses EQ pixels.
- * The texture grows dynamically in height keeping width fixed at TEXTURE_WIDTH.
+ * texture. Each RGBA pixel represents one quaternion. A figure uses QUATS_PER_BODY pixels.
+ * The texture grows dynamically in height keeping width fixed at QUAT_TEXTURE_WIDTH.
  *
  * A full 2048x2048 texture supports ~79k figures (38 per row).
  *
+ * -----------------------------------------------------------------------------
  *
- * TEXTURE_WIDTH - data texture width (2048)
- * EQ		- total number of quaternions (pixels) per figure (53 )
- * EQ_DATA	- index of the data quaternion (52)
+ * QUAT_TEXTURE_WIDTH	- data texture width (2048)
+ * QUATS_PER_BODY		- total number of quaternions (pixels) per figure (53)
+ * PURE_QUATS_PER_BODY	- number of pure/proper/joint quaternions (52)
+ * QUAT_DATA_INDEX		- index of the data quaternion (52)
  *
  * quatTextureNode - a single unique instance of QuatTextureNode for all figures
  *
@@ -34,6 +222,7 @@ import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
  *   .setQ(figure,joint,vec4)		- sets a full quaternion for a figure joint
  *   .setXYZ(figure,joint,x,y,z,w)	- sets quaternion components directly
  *
+ * -----------------------------------------------------------------------------
  *
  * AI Disclosure: Grok 4.3 assistance was used for proper texture resizing logic,
  * cloning behavior in TSL TextureNode, and fine-tuning code comments.
@@ -45,26 +234,33 @@ import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
 /**
  * Data texture width - 2048 is well supported across systems
  */
-const TEXTURE_WIDTH = 2048;
+const QUAT_TEXTURE_WIDTH = 2048;
 
 
 
 /**
  * Number of vec4 per figure, 0..51 are quaternions, 52 is user data
  */
-const EQ = 53; 
+const QUATS_PER_BODY = 53;
+
+
+
+/**
+ * Number of quaternions per body that are used as quaternions
+ */
+const PURE_QUATS_PER_BODY = 52;
 
 
 
 /**
  * Index of the data quaternion. It is not used as quaternion.
- * Could be used a loop of pure quaternions: for (i=0; i<EQ_DATA; i++)...
+ * Could be used a loop of pure quaternions: for (i=0; i<QUAT_DATA_INDEX; i++)...
  *		x - the type of the figure (man=0, woman=1, child=2)
  *		y - unused, set to 0
  *		z - unused, set to 0
  *		w - unused, set to 0
  */
-const EQ_DATA = 52; // 52 is vec4 for user data
+const QUAT_DATA_INDEX = 52; // 52 is vec4 for user data
 
 
 
@@ -119,12 +315,13 @@ class QuatTextureNode extends TextureNode {
 
 	/**
 	 * Custom uniform hash to help Three.js/TSL caching. [AI]
+	 * Commented because seams to be not needed. [PB]
 	 */
-	getUniformHash( /* builder */ ) {
-
-		return `QuatTexture-${this.value?.uuid || 'default'}`;
-
-	}
+	//	getUniformHash( /* builder */ ) {
+	//
+	//		return `QuatTexture-${this.value?.uuid || 'default'}`;
+	//
+	//	}
 
 
 
@@ -137,23 +334,23 @@ class QuatTextureNode extends TextureNode {
 
 		// Calculate the new height of the data texture
 
-		var doubleHeight = Math.min( 2*this.quatTexture.image.height, TEXTURE_WIDTH );
-		var preciseHeight = Math.ceil( count*EQ/TEXTURE_WIDTH );
+		var doubleHeight = Math.min( 2*this.quatTexture.image.height, QUAT_TEXTURE_WIDTH );
+		var preciseHeight = Math.ceil( count*QUATS_PER_BODY/QUAT_TEXTURE_WIDTH );
 		var newHeight = Math.max( doubleHeight, preciseHeight );
 
-		if ( newHeight > TEXTURE_WIDTH )
+		if ( newHeight > QUAT_TEXTURE_WIDTH )
 			throw new Error( 'Too many figures — DataTexture limit exceeded' );
 
 		// Create new larger array and copy existing data
 
-		var newDataArray = new Float32Array( 4*newHeight*TEXTURE_WIDTH );
+		var newDataArray = new Float32Array( 4*newHeight*QUAT_TEXTURE_WIDTH );
 		newDataArray.set( this.dataArray );
 
 		// Create new data texture
 
 		var newQuatTexture = new DataTexture(
 			newDataArray,
-			TEXTURE_WIDTH,
+			QUAT_TEXTURE_WIDTH,
 			newHeight,
 			RGBAFormat,
 			FloatType
@@ -169,8 +366,11 @@ class QuatTextureNode extends TextureNode {
 		this.quatTexture = newQuatTexture;
 		this.value = newQuatTexture;
 
-		this.count = Math.floor( newHeight * TEXTURE_WIDTH / EQ );
+		this.count = Math.floor( newHeight * QUAT_TEXTURE_WIDTH / QUATS_PER_BODY );
 
+		// Commented because seams to be not needed. [PB]
+
+		/**
 		// Increment version [AI]
 
 		this.version = ( this.version || 0 ) + 1;
@@ -178,6 +378,7 @@ class QuatTextureNode extends TextureNode {
 		// Force material update if we have a reference to it [AI]
 
 		if ( this._material ) this._material.needsUpdate = true;
+		*/
 
 		console.log( `QUATTEX: resized → ${this.dataArray.length} floats (${this.count} figures)` );
 
@@ -213,7 +414,7 @@ class QuatTextureNode extends TextureNode {
 	 */
 	setQ( figure, joint, vec4 ) {
 
-		vec4.toArray( this.dataArray, ( EQ*figure+joint )*4 );
+		vec4.toArray( this.dataArray, ( QUATS_PER_BODY*figure+joint )*4 );
 
 	}
 
@@ -224,7 +425,7 @@ class QuatTextureNode extends TextureNode {
      */
 	setXYZ( figure, joint, x, y, z, w ) {
 
-		var base = ( EQ*figure+joint )*4;
+		var base = ( QUATS_PER_BODY*figure+joint )*4;
 
 		this.dataArray[ base++ ] = x;
 		this.dataArray[ base++ ] = y;
@@ -242,6 +443,224 @@ class QuatTextureNode extends TextureNode {
  * Global shared instance used across the application
  */
 var quatTextureNode = new QuatTextureNode( );
+
+var rotateByQuaternion = Fn( ([ p, q ])=>{
+
+	return p.add( q.xyz.cross( q.xyz.cross( p ).add( q.w.mul( p ) ) ).mul( 2 ) );
+
+}, { return: 'vec3', p: 'vec3', q: 'vec4' } );
+
+
+
+var scaleQuaternion = Fn( ([ quat, k ])=>{
+
+	var q = vec4();
+	var len = quat.xyz.length().toVar();
+
+	If( len.lessThan( 1e-5 ), ()=>{
+
+		q.assign( vec4( 0, 0, 0, 1 ) );
+
+	} ).
+
+		Else( ()=>{
+
+			var acos = k.mul( quat.w.acos() ).toVar();
+			q.assign( vec4( quat.xyz.div( len ).mul( acos.sin() ), acos.cos() ) );
+
+		} );
+
+	return q;
+
+}, { return: 'vec4', quat: 'vec4', k: 'float' } );
+
+
+
+var disfigureMatrix = Fn( ([ mat, pivot, quat, k ])=>{
+
+	var newMat = mat.toVar();
+
+	// if k>0 the 'matrix' must be updated
+	If( k.greaterThan( 0 ), () => {
+
+		var q = quat.toVar();
+
+		// if k<1 the quaternion's rotation must be 'divided'
+		If( k.lessThan( 1 ), ()=>{
+
+			q.assign( scaleQuaternion( q, k ) );
+
+		} ); // k<1
+
+		newMat.element( 0 ).assign( rotateByQuaternion( mat.element( 0 ).sub( pivot ), q ).add( pivot ) );
+		newMat.element( 1 ).assign( rotateByQuaternion( mat.element( 1 ), q ) );
+
+	} ); // k>0
+
+	return newMat;
+
+}, { return: 'mat3', mat: 'mat3', pivot: 'vec3', quat: 'vec4', k: 'float' } );
+
+
+
+var layout = { pos: 'vec3', range: 'vec4', return: 'float' };
+
+
+
+var gradientX = Fn( ([ pos, range ])=>pos.x.add( pos.y.mul( range.z ) ).smoothstep( range.x, range.y ), layout );
+
+
+
+var gradientY = Fn( ([ pos, range ])=>pos.y.add( pos.z.mul( range.z ) ).smoothstep( range.x, range.y ), layout );
+
+
+
+var gradientYT = Fn( ([ pos, range, slope ])=>{
+
+	return pos.z.add( pos.x.mul( slope ) ).smoothstep( range.z, range.w );
+
+}, { pos: 'vec3', range: 'vec4', slope: 'float', return: 'float' } );
+
+
+
+var gradientLeg = Fn( ([ pos, range, range2 ])=>{
+
+	var y = pos.y.sub( pos.x.abs().mul( 1/5 ) );
+	var ofs = select( range2.x.equal( 1 ), pos.z.add( 0.05 ).abs().mul( 1/2 ), pos.z.mul( 1/6 ) );
+
+	return pos.x.smoothstep( 0, range2.y )
+		.mul( y.smoothstep( range.x.sub( ofs ), range.y ).smoothstep( 0, 1 ).pow( 2 ) )
+		.add( pos.x.smoothstep( 0, range2.y.div( 10 ) ).mul( y.smoothstep( range.z, range.w ) ) )
+		.clamp( 0, 1 )
+	;
+
+}, { return: 'float', pos: 'vec3', range: 'vec4', range2: 'vec2' } );
+
+
+
+var gradientArm = Fn( ([ pos, pivot, range ])=>{
+
+	var x = pos.x,
+		y = pos.y;
+
+	var dx = y.sub( pivot.y ).div( 4, select( x.greaterThan( 0 ), 1, -1 ) );
+
+	return x.add( dx ).smoothstep( range.x, range.y ).smoothstep( 0, 1 )
+		.mul( y.step( range.z ).oneMinus() );
+
+}, { pos: 'vec3', pivot: 'vec3', range: 'vec4', return: 'float' } );
+
+
+
+var gradientXT = Fn( ([ pos, range, slope ])=>
+	pos.x.add( pos.z.mul( slope ) )
+		.smoothstep( range.x, range.y )
+		.mul(
+			pos.z.smoothstep( range.z.sub( 0.0001 ), range.z.add( 0.0001 ) ),
+			pos.z.smoothstep( range.w.add( 0.0001 ), range.w.sub( 0.0001 ) )
+		)
+, { pos: 'vec3', range: 'vec4', slope: 'float', return: 'float' } );
+
+
+var getQuatAddr = Fn( ([ figureIndex, propIndex ])=>{
+
+	var offset = figureIndex.mul( QUATS_PER_BODY ).add( propIndex );//.toVar();
+	return ivec2( offset.mod( QUAT_TEXTURE_WIDTH ), offset.div( QUAT_TEXTURE_WIDTH ) );
+
+}, { return: 'ivec2', figureIndex: 'uint', propIndex: 'int' } );
+
+
+
+var q = ( figureIndex, propIndex )=> {
+
+	return quatTextureNode.load( getQuatAddr( figureIndex, propIndex ) );
+
+};
+
+
+
+var disfigureBody = Fn( ( )=>{
+
+	var p = positionGeometry,
+		m = mat3( p, normalGeometry.normalize(), vec3( 0 ) ).toVar( );
+
+	var figureIndex = attribute( 'uids', 'int' );
+
+	var gender = q( figureIndex, QUAT_DATA_INDEX ).x.mul( 52 ).toVar(); // 52 pivots
+	var gender2 = q( figureIndex, QUAT_DATA_INDEX ).x.mul( 4 ).toVar(); // 4 extras
+
+	var disP = ( i, gradient ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradient ) ),
+		disY = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientY( p, ranges.element( i.add( gender ) ) ) ) ),
+		disX = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientX( p, ranges.element( i.add( gender ) ) ) ) ),
+		disT = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientXT( p, ranges.element( i.add( gender ) ), 0 ) ) );
+
+	var isLeft = int( step( p.x, 0 ) ).toVar( ),
+		isDown = p.y.lessThan( pivots.element( int( 2 ).add( gender ) ).y ).toVar( ), //chest
+		isHand = p.x.abs().greaterThan( pivots.element( int( 16 ).add( gender ) ).x ); // wrist
+
+	var pick = ( left, right )=>isLeft.mul( right-left ).add( left ).toVar();
+
+
+	If( isDown, ()=>{
+
+		// process legs
+
+		let start = pick( 4, 10 ),
+			end = start.add( 5 ).toVar();
+		let leg = pick( 0, 1 );
+
+		// foot ankle shin knee thigh
+		Loop( { start: start, end: end }, ( { i } ) => disY( i ) );
+
+		// leg
+		disP( end, gradientLeg( p, ranges.element( end.add( gender ) ), extras.element( leg.add( gender2 ) ).xy ) );
+
+	} ).Else( ()=>{
+
+		// process hands
+		If( isHand, ()=>{
+
+			let thumb = pick( 24, 26 );
+			let thumb2 = pick( 2, 3 );
+
+			disP( thumb, gradientXT( p, ranges.element( thumb.add( gender ) ), extras.element( thumb2.add( gender2 ) ).x ) );
+			thumb.addAssign( 1 );
+			disP( thumb, gradientYT( p, ranges.element( thumb.add( gender ) ), extras.element( thumb2.add( gender2 ) ).y ) );
+
+			let start = pick( 28, 40 ),
+				end = start.add( 12 );
+
+			// index, middle, ring, pinky
+			Loop( { start: start, end: end }, ( { i } ) => disT( i ) );
+
+		} );
+
+		// process arms
+
+		let start = pick( 16, 20 ),
+			end = start.add( 3 );
+
+		// wrist forearm elbow
+		Loop( { start: start, end: end }, ( { i } ) => disX( i ) );
+
+		// arm
+		disP( end, gradientArm( p, pivots.element( int( end ).add( gender ) ), ranges.element( end.add( gender ) ) ) );
+
+	} );
+
+
+
+	//	process torso
+
+	Loop( { end: int( 4 ) }, ( { i } ) => disY( i ) );
+
+	// footer
+	m.element( 1 ).assign( transformNormalToView( m.element( 1 ) ).normalize() );
+
+	console.log( 'DODO==============================' );
+	return m;//.debug();
+
+} );
 
 // number generators
 
@@ -272,7 +691,7 @@ function random( min=-1, max=1 ) {
 
 }
 
-var renderer, scene, camera, light, cameraLight, controls, ground, userAnimationLoop, stats, everybody = [];
+var renderer, scene, camera, light, cameraLight, controls, ground, userAnimationLoop, stats;
 
 
 
@@ -509,348 +928,6 @@ function setAnimationLoop( animationLoop ) {
 
 }
 
-// path to GLB models
-
-const ASSETS_PATH = import.meta.url
-	.replace( '/src/assets.js', '/assets/models/' )
-	.replace( '/dist/disfigure.js', '/assets/models/' )
-	.replace( '/dist/disfigure.min.js', '/assets/models/' )
-	.replace( '/misc/firefox/assets.js', '/assets/models/' );
-
-
-
-// preload figure metadata
-var pivots, ranges, extras;
-
-//console.time( 'metadata' );
-
-await Promise.all([
-	loadJSON( 'man.json' ),
-	loadJSON( 'woman.json' ),
-	loadJSON( 'child.json' ),
-]).then( ([ dataMan, dataWoman, dataChild ])=>{
-
-	var data1 = [
-		...dataMan.pivots.map( v=>new Vector3( ...v ) ).flat(),
-		...dataWoman.pivots.map( v=>new Vector3( ...v ) ).flat(),
-		...dataChild.pivots.map( v=>new Vector3( ...v ) ).flat(),
-	];
-	var data2 = [
-		...dataMan.ranges.map( v=>new Vector4( ...v ) ).flat(),
-		...dataWoman.ranges.map( v=>new Vector4( ...v ) ).flat(),
-		...dataChild.ranges.map( v=>new Vector4( ...v ) ).flat(),
-	];
-	var data3 = [
-		...dataMan.extras.map( v=>new Vector4( ...v ) ).flat(),
-		...dataWoman.extras.map( v=>new Vector4( ...v ) ).flat(),
-		...dataChild.extras.map( v=>new Vector4( ...v ) ).flat(),
-	];
-
-	pivots = uniformArray( data1, 'vec3' ).setName( 'pivots' );
-	ranges = uniformArray( data2, 'vec4' ).setName( 'ranges' );
-	extras = uniformArray( data3, 'vec4' ).setName( 'extras' );
-
-	//console.timeEnd( 'metadata' );
-
-} );
-
-
-// preloading names of skeleton joints
-
-//console.time( 'body.json' );
-
-const JOINTS = ( await fetch( ASSETS_PATH+'body.json' ).then( r => r.json() ) ).joints;
-JOINTS.forEach( x => {
-
-	x.parentIndex = JOINTS.findIndex( y => y.name==x.parent ); // set parent index for each joint
-	x.signs = new Vector3( ...x.signs ); // convert angle directions into Vector3
-
-} );
-
-//console.timeEnd( 'body.json' );
-
-
-
-/**
- * Loads a GLB model and optionally simplifies its geometry.
- *
- * The model must have a single mesh with geometry as the first child
- * of `gltf.scene`.
- *
- * @param {string} url - Full URL of the GLB model file.
- * @param {number} [lowpoly=0] - Geometry simplification factor.
- *        Mapped linearly [0 to 1]→[0% to 75%]
- *        - `lowpoly = 0` → keeps the original geometry
- *        - `lowpoly = 1` → removes ~75% of the geometry
- * @returns {Promise<BufferGeometry>} Promise for the geometry.
- */
-function loadGLTF( url, lowpoly = 0 ) {
-
-	//	console.time( url );
-
-	return new GLTFLoader().loadAsync( ASSETS_PATH+url ).then( gltf => {
-
-		// get the geometry and vertex count to remove
-
-		var geometry = gltf.scene.children[ 0 ].geometry,
-			vertices = Math.floor( geometry.attributes.position.count * lowpoly * 0.75 );
-
-		// simplify the geometry if needed
-
-		if ( vertices > 0 ) {
-
-			var simplified = new SimplifyModifier().modify( geometry, vertices );
-			geometry.dispose();
-			geometry = simplified;
-
-		}
-
-		//		console.timeEnd( url );
-
-		return geometry;
-
-	} ); // then
-
-} // loadGLTF
-
-
-
-/**
- * Loads a JSON model description (skeleton data).
- *
- * Loads pivot points, ranges and extra data. All coordinate arrays
- * are automatically converted to Three.js TSL vectors (`vec3` / `vec4`).
- *
- * @param {string} url - Full URL of the JSON file.
- * @returns {Promise<object>} Promise for an object with:
- *                            - `pivots`: `vec3[]`
- *                            - `ranges`: `vec4[]`
- *                            - `extras`: `vec4[]`
- */
-function loadJSON( url ) {
-
-	return fetch( ASSETS_PATH+url ).then( r => r.json() );
-
-} // loadJSON
-
-var rotateByQuaternion = Fn( ([ p, q ])=>{
-
-	return p.add( q.xyz.cross( q.xyz.cross( p ).add( q.w.mul( p ) ) ).mul( 2 ) );
-
-}, { return: 'vec3', p: 'vec3', q: 'vec4' } );
-
-
-
-var scaleQuaternion = Fn( ([ quat, k ])=>{
-
-	var q = vec4();
-	var len = quat.xyz.length().toVar();
-
-	If( len.lessThan( 1e-5 ), ()=>{
-
-		q.assign( vec4( 0, 0, 0, 1 ) );
-
-	} ).
-
-		Else( ()=>{
-
-			var acos = k.mul( quat.w.acos() ).toVar();
-			q.assign( vec4( quat.xyz.div( len ).mul( acos.sin() ), acos.cos() ) );
-
-		} );
-
-	return q;
-
-}, { return: 'vec4', quat: 'vec4', k: 'float' } );
-
-
-
-var disfigureMatrix = Fn( ([ mat, pivot, quat, k ])=>{
-
-	var newMat = mat.toVar();
-
-	// if k>0 the 'matrix' must be updated
-	If( k.greaterThan( 0 ), () => {
-
-		var q = quat.toVar();
-
-		// if k<1 the quaternion's rotation must be 'divided'
-		If( k.lessThan( 1 ), ()=>{
-
-			q.assign( scaleQuaternion( q, k ) );
-
-		} ); // k<1
-
-		newMat.element( 0 ).assign( rotateByQuaternion( mat.element( 0 ).sub( pivot ), q ).add( pivot ) );
-		newMat.element( 1 ).assign( rotateByQuaternion( mat.element( 1 ), q ) );
-
-	} ); // k>0
-
-	return newMat;
-
-}, { return: 'mat3', mat: 'mat3', pivot: 'vec3', quat: 'vec4', k: 'float' } );
-
-
-
-var layout = { pos: 'vec3', range: 'vec4', return: 'float' };
-
-
-
-var gradientX = Fn( ([ pos, range ])=>pos.x.add( pos.y.mul( range.z ) ).smoothstep( range.x, range.y ), layout );
-
-
-
-var gradientY = Fn( ([ pos, range ])=>pos.y.add( pos.z.mul( range.z ) ).smoothstep( range.x, range.y ), layout );
-
-
-
-var gradientYT = Fn( ([ pos, range, slope ])=>{
-
-	return pos.z.add( pos.x.mul( slope ) ).smoothstep( range.z, range.w );
-
-}, { pos: 'vec3', range: 'vec4', slope: 'float', return: 'float' } );
-
-
-
-var gradientLeg = Fn( ([ pos, range, range2 ])=>{
-
-	var y = pos.y.sub( pos.x.abs().mul( 1/5 ) );
-	var ofs = select( range2.x.equal( 1 ), pos.z.add( 0.05 ).abs().mul( 1/2 ), pos.z.mul( 1/6 ) );
-
-	return pos.x.smoothstep( 0, range2.y )
-		.mul( y.smoothstep( range.x.sub( ofs ), range.y ).smoothstep( 0, 1 ).pow( 2 ) )
-		.add( pos.x.smoothstep( 0, range2.y.div( 10 ) ).mul( y.smoothstep( range.z, range.w ) ) )
-		.clamp( 0, 1 )
-	;
-
-}, { return: 'float', pos: 'vec3', range: 'vec4', range2: 'vec2' } );
-
-
-
-var gradientArm = Fn( ([ pos, pivot, range ])=>{
-
-	var x = pos.x,
-		y = pos.y;
-
-	var dx = y.sub( pivot.y ).div( 4, select( x.greaterThan( 0 ), 1, -1 ) );
-
-	return x.add( dx ).smoothstep( range.x, range.y ).smoothstep( 0, 1 )
-		.mul( y.step( range.z ).oneMinus() );
-
-}, { pos: 'vec3', pivot: 'vec3', range: 'vec4', return: 'float' } );
-
-
-
-var gradientXT = Fn( ([ pos, range, slope ])=>
-	pos.x.add( pos.z.mul( slope ) )
-		.smoothstep( range.x, range.y )
-		.mul(
-			pos.z.smoothstep( range.z.sub( 0.0001 ), range.z.add( 0.0001 ) ),
-			pos.z.smoothstep( range.w.add( 0.0001 ), range.w.sub( 0.0001 ) )
-		)
-, { pos: 'vec3', range: 'vec4', slope: 'float', return: 'float' } );
-
-
-var getQuatAddr = Fn( ([ figureIndex, propIndex ])=>{
-
-	var offset = figureIndex.mul( EQ ).add( propIndex );//.toVar();
-	return ivec2( offset.mod( TEXTURE_WIDTH ), offset.div( TEXTURE_WIDTH ) );
-
-}, { return: 'ivec2', figureIndex: 'uint', propIndex: 'int' } );
-
-
-
-var q = ( figureIndex, propIndex )=> {
-
-	return quatTextureNode.load( getQuatAddr( figureIndex, propIndex ) );
-
-};
-
-
-
-var disfigureBody = Fn( ( )=>{
-
-	var p = positionGeometry,
-		m = mat3( p, normalGeometry.normalize(), vec3( 0 ) ).toVar( );
-
-	var figureIndex = attribute( 'uids', 'int' );
-
-	var gender = q( figureIndex, EQ_DATA ).x.mul( 52 ).toVar(); // 52 pivots
-	var gender2 = q( figureIndex, EQ_DATA ).x.mul( 4 ).toVar(); // 4 extras
-
-	var disP = ( i, gradient ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradient ) ),
-		disY = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientY( p, ranges.element( i.add( gender ) ) ) ) ),
-		disX = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientX( p, ranges.element( i.add( gender ) ) ) ) ),
-		disT = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientXT( p, ranges.element( i.add( gender ) ), 0 ) ) );
-
-	var isLeft = int( step( p.x, 0 ) ).toVar( ),
-		isDown = p.y.lessThan( pivots.element( int( 2 ).add( gender ) ).y ).toVar( ), //chest
-		isHand = p.x.abs().greaterThan( pivots.element( int( 16 ).add( gender ) ).x ); // wrist
-
-	var pick = ( left, right )=>isLeft.mul( right-left ).add( left ).toVar();
-
-
-	If( isDown, ()=>{
-
-		// process legs
-
-		let start = pick( 4, 10 ),
-			end = start.add( 5 ).toVar();
-		let leg = pick( 0, 1 );
-
-		// foot ankle shin knee thigh
-		Loop( { start: start, end: end }, ( { i } ) => disY( i ) );
-
-		// leg
-		disP( end, gradientLeg( p, ranges.element( end.add( gender ) ), extras.element( leg.add( gender2 ) ).xy ) );
-
-	} ).Else( ()=>{
-
-		// process hands
-		If( isHand, ()=>{
-
-			let thumb = pick( 24, 26 );
-			let thumb2 = pick( 2, 3 );
-
-			disP( thumb, gradientXT( p, ranges.element( thumb.add( gender ) ), extras.element( thumb2.add( gender2 ) ).x ) );
-			thumb.addAssign( 1 );
-			disP( thumb, gradientYT( p, ranges.element( thumb.add( gender ) ), extras.element( thumb2.add( gender2 ) ).y ) );
-
-			let start = pick( 28, 40 ),
-				end = start.add( 12 );
-
-			// index, middle, ring, pinky
-			Loop( { start: start, end: end }, ( { i } ) => disT( i ) );
-
-		} );
-
-		// process arms
-
-		let start = pick( 16, 20 ),
-			end = start.add( 3 );
-
-		// wrist forearm elbow
-		Loop( { start: start, end: end }, ( { i } ) => disX( i ) );
-
-		// arm
-		disP( end, gradientArm( p, pivots.element( int( end ).add( gender ) ), ranges.element( end.add( gender ) ) ) );
-
-	} );
-
-
-
-	//	process torso
-
-	Loop( { end: int( 4 ) }, ( { i } ) => disY( i ) );
-
-	// footer
-	m.element( 1 ).assign( transformNormalToView( m.element( 1 ) ).normalize() );
-
-	//	console.log( 'DODO==============================' );
-	return m;//.debug();
-
-} );
-
 var disfigure = disfigureBody( );
 var disfigurePosition = disfigure.element( 0 );
 var disfigureNormal = disfigure.element( 1 );
@@ -952,6 +1029,10 @@ class Pool extends InstancedMesh {
 	} // Pool.copy
 
 }
+
+var everybody = [];
+
+
 
 // degrees-radian conversion
 var toDeg = x => x * 180 / Math.PI,
@@ -1079,7 +1160,7 @@ class Body extends Object3D {
 
 		this.eulers = [];
 
-		for ( var i=0; i<EQ_DATA; i++ ) {
+		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
 			this.eulers.push( new EulerDegrees( this, i, JOINTS[ i ].parentIndex, JOINTS[ i ].signs ) );
 
@@ -1097,7 +1178,7 @@ class Body extends Object3D {
 		this.pool.setMatrixAt( this.pid, this.matrix );
 		this.pool.instanceMatrix.needsUpdate = true;
 
-		for ( var i=0; i<EQ_DATA; i++ ) {
+		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
 			var euler = this.eulers[ i ];
 
@@ -1115,7 +1196,7 @@ class Body extends Object3D {
 
 		var offset = this.quaternionOffset;
 
-		for ( var i=0; i<EQ_DATA; i++ ) {
+		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
 			var _euler = this.eulers[ i ];
 
@@ -1292,13 +1373,13 @@ class Man extends Body {
 
 		super( Man.pool );
 
-		quatTextureNode.setXYZ( this.uid, EQ_DATA, 0, 0, 0, 0 );
+		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, 0, 0, 0, 0 );
 
 		this.material = Man.pool.material; // expose to outside
 
 		this.scale.setScalar( height/1.795 ); // 1.795 is 3D model height
 
-		this.quaternionOffset = 0*EQ_DATA; // custom property
+		this.quaternionOffset = 0*PURE_QUATS_PER_BODY; // custom property
 
 		this.l_arm.z = this.r_arm.z = -75;
 		this.l_elbow.y = this.r_elbow.y = 20;
@@ -1327,13 +1408,13 @@ class Woman extends Body {
 
 		super( Woman.pool );
 
-		quatTextureNode.setXYZ( this.uid, EQ_DATA, 1, 0, 0, 0 );
+		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, 1, 0, 0, 0 );
 
 		this.material = Woman.pool.material; // expose to outside
 
 		this.scale.setScalar( height/1.691 ); // 1.691 is 3D model height
 
-		this.quaternionOffset = 1*EQ_DATA; // custom property
+		this.quaternionOffset = 1*PURE_QUATS_PER_BODY; // custom property
 
 		this.l_arm.z = this.r_arm.z = -90;
 		this.l_elbow.y = this.r_elbow.y = 0;
@@ -1360,13 +1441,13 @@ class Child extends Body {
 
 		super( Child.pool );
 
-		quatTextureNode.setXYZ( this.uid, EQ_DATA, 2, 0, 0, 0 );
+		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, 2, 0, 0, 0 );
 
 		this.material = Child.pool.material; // expose to outside
 
 		this.scale.setScalar( height/1.352 ); // 1.352 is 3D model height
 
-		this.quaternionOffset = 2*EQ_DATA; // custom property
+		this.quaternionOffset = 2*PURE_QUATS_PER_BODY; // custom property
 
 		this.l_arm.x = this.r_arm.x = -10;
 		this.l_arm.z = this.r_arm.z = -80;

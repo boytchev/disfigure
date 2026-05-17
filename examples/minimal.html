@@ -1,10 +1,19 @@
 ﻿<!DOCTYPE html>
 
-<script src="importmap.js"></script>
+<script type="importmap">
+	{
+		"imports": {
+			"three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.min.js",
+			"three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.min.js",
+			"three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.min.js",
+			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
+		}
+	}
+</script>
 
 <script type="module">
 
-	import {World, Man} from 'disfigure';
+	import {World, Man} from '../dist/disfigure.min.js';
 
 	new World;
 	new Man;

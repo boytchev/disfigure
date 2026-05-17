@@ -9,7 +9,7 @@ import Stats from 'three/addons/libs/stats.module.js';
 
 import { SimplexNoise } from "three/addons/math/SimplexNoise.js";
 import { quatTextureNode } from "./quats.js";
-import { Child, Man, Woman } from "./body.js";
+import { Child, everybody, Man, Woman } from "./body.js";
 
 
 
@@ -43,7 +43,7 @@ function random( min=-1, max=1 ) {
 
 }
 
-var renderer, scene, camera, light, cameraLight, controls, ground, userAnimationLoop, stats, everybody = [];
+var renderer, scene, camera, light, cameraLight, controls, ground, userAnimationLoop, stats;
 
 
 

@@ -1,11 +1,24 @@
-﻿
-// disfigure assets loaders
-//
-// provides functions to handle loading of 3D models and their metadata
-//
-// JOINT						→ names and rotation direction of joints
-// loadGLTF(url, lowpoly = 0)	→ loads and optionally simplifies a GLB model
-// loadJSON(url)				→ loads JSON skeleton description
+﻿/**
+ * Disfigure Assets Loader
+ *
+ * -----------------------------------------------------------------------------
+ *
+ * This module handles the preload of skeleton metadata and the asynchronous
+ * loading of 3D assets and skeleton metadata.
+ *
+ * All models and metadata are expected to be in `/assets/models/`.
+ *
+ * -----------------------------------------------------------------------------
+ *
+ * JOINTS	- array of JS objects with joint names, hierarchy and orientation
+ * pivots	- uniform array of vec3 with coordinates of joint pivot points
+ * ranges	- uniform array of vec4 with joint selection ranges
+ * extras	- uniform array of vec4 with additional selection data
+ *
+ * -----------------------------------------------------------------------------
+ *
+ * AI Disclosure: Grok 4.3 assistance was used for fine-tuning code comments.
+ */
 
 
 
@@ -16,130 +29,167 @@ import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
 
 
 
-// path to GLB models
+/**
+ * Preloaded metadata for joint names and rotation directions.
+ * The same metadata is used for all fibure types.
+ * 		.name - name of joint
+ *		.parentIndex - index of parent joint (calculated)
+ *		.signs - rotation direction for joints (calculated)
+ */
+var JOINTS;
 
+
+
+/**
+ * Preloaded skeleton data. Defined are uniformArray to make the TSL shader code
+ * shorter. Once created, they are not modified.
+ *
+ * pivots - array of vec3 = [52 for man, 52 for woman, 52 for child]
+ * ranges - array of vec4 = [52 for man, 52 for woman, 52 for child]
+ * extras - array of few vec4 [4 for man, 4 for woman, 4 for child]
+ */
+var pivots, ranges, extras;
+
+
+
+/**
+ * Base path for all model and metadata files
+ */
 const ASSETS_PATH = import.meta.url
 	.replace( '/src/assets.js', '/assets/models/' )
 	.replace( '/dist/disfigure.js', '/assets/models/' )
-	.replace( '/dist/disfigure.min.js', '/assets/models/' )
-	.replace( '/misc/firefox/assets.js', '/assets/models/' );
+	.replace( '/dist/disfigure.min.js', '/assets/models/' );
 
 
 
-// preload figure metadata
-var pivots, ranges, extras;
+/**
+ * Simple JSON loader for metadata files. Returns a promise. Used internally.
+ */
+function loadJSON( url ) {
 
-//console.time( 'metadata' );
+	return fetch( ASSETS_PATH + url ).then( r => {
 
-await Promise.all([
-	loadJSON( 'man.json' ),
-	loadJSON( 'woman.json' ),
-	loadJSON( 'child.json' ),
-]).then( ([ dataMan, dataWoman, dataChild ])=>{
+		if ( !r.ok ) throw new Error( `Failed to load metadata: ${url}` ); // [AI]
 
-	var data1 = [
-		...dataMan.pivots.map( v=>new Vector3( ...v ) ).flat(),
-		...dataWoman.pivots.map( v=>new Vector3( ...v ) ).flat(),
-		...dataChild.pivots.map( v=>new Vector3( ...v ) ).flat(),
-	];
-	var data2 = [
-		...dataMan.ranges.map( v=>new Vector4( ...v ) ).flat(),
-		...dataWoman.ranges.map( v=>new Vector4( ...v ) ).flat(),
-		...dataChild.ranges.map( v=>new Vector4( ...v ) ).flat(),
-	];
-	var data3 = [
-		...dataMan.extras.map( v=>new Vector4( ...v ) ).flat(),
-		...dataWoman.extras.map( v=>new Vector4( ...v ) ).flat(),
-		...dataChild.extras.map( v=>new Vector4( ...v ) ).flat(),
-	];
+		return r.json();
 
-	pivots = uniformArray( data1, 'vec3' ).setName( 'pivots' );
-	ranges = uniformArray( data2, 'vec4' ).setName( 'ranges' );
-	extras = uniformArray( data3, 'vec4' ).setName( 'extras' );
+	} );
 
-	//console.timeEnd( 'metadata' );
-
-} );
+}
 
 
-// preloading names of skeleton joints
 
-//console.time( 'body.json' );
-
-const JOINTS = ( await fetch( ASSETS_PATH+'body.json' ).then( r => r.json() ) ).joints;
-JOINTS.forEach( x => {
-
-	x.parentIndex = JOINTS.findIndex( y => y.name==x.parent ); // set parent index for each joint
-	x.signs = new Vector3( ...x.signs ); // convert angle directions into Vector3
-
-} );
-
-//console.timeEnd( 'body.json' );
+/**
+ * Cache for loaded and simplified geometries: "url|lowpoly" → geometry promise
+ */
+var geometryCache = new Map(); // [AI]
 
 
 
 /**
  * Loads a GLB model and optionally simplifies its geometry.
  *
- * The model must have a single mesh with geometry as the first child
- * of `gltf.scene`.
+ * The model must have a single mesh as the first child of `gltf.scene`.
+ * Returns a promise for the geometry.
  *
- * @param {string} url - Full URL of the GLB model file.
- * @param {number} [lowpoly=0] - Geometry simplification factor.
- *        Mapped linearly [0 to 1]→[0% to 75%]
- *        - `lowpoly = 0` → keeps the original geometry
- *        - `lowpoly = 1` → removes ~75% of the geometry
- * @returns {Promise<BufferGeometry>} Promise for the geometry.
+ * Caching code suggested by AI.
+ *
+ * @param {string} url - Filename with .glb extension
+ * @param {number} lowpoly - Simplification factor (0=original, 1≈75% reduction)
  */
 function loadGLTF( url, lowpoly = 0 ) {
 
-	//	console.time( url );
+	var cacheKey = `${url}|${lowpoly}`;
 
-	return new GLTFLoader().loadAsync( ASSETS_PATH+url ).then( gltf => {
+	// Return cached promise if available (prevents duplicate loading/simplification)
 
-		// get the geometry and vertex count to remove
+	if ( geometryCache.has( cacheKey ) ) {
 
-		var geometry = gltf.scene.children[ 0 ].geometry,
-			vertices = Math.floor( geometry.attributes.position.count * lowpoly * 0.75 );
+		return geometryCache.get( cacheKey );
 
-		// simplify the geometry if needed
+	}
 
-		if ( vertices > 0 ) {
+	// Load and optionally simplify the geometry of a model
 
-			var simplified = new SimplifyModifier().modify( geometry, vertices );
+	var promise = new GLTFLoader().loadAsync( ASSETS_PATH+url ).then( gltf => {
+
+		var geometry = gltf.scene.children[ 0 ].geometry;
+
+		// Simplify the geometry if requested
+
+		if ( lowpoly > 0 ) {
+
+			var existingVertices = geometry.attributes.position.count,
+				removedVertices = Math.floor( existingVertices * lowpoly * 0.75 );
+
+			var simplified = new SimplifyModifier().modify( geometry, removedVertices );
+
 			geometry.dispose();
 			geometry = simplified;
 
 		}
 
-		//		console.timeEnd( url );
-
 		return geometry;
 
-	} ); // then
+	} ); // promise then
 
-} // loadGLTF
+	// Store the promise in the cache
+
+	geometryCache.set( cacheKey, promise );
+
+	return promise;
+
+}
 
 
 
 /**
- * Loads a JSON model description (skeleton data).
- *
- * Loads pivot points, ranges and extra data. All coordinate arrays
- * are automatically converted to Three.js TSL vectors (`vec3` / `vec4`).
- *
- * @param {string} url - Full URL of the JSON file.
- * @returns {Promise<object>} Promise for an object with:
- *                            - `pivots`: `vec3[]`
- *                            - `ranges`: `vec4[]`
- *                            - `extras`: `vec4[]`
+ * Preload and process all skeleton metadata
  */
-function loadJSON( url ) {
+await Promise.all([
+	loadJSON( 'body.json' ),
+	loadJSON( 'man.json' ),
+	loadJSON( 'woman.json' ),
+	loadJSON( 'child.json' ),
+]).then( ([ dataJoints, dataMan, dataWoman, dataChild ])=>{
 
-	return fetch( ASSETS_PATH+url ).then( r => r.json() );
+	// process JOINTS: find parent indices, convert angle directions to Vector3
 
-} // loadJSON
+	JOINTS = dataJoints.joints;
+	JOINTS.forEach( x => {
+
+		x.parentIndex = JOINTS.findIndex( y => y.name==x.parent );
+		x.signs = new Vector3( ...x.signs );
+
+	} );
+
+	// process pivots: merge data for figures, convert to vec3 uniform array
+
+	pivots = uniformArray([
+		...dataMan.pivots.map( v=>new Vector3( ...v ) ),
+		...dataWoman.pivots.map( v=>new Vector3( ...v ) ),
+		...dataChild.pivots.map( v=>new Vector3( ...v ) ),
+	], 'vec3' ).setName( 'pivots' );
+
+	// process ranges: merge data for figures, convert to vec4 uniform array
+
+	ranges = uniformArray([
+		...dataMan.ranges.map( v=>new Vector4( ...v ) ),
+		...dataWoman.ranges.map( v=>new Vector4( ...v ) ),
+		...dataChild.ranges.map( v=>new Vector4( ...v ) ),
+	], 'vec4' ).setName( 'ranges' );
+
+	// process extras: merge data for figures, convert to vec4 uniform array
+
+	extras = uniformArray([
+		...dataMan.extras.map( v=>new Vector4( ...v ) ),
+		...dataWoman.extras.map( v=>new Vector4( ...v ) ),
+		...dataChild.extras.map( v=>new Vector4( ...v ) ),
+	], 'vec4' ).setName( 'extras' );
+
+
+} );
 
 
 
-export { JOINTS, loadGLTF, loadJSON, pivots, ranges, extras };
+export { JOINTS, loadGLTF, pivots, ranges, extras };

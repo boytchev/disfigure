@@ -4,10 +4,12 @@
 
 
 import { Euler, MathUtils, Object3D, Quaternion, Vector3 } from 'three';
-import { everybody } from './world.js';
 import { JOINTS, pivots } from './assets.js';
 import { Pool } from './pool.js';
 import { PURE_QUATS_PER_BODY, QUAT_DATA_INDEX, quatTextureNode } from './quats.js';
+
+
+var everybody = [];
 
 
 
@@ -437,4 +439,4 @@ class Child extends Body {
 } // Child
 
 
-export { Man, Woman, Child };
+export { Man, Woman, Child, everybody };

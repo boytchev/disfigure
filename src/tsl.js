@@ -222,7 +222,7 @@ var disfigureBody = Fn( ( )=>{
 	// footer
 	m.element( 1 ).assign( transformNormalToView( m.element( 1 ) ).normalize() );
 
-	//	console.log( 'DODO==============================' );
+	console.log( 'DODO==============================' );
 	return m;//.debug();
 
 } );
