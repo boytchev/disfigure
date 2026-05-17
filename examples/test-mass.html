@@ -19,17 +19,17 @@
 
 		// create a default world
 
-		new Happy.World( )//{men:1000, women:1000, children:1000, stats:true} );
+		new Happy.World( {men:1000, women:1000, children:1000, stats:true} );
 
-Happy.Man.lowpoly = 1.1;
-Happy.Woman.lowpoly = 1.1;
-Happy.Child.lowpoly = 1.1;
 /*
+Happy.Man.lowpoly = 1;
+Happy.Woman.lowpoly = 1;
+Happy.Child.lowpoly = 1;
+
 Happy.Man.vertexStage = true;
 Happy.Woman.vertexStage = true;
 Happy.Child.vertexStage = true;
 */
-
 		// create a man, a woman and a child
 
 		for( var i=0; i<100; i++ ) {
@@ -68,6 +68,7 @@ woman.material.roughness = 0.4;
 woman.material.metalness = 0.6;
 child.material.roughness = 0.4;
 child.material.metalness = 0.6;
+man.material.wireframe = true;
 
 		// move the people
 		

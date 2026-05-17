@@ -62,6 +62,7 @@ class Pool extends InstancedMesh {
 			// safe only for webgl <-- causes extra shader compilation, so better to remove it
 			//if( renderer.backend.isWebGLBackend ) renderer.render( this, camera )
 
+
 			if ( this.addToScene ) {
 
 				this.onLoad();

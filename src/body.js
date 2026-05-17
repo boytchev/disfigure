@@ -211,7 +211,6 @@ class Body extends Object3D {
 				object.quaternion.copy( _q );
 				object.updateMatrix();
 
-
 			} // for object
 
 		} // for i

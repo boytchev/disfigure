@@ -84,38 +84,17 @@ function loadJSON( url ) {
 
 
 /**
- * Cache for loaded and simplified geometries: "url|lowpoly" → geometry promise
- */
-var geometryCache = new Map(); // [AI]
-
-
-
-/**
  * Loads a GLB model and optionally simplifies its geometry.
  *
  * The model must have a single mesh as the first child of `gltf.scene`.
  * Returns a promise for the geometry.
- *
- * Caching code suggested by AI.
  *
  * @param {string} url - Filename with .glb extension
  * @param {number} lowpoly - Simplification factor (0=original, 1≈75% reduction)
  */
 function loadGLTF( url, lowpoly = 0 ) {
 
-	var cacheKey = `${url}|${lowpoly}`;
-
-	// Return cached promise if available (prevents duplicate loading/simplification)
-
-	if ( geometryCache.has( cacheKey ) ) {
-
-		return geometryCache.get( cacheKey );
-
-	}
-
-	// Load and optionally simplify the geometry of a model
-
-	var promise = new GLTFLoader().loadAsync( ASSETS_PATH+url ).then( gltf => {
+	return new GLTFLoader().loadAsync( ASSETS_PATH+url ).then( gltf => {
 
 		var geometry = gltf.scene.children[ 0 ].geometry;
 
@@ -136,12 +115,6 @@ function loadGLTF( url, lowpoly = 0 ) {
 		return geometry;
 
 	} ); // promise then
-
-	// Store the promise in the cache
-
-	geometryCache.set( cacheKey, promise );
-
-	return promise;
 
 }
 
@@ -941,7 +914,7 @@ var disfigureNormal = disfigure.element( 1 );
  */
 class Pool extends InstancedMesh {
 
-	constructor( url, MAX_BODIES, lowpoly, useVertexStage ) {
+	constructor( url, MAX_BODIES, lowpoly, useVertexStage, onReady ) {
 
 		// create an empty instance mesh
 
@@ -981,6 +954,7 @@ class Pool extends InstancedMesh {
 			// safe only for webgl <-- causes extra shader compilation, so better to remove it
 			//if( renderer.backend.isWebGLBackend ) renderer.render( this, camera )
 
+			
 			if ( this.addToScene ) {
 
 				this.onLoad();
@@ -1231,7 +1205,6 @@ class Body extends Object3D {
 				object.position.copy( _p );
 				object.quaternion.copy( _q );
 				object.updateMatrix();
-
 
 			} // for object
 
