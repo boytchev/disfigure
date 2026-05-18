@@ -3,14 +3,13 @@
 
 
 
-import { CanvasTexture, CircleGeometry, Color, DirectionalLight, Mesh, MeshLambertMaterial, Object3D, PCFSoftShadowMap, PerspectiveCamera, Scene, WebGPURenderer } from 'three';
+import { CanvasTexture, CircleGeometry, Color, DirectionalLight, Mesh, MeshLambertMaterial, Object3D, PCFSoftShadowMap, PerspectiveCamera, WebGPURenderer } from 'three';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import Stats from 'three/addons/libs/stats.module.js';
 
 import { SimplexNoise } from "three/addons/math/SimplexNoise.js";
-import { quatTextureNode } from "./quats.js";
-import { Child, everybody, Man, Woman } from "./body.js";
-
+import { scene } from './pool.js';
+import { config, everybody } from './assets.js';
 
 
 
@@ -43,7 +42,7 @@ function random( min=-1, max=1 ) {
 
 }
 
-var renderer, scene, camera, light, cameraLight, controls, ground, userAnimationLoop, stats;
+var renderer, camera, light, cameraLight, controls, ground, userAnimationLoop, stats;
 
 
 
@@ -60,7 +59,7 @@ var renderer, scene, camera, light, cameraLight, controls, ground, userAnimation
 
 class World {
 
-	constructor( options ) {
+	constructor( options = {} ) {
 
 		renderer = new WebGPURenderer( { antialias: options?.antialias ?? true } );
 		renderer.setSize( innerWidth, innerHeight );
@@ -71,7 +70,6 @@ class World {
 		document.body.style.overflow = 'hidden';
 		document.body.style.margin = '0';
 
-		scene = new Scene();
 		scene.background = new Color( 'whitesmoke' );
 
 		camera = new PerspectiveCamera( 30, innerWidth/innerHeight );
@@ -79,31 +77,42 @@ class World {
 
 		renderer.compileAsync( scene, camera );
 
-		if ( options?.men ) {
+		if ( 'men' in options ) {
 
-			Man.count = options.men;
+			config.men = options.men;
 
 		} // men
 
-		if ( options?.women ) {
+		if ( 'women' in options ) {
 
-			Woman.count = options.women;
+			config.women = options.women;
 
 		} // women
 
-		if ( options?.children ) {
+		if ( 'children' in options ) {
 
-			Child.count = options.children;
+			config.children = options.children;
 
 		} // children
 
-		quatTextureNode.setCapacity( Man.count+Woman.count+Child.count );
 
-		if ( options?.population ) {
+		if ( 'population' in options ) {
 
-			quatTextureNode.setCapacity( options.population );
+			config.population = options.population;
 
 		} // population
+
+		if ( 'smooth' in options ) {
+
+			config.smooth = options?.smooth;
+
+		} // smooth
+
+		if ( 'lowpoly' in options ) {
+
+			config.lowpoly = options?.lowpoly;
+
+		} // smooth
 
 		if ( options?.stats ?? false ) {
 

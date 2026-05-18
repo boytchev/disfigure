@@ -229,4 +229,9 @@ var disfigureBody = Fn( ( )=>{
 
 
 
-export { disfigureMatrix, disfigureBody, gradientX, gradientY, gradientYT, gradientXT, gradientLeg, gradientArm };
+var disfigure = disfigureBody( );
+var disfigurePosition = disfigure.element( 0 );
+var disfigureNormal = disfigure.element( 1 );
+
+
+export { disfigureMatrix, disfigurePosition, disfigureNormal, disfigureBody, gradientX, gradientY, gradientYT, gradientXT, gradientLeg, gradientArm };

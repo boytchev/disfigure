@@ -1,23 +1,27 @@
 ﻿/**
  * Disfigure Assets Loader
  *
- * -----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
  *
- * This module handles the preload of skeleton metadata and the asynchronous
- * loading of 3D assets and skeleton metadata.
+ * This module defined global configuration, handles the preload of skeleton
+ * metadata and the asynchronous loading of 3D assets and skeleton metadata.
  *
  * All models and metadata are expected to be in `/assets/models/`.
- *
  * -----------------------------------------------------------------------------
  *
- * JOINTS	- array of JS objects with joint names, hierarchy and orientation
- * pivots	- uniform array of vec3 with coordinates of joint pivot points
- * ranges	- uniform array of vec4 with joint selection ranges
- * extras	- uniform array of vec4 with additional selection data
+ * Public API:
  *
+ * config    - {men,women,children,population,smooth,lowpoly}
+ * everybody - array of all created bodies
+ * JOINTS	 - array of JS objects with joint names, hierarchy and orientation
+ * pivots	 - uniform array of vec3 with coordinates of joint pivot points
+ * ranges	 - uniform array of vec4 with joint selection ranges
+ * extras	 - uniform array of vec4 with additional selection data
  * -----------------------------------------------------------------------------
  *
- * AI Disclosure: Grok 4.3 assistance was used for fine-tuning code comments.
+ * AI Disclosure:
+ *
+ * Grok 4.3 assistance was used for fine-tuning code comments.
  */
 
 
@@ -26,6 +30,27 @@ import { Vector3, Vector4 } from 'three';
 import { uniformArray } from 'three/tsl';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
+
+
+
+/**
+ * Global configuration
+ */
+var config = {
+	men: 1,			// amount of preallocatd space for Man instances
+	women: 1,		// amount of preallocatd space for Woman instances
+	children: 1,	// amount of preallocatd space for Child instances
+	population: 3,	// amount of preallocatd space for quad texture used for rigging
+	smooth: true,	// true = smooth shapes, false = rough shapes
+	lowpoly: 0,		// lowpoly reduction factor, 0=0%, 1=75% reduction
+};
+
+
+
+/**
+ * Array of all created bodies
+ */
+var everybody = [];
 
 
 
@@ -86,9 +111,8 @@ function loadJSON( url ) {
  * Returns a promise for the geometry.
  *
  * @param {string} url - Filename with .glb extension
- * @param {number} lowpoly - Simplification factor (0=original, 1≈75% reduction)
  */
-function loadGLTF( url, lowpoly = 0 ) {
+function loadGLTF( url ) {
 
 	return new GLTFLoader().loadAsync( ASSETS_PATH+url ).then( gltf => {
 
@@ -96,10 +120,10 @@ function loadGLTF( url, lowpoly = 0 ) {
 
 		// Simplify the geometry if requested
 
-		if ( lowpoly > 0 ) {
+		if ( config.lowpoly > 0 ) {
 
 			var existingVertices = geometry.attributes.position.count,
-				removedVertices = Math.floor( existingVertices * lowpoly * 0.75 );
+				removedVertices = Math.floor( existingVertices * config.lowpoly * 0.75 );
 
 			var simplified = new SimplifyModifier().modify( geometry, removedVertices );
 
@@ -165,4 +189,4 @@ await Promise.all([
 
 
 
-export { JOINTS, loadGLTF, pivots, ranges, extras };
+export { JOINTS, loadGLTF, pivots, ranges, extras, config, everybody };

@@ -1,6 +1,6 @@
 // disfigure v0.0.25
 
-import { Vector3, Vector4, TextureNode, DataTexture, RGBAFormat, FloatType, WebGPURenderer, PCFSoftShadowMap, Scene, Color, PerspectiveCamera, DirectionalLight, Object3D, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture, InstancedMesh, MeshStandardNodeMaterial, InstancedBufferAttribute, Quaternion, MathUtils, Euler } from 'three';
+import { Vector3, Vector4, TextureNode, DataTexture, RGBAFormat, FloatType, Scene, InstancedMesh, MeshStandardNodeMaterial, InstancedBufferAttribute, Quaternion, Object3D, MathUtils, Euler, WebGPURenderer, PCFSoftShadowMap, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture } from 'three';
 import { uniformArray, Fn, vec4, If, select, ivec2, mat3, positionGeometry, normalGeometry, vec3, attribute, int, step, Loop, transformNormalToView, vertexStage } from 'three/tsl';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
@@ -11,25 +11,50 @@ import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 /**
  * Disfigure Assets Loader
  *
- * -----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
  *
- * This module handles the preload of skeleton metadata and the asynchronous
- * loading of 3D assets and skeleton metadata.
+ * This module defined global configuration, handles the preload of skeleton
+ * metadata and the asynchronous loading of 3D assets and skeleton metadata. 
  *
  * All models and metadata are expected to be in `/assets/models/`.
- *
  * -----------------------------------------------------------------------------
  *
- * JOINTS	- array of JS objects with joint names, hierarchy and orientation
- * pivots	- uniform array of vec3 with coordinates of joint pivot points
- * ranges	- uniform array of vec4 with joint selection ranges
- * extras	- uniform array of vec4 with additional selection data
+ * Public API:
  *
+ * config    - {men,women,children,population,smooth,lowpoly}
+ * everybody - array of all created bodies
+ * JOINTS	 - array of JS objects with joint names, hierarchy and orientation
+ * pivots	 - uniform array of vec3 with coordinates of joint pivot points
+ * ranges	 - uniform array of vec4 with joint selection ranges
+ * extras	 - uniform array of vec4 with additional selection data
  * -----------------------------------------------------------------------------
  *
- * AI Disclosure: Grok 4.3 assistance was used for fine-tuning code comments.
+ * AI Disclosure:
+ *
+ * Grok 4.3 assistance was used for fine-tuning code comments.
  */
 
+
+
+
+/**
+ * Global configuration
+ */
+var config = {
+	men: 1,			// amount of preallocatd space for Man instances
+	women: 1,		// amount of preallocatd space for Woman instances
+	children: 1,	// amount of preallocatd space for Child instances
+	population: 3,	// amount of preallocatd space for quad texture used for rigging
+	smooth: true,	// true = smooth shapes, false = rough shapes
+	lowpoly: 0,		// lowpoly reduction factor, 0=0%, 1=75% reduction
+};
+
+
+
+/**
+ * Array of all created bodies
+ */
+var everybody = [];
 
 
 
@@ -90,9 +115,8 @@ function loadJSON( url ) {
  * Returns a promise for the geometry.
  *
  * @param {string} url - Filename with .glb extension
- * @param {number} lowpoly - Simplification factor (0=original, 1≈75% reduction)
  */
-function loadGLTF( url, lowpoly = 0 ) {
+function loadGLTF( url ) {
 
 	return new GLTFLoader().loadAsync( ASSETS_PATH+url ).then( gltf => {
 
@@ -100,10 +124,10 @@ function loadGLTF( url, lowpoly = 0 ) {
 
 		// Simplify the geometry if requested
 
-		if ( lowpoly > 0 ) {
+		if ( config.lowpoly > 0 ) {
 
 			var existingVertices = geometry.attributes.position.count,
-				removedVertices = Math.floor( existingVertices * lowpoly * 0.75 );
+				removedVertices = Math.floor( existingVertices * config.lowpoly * 0.75 );
 
 			var simplified = new SimplifyModifier().modify( geometry, removedVertices );
 
@@ -180,6 +204,8 @@ await Promise.all([
  *
  * -----------------------------------------------------------------------------
  *
+ * Public API:
+ *
  * QUAT_TEXTURE_WIDTH	- data texture width (2048)
  * QUATS_PER_BODY		- total number of quaternions (pixels) per figure (53)
  * PURE_QUATS_PER_BODY	- number of pure/proper/joint quaternions (52)
@@ -197,7 +223,9 @@ await Promise.all([
  *
  * -----------------------------------------------------------------------------
  *
- * AI Disclosure: Grok 4.3 assistance was used for proper texture resizing logic,
+ * AI Disclosure:
+ *
+ * Grok 4.3 assistance was used for proper texture resizing logic,
  * cloning behavior in TSL TextureNode, and fine-tuning code comments.
  */
 
@@ -635,6 +663,600 @@ var disfigureBody = Fn( ( )=>{
 
 } );
 
+
+
+var disfigure = disfigureBody( );
+var disfigurePosition = disfigure.element( 0 );
+var disfigureNormal = disfigure.element( 1 );
+
+/**
+ * Disfigure Instanced Pool of 3D Models
+ * 
+ * -----------------------------------------------------------------------------
+ *
+ * Manages a pool of instanced 3D bodies (figures) using Three.js InstancedMesh.
+ * 
+ * This module provides an efficient way to render a large number of similar
+ * meshes with per-instance variations. Uses InstancedMesh for GPU-efficient
+ * rendering, integrates custom TSL nodes for procedural rigging (by setting
+ * `positionNode` and `normalNode` of `material`, supports dynamic allocation
+ * of bodies from the pool.
+ *
+ * -----------------------------------------------------------------------------
+ *
+ * Public API:
+ *
+ * scene	- default Three.js scene
+ * Pool		- class for instances of figures of given type and number
+ *
+ *   .material	 - node material for all figures in the pool
+ *   .count		 - current number of active figures
+ *   .uidsArray  - array if unique IDs of figures - indices in the quat texture
+ *   .uidsAttr	 - instance attribute of unique IDs (bound to `uidsArray`)
+ *   .addToScene - to to indicate active from to-be-deleted pools
+ *
+ *   .onLoad()	 - callback method called after geometry is loaded
+ *   .isFull()	 - returns whether the pull is full (no space for more figure)
+ *	 .getBody	 - allocates an instance and returns its index
+ *
+ * -----------------------------------------------------------------------------
+ *
+ * AI Disclosure:
+ *
+ * Grok 4.3 assistance was used for fine-tuning code comments.
+ */
+ 
+
+
+
+/**
+ * Default scene if the user does not use own scene.
+ */
+var scene = new Scene();
+
+
+
+/**
+ * A class representing a pool of instanced meshes with custom TSL materials.
+ * 
+ * The pool pre-allocates a fixed number of instances (`count`) for performance.
+ * Each instance has an attribute UID pointing to a data texture of quaternions.
+ *
+ * A pool may contain only one type of figure instances - Man, Woman or Child.
+ */
+class Pool extends InstancedMesh {
+
+	/**
+	 * Creates a new Pool instanced mesh with URL to geometry *.glb file and
+	 * total capacity of instances this pool can hold.
+     */
+	constructor( url, count ) {
+
+		// Create material with TSL nodes (will be configured after geometry loads)
+
+		var material = new MeshStandardNodeMaterial( );
+
+		// Initialize empty InstancedMesh
+
+		super( null, material, count );
+
+		this.count = 0; // Current number of active instances
+		
+		this.castShadow = true;
+		this.receiveShadow = true;
+		this.frustumCulled = false;
+
+		// Array to store global unique IDs (UIDs) for each instance.
+		// It will become instance attribute once the geometry is ready.
+		
+		this.uidsArray = new Int32Array( count );
+
+		// Whether to automatically add this pool to the shared scene after
+		// loading. If the pool is resized before the first render, this property
+		// is set to false and the pool is not included in the scene. A copy of
+		// its instances are in the resized pool and it is included in the scene.
+		
+		this.addToScene = true;
+
+		console.log( `Pool: created with capacity ${count} instances` );
+
+		// Asynchronously load the geometry, the skeleton data, hook
+		// shaders to material nodes and add the instance to the scene
+
+		loadGLTF( url+'.glb' ).then( ( geometry )=>{
+
+			this.geometry = geometry;
+
+			// Add per-instance UID attribute for each instance
+			
+			this.geometry.setAttribute( 'uids', new InstancedBufferAttribute( this.uidsArray, 1 ) );
+			this.uidsAttr = this.geometry.getAttribute( 'uids' );
+			this.uidsAttr.needsUpdate = true;
+
+			// Hook custom TSL deformation nodes
+			
+			material.positionNode = disfigurePosition;
+			material.normalNode = disfigureNormal;
+
+			// Optional: force normal calculation in vertex stage.
+			// Reduces computational load at the cost of lower lighting quality.
+			
+			if ( !config.smooth )
+				material.normalNode = vertexStage( material.normalNode );
+
+			material.needsUpdate = true;
+
+			// Add to scene if enabled
+			
+			if ( this.addToScene ) {
+
+				this.onLoad();
+				scene.add( this );
+
+			}
+
+		} ); // loadGLTF
+
+	} // constructor
+
+
+
+    /**
+     * Callback function called after the GLTF model has been successfully loaded.
+     * Override this method in subclasses to run custom initialization logic.
+     */
+	onLoad() {
+		
+		// To be overridden by subclasses if needed
+		
+	}
+
+
+
+    /**
+     * Checks if the pool has reached its maximum capacity.
+     */
+	isFull( ) {
+
+		return ( this.count >= this.instanceMatrix.count );
+
+	}
+	
+
+
+	/**
+     * Allocates and returns the index of a new body from the pool.
+     */
+	 getBody( ) {
+
+		if ( this.isFull() ) {
+			
+			throw new Error( 'Too many figures (instance pool is full)' );
+			
+		}
+
+		return this.count++;
+
+	}
+
+
+
+	/**
+     * Copies all instance data (matrices and UIDs) from another Pool into this one.
+     */
+	copy( sourcePool ) {
+
+		// Copy matrices
+		this.instanceMatrix.array.set( sourcePool.instanceMatrix.array );
+		this.instanceMatrix.needsUpdate = true;
+
+		// Copy UIDs
+		this.uidsArray.set( sourcePool.uidsArray );
+		this.geometry.getAttribute( 'uids' ).needsUpdate = true;
+
+	}
+
+}
+
+// degrees-radian conversion
+var toDeg = x => x * 180 / Math.PI,
+	toRad = x => x / 180 * Math.PI;
+
+
+
+// global unique identifier for bodies
+var uid = 0;
+
+
+
+// dummy variables
+var _p = new Vector3(),
+	_q = new Quaternion(),
+	pivot = new Vector3();
+
+
+class EulerDegrees extends Euler {
+
+	constructor( body, index, parentIndex, signs ) {
+
+		super();
+
+		this.body = body;
+		this.index = index;
+		this.parentIndex = parentIndex;
+		this.signs = signs;
+		this.quaternion = new Quaternion();
+		this.needsUpdate = true;
+		this.attached = [];
+
+	}
+
+	set( x, y, z ) {
+
+		this.x = x;
+		this.y = y;
+		this.z = z;
+
+	}
+
+	set x( n ) {
+
+		super.x = toRad( this.signs.x*n );
+		this.needsUpdate = true;
+
+	}
+
+	set y( n ) {
+
+		super.y = toRad( this.signs.y*n );
+		this.needsUpdate = true;
+
+	}
+
+	set z( n ) {
+
+		super.z = toRad( this.signs.z*n );
+		this.needsUpdate = true;
+
+	}
+
+	get x( ) {
+
+		return toDeg( this.signs.x*super.x );
+
+	}
+
+	get y( ) {
+
+		return toDeg( this.signs.y*super.y );
+
+	}
+
+	get z( ) {
+
+		return toDeg( this.signs.z*super.z );
+
+	}
+
+	get q( ) {
+
+		if ( this.needsUpdate ) {
+
+			this.quaternion.setFromEuler( this );
+			this.needsUpdate = false;
+
+		}
+
+		return this.quaternion;
+
+	}
+
+	// attach object to current joint
+	attach( object ) {
+
+		object.initialPosition = object.position.clone();
+		object.matrixAutoUpdate = false;
+
+		this.attached.push( object );
+
+		this.body.pool.add( object );
+
+
+	}
+
+}
+
+
+class Body extends Object3D {
+
+	constructor( pool, bodyTypeIndex, scale ) {
+
+		quatTextureNode.setCapacity( uid+1 );
+		pool.material.needsUpdate = true;
+
+		super();
+
+		this.pool = pool;
+		this.pid = pool.getBody(); // instance index within the pool
+		this.uid = uid++; // global body index
+		this.material = this.pool.material; // expose to outside
+		this.scale.setScalar( scale );
+
+		quatTextureNode.setCapacity( Math.max( config.men+config.women+config.children, config.population ) );
+
+		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, bodyTypeIndex, 0, 0, 0 );
+		this.quaternionOffset = bodyTypeIndex*PURE_QUATS_PER_BODY;
+
+		pool.uidsArray[ this.pid ] = this.uid;
+
+		this.eulers = [];
+
+		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
+
+			this.eulers.push( new EulerDegrees( this, i, JOINTS[ i ].parentIndex, JOINTS[ i ].signs ) );
+
+			this[ JOINTS[ i ].name ] = this.eulers[ i ];
+
+		}
+
+		everybody.push( this );
+
+	}
+
+	update( ) {
+
+		this.updateMatrix();
+		this.pool.setMatrixAt( this.pid, this.matrix );
+		this.pool.instanceMatrix.needsUpdate = true;
+
+		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
+
+			var euler = this.eulers[ i ];
+
+			quatTextureNode.setQ( this.uid, i, euler.q );
+
+		} // for i
+
+		quatTextureNode.quatTexture.needsUpdate = true;
+
+	} // Body.update
+
+	updateAttached( ) {
+
+		if ( !pivots ) return;
+
+		var offset = this.quaternionOffset;
+
+		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
+
+			var _euler = this.eulers[ i ];
+
+			for ( var object of _euler.attached ) {
+
+				var euler = _euler;
+
+				pivot.set( ...pivots.array[ euler.index+offset ]);
+
+				_p.copy( object.initialPosition );
+				_p.add( pivot );
+
+				_q.identity();
+
+
+				scan: while ( euler ) {
+
+					pivot.set( ...pivots.array[ euler.index+offset ]);
+
+					_p.sub( pivot ).applyQuaternion( euler.quaternion ).add( pivot );
+					_q.premultiply( euler.quaternion );
+
+					if ( euler.parentIndex<0 ) break scan;
+
+					euler = this.eulers[ euler.parentIndex ];
+
+				}
+
+				_p.multiply( this.scale );
+				_p.add( this.position );
+
+				object.position.copy( _p );
+				object.quaternion.copy( _q );
+				object.updateMatrix();
+
+			} // for object
+
+		} // for i
+
+	} // Body.updateAttached
+
+
+
+	get posture() {
+
+		var r = x=>Math.round( 100*( Object.is( x, -0 )?0:x ) )/100; // round a number
+
+		return {
+			version: 9,
+			position: [ ...this.position ],
+			angles: this.eulers.map( e=>[ r( e.x ), r( e.y ), r( e.z ) ]),
+		};
+
+	} // Body.get.posture
+
+
+
+	get posture() {
+
+		var r = x=>Math.round( 100*( Object.is( x, -0 )?0:x ) )/100; // round a number
+
+		return {
+			version: 9,
+			//position: [...this.position],
+			angles: this.eulers.map( e=>[ r( e.x ), r( e.y ), r( e.z ) ]),
+		};
+
+	} // Body.get.posture
+
+
+
+	get postureString() {
+
+		return JSON.stringify( this.posture );
+
+	} // Body.get.postureString
+
+
+
+	set posture( data ) {
+
+		if ( data.version !=9 )
+			throw 'Incompatible posture version';
+
+		//this.position.set( ...data.position );
+
+		for ( var i in data.angles ) {
+
+			this.eulers[ i ].x = data.angles[ i ][ 0 ];
+			this.eulers[ i ].y = data.angles[ i ][ 1 ];
+			this.eulers[ i ].z = data.angles[ i ][ 2 ];
+
+		}
+
+	} // Body.posture
+
+
+	blend( postureA, postureB, k ) {
+
+		function lerp( a, b ) {
+
+			var c = [];
+			for ( var i=0; i<a.length; i++ )
+				c[ i ] = MathUtils.lerp( a[ i ], b[ i ], k );
+
+			return c;
+
+		}
+
+		if ( postureA.version !=9 || postureB.version !=9 )
+			throw 'Incompatible posture version';
+
+		this.posture = {
+			version: 9,
+			angles: postureA.angles.map( ( a, i ) => lerp( a, postureB.angles[ i ]) ),
+		};
+
+	} // blend
+
+
+} // Body
+
+
+var pools = { man: null, woman: null, child: null };
+
+function preparePool( name, initialCount ) {
+
+	if ( pools[ name ] == null ) {
+
+		pools[ name ] = new Pool( name, initialCount );
+
+	}
+
+	if ( pools[ name ].isFull() ) {
+
+
+		// get a larger pool
+
+		var oldPool = pools[ name ];
+		var newPool = new Pool( name, 2*oldPool.count );
+		oldPool.addToScene = false;
+		oldPool.removeFromParent();
+		for ( var body of everybody ) {
+
+			if ( body.pool == oldPool ) body.pool = newPool;
+
+		}
+
+		if ( oldPool.children.length>0 )
+			newPool.add( ...oldPool.children ); // move attached objects
+
+		console.log( name+':: pool is full, size', oldPool.uidsArray.length, '->', newPool.uidsArray.length );
+
+		newPool.count = oldPool.count; // revert to old count, because only that number of figures exist
+		newPool.instanceMatrix.array.set( oldPool.instanceMatrix.array );
+		newPool.uidsArray.set( oldPool.uidsArray );
+
+		pools[ name ] = newPool;
+
+	}
+
+}
+
+class Man extends Body {
+
+	static count = 2; // max number of men
+
+	constructor( height = 1.80 ) {
+
+		preparePool( 'man', config.men );
+
+		super( pools.man, 0, height/1.795 ); // 1.795 is 3D model height
+
+		this.l_arm.z = this.r_arm.z = -75;
+		this.l_elbow.y = this.r_elbow.y = 20;
+		this.l_leg.z = this.r_leg.z = 10;
+		this.l_ankle.z = this.r_ankle.z = -10;
+		this.l_ankle.x = this.r_ankle.x = 3;
+
+		this.position.y = -0.012;
+
+	}
+
+} // Man
+
+
+
+class Woman extends Body {
+
+	static count = 2; // max number of women
+
+	constructor( height = 1.70 ) {
+
+		preparePool( 'woman', config.women );
+
+		super( pools.woman, 1, height/1.691 ); // 1.691 is 3D model height
+
+		this.l_arm.z = this.r_arm.z = -90;
+		this.l_elbow.y = this.r_elbow.y = 0;
+		this.l_leg.z = this.r_leg.z = -3;
+		this.l_ankle.z = this.r_ankle.z = 3;
+		this.l_ankle.x = this.r_ankle.x = 3;
+
+	}
+
+} // Woman
+
+
+
+class Child extends Body {
+
+	static count = 2; // max number of children
+
+	constructor( height = 1.35 ) {
+
+		preparePool( 'child', config.children );
+
+		super( pools.child, 2, height/1.352 ); // 1.352 is 3D model height
+
+		this.l_arm.x = this.r_arm.x = -10;
+		this.l_arm.z = this.r_arm.z = -80;
+		this.l_ankle.bend = this.r_ankle.bend = 3;
+
+		this.position.y = -8e-3;
+
+	}
+
+} // Child
+
 // number generators
 
 var simplex = new SimplexNoise( );
@@ -664,7 +1286,7 @@ function random( min=-1, max=1 ) {
 
 }
 
-var renderer, scene, camera, light, cameraLight, controls, ground, userAnimationLoop, stats;
+var renderer, camera, light, cameraLight, controls, ground, userAnimationLoop, stats;
 
 
 
@@ -681,7 +1303,7 @@ var renderer, scene, camera, light, cameraLight, controls, ground, userAnimation
 
 class World {
 
-	constructor( options ) {
+	constructor( options = {} ) {
 
 		renderer = new WebGPURenderer( { antialias: options?.antialias ?? true } );
 		renderer.setSize( innerWidth, innerHeight );
@@ -692,7 +1314,6 @@ class World {
 		document.body.style.overflow = 'hidden';
 		document.body.style.margin = '0';
 
-		scene = new Scene();
 		scene.background = new Color( 'whitesmoke' );
 
 		camera = new PerspectiveCamera( 30, innerWidth/innerHeight );
@@ -700,31 +1321,42 @@ class World {
 
 		renderer.compileAsync( scene, camera );
 
-		if ( options?.men ) {
+		if ( 'men' in options ) {
 
-			Man.count = options.men;
+			config.men = options.men;
 
 		} // men
 
-		if ( options?.women ) {
+		if ( 'women' in options ) {
 
-			Woman.count = options.women;
+			config.women = options.women;
 
 		} // women
 
-		if ( options?.children ) {
+		if ( 'children' in options ) {
 
-			Child.count = options.children;
+			config.children = options.children;
 
 		} // children
 
-		quatTextureNode.setCapacity( Man.count+Woman.count+Child.count );
 
-		if ( options?.population ) {
+		if ( 'population' in options ) {
 
-			quatTextureNode.setCapacity( options.population );
+			config.population = options.population;
 
 		} // population
+
+		if ( 'smooth' in options ) {
+
+			config.smooth = options?.smooth;
+
+		} // smooth
+
+		if ( 'lowpoly' in options ) {
+
+			config.lowpoly = options?.lowpoly;
+
+		} // smooth
 
 		if ( options?.stats ?? false ) {
 
@@ -901,537 +1533,6 @@ function setAnimationLoop( animationLoop ) {
 
 }
 
-var disfigure = disfigureBody( );
-var disfigurePosition = disfigure.element( 0 );
-var disfigureNormal = disfigure.element( 1 );
-
-
-/**
- * A class representing an instanced mesh with TSL material.
- * The data for rigging is stored in a square data texture.
- *
- * @augments InstancedMesh
- */
-class Pool extends InstancedMesh {
-
-	constructor( url, MAX_BODIES, lowpoly, useVertexStage, onReady ) {
-
-		// create an empty instance mesh
-
-		var material = new MeshStandardNodeMaterial( );
-
-		super( null, material, MAX_BODIES );
-
-		this.count = 0;
-		this.castShadow = true;
-		this.receiveShadow = true;
-		this.frustumCulled = false;
-
-		this.uidsArray = new Int32Array( MAX_BODIES ); // the global body index (uid) of each instance
-
-		this.addToScene = true;
-
-		console.log( 'Pool:created count', MAX_BODIES );
-
-		// asynchronously load the geometry, the skeleton data, hook
-		// shaders to material nodes and add the instance to the scene
-
-		loadGLTF( url+'.glb', lowpoly ).then( ( geometry )=>{
-
-			this.geometry = geometry;
-			this.geometry.setAttribute( 'uids', new InstancedBufferAttribute( this.uidsArray, 1 ) );
-			this.uidsAttr = this.geometry.getAttribute( 'uids' );
-			this.uidsAttr.needsUpdate = true;
-
-			material.positionNode = disfigurePosition;
-
-			if ( useVertexStage )
-				material.normalNode = vertexStage( disfigureNormal );
-			else
-				material.normalNode = disfigureNormal;
-			material.needsUpdate = true;
-
-			// safe only for webgl <-- causes extra shader compilation, so better to remove it
-			//if( renderer.backend.isWebGLBackend ) renderer.render( this, camera )
-
-			
-			if ( this.addToScene ) {
-
-				this.onLoad();
-				scene.add( this );
-
-			}
-
-		} );
-
-	} // Pool.constructor
-
-
-
-	onLoad() {
-	} // Pool.onLoad
-
-
-
-	isFull( ) {
-
-		return ( this.count >= this.instanceMatrix.count );
-
-	} // Pool.isFull
-
-
-	getBody( ) {
-
-		if ( this.isFull() ) throw 'Too many figures (instance pool)';
-
-		return this.count++;
-
-	} // Pool.getBody
-
-
-	// copy another pool to this pool
-	copy( sourcePool ) {
-
-		// copy matrices
-		this.instanceMatrix.array.set( sourcePool.instanceMatrix.array );
-		this.instanceMatrix.needsUpdate = true;
-
-		// copy uids
-		this.uidsArray.set( sourcePool.uidsArray );
-		this.geometry.getAttribute( 'uids' ).needsUpdate = true;
-
-	} // Pool.copy
-
-}
-
-var everybody = [];
-
-
-
-// degrees-radian conversion
-var toDeg = x => x * 180 / Math.PI,
-	toRad = x => x / 180 * Math.PI;
-
-
-
-// global unique identifier for bodies
-var uid = 0;
-
-
-
-// dummy variables
-var _p = new Vector3(),
-	_q = new Quaternion(),
-	pivot = new Vector3();
-
-
-class EulerDegrees extends Euler {
-
-	constructor( body, index, parentIndex, signs ) {
-
-		super();
-
-		this.body = body;
-		this.index = index;
-		this.parentIndex = parentIndex;
-		this.signs = signs;
-		this.quaternion = new Quaternion();
-		this.needsUpdate = true;
-		this.attached = [];
-
-	}
-
-	set( x, y, z ) {
-
-		this.x = x;
-		this.y = y;
-		this.z = z;
-
-	}
-
-	set x( n ) {
-
-		super.x = toRad( this.signs.x*n );
-		this.needsUpdate = true;
-
-	}
-
-	set y( n ) {
-
-		super.y = toRad( this.signs.y*n );
-		this.needsUpdate = true;
-
-	}
-
-	set z( n ) {
-
-		super.z = toRad( this.signs.z*n );
-		this.needsUpdate = true;
-
-	}
-
-	get x( ) {
-
-		return toDeg( this.signs.x*super.x );
-
-	}
-
-	get y( ) {
-
-		return toDeg( this.signs.y*super.y );
-
-	}
-
-	get z( ) {
-
-		return toDeg( this.signs.z*super.z );
-
-	}
-
-	get q( ) {
-
-		if ( this.needsUpdate ) {
-
-			this.quaternion.setFromEuler( this );
-			this.needsUpdate = false;
-
-		}
-
-		return this.quaternion;
-
-	}
-
-	// attach object to current joint
-	attach( object ) {
-
-		object.initialPosition = object.position.clone();
-		object.matrixAutoUpdate = false;
-
-		this.attached.push( object );
-
-		this.body.pool.add( object );
-
-
-	}
-
-}
-
-
-class Body extends Object3D {
-
-	constructor( pool ) {
-
-		quatTextureNode.setCapacity( uid+1 );
-		pool.material.needsUpdate = true;
-
-		super();
-
-		this.pool = pool;
-		this.pid = pool.getBody(); // instance index within the pool
-		this.uid = uid++; // global body index
-
-		pool.uidsArray[ this.pid ] = this.uid;
-
-		this.eulers = [];
-
-		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
-
-			this.eulers.push( new EulerDegrees( this, i, JOINTS[ i ].parentIndex, JOINTS[ i ].signs ) );
-
-			this[ JOINTS[ i ].name ] = this.eulers[ i ];
-
-		}
-
-		everybody.push( this );
-
-	}
-
-	update( ) {
-
-		this.updateMatrix();
-		this.pool.setMatrixAt( this.pid, this.matrix );
-		this.pool.instanceMatrix.needsUpdate = true;
-
-		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
-
-			var euler = this.eulers[ i ];
-
-			quatTextureNode.setQ( this.uid, i, euler.q );
-
-		} // for i
-
-		quatTextureNode.quatTexture.needsUpdate = true;
-
-	} // Body.update
-
-	updateAttached( ) {
-
-		if ( !pivots ) return;
-
-		var offset = this.quaternionOffset;
-
-		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
-
-			var _euler = this.eulers[ i ];
-
-			for ( var object of _euler.attached ) {
-
-				var euler = _euler;
-
-				pivot.set( ...pivots.array[ euler.index+offset ]);
-
-				_p.copy( object.initialPosition );
-				_p.add( pivot );
-
-				_q.identity();
-
-
-				scan: while ( euler ) {
-
-					pivot.set( ...pivots.array[ euler.index+offset ]);
-
-					_p.sub( pivot ).applyQuaternion( euler.quaternion ).add( pivot );
-					_q.premultiply( euler.quaternion );
-
-					if ( euler.parentIndex<0 ) break scan;
-
-					euler = this.eulers[ euler.parentIndex ];
-
-				}
-
-				_p.multiply( this.scale );
-				_p.add( this.position );
-
-				object.position.copy( _p );
-				object.quaternion.copy( _q );
-				object.updateMatrix();
-
-			} // for object
-
-		} // for i
-
-	} // Body.updateAttached
-
-
-
-	get posture() {
-
-		var r = x=>Math.round( 100*( Object.is( x, -0 )?0:x ) )/100; // round a number
-
-		return {
-			version: 9,
-			position: [ ...this.position ],
-			angles: this.eulers.map( e=>[ r( e.x ), r( e.y ), r( e.z ) ]),
-		};
-
-	} // Body.get.posture
-
-
-
-	get posture() {
-
-		var r = x=>Math.round( 100*( Object.is( x, -0 )?0:x ) )/100; // round a number
-
-		return {
-			version: 9,
-			//position: [...this.position],
-			angles: this.eulers.map( e=>[ r( e.x ), r( e.y ), r( e.z ) ]),
-		};
-
-	} // Body.get.posture
-
-
-
-	get postureString() {
-
-		return JSON.stringify( this.posture );
-
-	} // Body.get.postureString
-
-
-
-	set posture( data ) {
-
-		if ( data.version !=9 )
-			throw 'Incompatible posture version';
-
-		//this.position.set( ...data.position );
-
-		for ( var i in data.angles ) {
-
-			this.eulers[ i ].x = data.angles[ i ][ 0 ];
-			this.eulers[ i ].y = data.angles[ i ][ 1 ];
-			this.eulers[ i ].z = data.angles[ i ][ 2 ];
-
-		}
-
-	} // Body.posture
-
-
-	blend( postureA, postureB, k ) {
-
-		function lerp( a, b ) {
-
-			var c = [];
-			for ( var i=0; i<a.length; i++ )
-				c[ i ] = MathUtils.lerp( a[ i ], b[ i ], k );
-
-			return c;
-
-		}
-
-		if ( postureA.version !=9 || postureB.version !=9 )
-			throw 'Incompatible posture version';
-
-		this.posture = {
-			version: 9,
-			angles: postureA.angles.map( ( a, i ) => lerp( a, postureB.angles[ i ]) ),
-		};
-
-	} // blend
-
-
-} // Body
-
-
-function preparePool( Class, name ) {
-
-	if ( Class.pool == null ) {
-
-		Class.pool = new Pool( name, Class.count, Class.lowpoly, Class.vertexStage );
-
-	}
-
-	if ( Class.pool.isFull() ) {
-
-
-		// get a larger pool
-		Class.count = Math.round( 2*Class.count );
-
-		var oldPool = Class.pool;
-		var newPool = new Pool( name, Class.count, Class.lowpoly, Class.vertexStage );
-		oldPool.addToScene = false;
-		oldPool.removeFromParent();
-		for ( var body of everybody ) {
-
-			if ( body.pool == oldPool ) body.pool = newPool;
-
-		}
-
-		if ( oldPool.children.length>0 )
-			newPool.add( ...oldPool.children ); // move attached objects
-
-		console.log( name+':: pool is full, size', oldPool.uidsArray.length, '->', newPool.uidsArray.length );
-
-		newPool.count = oldPool.count;
-		newPool.instanceMatrix.array.set( oldPool.instanceMatrix.array );
-		newPool.uidsArray.set( oldPool.uidsArray );
-
-		Class.pool = newPool;
-
-	}
-
-}
-
-class Man extends Body {
-
-	static pool = null;
-	static count = 2; // max number of men
-	static lowpoly = 0; // lowpoly-ness, 0=original, 1.0 remove 75%
-	static vertexStage = false; // true for faster but uglier normals
-
-	constructor( height = 1.80 ) {
-
-		preparePool( Man, 'man' );
-
-		super( Man.pool );
-
-		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, 0, 0, 0, 0 );
-
-		this.material = Man.pool.material; // expose to outside
-
-		this.scale.setScalar( height/1.795 ); // 1.795 is 3D model height
-
-		this.quaternionOffset = 0*PURE_QUATS_PER_BODY; // custom property
-
-		this.l_arm.z = this.r_arm.z = -75;
-		this.l_elbow.y = this.r_elbow.y = 20;
-		this.l_leg.z = this.r_leg.z = 10;
-		this.l_ankle.z = this.r_ankle.z = -10;
-		this.l_ankle.x = this.r_ankle.x = 3;
-
-		this.position.y = -0.012;
-
-	}
-
-} // Man
-
-
-
-class Woman extends Body {
-
-	static pool = null;
-	static count = 2; // max number of women
-	static lowpoly = 0; // lowpoly-ness, 0=original, 1.0 remove 75%
-	static vertexStage = false; // true for faster but uglier normals
-
-	constructor( height = 1.70 ) {
-
-		preparePool( Woman, 'woman' );
-
-		super( Woman.pool );
-
-		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, 1, 0, 0, 0 );
-
-		this.material = Woman.pool.material; // expose to outside
-
-		this.scale.setScalar( height/1.691 ); // 1.691 is 3D model height
-
-		this.quaternionOffset = 1*PURE_QUATS_PER_BODY; // custom property
-
-		this.l_arm.z = this.r_arm.z = -90;
-		this.l_elbow.y = this.r_elbow.y = 0;
-		this.l_leg.z = this.r_leg.z = -3;
-		this.l_ankle.z = this.r_ankle.z = 3;
-		this.l_ankle.x = this.r_ankle.x = 3;
-
-	}
-
-} // Woman
-
-
-
-class Child extends Body {
-
-	static pool = null;
-	static count = 2; // max number of children
-	static lowpoly = 0; // lowpoly-ness, 0=original, 1.0 remove 75%
-	static vertexStage = false; // true for faster but uglier normals
-
-	constructor( height = 1.35 ) {
-
-		preparePool( Child, 'child' );
-
-		super( Child.pool );
-
-		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, 2, 0, 0, 0 );
-
-		this.material = Child.pool.material; // expose to outside
-
-		this.scale.setScalar( height/1.352 ); // 1.352 is 3D model height
-
-		this.quaternionOffset = 2*PURE_QUATS_PER_BODY; // custom property
-
-		this.l_arm.x = this.r_arm.x = -10;
-		this.l_arm.z = this.r_arm.z = -80;
-		this.l_ankle.bend = this.r_ankle.bend = 3;
-
-		this.position.y = -8e-3;
-
-	}
-
-} // Child
-
 // disfigure
 //
 // A software burrito that wraps everything in a single file
@@ -1441,4 +1542,4 @@ class Child extends Body {
 
 console.log( '\n%c\u22EE\u22EE\u22EE Disfigure\n%chttps://boytchev.github.io/disfigure/\n', 'color: navy', 'font-size:80%' );
 
-export { Child, Man, Pool, Woman, World, camera, cameraLight, chaotic, controls, disfigureBody, disfigureMatrix, everybody, gradientArm, gradientLeg, gradientX, gradientXT, gradientY, gradientYT, ground, light, random, regular, renderer, scene, setAnimationLoop };
+export { Child, Man, Pool, Woman, World, camera, cameraLight, chaotic, controls, disfigureBody, disfigureMatrix, disfigureNormal, disfigurePosition, everybody, gradientArm, gradientLeg, gradientX, gradientXT, gradientY, gradientYT, ground, light, random, regular, renderer, scene, setAnimationLoop };

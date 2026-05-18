@@ -11,6 +11,8 @@
  *
  * -----------------------------------------------------------------------------
  *
+ * Public API:
+ *
  * QUAT_TEXTURE_WIDTH	- data texture width (2048)
  * QUATS_PER_BODY		- total number of quaternions (pixels) per figure (53)
  * PURE_QUATS_PER_BODY	- number of pure/proper/joint quaternions (52)
@@ -28,7 +30,9 @@
  *
  * -----------------------------------------------------------------------------
  *
- * AI Disclosure: Grok 4.3 assistance was used for proper texture resizing logic,
+ * AI Disclosure:
+ *
+ * Grok 4.3 assistance was used for proper texture resizing logic,
  * cloning behavior in TSL TextureNode, and fine-tuning code comments.
  */
 

@@ -4,12 +4,9 @@
 
 
 import { Euler, MathUtils, Object3D, Quaternion, Vector3 } from 'three';
-import { JOINTS, pivots } from './assets.js';
+import { config, everybody, JOINTS, pivots } from './assets.js';
 import { Pool } from './pool.js';
 import { PURE_QUATS_PER_BODY, QUAT_DATA_INDEX, quatTextureNode } from './quats.js';
-
-
-var everybody = [];
 
 
 
@@ -124,7 +121,7 @@ class EulerDegrees extends Euler {
 
 class Body extends Object3D {
 
-	constructor( pool ) {
+	constructor( pool, bodyTypeIndex, scale ) {
 
 		quatTextureNode.setCapacity( uid+1 );
 		pool.material.needsUpdate = true;
@@ -134,6 +131,13 @@ class Body extends Object3D {
 		this.pool = pool;
 		this.pid = pool.getBody(); // instance index within the pool
 		this.uid = uid++; // global body index
+		this.material = this.pool.material; // expose to outside
+		this.scale.setScalar( scale );
+
+		quatTextureNode.setCapacity( Math.max( config.men+config.women+config.children, config.population ) );
+
+		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, bodyTypeIndex, 0, 0, 0 );
+		this.quaternionOffset = bodyTypeIndex*PURE_QUATS_PER_BODY;
 
 		pool.uidsArray[ this.pid ] = this.uid;
 
@@ -299,22 +303,23 @@ class Body extends Object3D {
 } // Body
 
 
-function preparePool( Class, name ) {
+var pools = { man: null, woman: null, child: null };
 
-	if ( Class.pool == null ) {
+function preparePool( name, initialCount ) {
 
-		Class.pool = new Pool( name, Class.count, Class.lowpoly, Class.vertexStage );
+	if ( pools[ name ] == null ) {
+
+		pools[ name ] = new Pool( name, initialCount );
 
 	}
 
-	if ( Class.pool.isFull() ) {
+	if ( pools[ name ].isFull() ) {
 
 
 		// get a larger pool
-		Class.count = Math.round( 2*Class.count );
 
-		var oldPool = Class.pool;
-		var newPool = new Pool( name, Class.count, Class.lowpoly, Class.vertexStage );
+		var oldPool = pools[ name ];
+		var newPool = new Pool( name, 2*oldPool.count );
 		oldPool.addToScene = false;
 		oldPool.removeFromParent();
 		for ( var body of everybody ) {
@@ -328,11 +333,11 @@ function preparePool( Class, name ) {
 
 		console.log( name+':: pool is full, size', oldPool.uidsArray.length, '->', newPool.uidsArray.length );
 
-		newPool.count = oldPool.count;
+		newPool.count = oldPool.count; // revert to old count, because only that number of figures exist
 		newPool.instanceMatrix.array.set( oldPool.instanceMatrix.array );
 		newPool.uidsArray.set( oldPool.uidsArray );
 
-		Class.pool = newPool;
+		pools[ name ] = newPool;
 
 	}
 
@@ -340,24 +345,13 @@ function preparePool( Class, name ) {
 
 class Man extends Body {
 
-	static pool = null;
 	static count = 2; // max number of men
-	static lowpoly = 0; // lowpoly-ness, 0=original, 1.0 remove 75%
-	static vertexStage = false; // true for faster but uglier normals
 
 	constructor( height = 1.80 ) {
 
-		preparePool( Man, 'man' );
+		preparePool( 'man', config.men );
 
-		super( Man.pool );
-
-		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, 0, 0, 0, 0 );
-
-		this.material = Man.pool.material; // expose to outside
-
-		this.scale.setScalar( height/1.795 ); // 1.795 is 3D model height
-
-		this.quaternionOffset = 0*PURE_QUATS_PER_BODY; // custom property
+		super( pools.man, 0, height/1.795 ); // 1.795 is 3D model height
 
 		this.l_arm.z = this.r_arm.z = -75;
 		this.l_elbow.y = this.r_elbow.y = 20;
@@ -375,24 +369,13 @@ class Man extends Body {
 
 class Woman extends Body {
 
-	static pool = null;
 	static count = 2; // max number of women
-	static lowpoly = 0; // lowpoly-ness, 0=original, 1.0 remove 75%
-	static vertexStage = false; // true for faster but uglier normals
 
 	constructor( height = 1.70 ) {
 
-		preparePool( Woman, 'woman' );
+		preparePool( 'woman', config.women );
 
-		super( Woman.pool );
-
-		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, 1, 0, 0, 0 );
-
-		this.material = Woman.pool.material; // expose to outside
-
-		this.scale.setScalar( height/1.691 ); // 1.691 is 3D model height
-
-		this.quaternionOffset = 1*PURE_QUATS_PER_BODY; // custom property
+		super( pools.woman, 1, height/1.691 ); // 1.691 is 3D model height
 
 		this.l_arm.z = this.r_arm.z = -90;
 		this.l_elbow.y = this.r_elbow.y = 0;
@@ -408,24 +391,13 @@ class Woman extends Body {
 
 class Child extends Body {
 
-	static pool = null;
 	static count = 2; // max number of children
-	static lowpoly = 0; // lowpoly-ness, 0=original, 1.0 remove 75%
-	static vertexStage = false; // true for faster but uglier normals
 
 	constructor( height = 1.35 ) {
 
-		preparePool( Child, 'child' );
+		preparePool( 'child', config.children );
 
-		super( Child.pool );
-
-		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, 2, 0, 0, 0 );
-
-		this.material = Child.pool.material; // expose to outside
-
-		this.scale.setScalar( height/1.352 ); // 1.352 is 3D model height
-
-		this.quaternionOffset = 2*PURE_QUATS_PER_BODY; // custom property
+		super( pools.child, 2, height/1.352 ); // 1.352 is 3D model height
 
 		this.l_arm.x = this.r_arm.x = -10;
 		this.l_arm.z = this.r_arm.z = -80;
