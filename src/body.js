@@ -410,4 +410,4 @@ class Child extends Body {
 } // Child
 
 
-export { Man, Woman, Child, everybody };
+export { Man, Woman, Child, everybody, pools };
