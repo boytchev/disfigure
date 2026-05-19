@@ -162,15 +162,7 @@ class Body extends Object3D {
 
 			setJointQuaternion( this.uid, i, ...this.eulers[ i ].q );
 
-		} // for i
-
-	} // Body.update
-
-	updateAttached( ) {
-
-		if ( !pivots ) return;
-
-		var offset = this.quaternionOffset;
+		}
 
 		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
@@ -180,7 +172,7 @@ class Body extends Object3D {
 
 				var euler = _euler;
 
-				pivot.set( ...pivots.array[ euler.index+offset ]);
+				pivot.set( ...pivots.array[ euler.index+this.quaternionOffset ]);
 
 				_p.copy( object.initialPosition );
 				_p.add( pivot );
@@ -190,7 +182,7 @@ class Body extends Object3D {
 
 				scan: while ( euler ) {
 
-					pivot.set( ...pivots.array[ euler.index+offset ]);
+					pivot.set( ...pivots.array[ euler.index+this.quaternionOffset ]);
 
 					_p.sub( pivot ).applyQuaternion( euler.quaternion ).add( pivot );
 					_q.premultiply( euler.quaternion );
@@ -338,8 +330,6 @@ function preparePool( name, initialCount ) {
 
 class Man extends Body {
 
-	static count = 2; // max number of men
-
 	constructor( height = 1.80 ) {
 
 		preparePool( 'man', config.men );
@@ -362,8 +352,6 @@ class Man extends Body {
 
 class Woman extends Body {
 
-	static count = 2; // max number of women
-
 	constructor( height = 1.70 ) {
 
 		preparePool( 'woman', config.women );
@@ -383,8 +371,6 @@ class Woman extends Body {
 
 
 class Child extends Body {
-
-	static count = 2; // max number of children
 
 	constructor( height = 1.35 ) {
 
