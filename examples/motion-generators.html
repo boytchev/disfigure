@@ -83,7 +83,7 @@
 			var time = event.time/500,
 				figure = event.target;
 
-			animate( figure, Happy.regular( time, figure.id/12, -25, 25 ) );
+			animate( figure, Happy.regular( time+figure.id/12, -25, 25 ) );
 			
 		}
 

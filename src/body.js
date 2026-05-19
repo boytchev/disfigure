@@ -6,7 +6,7 @@
 import { Euler, MathUtils, Object3D, Quaternion, Vector3 } from 'three';
 import { config, everybody, JOINTS, pivots } from './assets.js';
 import { Pool } from './pool.js';
-import { PURE_QUATS_PER_BODY, QUAT_DATA_INDEX, quatTextureNode } from './quats.js';
+import { PURE_QUATS_PER_BODY, QUAT_DATA_INDEX, setJointQuaternion, setQuaternionCapacity } from './quats.js';
 
 
 
@@ -123,9 +123,6 @@ class Body extends Object3D {
 
 	constructor( pool, bodyTypeIndex, scale ) {
 
-		quatTextureNode.setCapacity( uid+1 );
-		pool.material.needsUpdate = true;
-
 		super();
 
 		this.pool = pool;
@@ -134,9 +131,9 @@ class Body extends Object3D {
 		this.material = this.pool.material; // expose to outside
 		this.scale.setScalar( scale );
 
-		quatTextureNode.setCapacity( Math.max( config.men+config.women+config.children, config.population ) );
+		setQuaternionCapacity( Math.max( uid+1, config.men+config.women+config.children, config.population ) );
+		setJointQuaternion( this.uid, QUAT_DATA_INDEX, bodyTypeIndex, 0, 0, 0 );
 
-		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, bodyTypeIndex, 0, 0, 0 );
 		this.quaternionOffset = bodyTypeIndex*PURE_QUATS_PER_BODY;
 
 		pool.uidsArray[ this.pid ] = this.uid;
@@ -163,13 +160,9 @@ class Body extends Object3D {
 
 		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
-			var euler = this.eulers[ i ];
-
-			quatTextureNode.setQ( this.uid, i, euler.q );
+			setJointQuaternion( this.uid, i, ...this.eulers[ i ].q );
 
 		} // for i
-
-		quatTextureNode.quatTexture.needsUpdate = true;
 
 	} // Body.update
 

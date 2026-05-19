@@ -137,20 +137,20 @@
 		Happy.setAnimationLoop( ( t )=>{
 
 
-			manX.l_arm.x = Happy.regular( t/1000, 0, -40, 40 );
+			manX.l_arm.x = Happy.regular( t/1000, -40, 40 );
 			manX.l_forearm.x = manX.l_arm.x;
 			manX.r_arm.x = manX.l_arm.x;
 			manX.r_forearm.x = manX.l_forearm.x;
 
-			manY.l_arm.y = Happy.regular( t/500, 4, -10, 40 );
+			manY.l_arm.y = Happy.regular( t/500+4, -10, 40 );
 			manY.r_arm.y = manY.l_arm.y;
-			manY.l_elbow.y = Happy.regular( t/1000, 8, 0, 80 );
+			manY.l_elbow.y = Happy.regular( t/1000+8, 0, 80 );
 			manY.r_elbow.y = manY.l_elbow.y;
-			manY.l_wrist.y = Happy.regular( t/400, 6, -30, 30 );
+			manY.l_wrist.y = Happy.regular( t/400+6, -30, 30 );
 			manY.r_wrist.y = manY.l_wrist.y;
 			
-			manZ.l_arm.z = Happy.regular( t/1000, 2, -40, 20 );
-			manZ.l_wrist.z = Happy.regular( t/400, 3, -40, 40 );
+			manZ.l_arm.z = Happy.regular( t/1000+2, -40, 20 );
+			manZ.l_wrist.z = Happy.regular( t/400+3, -40, 40 );
 			manZ.r_arm.z = manZ.l_arm.z;
 			manZ.r_wrist.z = manZ.l_wrist.z;
 

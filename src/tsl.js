@@ -223,16 +223,13 @@ var gradientXT = Fn( ([ pos, range, slope ])=>{
 
 /**
  * Computes texture coordinates for quaternion data lookup for figure and joint.
- *
- *   offset = figureIndex * QUATS_PER_BODY + propIndex
- *   coord = ivec2(offset % WIDTH, offset / WIDTH)
  */
 var getQuatAddr = Fn( ([ figureIndex, jointIndex ])=>{
 
-	var offset = figureIndex.mul( QUATS_PER_BODY ).add( jointIndex );//.toVar();
+	var offset = figureIndex.add( jointIndex ).toVar();
 	return ivec2( offset.mod( QUAT_TEXTURE_WIDTH ), offset.div( QUAT_TEXTURE_WIDTH ) );
 
-}, { return: 'ivec2', figureIndex: 'uint', jointIndex: 'int' } );
+}, { return: 'ivec2', figureIndex: 'int', jointIndex: 'int' } );
 
 
 
@@ -261,7 +258,7 @@ var disfigureBody = Fn( ( )=>{
 	var p = positionGeometry,
 		m = mat3( p, normalGeometry.normalize(), vec3( 0 ) ).toVar( ); // container
 
-	var figureIndex = attribute( 'uids', 'int' );
+	var figureIndex = attribute( 'uids', 'int' ).mul( QUATS_PER_BODY ).toVar();
 
 	// Figure type offset for pivots and ranges (52 pivots per gender, 4 extras)
 
@@ -278,7 +275,7 @@ var disfigureBody = Fn( ( )=>{
 	// Side and region detection
 
 	var isLeft = int( step( p.x, 0 ) ).toVar( ),
-		isDown = p.y.lessThan( pivots.element( int( 2 ).add( gender ) ).y ).toVar( ), //below chest
+		isDown = p.y.lessThan( pivots.element( int( 2 ).add( gender ) ).y ), //below chest
 		isHand = p.x.abs().greaterThan( pivots.element( int( 16 ).add( gender ) ).x ); // beyond wrist
 
 	// Helper function to simulate ternary isLeft?left:right
@@ -348,7 +345,6 @@ var disfigureBody = Fn( ( )=>{
 	// head chest waist torso
 
 	Loop( { end: int( 4 ) }, ( { i } ) => disY( i ) );
-
 
 	// Final normal transformation to view space + normalization
 

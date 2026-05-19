@@ -175,26 +175,26 @@
 		
 		Happy.setAnimationLoop( ( t )=>{
 
-			manX.l_thumb.x = Happy.regular( t/500, 0, -20, 60 );
+			manX.l_thumb.x = Happy.regular( t/500, -20, 60 );
 			manX.r_thumb.x = manX.l_thumb.x;
 
-			manY.l_thumb.y = Happy.regular( t/500, 0, -30, 20 );
+			manY.l_thumb.y = Happy.regular( t/500, -30, 20 );
 			
-			var a = Happy.regular( t/500, 0, -2, 10 );
+			var a = Happy.regular( t/500, -2, 10 );
 			manY.l_index.y = manY.l_pinky.y = 3*a;
 			manY.l_middle.y = manY.l_ring.y = a;
 
-			manY.r_thumb.y = Happy.regular( t/500, 0, -30, 20 );
+			manY.r_thumb.y = Happy.regular( t/500, -30, 20 );
 
-			a = Happy.regular( t/500, 0, -2, 10 );
+			a = Happy.regular( t/500, -2, 10 );
 			manY.r_index.y = manY.r_pinky.y = 3*a;
 			manY.r_middle.y = manY.r_ring.y = a;
 
-			manZ.l_thumb.z = manZ.r_thumb.z = Happy.regular( t/500, 0, -60, 60 );
-			manZ.l_index.z = manZ.r_index.z = Happy.regular( t/500, 9.5, -60, 60 );
-			manZ.l_middle.z = manZ.r_middle.z = Happy.regular( t/500, 9, -60, 60 );
-			manZ.l_ring.z = manZ.r_ring.z = Happy.regular( t/500, 8.5, -60, 60 );
-			manZ.l_pinky.z = manZ.r_pinky.z = Happy.regular( t/500, 8, -60, 60 );
+			manZ.l_thumb.z = manZ.r_thumb.z = Happy.regular( t/500, -60, 60 );
+			manZ.l_index.z = manZ.r_index.z = Happy.regular( t/500+9.5, -60, 60 );
+			manZ.l_middle.z = manZ.r_middle.z = Happy.regular( t/500+9, -60, 60 );
+			manZ.l_ring.z = manZ.r_ring.z = Happy.regular( t/500+8.5, -60, 60 );
+			manZ.l_pinky.z = manZ.r_pinky.z = Happy.regular( t/500+8, -60, 60 );
 
 		} );
 		

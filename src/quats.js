@@ -18,15 +18,10 @@
  * PURE_QUATS_PER_BODY	- number of pure/proper/joint quaternions (52)
  * QUAT_DATA_INDEX		- index of the data quaternion (52)
  *
+ * setJointQuaternion	- sets quaternion of a joint of a figure
+ * setQuaternionCapacity- sets the capacity of the quaternion texture
+ *
  * quatTextureNode - a single unique instance of QuatTextureNode for all figures
- *
- *   .dataArray			- direct reference to the underlying raw data (Float32Array)
- *   .quatTexture		- the active DataTexture object (DataTexture)
- *   .count				- current maximum number of figures the texture can hold (number)
- *   .isQuatTextureNode	- flag identifying this custom node (boolean)
- *
- *   .setQ(figure,joint,vec4)		- sets a full quaternion for a figure joint
- *   .setXYZ(figure,joint,x,y,z,w)	- sets quaternion components directly
  *
  * -----------------------------------------------------------------------------
  *
@@ -80,6 +75,11 @@ const QUAT_DATA_INDEX = 52; // 52 is vec4 for user data
  * Custom TextureNode optimized for storing and accessing quaternion data.
  * Grows automatically. Extends TextureNode but disables all automatic UV
  * transformations and flipY logic that Three.js/TSL normally applies.
+ *
+ *   .dataArray			- direct reference to the underlying raw data (Float32Array)
+ *   .quatTexture		- the active DataTexture object (DataTexture)
+ *   .count				- current maximum number of figures the texture can hold (number)
+ *   .isQuatTextureNode	- flag identifying this custom node (boolean)
  */
 class QuatTextureNode extends TextureNode {
 
@@ -137,67 +137,6 @@ class QuatTextureNode extends TextureNode {
 
 
 	/**
-	 * Increases texture capacity when more figures are added.
-	 */
-	setCapacity( count ) {
-
-		if ( count <= this.count ) return; // already sufficient
-
-		// Calculate the new height of the data texture
-
-		var doubleHeight = Math.min( 2*this.quatTexture.image.height, QUAT_TEXTURE_WIDTH );
-		var preciseHeight = Math.ceil( count*QUATS_PER_BODY/QUAT_TEXTURE_WIDTH );
-		var newHeight = Math.max( doubleHeight, preciseHeight );
-
-		if ( newHeight > QUAT_TEXTURE_WIDTH )
-			throw new Error( 'Too many figures — DataTexture limit exceeded' );
-
-		// Create new larger array and copy existing data
-
-		var newDataArray = new Float32Array( 4*newHeight*QUAT_TEXTURE_WIDTH );
-		newDataArray.set( this.dataArray );
-
-		// Create new data texture
-
-		var newQuatTexture = new DataTexture(
-			newDataArray,
-			QUAT_TEXTURE_WIDTH,
-			newHeight,
-			RGBAFormat,
-			FloatType
-		);
-
-		// Dispose old texture
-
-		this.quatTexture.dispose();
-
-		// Update internal references
-
-		this.dataArray = newDataArray;
-		this.quatTexture = newQuatTexture;
-		this.value = newQuatTexture;
-
-		this.count = Math.floor( newHeight * QUAT_TEXTURE_WIDTH / QUATS_PER_BODY );
-
-		// Commented because seams to be not needed. [PB]
-
-		/**
-		// Increment version [AI]
-
-		this.version = ( this.version || 0 ) + 1;
-
-		// Force material update if we have a reference to it [AI]
-
-		if ( this._material ) this._material.needsUpdate = true;
-		*/
-
-		console.log( `QUATTEX: resized → ${this.dataArray.length} floats (${this.count} figures)` );
-
-	}
-
-
-
-	/**
 	 * Disables TSL's automatic UV transformation (including flipY).
 	 */
 
@@ -218,34 +157,6 @@ class QuatTextureNode extends TextureNode {
 
 	}
 
-
-
-	/**
-	 * Sets a full quaternion for a given figure and joint.
-	 */
-	setQ( figure, joint, vec4 ) {
-
-		vec4.toArray( this.dataArray, ( QUATS_PER_BODY*figure+joint )*4 );
-
-	}
-
-
-
-	/**
-     * Sets quaternion components directly (x, y, z, w).
-     */
-	setXYZ( figure, joint, x, y, z, w ) {
-
-		var base = ( QUATS_PER_BODY*figure+joint )*4;
-
-		this.dataArray[ base++ ] = x;
-		this.dataArray[ base++ ] = y;
-		this.dataArray[ base++ ] = z;
-		this.dataArray[ base++ ] = w;
-
-	}
-
-
 } // QuatTexNode
 
 
@@ -257,4 +168,86 @@ var quatTextureNode = new QuatTextureNode( );
 
 
 
-export { quatTextureNode, QUAT_TEXTURE_WIDTH, QUATS_PER_BODY, QUAT_DATA_INDEX, PURE_QUATS_PER_BODY };
+/**
+ * Sets quaternion components of a joint of a figure (x, y, z, w).
+ */
+function setJointQuaternion( figure, joint, x, y, z, w ) {
+
+	var base = ( QUATS_PER_BODY*figure+joint )*4,
+		array = quatTextureNode.dataArray;
+
+	array[ base++ ] = x;
+	array[ base++ ] = y;
+	array[ base++ ] = z;
+	array[ base ] = w;
+
+	quatTextureNode.quatTexture.needsUpdate = true;
+
+}
+
+
+
+/**
+ * Increases texture capacity when more figures are added. The new texture
+ * should support the quaternions of at least `count` figures.
+ */
+function setQuaternionCapacity( count ) {
+
+	if ( count <= quatTextureNode.count ) return; // already sufficient
+
+	// Calculate the new height of the data texture
+
+	var doubleHeight = Math.min( 2*quatTextureNode.quatTexture.image.height, QUAT_TEXTURE_WIDTH );
+	var preciseHeight = Math.ceil( count*QUATS_PER_BODY/QUAT_TEXTURE_WIDTH );
+	var newHeight = Math.max( doubleHeight, preciseHeight );
+
+	if ( newHeight > QUAT_TEXTURE_WIDTH )
+		throw new Error( 'Too many figures — DataTexture limit exceeded' );
+
+	// Create new larger array and copy existing data
+
+	var newDataArray = new Float32Array( 4*newHeight*QUAT_TEXTURE_WIDTH );
+	newDataArray.set( quatTextureNode.dataArray );
+
+	// Create new data texture
+
+	var newQuatTexture = new DataTexture(
+		newDataArray,
+		QUAT_TEXTURE_WIDTH,
+		newHeight,
+		RGBAFormat,
+		FloatType
+	);
+
+	// Dispose old texture
+
+	quatTextureNode.quatTexture.dispose();
+
+	// Update internal references
+
+	quatTextureNode.dataArray = newDataArray;
+	quatTextureNode.quatTexture = newQuatTexture;
+	quatTextureNode.value = newQuatTexture;
+
+	quatTextureNode.count = Math.floor( newHeight * QUAT_TEXTURE_WIDTH / QUATS_PER_BODY );
+
+	// Commented because seams to be not needed. [PB]
+
+	/**
+	// Increment version [AI]
+
+	this.version = ( this.version || 0 ) + 1;
+
+	// Force material update if we have a reference to it [AI]
+
+	if ( this._material ) this._material.needsUpdate = true;
+	*/
+
+	console.log( `QUATTEX: resized → ${quatTextureNode.dataArray.length} floats (${quatTextureNode.count} figures)` );
+
+}
+
+
+
+
+export { quatTextureNode, setJointQuaternion, setQuaternionCapacity, QUAT_TEXTURE_WIDTH, QUATS_PER_BODY, QUAT_DATA_INDEX, PURE_QUATS_PER_BODY };

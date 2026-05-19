@@ -1,12 +1,12 @@
 // disfigure v0.0.25
 
+import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 import { Vector3, Vector4, TextureNode, DataTexture, RGBAFormat, FloatType, Scene, InstancedMesh, MeshStandardNodeMaterial, InstancedBufferAttribute, Quaternion, Object3D, MathUtils, Euler, WebGPURenderer, PCFSoftShadowMap, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture } from 'three';
 import { uniformArray, Fn, vec4, If, select, ivec2, mat3, positionGeometry, normalGeometry, vec3, attribute, int, step, Loop, transformNormalToView, vertexStage } from 'three/tsl';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
-import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 
 /**
  * Disfigure Assets Loader
@@ -211,15 +211,10 @@ await Promise.all([
  * PURE_QUATS_PER_BODY	- number of pure/proper/joint quaternions (52)
  * QUAT_DATA_INDEX		- index of the data quaternion (52)
  *
+ * setJointQuaternion	- sets quaternion of a joint of a figure
+ * setQuaternionCapacity- sets the capacity of the quaternion texture
+ *
  * quatTextureNode - a single unique instance of QuatTextureNode for all figures
- *
- *   .dataArray			- direct reference to the underlying raw data (Float32Array)
- *   .quatTexture		- the active DataTexture object (DataTexture)
- *   .count				- current maximum number of figures the texture can hold (number)
- *   .isQuatTextureNode	- flag identifying this custom node (boolean)
- *
- *   .setQ(figure,joint,vec4)		- sets a full quaternion for a figure joint
- *   .setXYZ(figure,joint,x,y,z,w)	- sets quaternion components directly
  *
  * -----------------------------------------------------------------------------
  *
@@ -270,6 +265,11 @@ const QUAT_DATA_INDEX = 52; // 52 is vec4 for user data
  * Custom TextureNode optimized for storing and accessing quaternion data.
  * Grows automatically. Extends TextureNode but disables all automatic UV
  * transformations and flipY logic that Three.js/TSL normally applies.
+ *
+ *   .dataArray			- direct reference to the underlying raw data (Float32Array)
+ *   .quatTexture		- the active DataTexture object (DataTexture)
+ *   .count				- current maximum number of figures the texture can hold (number)
+ *   .isQuatTextureNode	- flag identifying this custom node (boolean)
  */
 class QuatTextureNode extends TextureNode {
 
@@ -327,67 +327,6 @@ class QuatTextureNode extends TextureNode {
 
 
 	/**
-	 * Increases texture capacity when more figures are added.
-	 */
-	setCapacity( count ) {
-
-		if ( count <= this.count ) return; // already sufficient
-
-		// Calculate the new height of the data texture
-
-		var doubleHeight = Math.min( 2*this.quatTexture.image.height, QUAT_TEXTURE_WIDTH );
-		var preciseHeight = Math.ceil( count*QUATS_PER_BODY/QUAT_TEXTURE_WIDTH );
-		var newHeight = Math.max( doubleHeight, preciseHeight );
-
-		if ( newHeight > QUAT_TEXTURE_WIDTH )
-			throw new Error( 'Too many figures — DataTexture limit exceeded' );
-
-		// Create new larger array and copy existing data
-
-		var newDataArray = new Float32Array( 4*newHeight*QUAT_TEXTURE_WIDTH );
-		newDataArray.set( this.dataArray );
-
-		// Create new data texture
-
-		var newQuatTexture = new DataTexture(
-			newDataArray,
-			QUAT_TEXTURE_WIDTH,
-			newHeight,
-			RGBAFormat,
-			FloatType
-		);
-
-		// Dispose old texture
-
-		this.quatTexture.dispose();
-
-		// Update internal references
-
-		this.dataArray = newDataArray;
-		this.quatTexture = newQuatTexture;
-		this.value = newQuatTexture;
-
-		this.count = Math.floor( newHeight * QUAT_TEXTURE_WIDTH / QUATS_PER_BODY );
-
-		// Commented because seams to be not needed. [PB]
-
-		/**
-		// Increment version [AI]
-
-		this.version = ( this.version || 0 ) + 1;
-
-		// Force material update if we have a reference to it [AI]
-
-		if ( this._material ) this._material.needsUpdate = true;
-		*/
-
-		console.log( `QUATTEX: resized → ${this.dataArray.length} floats (${this.count} figures)` );
-
-	}
-
-
-
-	/**
 	 * Disables TSL's automatic UV transformation (including flipY).
 	 */
 
@@ -408,34 +347,6 @@ class QuatTextureNode extends TextureNode {
 
 	}
 
-
-
-	/**
-	 * Sets a full quaternion for a given figure and joint.
-	 */
-	setQ( figure, joint, vec4 ) {
-
-		vec4.toArray( this.dataArray, ( QUATS_PER_BODY*figure+joint )*4 );
-
-	}
-
-
-
-	/**
-     * Sets quaternion components directly (x, y, z, w).
-     */
-	setXYZ( figure, joint, x, y, z, w ) {
-
-		var base = ( QUATS_PER_BODY*figure+joint )*4;
-
-		this.dataArray[ base++ ] = x;
-		this.dataArray[ base++ ] = y;
-		this.dataArray[ base++ ] = z;
-		this.dataArray[ base++ ] = w;
-
-	}
-
-
 } // QuatTexNode
 
 
@@ -444,6 +355,87 @@ class QuatTextureNode extends TextureNode {
  * Global shared instance used across the application
  */
 var quatTextureNode = new QuatTextureNode( );
+
+
+
+/**
+ * Sets quaternion components of a joint of a figure (x, y, z, w).
+ */
+function setJointQuaternion( figure, joint, x, y, z, w ) {
+
+	var base = ( QUATS_PER_BODY*figure+joint )*4,
+		array = quatTextureNode.dataArray;
+
+	array[ base++ ] = x;
+	array[ base++ ] = y;
+	array[ base++ ] = z;
+	array[ base ] = w;
+
+	quatTextureNode.quatTexture.needsUpdate = true;
+
+}
+
+
+
+/**
+ * Increases texture capacity when more figures are added. The new texture
+ * should support the quaternions of at least `count` figures.
+ */
+function setQuaternionCapacity( count ) {
+
+	if ( count <= quatTextureNode.count ) return; // already sufficient
+
+	// Calculate the new height of the data texture
+
+	var doubleHeight = Math.min( 2*quatTextureNode.quatTexture.image.height, QUAT_TEXTURE_WIDTH );
+	var preciseHeight = Math.ceil( count*QUATS_PER_BODY/QUAT_TEXTURE_WIDTH );
+	var newHeight = Math.max( doubleHeight, preciseHeight );
+
+	if ( newHeight > QUAT_TEXTURE_WIDTH )
+		throw new Error( 'Too many figures — DataTexture limit exceeded' );
+
+	// Create new larger array and copy existing data
+
+	var newDataArray = new Float32Array( 4*newHeight*QUAT_TEXTURE_WIDTH );
+	newDataArray.set( quatTextureNode.dataArray );
+
+	// Create new data texture
+
+	var newQuatTexture = new DataTexture(
+		newDataArray,
+		QUAT_TEXTURE_WIDTH,
+		newHeight,
+		RGBAFormat,
+		FloatType
+	);
+
+	// Dispose old texture
+
+	quatTextureNode.quatTexture.dispose();
+
+	// Update internal references
+
+	quatTextureNode.dataArray = newDataArray;
+	quatTextureNode.quatTexture = newQuatTexture;
+	quatTextureNode.value = newQuatTexture;
+
+	quatTextureNode.count = Math.floor( newHeight * QUAT_TEXTURE_WIDTH / QUATS_PER_BODY );
+
+	// Commented because seams to be not needed. [PB]
+
+	/**
+	// Increment version [AI]
+
+	this.version = ( this.version || 0 ) + 1;
+
+	// Force material update if we have a reference to it [AI]
+
+	if ( this._material ) this._material.needsUpdate = true;
+	*/
+
+	console.log( `QUATTEX: resized → ${quatTextureNode.dataArray.length} floats (${quatTextureNode.count} figures)` );
+
+}
 
 /**
  * Disfigure TSL Rigging
@@ -665,16 +657,13 @@ var gradientXT = Fn( ([ pos, range, slope ])=>{
 
 /**
  * Computes texture coordinates for quaternion data lookup for figure and joint.
- *
- *   offset = figureIndex * QUATS_PER_BODY + propIndex
- *   coord = ivec2(offset % WIDTH, offset / WIDTH)
  */
 var getQuatAddr = Fn( ([ figureIndex, jointIndex ])=>{
 
-	var offset = figureIndex.mul( QUATS_PER_BODY ).add( jointIndex );//.toVar();
+	var offset = figureIndex.add( jointIndex ).toVar();
 	return ivec2( offset.mod( QUAT_TEXTURE_WIDTH ), offset.div( QUAT_TEXTURE_WIDTH ) );
 
-}, { return: 'ivec2', figureIndex: 'uint', jointIndex: 'int' } );
+}, { return: 'ivec2', figureIndex: 'int', jointIndex: 'int' } );
 
 
 
@@ -703,7 +692,7 @@ var disfigureBody = Fn( ( )=>{
 	var p = positionGeometry,
 		m = mat3( p, normalGeometry.normalize(), vec3( 0 ) ).toVar( ); // container
 
-	var figureIndex = attribute( 'uids', 'int' );
+	var figureIndex = attribute( 'uids', 'int' ).mul( QUATS_PER_BODY ).toVar();
 
 	// Figure type offset for pivots and ranges (52 pivots per gender, 4 extras)
 
@@ -720,7 +709,7 @@ var disfigureBody = Fn( ( )=>{
 	// Side and region detection
 
 	var isLeft = int( step( p.x, 0 ) ).toVar( ),
-		isDown = p.y.lessThan( pivots.element( int( 2 ).add( gender ) ).y ).toVar( ), //below chest
+		isDown = p.y.lessThan( pivots.element( int( 2 ).add( gender ) ).y ), //below chest
 		isHand = p.x.abs().greaterThan( pivots.element( int( 16 ).add( gender ) ).x ); // beyond wrist
 
 	// Helper function to simulate ternary isLeft?left:right
@@ -790,7 +779,6 @@ var disfigureBody = Fn( ( )=>{
 	// head chest waist torso
 
 	Loop( { end: int( 4 ) }, ( { i } ) => disY( i ) );
-
 
 	// Final normal transformation to view space + normalization
 
@@ -1111,9 +1099,6 @@ class Body extends Object3D {
 
 	constructor( pool, bodyTypeIndex, scale ) {
 
-		quatTextureNode.setCapacity( uid+1 );
-		pool.material.needsUpdate = true;
-
 		super();
 
 		this.pool = pool;
@@ -1122,9 +1107,9 @@ class Body extends Object3D {
 		this.material = this.pool.material; // expose to outside
 		this.scale.setScalar( scale );
 
-		quatTextureNode.setCapacity( Math.max( config.men+config.women+config.children, config.population ) );
+		setQuaternionCapacity( Math.max( uid+1, config.men+config.women+config.children, config.population ) );
+		setJointQuaternion( this.uid, QUAT_DATA_INDEX, bodyTypeIndex, 0, 0, 0 );
 
-		quatTextureNode.setXYZ( this.uid, QUAT_DATA_INDEX, bodyTypeIndex, 0, 0, 0 );
 		this.quaternionOffset = bodyTypeIndex*PURE_QUATS_PER_BODY;
 
 		pool.uidsArray[ this.pid ] = this.uid;
@@ -1151,13 +1136,9 @@ class Body extends Object3D {
 
 		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
-			var euler = this.eulers[ i ];
-
-			quatTextureNode.setQ( this.uid, i, euler.q );
+			setJointQuaternion( this.uid, i, ...this.eulers[ i ].q );
 
 		} // for i
-
-		quatTextureNode.quatTexture.needsUpdate = true;
 
 	} // Body.update
 
@@ -1397,35 +1378,6 @@ class Child extends Body {
 
 } // Child
 
-// number generators
-
-var simplex = new SimplexNoise( );
-
-// generate chaotic but random sequence of numbers in [min.max]
-function chaotic( time, offset=0, min=-1, max=1 ) {
-
-	return min + ( max-min )*( simplex.noise( time, offset )+1 )/2;
-
-}
-
-
-
-// generate repeated sequence of numbers in [min.max]
-function regular( time, offset=0, min=-1, max=1 ) {
-
-	return min + ( max-min )*( Math.sin( time+offset )+1 )/2;
-
-}
-
-
-
-// generate random sequence of numbers in [min.max]
-function random( min=-1, max=1 ) {
-
-	return min + ( max-min )*Math.random( );
-
-}
-
 var renderer, camera, light, cameraLight, controls, ground, userAnimationLoop, stats;
 
 
@@ -1439,6 +1391,12 @@ var renderer, camera, light, cameraLight, controls, ground, userAnimationLoop, s
 //		antialias: true,
 //		shadows: true,
 //		stats: false,
+//		men
+//		women
+//		children
+//		population
+//		smooth
+//		lowpoly
 // }
 
 class World {
@@ -1673,13 +1631,88 @@ function setAnimationLoop( animationLoop ) {
 
 }
 
-// disfigure
-//
-// A software burrito that wraps everything in a single file
-// and exports only the things that I think someone might need.
+/**
+ * Disfigure Main Entry Point
+ *
+ * A lightweight library for TSL quaternion-based humanoid character rigging.
+ *
+ * This file serves as the public API and "software burrito" — it wraps
+ * all internal modules and exposes only the intended public interface.
+ *
+ * @see https://boytchev.github.io/disfigure/
+ *
+ * -----------------------------------------------------------------------------
+ *
+ * Public API:
+ *
+ * chaotic()	- Calculates a smoothly varying organic value
+ * regular()	- Calculates a smoothly oscillating sine value
+ * random()		- Calculates a uniform random value
+ *
+ * -----------------------------------------------------------------------------
+ *
+ * AI Disclosure:
+ *
+ * Grok 4.3 assistance was used for fine-tuning code comments.
+ */
 
 
 
-console.log( '\n%c\u22EE\u22EE\u22EE Disfigure\n%chttps://boytchev.github.io/disfigure/\n', 'color: navy', 'font-size:80%' );
 
-export { Child, Man, Pool, Woman, World, camera, cameraLight, chaotic, controls, disfigureBody, disfigureMatrix, disfigureNormal, disfigurePosition, everybody, gradientArm, gradientLeg, gradientX, gradientXT, gradientY, gradientYT, ground, light, pools, random, regular, renderer, scene, setAnimationLoop };
+/**
+ * Not-fancy banner - just name and link
+ */
+console.log(
+	'\nDisfigure\n%chttps://boytchev.github.io/disfigure/\n',
+	'font-size:80%'
+);
+
+
+
+var simplex = new SimplexNoise( );
+
+
+
+/**
+ * Calculates a smoothly varying pseudo-random value using Simplex 2D noise.
+ * Used for organic, chaotic motion suitable for breathing, idle animations, etc.
+ *
+ * The noise represents an imaginary terrain. This function gets the altitude
+ * at position [`x`,`y`]. The result is in [`min`,`max`].
+ */
+function chaotic( x, y, min, max ) {
+
+	return min + ( max-min )*( simplex.noise( x, y )+1 )/2;
+
+}
+
+
+
+/**
+ * Calculates a smoothly oscillating value using sine function.
+ * Used for predictable, repeating motion like walking cycle.
+ *
+ * The sine represents an imaginary wave. This function gets the altitude
+ * at position [`x`]. The result is in [`min`,`max`].
+ */
+function regular( x, min, max ) {
+
+	return min + ( max-min )*( Math.sin( x )+1 )/2;
+
+}
+
+
+
+/**
+ * Calculates a simple uniform random value (non-deterministic).
+ * Useful for one-time randomization or initial setup.
+ *
+ * The result is in [`min`,`max`].
+ */
+function random( min, max ) {
+
+	return min + ( max-min )*Math.random( );
+
+}
+
+export { Child, Man, Woman, World, camera, cameraLight, chaotic, controls, disfigureBody, disfigureMatrix, disfigureNormal, disfigurePosition, everybody, gradientArm, gradientLeg, gradientX, gradientXT, gradientY, gradientYT, ground, light, pools, random, regular, renderer, scene, setAnimationLoop };

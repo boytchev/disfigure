@@ -38,7 +38,7 @@
 		// regular
 		for( var i=0; i<N; i++ ) {
 			var x = (i/N-0.5)*5;
-			points[i].set( x, Happy.regular(10*x,0,0.6,1.1), 0 );
+			points[i].set( x, Happy.regular(10*x,0.6,1.1), 0 );
 		}
 				
 		geometry = new Three.BufferGeometry().setFromPoints( points );

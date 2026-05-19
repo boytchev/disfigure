@@ -142,27 +142,27 @@
 		
 		Happy.setAnimationLoop( ( t )=>{
 
-			manX.l_foot.x = Happy.regular( t/1000, 0, -20, 40 );
-			manX.l_ankle.x = Happy.regular( t/1000, 1, -40, 40 );
-			manX.l_knee.x = Happy.regular( t/1000, 2, 0, 90 );
-			manX.l_leg.x = Happy.regular( t/1000, 3, -30, 70 );
+			manX.l_foot.x = Happy.regular( t/1000, -20, 40 );
+			manX.l_ankle.x = Happy.regular( t/1000+1, -40, 40 );
+			manX.l_knee.x = Happy.regular( t/1000+2, 0, 90 );
+			manX.l_leg.x = Happy.regular( t/1000+3, -30, 70 );
 
-			manX.r_foot.x = Happy.regular( t/1000, 3, -20, 40 );
-			manX.r_ankle.x = Happy.regular( t/1000, 4, -40, 40 );
-			manX.r_knee.x = Happy.regular( t/1000, 5, 0, 90 );
-			manX.r_leg.x = Happy.regular( t/1000, 6, -30, 70 );
+			manX.r_foot.x = Happy.regular( t/1000+3, -20, 40 );
+			manX.r_ankle.x = Happy.regular( t/1000+4, -40, 40 );
+			manX.r_knee.x = Happy.regular( t/1000+5, 0, 90 );
+			manX.r_leg.x = Happy.regular( t/1000+6, -30, 70 );
 
-			manY.l_shin.y = Happy.regular( t/700, 0, -30, 30 );
+			manY.l_shin.y = Happy.regular( t/700, -30, 30 );
 			manY.l_thigh.y = manY.l_shin.y;
 			manY.r_shin.y = manY.l_shin.y;
 			manY.r_thigh.y = manY.l_shin.y;
 
-			manZ.l_ankle.z = Happy.regular( t/300, 0, -30, 30 );
+			manZ.l_ankle.z = Happy.regular( t/300, -30, 30 );
 			manZ.r_ankle.z = manZ.l_ankle.z;
-			manZ.l_knee.z = Happy.regular( t/500, 0, -15, 15 );
+			manZ.l_knee.z = Happy.regular( t/500, -15, 15 );
 			manZ.r_knee.z = manZ.l_knee.z;
 			t += 1000;
-			manZ.l_leg.z = Happy.regular( t/1000, 0, 5, 20 );
+			manZ.l_leg.z = Happy.regular( t/1000, 5, 20 );
 			manZ.r_leg.z = manZ.l_leg.z;
 		} );
 		
