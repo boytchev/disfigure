@@ -683,6 +683,13 @@ var q = ( figureIndex, jointIndex )=> {
 
 
 /**
+ * Internal count for number of generations of the main TSL function
+ */
+var disfigureVersion = 0;
+
+
+
+/**
  * Main body disfigure/deformation function.
  * Deforms position and normal using per-joint quaternions and gradient masks.
  * Uses a mat3 container to hold and transform position + normal together.
@@ -784,7 +791,13 @@ var disfigureBody = Fn( ( )=>{
 
 	m.element( 1 ).assign( transformNormalToView( m.element( 1 ) ).normalize() );
 
-	console.log( 'DODO==============================' );
+	// Warm if this disfigure function was generated too many times
+
+	++disfigureVersion;
+
+	if ( disfigureVersion > 6 && Math.log2( disfigureVersion ) % 1 < 1E-10 )
+		console.warn( `TSL compiled ${disfigureVersion} times` );
+
 	return m;//.debug();
 
 } )( );

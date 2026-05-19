@@ -169,27 +169,27 @@
 		
 		Happy.setAnimationLoop( ( t )=>{
 
-			manY.l_arm.y = manY.r_arm.y = Happy.regular( t/700, 5, 90, 80 );
-			manY.l_wrist.z = manY.r_wrist.z = Happy.regular( t/700, 2, -50, 50 );
+			manY.l_arm.y = manY.r_arm.y = Happy.regular( t/700+5, 90, 80 );
+			manY.l_wrist.z = manY.r_wrist.z = Happy.regular( t/700+2, -50, 50 );
 
-			manY.l_thumb_tip.y = Happy.regular( t/500, 0, 0, 60 );
+			manY.l_thumb_tip.y = Happy.regular( t/500, 0, 60 );
 			manY.r_thumb_tip.y = manY.l_thumb_tip.y;
 
-			manZ.l_forearm.x = manZ.r_forearm.x = Happy.regular( t/500, 1, -50, 50 );
-			manZ.l_wrist.x = manZ.r_wrist.x = Happy.regular( t/700, 2, -50, 50 );
-			manZ.l_wrist.z = manZ.r_wrist.z = Happy.regular( t/1100, 3, -50, 50 );
+			manZ.l_forearm.x = manZ.r_forearm.x = Happy.regular( t/500+1, -50, 50 );
+			manZ.l_wrist.x = manZ.r_wrist.x = Happy.regular( t/700+2, -50, 50 );
+			manZ.l_wrist.z = manZ.r_wrist.z = Happy.regular( t/1100+3, -50, 50 );
 
 			manZ.l_index_tip.z = manZ.r_index_tip.z =
-			manZ.l_index_mid.z = manZ.r_index_mid.z = Happy.regular( t/500, 5, -10, 90 );
+			manZ.l_index_mid.z = manZ.r_index_mid.z = Happy.regular( t/500+5, -10, 90 );
 			
 			manZ.l_middle_tip.z = manZ.r_middle_tip.z =
-			manZ.l_middle_mid.z = manZ.r_middle_mid.z = Happy.regular( t/500, 4, -10, 90 );
+			manZ.l_middle_mid.z = manZ.r_middle_mid.z = Happy.regular( t/500+4, -10, 90 );
 			
 			manZ.l_ring_tip.z = manZ.r_ring_tip.z = 
-			manZ.l_ring_mid.z = manZ.r_ring_mid.z = Happy.regular( t/500, 3, -10, 90 );
+			manZ.l_ring_mid.z = manZ.r_ring_mid.z = Happy.regular( t/500+3, -10, 90 );
 			
 			manZ.l_pinky_tip.z = manZ.r_pinky_tip.z = 
-			manZ.l_pinky_mid.z = manZ.r_pinky_mid.z = Happy.regular( t/500, 2, -10, 90 );
+			manZ.l_pinky_mid.z = manZ.r_pinky_mid.z = Happy.regular( t/500+2, -10, 90 );
 
 		} );
 		
