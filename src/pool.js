@@ -93,7 +93,7 @@ class Pool extends InstancedMesh {
 
 		this.addToScene = true;
 
-		console.log( `Pool: created with capacity ${count} instances` );
+		console.log( `Alloc ${url.toUpperCase()}[${count}]` );
 
 		// Asynchronously load the geometry, the skeleton data, hook
 		// shaders to material nodes and add the instance to the scene

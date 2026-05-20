@@ -243,7 +243,7 @@ function setQuaternionCapacity( count ) {
 	if ( this._material ) this._material.needsUpdate = true;
 	*/
 
-	console.log( `QUATTEX: resized → ${quatTextureNode.dataArray.length} floats (${quatTextureNode.count} figures)` );
+	console.log( `Alloc ALL[${quatTextureNode.count}] ${Math.round( quatTextureNode.dataArray.length*4/1024 )} kB` );
 
 }
 
