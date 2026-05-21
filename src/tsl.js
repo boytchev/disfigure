@@ -85,7 +85,7 @@ var scaleQuaternion = Fn( ([ quat, k ])=>{
 
 
 /**
- * Applies partial `k`k quaternion rotation `quat` to the matrix container `mat`.
+ * Applies partial `k` quaternion rotation `quat` to the matrix container `mat`.
  *   - element(0) → position (rotated around `pivot`)
  *   - element(1) → normal   (rotated, no pivot)
  *   - element(2) → unused
@@ -187,13 +187,10 @@ var gradientLeg = Fn( ([ pos, range, range2 ])=>{
  */
 var gradientArm = Fn( ([ pos, pivot, range ])=>{
 
-	var x = pos.x,
-		y = pos.y;
+	var dx = pos.y.sub( pivot.y ).div( 4, select( pos.x.greaterThan( 0 ), 1, -1 ) );
 
-	var dx = y.sub( pivot.y ).div( 4, select( x.greaterThan( 0 ), 1, -1 ) );
-
-	return x.add( dx ).smoothstep( range.x, range.y ).smoothstep( 0, 1 )
-		.mul( y.step( range.z ).oneMinus() );
+	return pos.x.add( dx ).smoothstep( range.x, range.y ).smoothstep( 0, 1 )
+		.mul( pos.y.step( range.z ).oneMinus() );
 
 }, { pos: 'vec3', pivot: 'vec3', range: 'vec4', return: 'float' } );
 

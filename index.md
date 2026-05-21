@@ -29,6 +29,7 @@ A library to rig 3D models.
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-event.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/motion-event.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-generators-graphs.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/motion-generators-graphs.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-generators.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/motion-generators.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/world-customize.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/world-customize.html)
 
 
 <div class="footnote">

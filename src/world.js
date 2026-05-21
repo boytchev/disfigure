@@ -74,7 +74,7 @@ var renderer, camera, light, cameraLight, controls, ground, userAnimationLoop, s
  *  - women		- Suggested number of women figures
  *  - children	- Suggested number of children figures
  *  - population- Total number of figures (may differ from men+women+children)
- *  - smooth	- Render figures with smoother serface (default is true)
+ *  - smooth	- Render figures with smoother surface (default is true)
  *  - lowpoly	- Reduce figure complexity (default is 0, no reduction)
  */
 class World {

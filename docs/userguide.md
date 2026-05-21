@@ -9,7 +9,8 @@
 
 
 
-[**Figures**](#figures) <small>([creating](#creating-a-figure) &middot;  [anatomy](#anatomy-of-a-figure) &middot; [posture](#figure-posture))</small> [**Motions**](#motions) <small>([figure](#figure-motion) &middot; [animation](#figure-animation)  &middot; [generators](#number-generators) )</small>
+[**Figures**](#figures) <small>([creating](#creating-a-figure) &middot; [anatomy](#anatomy-of-a-figure) &middot; [posture](#figure-posture))</small> [**Motions**](#motions) <small>([figure](#figure-motion) &middot; [animation](#figure-animation)  &middot; [generators](#number-generators) )</small> [**Using**](#using-disfigure) <small>([world](#world))</small>
+
 
 
 # Figures
@@ -264,6 +265,59 @@ Live examples: [generators graphs](../examples/motion-generators-graphs.html) an
 
 [<img src="../examples/snapshots/motion-generators-graphs.jpg" width="48%">](../examples/motion-generators-graphs.html)
 [<img src="../examples/snapshots/motion-generators.jpg" width="48%">](../examples/motion-generators.html)
+
+
+
+
+
+# Using Disfigure
+
+## Provisional world
+
+Disfigure provides a predefined default 3D world with all basic options,
+like camera, lights, ground, user navigations and so on.
+
+Options for the environment:
+
+- *antialias* &ndash; boolean, if false, antialias is turned off (default is true)
+- *ground* &ndash; boolean, if false, ground is not created (default is true)
+- *lights* &ndash; boolean; if false, lights are not created (default is true)
+- *shadows* &ndash; boolean, if false, shadows are not created (default is true)
+- *controls* &ndash; boolean, if false, orbit controls is not created (default is true)
+- *stats* &ndash; boolean, if true, stats panel is created (default is false)
+
+Options for figure:
+
+- *men* &ndash; number, allocated number of men figures (default is 3)
+- *women* &ndash; number, allocated number of women figures (default is 3)
+- *children* &ndash; number, allocated number of children figures (default is 3)
+- *population* &ndash; number, allocated number of figures (may differ from men+women+children, default is 9)
+- *smooth* &ndash; boolean, if false, render figures with low-quality but faster smoothing (default is true)
+- *lowpoly* &ndash; number 0 to 1, reduction factor for figure complexity (default is 0, no reduction)
+
+```js
+new World( {ground: false, stats: true, men:100} );
+```
+
+If a provisional world instance is created, it creates global variables:
+
+- *renderer* &ndash; WebGPU renderer
+- *scene* &ndash; default scene for all figures
+- *camera* &ndash; perspetive camera
+- *light* &ndash; static directional light with shadows
+- *cameraLight* &ndash; dynamic directional light
+
+Depending on options initialing a world may also create:
+
+- *ground* &ndash; ground for illusion of a solid surface
+- *controls* &ndash; orbit controls for primary navigation
+- *stats* &ndash; stats panel for performance monitoring
+
+
+Live examples: [default world](../examples/world???.html) and [customized world](../examples/world-customize.html):
+
+[<img src="../examples/snapshots/world-customize.jpg" width="48%">](../examples/world-customize.html)
+
 
 
 

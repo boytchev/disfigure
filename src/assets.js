@@ -37,10 +37,10 @@ import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
  * Global configuration
  */
 var config = {
-	men: 1,			// amount of preallocatd space for Man instances
-	women: 1,		// amount of preallocatd space for Woman instances
-	children: 1,	// amount of preallocatd space for Child instances
-	population: 3,	// amount of preallocatd space for quad texture used for rigging
+	men: 3,			// amount of preallocatd space for Man instances
+	women: 3,		// amount of preallocatd space for Woman instances
+	children: 3,	// amount of preallocatd space for Child instances
+	population: 9,	// amount of preallocatd space for quad texture used for rigging
 	smooth: true,	// true = smooth shapes, false = rough shapes
 	lowpoly: 0,		// lowpoly reduction factor, 0=0%, 1=75% reduction
 };
