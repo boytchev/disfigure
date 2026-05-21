@@ -375,4 +375,4 @@ var disfigureNormal = disfigureBody.element( 1 ); // normal node
 
 
 
-export { disfigureMatrix, disfigurePosition, disfigureNormal, disfigureBody, gradientX, gradientY, gradientYT, gradientXT, gradientLeg, gradientArm };
+export { disfigureMatrix, disfigurePosition, disfigureNormal, disfigureBody, gradientX, gradientY, gradientYT, gradientXT, gradientLeg, gradientArm, q };

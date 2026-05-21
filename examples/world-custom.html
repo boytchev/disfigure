@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Custom world</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Three from 'three';
+		import {positionGeometry} from 'three/tsl';
+		import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+		import * as Happy from 'disfigure';
+		import {randomPosture} from './random-posture.js';
+
+
+		// create a custom world
+
+		var renderer = new Three.WebGPURenderer( { antialias: true } );
+		renderer.setSize( innerWidth, innerHeight );
+		renderer.setAnimationLoop( animationLoop );
+
+		document.body.appendChild( renderer.domElement );
+		document.body.style.overflow = 'hidden';
+		document.body.style.margin = '0';
+		
+		var scene = new Three.Scene( );
+		
+		var camera = new Three.PerspectiveCamera( 30, innerWidth/innerHeight, 0.1, 1000 );
+		camera.position.set( 0, 0, 2 );
+		
+		// modify the lights
+		
+		var semilight = new Three.HemisphereLight( 'yellow', 'red', 4 );
+		scene.add( semilight );
+		
+		var controls = new OrbitControls( camera, renderer.domElement );
+		controls.enableDamping = true;
+		controls.target.set( 0, 0.9, 0 );		
+
+		window.addEventListener( "resize", ( /*event*/ ) => {
+
+			camera.aspect = innerWidth/innerHeight;
+			camera.updateProjectionMatrix( );
+
+			renderer.setSize( innerWidth, innerHeight );
+
+		} );
+
+		var platform = new Three.Mesh(
+			new Three.BoxGeometry( 0.5, 0.1, 0.5 ),
+			new Three.MeshStandardMaterial( {color: 'white'} )
+		);
+		platform.position.y = 0.5;
+//		scene.add( platform );
+		
+		// create a man
+
+		var man1 = new Happy.Man( );
+		var man2 = new Happy.Man( );
+		var man3 = new Happy.Man( );
+
+		scene.add( man1.pool, man2.pool, man3.pool );
+		
+		man1.material.blending = Three.MultiplicativeBlending;
+		man1.material.transparent = true;
+		man1.material.opacityNode = positionGeometry.y.smoothstep(1,1.5);
+		
+		// animate the scene
+		
+		function animationLoop( t ) {
+
+			t=t/4000;
+		
+			Happy.everybody.forEach( ( p )=>{
+				p.position.y = -0.5;
+				randomPosture( p, t, p.id );
+				p.update();
+
+			} );
+
+			// animating the man
+			controls.update();
+
+			renderer.render( scene, camera );
+
+		}
+		
+	</script>
+</body>
+</html>

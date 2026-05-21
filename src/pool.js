@@ -15,8 +15,9 @@
  *
  * Public API:
  *
- * scene	- default Three.js scene
- * Pool		- class for instances of figures of given type and number
+ * scene		- default Three.js scene
+ * setRenderer	- replaces the default renderer
+ * Pool			- class for instances of figures of given type and number
  *
  *   .material	 - node material for all figures in the pool
  *   .count		 - current number of active figures
@@ -48,6 +49,7 @@ import { config, loadGLTF } from './assets.js';
  * Default scene if the user does not use own scene.
  */
 var scene = new Scene();
+var renderer;
 
 
 
@@ -126,7 +128,7 @@ class Pool extends InstancedMesh {
 			if ( this.addToScene ) {
 
 				this.onLoad();
-				scene.add( this );
+				if( renderer ) scene.add( this );
 
 			}
 
@@ -195,4 +197,15 @@ class Pool extends InstancedMesh {
 
 
 
-export { Pool, scene };
+/**
+ * Replaces the default renderer with custom renderer
+ */
+function setRenderer( newRenderer ) {
+
+	renderer = newRenderer;
+
+}
+
+
+
+export { Pool, scene, renderer, setRenderer };

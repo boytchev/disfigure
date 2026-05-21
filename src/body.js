@@ -257,13 +257,18 @@ class Body extends Object3D {
 
 		// Create Euler-quaternions for joints
 
+		console.log( '----' );
 		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
 			this.eulers.push( new EulerDegrees( this, i, JOINTS[ i ].parentIndex, JOINTS[ i ].signs ) );
 
 			this[ JOINTS[ i ].name ] = this.eulers[ i ];
 
+			console.log( i, '->', JOINTS[ i ].parentIndex );
+
 		}
+
+		console.log( '----' );
 
 		everybody.push( this );
 

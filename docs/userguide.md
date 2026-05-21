@@ -299,7 +299,7 @@ Options for figure:
 new World( {ground: false, stats: true, men:100} );
 ```
 
-If a provisional world instance is created, it creates global variables:
+If a provisional world instance is created, it adds global variables:
 
 - *renderer* &ndash; WebGPU renderer
 - *scene* &ndash; default scene for all figures
@@ -313,10 +313,29 @@ Depending on options initialing a world may also create:
 - *controls* &ndash; orbit controls for primary navigation
 - *stats* &ndash; stats panel for performance monitoring
 
+It is not compulsory to the a provisional world. A program may dafine its
+custom Three.js world. In this case the figures should be added to the
+scene via their *pool* property, and the animation loop must call *update*
+method:
 
-Live examples: [default world](../examples/world???.html) and [customized world](../examples/world-customize.html):
+```js
+var man = new Man( );
 
-[<img src="../examples/snapshots/world-customize.jpg" width="48%">](../examples/world-customize.html)
+scene.add( man.pool );
+
+function animationLoop( t ) {
+
+	man.update();
+	...
+	renderer.render( scene, camera );
+}
+```
+
+
+Live examples: [variation of default world](../examples/world-custom.html) and [customized world](../examples/world-custom.html):
+
+[<img src="../examples/snapshots/world-default.jpg" width="48%">](../examples/world-default.html)
+[<img src="../examples/snapshots/world-custom.jpg" width="48%">](../examples/world-custom.html)
 
 
 

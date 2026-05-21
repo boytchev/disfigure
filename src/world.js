@@ -43,7 +43,7 @@
 import { CanvasTexture, CircleGeometry, Color, DirectionalLight, Mesh, MeshLambertMaterial, Object3D, PCFSoftShadowMap, PerspectiveCamera, WebGPURenderer } from 'three';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import Stats from 'three/addons/libs/stats.module.js';
-import { scene } from './pool.js';
+import { scene, renderer, setRenderer } from './pool.js';
 import { config, everybody } from './assets.js';
 
 
@@ -51,7 +51,7 @@ import { config, everybody } from './assets.js';
 /**
  * Module-level variables - exposed for external access
  */
-var renderer, camera, light, cameraLight, controls, ground, userAnimationLoop, stats;
+var camera, light, cameraLight, controls, ground, userAnimationLoop, stats;
 
 
 
@@ -83,7 +83,7 @@ class World {
 
 		// Renderer setup
 
-		renderer = new WebGPURenderer( { antialias: options?.antialias ?? true } );
+		setRenderer( new WebGPURenderer( { antialias: options?.antialias ?? true } ) );
 		renderer.setSize( innerWidth, innerHeight );
 		renderer.shadowMap.enabled = options?.shadows ?? true;
 		renderer.shadowMap.type = PCFSoftShadowMap;

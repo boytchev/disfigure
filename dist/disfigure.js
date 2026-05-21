@@ -41,10 +41,10 @@ import Stats from 'three/addons/libs/stats.module.js';
  * Global configuration
  */
 var config = {
-	men: 1,			// amount of preallocatd space for Man instances
-	women: 1,		// amount of preallocatd space for Woman instances
-	children: 1,	// amount of preallocatd space for Child instances
-	population: 3,	// amount of preallocatd space for quad texture used for rigging
+	men: 3,			// amount of preallocatd space for Man instances
+	women: 3,		// amount of preallocatd space for Woman instances
+	children: 3,	// amount of preallocatd space for Child instances
+	population: 9,	// amount of preallocatd space for quad texture used for rigging
 	smooth: true,	// true = smooth shapes, false = rough shapes
 	lowpoly: 0,		// lowpoly reduction factor, 0=0%, 1=75% reduction
 };
@@ -433,7 +433,7 @@ function setQuaternionCapacity( count ) {
 	if ( this._material ) this._material.needsUpdate = true;
 	*/
 
-	console.log( `Alloc ALL[${quatTextureNode.count}] ${Math.round(quatTextureNode.dataArray.length*4/1024)} kB` );
+	console.log( `Alloc ALL[${quatTextureNode.count}] ${Math.round( quatTextureNode.dataArray.length*4/1024 )} kB` );
 
 }
 
@@ -519,7 +519,7 @@ var scaleQuaternion = Fn( ([ quat, k ])=>{
 
 
 /**
- * Applies partial `k`k quaternion rotation `quat` to the matrix container `mat`.
+ * Applies partial `k` quaternion rotation `quat` to the matrix container `mat`.
  *   - element(0) → position (rotated around `pivot`)
  *   - element(1) → normal   (rotated, no pivot)
  *   - element(2) → unused
@@ -621,13 +621,10 @@ var gradientLeg = Fn( ([ pos, range, range2 ])=>{
  */
 var gradientArm = Fn( ([ pos, pivot, range ])=>{
 
-	var x = pos.x,
-		y = pos.y;
+	var dx = pos.y.sub( pivot.y ).div( 4, select( pos.x.greaterThan( 0 ), 1, -1 ) );
 
-	var dx = y.sub( pivot.y ).div( 4, select( x.greaterThan( 0 ), 1, -1 ) );
-
-	return x.add( dx ).smoothstep( range.x, range.y ).smoothstep( 0, 1 )
-		.mul( y.step( range.z ).oneMinus() );
+	return pos.x.add( dx ).smoothstep( range.x, range.y ).smoothstep( 0, 1 )
+		.mul( pos.y.step( range.z ).oneMinus() );
 
 }, { pos: 'vec3', pivot: 'vec3', range: 'vec4', return: 'float' } );
 
@@ -1008,7 +1005,7 @@ class Pool extends InstancedMesh {
  *
  * This module provides a high-level API for creating and animating 3D human
  * figures (men, women, children) using Three.js InstancedMesh for performance.
- * 
+ *
  * It handles skeletal posing via Euler angles (in degrees), joint hierarchies,
  * quaternion conversion, and attachment of custom objects to joints.
  *
@@ -1044,7 +1041,7 @@ class Pool extends InstancedMesh {
  *   .signs			- direciton of joint angle rotations
  *	 .quaternion	- quaternion representation of the Euler angles
  *	 .attached		- list of external objects attached to the joint
- *	
+ *
  *	 .q				- read-only property to get the quaternion
  *
  *   .set( )		- verbatim set of Euler angles
@@ -1108,17 +1105,17 @@ class EulerDegrees extends Euler {
 		this.index = index; // joint index in the skeleton
 		this.parentIndex = parentIndex; // index of the parent joint (or -1 for root)
 		this.signs = signs; // directions of angles
-		
+
 		this.quaternion = new Quaternion();
 		this.needsUpdate = true; // the quaternion must be recomputer
-		
+
 		this.attached = []; // external objects attached to this joint
 
 	}
 
 
 
-    /**
+	/**
 	 * Set verbatim all three angles at once (in degrees)
 	 */
 	set( x, y, z ) {
@@ -1131,7 +1128,7 @@ class EulerDegrees extends Euler {
 
 
 
-    /**
+	/**
 	 * Set an individual X, Y or Z angle (in degrees)
 	 */
 	set x( n ) {
@@ -1158,7 +1155,7 @@ class EulerDegrees extends Euler {
 
 
 
-    /**
+	/**
 	 * Get an individual X, Y or Z angle (in degrees)
 	 */
 	get x( ) {
@@ -1178,9 +1175,9 @@ class EulerDegrees extends Euler {
 		return toDeg( this.signs.z*super.z );
 
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Get the current quaternion (computed lazily)
 	 */
@@ -1199,7 +1196,7 @@ class EulerDegrees extends Euler {
 
 
 
-    /**
+	/**
      * Attach a Three.js Object3D to this joint.
      * The object will follow the joint's world transform.
      */
@@ -1236,11 +1233,11 @@ class Body extends Object3D {
 		this.pid = pool.getBody(); // instance index within the pool
 		this.uid = uid++; // global body index
 		this.material = this.pool.material; // expose to outside
-		
+
 		this.scale.setScalar( scale );
 
-        // Register this body in the global quaternion data array
-		
+		// Register this body in the global quaternion data array
+
 		setQuaternionCapacity( Math.max( uid+1, config.men+config.women+config.children, config.population ) );
 		setJointQuaternion( this.uid, QUAT_DATA_INDEX, bodyTypeIndex, 0, 0, 0 );
 
@@ -1250,15 +1247,19 @@ class Body extends Object3D {
 
 		this.eulers = [];
 
-        // Create Euler-quaternions for joints
-		
+		// Create Euler-quaternions for joints
+
+		console.log('----');
 		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
 			this.eulers.push( new EulerDegrees( this, i, JOINTS[ i ].parentIndex, JOINTS[ i ].signs ) );
 
 			this[ JOINTS[ i ].name ] = this.eulers[ i ];
 
+			console.log( i,'->',JOINTS[ i ].parentIndex );
+		
 		}
+		console.log('----');
 
 		everybody.push( this );
 
@@ -1266,7 +1267,7 @@ class Body extends Object3D {
 
 
 
-    /**
+	/**
      * Update the body's transform and all joint quaternions.
      * Also updates any objects attached to joints.
      */
@@ -1276,28 +1277,28 @@ class Body extends Object3D {
 		this.pool.setMatrixAt( this.pid, this.matrix );
 		this.pool.instanceMatrix.needsUpdate = true;
 
-        // Push joint quaternions to shared data buffer
-		
+		// Push joint quaternions to shared data buffer
+
 		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
 			setJointQuaternion( this.uid, i, ...this.eulers[ i ].q );
 
 		}
 
-        // Update attached objects (forward kinematics) - scan all joints
-		
+		// Update attached objects (forward kinematics) - scan all joints
+
 		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
 			var _euler = this.eulers[ i ];
 
 			// Process one by one attached objects to specific joint
-			
+
 			for ( var object of _euler.attached ) {
 
 				var euler = _euler;
 
 				// Apply this joint transformation
-				
+
 				pivot.set( ...pivots.array[ euler.index+this.quaternionOffset ]);
 
 				_p.copy( object.initialPosition );
@@ -1307,7 +1308,7 @@ class Body extends Object3D {
 
 
 				// Scan all parents and apply their transformation too
-				
+
 				scan: while ( euler ) {
 
 					pivot.set( ...pivots.array[ euler.index+this.quaternionOffset ]);
@@ -1321,13 +1322,13 @@ class Body extends Object3D {
 
 				}
 
-				// Apply position and scale 
-				
+				// Apply position and scale
+
 				_p.multiply( this.scale );
 				_p.add( this.position );
 
 				// Update the attached object
-				
+
 				object.position.copy( _p );
 				object.quaternion.copy( _q );
 				object.updateMatrix();
@@ -1340,7 +1341,7 @@ class Body extends Object3D {
 
 
 
-    /**
+	/**
      * Get current posture as a serializable object (angles in degrees)
      */
 	get posture() {
@@ -1356,7 +1357,7 @@ class Body extends Object3D {
 
 
 
-    /**
+	/**
      * Get current posture as a compact JSON string
      */
 	get postureString() {
@@ -1367,7 +1368,7 @@ class Body extends Object3D {
 
 
 
-    /**
+	/**
      * Set posture from saved data
      */
 	set posture( data ) {
@@ -1386,7 +1387,7 @@ class Body extends Object3D {
 	}
 
 
-    /**
+	/**
      * Linearly interpolate between `postureA` and `postureB` with factor `k`
      */
 	blend( postureA, postureB, k ) {
@@ -1430,15 +1431,15 @@ var pools = { man: null, woman: null, child: null };
 function preparePool( name, initialCount ) {
 
 	// Pool initial creation
-	
+
 	if ( pools[ name ] == null ) {
 
 		pools[ name ] = new Pool( name, initialCount );
 
 	}
 
-    // Pool growth logic
-	
+	// Pool growth logic
+
 	if ( pools[ name ].isFull() ) {
 
 
@@ -1446,17 +1447,17 @@ function preparePool( name, initialCount ) {
 
 		var oldPool = pools[ name ];
 		var newPool = new Pool( name, 2*oldPool.count );
-		
+
 		oldPool.addToScene = false;
 		oldPool.removeFromParent();
-		
-        // Reassign bodies to new pool
-		
+
+		// Reassign bodies to new pool
+
 		for ( var body of everybody )
 			if ( body.pool == oldPool ) body.pool = newPool;
-		
+
 		// Move attached objects
-		
+
 		if ( oldPool.children.length>0 )
 			newPool.add( ...oldPool.children );
 
@@ -1465,7 +1466,7 @@ function preparePool( name, initialCount ) {
 		newPool.count = oldPool.count;
 
 		// Transfer instance matrices and array of unique IDs
-		
+
 		newPool.instanceMatrix.array.set( oldPool.instanceMatrix.array );
 		newPool.uidsArray.set( oldPool.uidsArray );
 
@@ -1615,7 +1616,7 @@ var renderer, camera, light, cameraLight, controls, ground, userAnimationLoop, s
  *  - women		- Suggested number of women figures
  *  - children	- Suggested number of children figures
  *  - population- Total number of figures (may differ from men+women+children)
- *  - smooth	- Render figures with smoother serface (default is true)
+ *  - smooth	- Render figures with smoother surface (default is true)
  *  - lowpoly	- Reduce figure complexity (default is 0, no reduction)
  */
 class World {
@@ -1968,4 +1969,4 @@ function random( min, max ) {
 
 }
 
-export { Child, Man, Woman, World, camera, cameraLight, chaotic, controls, disfigureBody, disfigureMatrix, disfigureNormal, disfigurePosition, everybody, gradientArm, gradientLeg, gradientX, gradientXT, gradientY, gradientYT, ground, light, pools, random, regular, renderer, scene, setAnimationLoop };
+export { Child, Man, Woman, World, camera, cameraLight, chaotic, controls, disfigureBody, disfigureMatrix, disfigureNormal, disfigurePosition, everybody, gradientArm, gradientLeg, gradientX, gradientXT, gradientY, gradientYT, ground, light, pools, q, random, regular, renderer, scene, setAnimationLoop };
