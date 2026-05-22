@@ -115,7 +115,7 @@ class EulerDegrees extends Euler {
 		this.signs = signs; // directions of angles
 
 		this.quaternion = new Quaternion();
-		this.needsUpdate = true; // the quaternion must be recomputer
+		this.needsUpdate = true; // the quaternion must be recomputed
 
 		this.attached = []; // external objects attached to this joint
 
@@ -211,6 +211,7 @@ class EulerDegrees extends Euler {
 	attach( object ) {
 
 		object.initialPosition = object.position.clone();
+		object.initialQuaternion = object.quaternion.clone();
 		object.matrixAutoUpdate = false;
 
 		this.attached.push( object );
@@ -313,7 +314,7 @@ class Body extends Object3D {
 				_p.copy( object.initialPosition );
 				_p.add( pivot );
 
-				_q.identity();
+				_q.copy( object.initialQuaternion );
 
 
 				// Scan all parents and apply their transformation too

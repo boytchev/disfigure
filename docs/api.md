@@ -88,6 +88,11 @@ Numeric property. Gets or sets the rotation angle in degrees around the Y
 Numeric property. Gets or sets the rotation angle in degrees around the Z
 "chest" axis.
 
+### figure.bodypart.**attach**(*object*)
+
+Method. Attaches 3D *object* to a body part. Object's position and
+orientation are relative to the body part.
+
 
 
 ## Functions

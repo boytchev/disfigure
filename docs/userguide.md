@@ -9,7 +9,7 @@
 
 
 
-[**Figures**](#figures) <small>([creating](#creating-a-figure) &middot; [anatomy](#anatomy-of-a-figure) &middot; [posture](#figure-posture))</small> [**Motions**](#motions) <small>([figure](#figure-motion) &middot; [animation](#figure-animation)  &middot; [generators](#number-generators) )</small> [**Using**](#using-disfigure) <small>([world](#world))</small>
+[**Figures**](#figures) <small>([creating](#creating-a-figure) &middot; [anatomy](#anatomy-of-a-figure) &middot; [posture](#figure-posture) &middot; [accessories](#figure-accessories))</small> [**Motions**](#motions) <small>([figure](#figure-motion) &middot; [animation](#figure-animation)  &middot; [generators](#number-generators) )</small> [**Using**](#using-disfigure) <small>([world](#provisional-world))</small>
 
 
 
@@ -92,6 +92,23 @@ Live examples: [posture data](../examples/figure-posture.html) and [posture blen
 
 [<img src="../examples/snapshots/figure-posture.jpg" width="48%" border="1">](../examples/figure-posture.html) 
 [<img src="../examples/snapshots/figure-blend.jpg" width="48%" border="1">](../examples/figure-blend.html) 
+
+
+
+## Figure accessories
+
+Accessories are Three.js objects attached to a specific body part. They do not
+deform, but move as if attached to the body. The accessory own *position* and
+*rotation* properties are in respect to the origin of the hosting body part.
+
+``` javascript
+figure.l_arm.attach(object);
+```
+
+Live examples: [attach one accessory](../examples/figure-accessory.html) and [many acccessories](../examples/figure-accessor.html):
+
+[<img src="../examples/snapshots/figure-accessories.jpg" width="48%" border="1">](../examples/figure-accessories.html) 
+[<img src="../examples/snapshots/figure-accessories.jpg" width="48%" border="1">](../examples/figure-accessories.html) 
 
 
 

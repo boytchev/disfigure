@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Attaching an accessory to the body</h3></br>
+	</header>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Three from 'three';
+		import * as Happy from 'disfigure';
+
+
+		// create a default world
+
+		new Happy.World( );
+		Happy.controls.autoRotate = true;
+		Happy.controls.target.y = 0.8;
+
+
+		// create a man
+		
+		var man = new Happy.Man( );
+
+		// overall body position
+
+		man.position.y = -0.25;
+
+		// torso and head
+		man.torso.x = 8;
+		
+		man.head.x = -5;
+		man.head.y = -60;
+		man.head.z = -8;
+		
+		man.chest.x = 0;
+		man.chest.y = -34;
+		man.chest.z = 0;
+		
+		man.waist.x = -5;
+		man.waist.y = 4;
+		man.waist.z = -6;
+
+		// left leg
+
+		man.l_leg.x = 0;
+		man.l_leg.z = 25;
+		
+		man.l_knee.x = 50;
+		
+		man.l_shin.y = -4;
+		
+		man.l_ankle.x = -32;
+		man.l_ankle.z = -23;
+		
+		man.l_foot.x = -20;
+
+		// right leg
+
+		man.r_leg.x = 50;
+		man.r_leg.z = 50;
+		
+		man.r_thigh.y = 40;
+		
+		man.r_knee.x = 88;
+		
+		man.r_shin.y = 6;
+		
+		man.r_ankle.x = -22;
+		man.r_ankle.z = 0;
+
+		// left arm
+
+		man.l_arm.x = 7;
+		man.l_arm.y = 7;
+		man.l_arm.z = 0;
+		
+		man.l_elbow.y = 140;
+		
+		man.l_wrist.z = 25;
+
+		// right arm
+
+		man.r_arm.x = -12;
+		man.r_arm.y = -5;
+		man.r_arm.z = -20;
+		
+		man.r_elbow.y = 50;
+		
+		man.r_forearm.x = 90;
+		
+		man.r_wrist.z = 15;
+
+		man.r_index.z = man.r_ring.z = man.r_pinky.z = 90;
+		man.r_middle.z = 90;
+		
+		man.r_index_mid.z = man.r_ring_mid.z = man.r_pinky_mid.z = 90;
+		man.r_middle_mid.z = 80;
+		
+		man.r_index_tip.z = 90;
+		man.r_middle_tip.z = 60
+		man.r_ring_tip.z = 50;
+		man.r_pinky_tip.z = 80;
+		
+		man.r_thumb.x = 50;
+		man.r_thumb.z = 20;
+		man.r_thumb_tip.y = 60;
+		
+		// stick
+
+		var geometry = new Three.CylinderGeometry( 0.01, 0.01, 2 ),
+			material = new Three.MeshStandardMaterial( { color: 'crimson' } ),
+			stick = new Three.Mesh( geometry, material );
+
+		stick.rotation.set( 1.5, 0, 0.1 );
+		stick.position.set( -0.08, -0.03, 0 );
+		stick.castShadow = true;
+
+		man.r_wrist.attach( stick );
+
+		Happy.setAnimationLoop( (t)=>{
+		
+			man.head.x = -5 + Happy.chaotic(t/5000,0,-13,13);
+			man.head.y = -60 + Happy.chaotic(t/5000,1,-13,13);
+			man.chest.y = -34 + Happy.chaotic(t/5000,2,-13,13);;
+			man.waist.y = 4 + Happy.chaotic(t/5000,3,-13,13);;
+
+			man.r_forearm.x = Happy.regular( t/1000+Happy.regular(t/500,-1,1),-30,90);
+			
+		});
+		
+	</script>
+</body>
+</html>
