@@ -21,6 +21,7 @@ A library to rig 3D models.
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-position.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/figure-position.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-posture.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/figure-posture.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-type.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/figure-type.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/minimal-cdn.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/minimal-cdn.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-arms.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/motion-arms.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-axes.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/motion-axes.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-event.jpg" width="23%">](https://boytchev.github.io/disfigure/examples/motion-event.html)

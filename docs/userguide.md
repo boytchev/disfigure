@@ -390,45 +390,48 @@ The main disadvantages of using a CDN are:
 * internet access to the CDN is required at program startup
 * pointers to three.js and disfigure.js must be defined as importmaps
 
-<!--
-A somewhat minimal program that uses mannequin.js from this CDN is shown
-in this [see it](example-minimal-cdn.html). If the file is downloaded, it
-could be run locally without any additional installation. The importmaps in the
-example point to specific release of Three.js and to the latest version of mannequin.js.
+A minimal program that uses Disfigure.js from a CDN needs to define 4 import
+maps: `three`, `three/webgpu`, `three/tsl` and `three/addons`. Preferably
+`disfigure` could also be defined.
+
 
 ```html
 <!DOCTYPE html>
 
-<html>
+<script type="importmap">
+	{
+		"imports": {
+			"three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.min.js",
+			"three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.min.js",
+			"three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.min.js",
+			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/",
+			"disfigure": "https://cdn.jsdelivr.net/gh/boytchev/disfigure@main/dist/disfigure.min.js"
+		}
+	}
+</script>
 
-<head>
-   <script type="importmap">
-   {
-      "imports": {
-         "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
-         "mannequin": "https://cdn.jsdelivr.net/npm/mannequin-js@latest/src/mannequin.js"
-      }
-   }
-   </script>
-</head>
+<script type="module">
 
-<body>
-   <script type="module">
-      import { createStage, Male } from "mannequin";
-      createStage( );
-      new Male();
-   </script>
-</body>
-</html>
+	import {World, Man} from 'disfigure';
+
+	new World;
+	new Man;
+
+</script>
 ```
 
-Note that many of the examples in this document use the script `importmap.js`
+
+
+Live examples: [minimal CDN](../examples/minima-cdn.html) and [???](../examples/???.html):
+
+[<img src="../examples/snapshots/minimal-cdn.jpg" width="48%">](../examples/world-default.html)
+[<img src="../examples/snapshots/???.jpg" width="48%">](../examples/???.html)
+
+
+Note: many of the examples in this document use the script `importmap.js`
 to generate the import maps and inject them in the page. This is done solely
 for maintaining shorter code and to easily switch to other versions of either
-Three.js or mannequin.js.
--->
-
+Three.js or Disfigure.js.
 
 
 
