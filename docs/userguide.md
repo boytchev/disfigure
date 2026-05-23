@@ -357,22 +357,6 @@ Live examples: [variation of default world](../examples/world-custom.html) and [
 
 ## Using with CDN
 
-The **mannequin.js** library is provided as a set of JavaScript modules. It is
-intended to be used from a CDN. Most likely the library can be installed via
-`npm`, however this is not tested so far.
-
-The library uses Three.js and expects the following import maps to be defined:
-
-* `three`: pointer to the Three.js built called `three.module.js` 
-* `three/addons/`: pointer to the path of Three.js addons
-* `mannequin`: pointer to the main library file called `mannequin.js`
-
-The following subsections demonstrate some possible configuration scenarios of
-using mannequin.js.
-
-
-### Running from a CDN
-
 [Content Delivery Network (CDN)](https://en.wikipedia.org/wiki/Content_delivery_network). 
 serves as a host of the library files. At the time of writing this document
 it is recommended to use [jsDelivr](https://cdn.jsdelivr.net) as CDN. Other
