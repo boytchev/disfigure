@@ -9,7 +9,7 @@
 
 
 
-[**Figures**](#figures) <small>([creating](#creating-a-figure) &middot; [anatomy](#anatomy-of-a-figure) &middot; [posture](#figure-posture) &middot; [accessories](#figure-accessories))</small> [**Motions**](#motions) <small>([figure](#figure-motion) &middot; [animation](#figure-animation)  &middot; [generators](#number-generators) )</small> [**Using**](#using-disfigure) <small>([world](#provisional-world) &middot; [CDN](#using-with-cdn))</small>
+[**Figures**](#figures) <small>([creating](#creating-a-figure) &middot; [anatomy](#anatomy-of-a-figure) &middot; [posture](#figure-posture) &middot; [accessories](#figure-accessories))</small> [**Motions**](#motions) <small>([figure](#figure-motion) &middot; [animation](#figure-animation)  &middot; [generators](#number-generators) )</small> [**Using**](#using-disfigure) <small>([world](#provisional-world) &middot; [CDN](#using-with-cdn) &middot; [local](#using-with-local-web-server) &middot; [nodes](#using-with-nodesjs))</small>
 
 
 
@@ -365,7 +365,7 @@ CDNs are also available.
 The main advantages of using a CDN are:
 
 * there is no need to install disfigure.js
-* there is no need to install nodes.js or another JS module manager
+* there is no need to install node.js or another JS module manager
 * there is no need to install a local web server
 * a user file can be directly run in a browser
 
@@ -404,18 +404,60 @@ maps: `three`, `three/webgpu`, `three/tsl` and `three/addons`. Preferably
 </script>
 ```
 
-
-
-Live examples: [minimal CDN](../examples/minima-cdn.html) and [???](../examples/???.html):
+Live example: [minimal CDN](../examples/minima-cdn.html):
 
 [<img src="../examples/snapshots/minimal-cdn.jpg" width="48%">](../examples/world-default.html)
-[<img src="../examples/snapshots/???.jpg" width="48%">](../examples/???.html)
 
 
 Note: many of the examples in this document use the script `importmap.js`
 to generate the import maps and inject them in the page. This is done solely
 for maintaining shorter code and to easily switch to other versions of either
 Three.js or Disfigure.js.
+
+
+## Using with local web server
+
+A local web server could provide files just as CDN. The only change is the 
+importmap &ndash; it should point the local files. Note that all files must
+be accessed via `https`. 
+
+The main advantages of using only local files are:
+
+* no internet access is required
+* no need to install node.js or another JS module manager
+* protection from a breaking change in the online libraries
+* a user file can be directly run in a browser
+* user code can use modules and can be split in several files
+
+The main disadvantages of using only local files are:
+
+* disfigure.js and used three.js files must be downloaded
+* a local web server must be installed
+* pointers to local three.js and disfigure.js must be still defined as importmaps
+
+
+
+## Using with node.js
+
+The library is provided as a NPM package. If node.js is installed on the user
+machine, it should be possible to install disfigure.js and use it directly.
+
+The main advantages of using node.js:
+
+* no internet access is required once the package installation is done
+* no need to use import maps (the whole importmaps section can be omitted)
+* protection from a breaking change in the online libraries
+
+The main disadvantages of using using node.js:
+
+* node.js, three.js and disfigure.js must be installed
+
+Note: This approach is not tested. If you find that it is not working and you
+know how to fix it, please get in touch.
+
+
+
+
 
 
 
