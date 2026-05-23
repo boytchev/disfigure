@@ -26,8 +26,7 @@ var disfigureMatrix = Fn( ([ mat, k ])=>{
 
 	var newMat = mat.toVar();
 
-//	If( k.greaterThan( 0 ).and(k.lessThan( 1 )), () => {
-	If( k.greaterThan( 0 ), () => {
+	If( k.greaterThan( 0 ).and(k.lessThan( 1 )), () => {
 
 		newMat.addAssign( 1 );
 
@@ -78,7 +77,7 @@ var disfigureBodySelect = Fn( ([ ])=>{
 		Loop( { start: start, end: end }, ( { i } ) => disY( i ) );
 
 		// leg
-		disP( end, gradientLeg( p, ranges.element( end ), extras.element( leg ).xy ) );
+		//disP( end, gradientLeg( p, ranges.element( end ), extras.element( leg ).xy ) );
 
 	} ).Else( ()=>{
 
@@ -110,14 +109,15 @@ var disfigureBodySelect = Fn( ([ ])=>{
 
 		// arm
 		disP( end, gradientArm( p, pivots.element( end ), ranges.element( end ) ) );
-
 	} );
+
 
 
 
 	//	process torso
 
-	Loop( { end: int( 4 ) }, ( { i } ) => disY( i ) );
+	//Loop( { end: int( 4 ) }, ( { i } ) => disY( i ) );
+	Loop( { end: int( 3 ) }, ( { i } ) => disY( i ) );
 
 
 
@@ -127,13 +127,13 @@ var disfigureBodySelect = Fn( ([ ])=>{
 
 	var col = vec3( 0 ).toVar();
 	
-	If( m.equal(1), ()=>{col.assign(vec3(1,0,0));} );
-	If( m.equal(2), ()=>{col.assign(vec3(0,1,0));} );
-	If( m.equal(3), ()=>{col.assign(vec3(0,0,1));} );
-	If( m.equal(4), ()=>{col.assign(vec3(1,1,0));} );
-	If( m.equal(5), ()=>{col.assign(vec3(1,0,1));} );
-	If( m.equal(6), ()=>{col.assign(vec3(0,1,1));} );
-	If( m.equal(7), ()=>{col.assign(vec3(1,1,1));} );
+	If( m.equal(1), ()=>{col.assign(vec3(1/2,1/2,1/2));} ); //red
+	If( m.equal(2), ()=>{col.assign(vec3(0,1,0));} ); //green
+	If( m.equal(3), ()=>{col.assign(vec3(0,0,1));} ); //blue
+	If( m.equal(4), ()=>{col.assign(vec3(1,1,0));} ); //yellow
+	If( m.equal(5), ()=>{col.assign(vec3(1,0,0));} ); //white
+	If( m.equal(6), ()=>{col.assign(vec3(1,0,1));} ); //violet
+	If( m.equal(7), ()=>{col.assign(vec3(0,1,1));} ); //cyan
 
 	return col;
 
@@ -149,11 +149,14 @@ var disfigureBodySelect = Fn( ([ ])=>{
 
 		var man = new Man( );
 		man.position.x = -0.75;
+		for(var e of man.eulers) e.set(0,0,0);
 		
 		var woman = new Woman( );
 		woman.position.x = 0.75;
+		for(var e of woman.eulers) e.set(0,0,0);
 
 		var child = new Child( );
+		for(var e of child.eulers) e.set(0,0,0);
 		
 man.material.colorNode = disfigureBodySelect();
 woman.material.colorNode = disfigureBodySelect();

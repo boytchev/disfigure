@@ -14,7 +14,7 @@
 	<script type="module">
 
 		import * as Three from 'three';
-		import {positionGeometry} from 'three/tsl';
+		import { positionWorld, vec4 } from 'three/tsl';
 		import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 		import * as Happy from 'disfigure';
@@ -23,7 +23,7 @@
 
 		// create a custom world
 
-		var renderer = new Three.WebGPURenderer( { antialias: true } );
+		var renderer = new Three.WebGPURenderer( { antialias: true,  premultipliedAlpha: true } );
 		renderer.setSize( innerWidth, innerHeight );
 		renderer.setAnimationLoop( animationLoop );
 
@@ -54,31 +54,25 @@
 
 		} );
 
-		var platform = new Three.Mesh(
-			new Three.BoxGeometry( 0.5, 0.1, 0.5 ),
-			new Three.MeshStandardMaterial( {color: 'white'} )
-		);
-		platform.position.y = 0.5;
-//		scene.add( platform );
 		
-		// create a man
+		// create men
 
 		var man1 = new Happy.Man( );
 		var man2 = new Happy.Man( );
 		var man3 = new Happy.Man( );
+		var man4 = new Happy.Man( );
 
-		scene.add( man1.pool, man2.pool, man3.pool );
-		
-		man1.material.blending = Three.MultiplicativeBlending;
-		man1.material.transparent = true;
-		man1.material.opacityNode = positionGeometry.y.smoothstep(1,1.5);
-		
+		scene.add( man4.pool );
+
+		man4.material.transparent = true;
+		man4.material.opacityNode = positionWorld.y.smoothstep(0.4,0.8);
+
 		// animate the scene
 		
 		function animationLoop( t ) {
 
 			t=t/4000;
-		
+
 			Happy.everybody.forEach( ( p )=>{
 				p.position.y = -0.5;
 				randomPosture( p, t, p.id );

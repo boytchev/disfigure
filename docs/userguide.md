@@ -9,7 +9,7 @@
 
 
 
-[**Figures**](#figures) <small>([creating](#creating-a-figure) &middot; [anatomy](#anatomy-of-a-figure) &middot; [posture](#figure-posture) &middot; [accessories](#figure-accessories))</small> [**Motions**](#motions) <small>([figure](#figure-motion) &middot; [animation](#figure-animation)  &middot; [generators](#number-generators) )</small> [**Using**](#using-disfigure) <small>([world](#provisional-world))</small>
+[**Figures**](#figures) <small>([creating](#creating-a-figure) &middot; [anatomy](#anatomy-of-a-figure) &middot; [posture](#figure-posture) &middot; [accessories](#figure-accessories))</small> [**Motions**](#motions) <small>([figure](#figure-motion) &middot; [animation](#figure-animation)  &middot; [generators](#number-generators) )</small> [**Using**](#using-disfigure) <small>([world](#provisional-world) &middot; [CDN](#using-with-cdn))</small>
 
 
 
@@ -107,7 +107,7 @@ figure.l_arm.attach(object);
 
 Live examples: [attach one accessory](../examples/figure-accessory.html) and [many acccessories](../examples/figure-accessor.html):
 
-[<img src="../examples/snapshots/figure-accessories.jpg" width="48%" border="1">](../examples/figure-accessories.html) 
+[<img src="../examples/snapshots/figure-accessory.jpg" width="48%" border="1">](../examples/figure-accessory.html) 
 [<img src="../examples/snapshots/figure-accessories.jpg" width="48%" border="1">](../examples/figure-accessories.html) 
 
 
@@ -353,6 +353,81 @@ Live examples: [variation of default world](../examples/world-custom.html) and [
 
 [<img src="../examples/snapshots/world-default.jpg" width="48%">](../examples/world-default.html)
 [<img src="../examples/snapshots/world-custom.jpg" width="48%">](../examples/world-custom.html)
+
+
+## Using with CDN
+
+The **mannequin.js** library is provided as a set of JavaScript modules. It is
+intended to be used from a CDN. Most likely the library can be installed via
+`npm`, however this is not tested so far.
+
+The library uses Three.js and expects the following import maps to be defined:
+
+* `three`: pointer to the Three.js built called `three.module.js` 
+* `three/addons/`: pointer to the path of Three.js addons
+* `mannequin`: pointer to the main library file called `mannequin.js`
+
+The following subsections demonstrate some possible configuration scenarios of
+using mannequin.js.
+
+
+### Running from a CDN
+
+[Content Delivery Network (CDN)](https://en.wikipedia.org/wiki/Content_delivery_network). 
+serves as a host of the library files. At the time of writing this document
+it is recommended to use [jsDelivr](https://cdn.jsdelivr.net) as CDN. Other
+CDNs are also available.
+
+The main advantages of using a CDN are:
+
+* there is no need to install disfigure.js
+* there is no need to install nodes.js or another JS module manager
+* there is no need to install a local web server
+* a user file can be directly run in a browser
+
+The main disadvantages of using a CDN are:
+
+* internet access to the CDN is required at program startup
+* pointers to three.js and disfigure.js must be defined as importmaps
+
+<!--
+A somewhat minimal program that uses mannequin.js from this CDN is shown
+in this [see it](example-minimal-cdn.html). If the file is downloaded, it
+could be run locally without any additional installation. The importmaps in the
+example point to specific release of Three.js and to the latest version of mannequin.js.
+
+```html
+<!DOCTYPE html>
+
+<html>
+
+<head>
+   <script type="importmap">
+   {
+      "imports": {
+         "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+         "mannequin": "https://cdn.jsdelivr.net/npm/mannequin-js@latest/src/mannequin.js"
+      }
+   }
+   </script>
+</head>
+
+<body>
+   <script type="module">
+      import { createStage, Male } from "mannequin";
+      createStage( );
+      new Male();
+   </script>
+</body>
+</html>
+```
+
+Note that many of the examples in this document use the script `importmap.js`
+to generate the import maps and inject them in the page. This is done solely
+for maintaining shorter code and to easily switch to other versions of either
+Three.js or mannequin.js.
+-->
 
 
 

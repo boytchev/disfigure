@@ -9,22 +9,6 @@ Apart for moving body parts, Disfigure provides basic functionality
 for additional modification of a figure &ndash; adding accessories
 or changing colors.
 
-
-## Accessories
-
-### figure.bodypart.**attach**( *accessory*, *x*, *y*, *z* )<br>figure.bodypart.**attach**( *accessory* )
-
-Accessories are Three.js objects attached to a specific body part.
-They do not deform, but move as if attached to the body. The position
-of *accessory* is defined by the optional parameters *x*, *y* and *z*.
-The position is in respect to the origin point of the body part &ndash;
-[see it](../examples/extras-attach.html). Alternatively, the position
-of an accessory could be set via its Three.js `position` property.
-
-``` javascript
-figure.l_arm.attach(spike);
-```
-
 ### figure.bodypart.**point**( *x*, *y*, *z* )
 
 When just the final coordinates are needed it is faster to use `point`,
@@ -233,75 +217,6 @@ figure.material.colorNode = TSLTexture.camouflage ( {
 [<img src="../examples/snapshots/extras-tsl-texture.jpg" width="48%">](../examples/extras-tsl-texture.html)
 		
 # Using mannequin.js
-
-The **mannequin.js** library is provided as a set of JavaScript modules. It is
-intended to be used from a CDN. Most likely the library can be installed via
-`npm`, however this is not tested so far.
-
-The library uses Three.js and expects the following import maps to be defined:
-
-* `three`: pointer to the Three.js built called `three.module.js` 
-* `three/addons/`: pointer to the path of Three.js addons
-* `mannequin`: pointer to the main library file called `mannequin.js`
-
-The following subsections demonstrate some possible configuration scenarios of
-using mannequin.js.
-
-
-### Running from a CDN
-
-CDN stands for [Content Delivery Network](https://en.wikipedia.org/wiki/Content_delivery_network). 
-Within mannnequin.js a CDN serves as a host of the library files. At the time of
-writing this document it is recommended to use [jsDelivr](https://cdn.jsdelivr.net)
-as CDN. Other CDNs are also available.
-
-The main advantages of using a CDN are:
-* there is no need to install mannequin.js
-* there is no need to install nodes.js or another JS module manager
-* there is no need to install a local web server
-* a user file can be directly run in a browser
-
-The main disadvantages of using a CDN are:
-* internet access to the CDN is reuqired at program startup
-* pointers to Three.js and mannequin.js must be defined as importmaps
-
-A somewhat minimal program that uses mannequin.js from this CDN is shown
-in this [see it](example-minimal-cdn.html). If the file is downloaded, it
-could be run locally without any additional installation. The importmaps in the
-example point to specific release of Three.js and to the latest version of mannequin.js.
-
-```html
-<!DOCTYPE html>
-
-<html>
-
-<head>
-   <script type="importmap">
-   {
-      "imports": {
-         "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
-         "mannequin": "https://cdn.jsdelivr.net/npm/mannequin-js@latest/src/mannequin.js"
-      }
-   }
-   </script>
-</head>
-
-<body>
-   <script type="module">
-      import { createStage, Male } from "mannequin";
-      createStage( );
-      new Male();
-   </script>
-</body>
-</html>
-```
-
-Note that many of the examples in this document use the script `importmap.js`
-to generate the import maps and inject them in the page. This is done solely
-for maintaining shorter code and to easily switch to other versions of either
-Three.js or mannequin.js.
-
 
 ### Running via a local web server
 

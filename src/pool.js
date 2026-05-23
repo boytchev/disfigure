@@ -16,7 +16,7 @@
  * Public API:
  *
  * scene		- default Three.js scene
- * setRenderer	- replaces the default renderer
+ * setSene		- initializes the default scene
  * Pool			- class for instances of figures of given type and number
  *
  *   .material	 - node material for all figures in the pool
@@ -39,7 +39,7 @@
 
 
 import { vertexStage } from 'three/tsl';
-import { InstancedBufferAttribute, InstancedMesh, MeshStandardNodeMaterial, Scene } from 'three';
+import { InstancedBufferAttribute, InstancedMesh, MeshStandardNodeMaterial, PlaneGeometry, Scene } from 'three';
 import { disfigureNormal, disfigurePosition } from './tsl.js';
 import { config, loadGLTF } from './assets.js';
 
@@ -48,8 +48,14 @@ import { config, loadGLTF } from './assets.js';
 /**
  * Default scene if the user does not use own scene.
  */
-var scene = new Scene();
-var renderer;
+var scene;
+
+
+
+/**
+ * Geometry used before the actual geometry is loaded.
+ */
+var dummyGeometry = new PlaneGeometry().translate( 0, 1E10, 0 );
 
 
 
@@ -75,7 +81,7 @@ class Pool extends InstancedMesh {
 
 		// Initialize empty InstancedMesh
 
-		super( null, material, count );
+		super( dummyGeometry, material, count );
 
 		this.count = 0; // Current number of active instances
 
@@ -128,7 +134,7 @@ class Pool extends InstancedMesh {
 			if ( this.addToScene ) {
 
 				this.onLoad();
-				if( renderer ) scene.add( this );
+				if ( scene ) scene.add( this );
 
 			}
 
@@ -198,14 +204,14 @@ class Pool extends InstancedMesh {
 
 
 /**
- * Replaces the default renderer with custom renderer
+ * Set the provisional scene for World
  */
-function setRenderer( newRenderer ) {
+function setScene( ) {
 
-	renderer = newRenderer;
+	scene = new Scene();
 
 }
 
 
 
-export { Pool, scene, renderer, setRenderer };
+export { Pool, scene, setScene };

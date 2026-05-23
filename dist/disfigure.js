@@ -1,7 +1,7 @@
 // disfigure v0.0.25
 
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
-import { Vector3, Vector4, TextureNode, DataTexture, RGBAFormat, FloatType, Scene, InstancedMesh, MeshStandardNodeMaterial, InstancedBufferAttribute, Quaternion, Object3D, MathUtils, Euler, WebGPURenderer, PCFSoftShadowMap, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture } from 'three';
+import { Vector3, Vector4, TextureNode, DataTexture, RGBAFormat, FloatType, PlaneGeometry, Scene, InstancedMesh, MeshStandardNodeMaterial, InstancedBufferAttribute, Quaternion, Object3D, MathUtils, Euler, WebGPURenderer, PCFSoftShadowMap, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture } from 'three';
 import { uniformArray, Fn, vec4, If, select, ivec2, mat3, positionGeometry, normalGeometry, vec3, attribute, int, step, Loop, transformNormalToView, vertexStage } from 'three/tsl';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
@@ -824,8 +824,9 @@ var disfigureNormal = disfigureBody.element( 1 ); // normal node
  *
  * Public API:
  *
- * scene	- default Three.js scene
- * Pool		- class for instances of figures of given type and number
+ * scene		- default Three.js scene
+ * setSene		- initializes the default scene
+ * Pool			- class for instances of figures of given type and number
  *
  *   .material	 - node material for all figures in the pool
  *   .count		 - current number of active figures
@@ -850,7 +851,14 @@ var disfigureNormal = disfigureBody.element( 1 ); // normal node
 /**
  * Default scene if the user does not use own scene.
  */
-var scene = new Scene();
+var scene;
+
+
+
+/**
+ * Geometry used before the actual geometry is loaded.
+ */
+var dummyGeometry = new PlaneGeometry().translate(0,1E10,0);
 
 
 
@@ -876,7 +884,7 @@ class Pool extends InstancedMesh {
 
 		// Initialize empty InstancedMesh
 
-		super( null, material, count );
+		super( dummyGeometry, material, count );
 
 		this.count = 0; // Current number of active instances
 
@@ -929,7 +937,7 @@ class Pool extends InstancedMesh {
 			if ( this.addToScene ) {
 
 				this.onLoad();
-				scene.add( this );
+				if( scene ) scene.add( this );
 
 			}
 
@@ -993,6 +1001,17 @@ class Pool extends InstancedMesh {
 		this.geometry.getAttribute( 'uids' ).needsUpdate = true;
 
 	}
+
+}
+
+
+
+/**
+ * Set the provisional scene for World
+ */
+function setScene( ) {
+
+	scene = new Scene();
 
 }
 
@@ -1107,7 +1126,7 @@ class EulerDegrees extends Euler {
 		this.signs = signs; // directions of angles
 
 		this.quaternion = new Quaternion();
-		this.needsUpdate = true; // the quaternion must be recomputer
+		this.needsUpdate = true; // the quaternion must be recomputed
 
 		this.attached = []; // external objects attached to this joint
 
@@ -1203,6 +1222,7 @@ class EulerDegrees extends Euler {
 	attach( object ) {
 
 		object.initialPosition = object.position.clone();
+		object.initialQuaternion = object.quaternion.clone();
 		object.matrixAutoUpdate = false;
 
 		this.attached.push( object );
@@ -1249,17 +1269,13 @@ class Body extends Object3D {
 
 		// Create Euler-quaternions for joints
 
-		console.log('----');
 		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
 			this.eulers.push( new EulerDegrees( this, i, JOINTS[ i ].parentIndex, JOINTS[ i ].signs ) );
 
 			this[ JOINTS[ i ].name ] = this.eulers[ i ];
 
-			console.log( i,'->',JOINTS[ i ].parentIndex );
-		
 		}
-		console.log('----');
 
 		everybody.push( this );
 
@@ -1304,7 +1320,7 @@ class Body extends Object3D {
 				_p.copy( object.initialPosition );
 				_p.add( pivot );
 
-				_q.identity();
+				_q.copy( object.initialQuaternion );
 
 
 				// Scan all parents and apply their transformation too
@@ -1635,7 +1651,7 @@ class World {
 		document.body.style.margin = '0';
 
 		// Scene setup (defined in pool.js)
-
+		setScene( );
 		scene.background = new Color( 'whitesmoke' );
 
 		// Camera setup
