@@ -383,23 +383,23 @@ maps: `three`, `three/webgpu`, `three/tsl` and `three/addons`. Preferably
 <!DOCTYPE html>
 
 <script type="importmap">
-	{
-		"imports": {
-			"three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.min.js",
-			"three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.min.js",
-			"three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.min.js",
-			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/",
-			"disfigure": "https://cdn.jsdelivr.net/gh/boytchev/disfigure@main/dist/disfigure.min.js"
-		}
-	}
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.min.js",
+      "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.min.js",
+      "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.min.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/",
+      "disfigure": "https://cdn.jsdelivr.net/gh/boytchev/disfigure@main/dist/disfigure.min.js"
+    }
+  }
 </script>
 
 <script type="module">
 
-	import {World, Man} from 'disfigure';
+  import {World, Man} from 'disfigure';
 
-	new World;
-	new Man;
+  new World;
+  new Man;
 
 </script>
 ```
