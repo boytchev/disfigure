@@ -9,7 +9,7 @@
 
 
 
-[**Figures**](#figures) <small>([creating](#creating-a-figure) &middot; [anatomy](#anatomy-of-a-figure) &middot; [posture](#figure-posture) &middot; [accessories](#figure-accessories))</small> [**Motions**](#motions) <small>([figure](#figure-motion) &middot; [animation](#figure-animation)  &middot; [generators](#number-generators) )</small> [**Using**](#using-disfigure) <small>([world](#provisional-world) &middot; [CDN](#using-with-cdn) &middot; [local](#using-with-local-web-server) &middot; [nodes](#using-with-nodesjs))</small>
+[**Figures**](#figures) <small>([creating](#creating-a-figure) &middot; [anatomy](#anatomy-of-a-figure) &middot; [posture](#figure-posture) &middot; [accessories](#figure-accessories))</small> [**Motions**](#motions) <small>([figure](#figure-motion) &middot; [animation](#figure-animation)  &middot; [generators](#number-generators) )</small> [**Using**](#using-disfigure) <small>([world](#provisional-world) &middot; [CDN](#using-with-cdn) &middot; [local](#using-with-local-web-server) &middot; [nodes](#using-with-nodejs))</small>
 
 
 
