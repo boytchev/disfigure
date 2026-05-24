@@ -858,7 +858,7 @@ var scene;
 /**
  * Geometry used before the actual geometry is loaded.
  */
-var dummyGeometry = new PlaneGeometry().translate(0,1E10,0);
+var dummyGeometry = new PlaneGeometry().translate( 0, 1E10, 0 );
 
 
 
@@ -937,7 +937,7 @@ class Pool extends InstancedMesh {
 			if ( this.addToScene ) {
 
 				this.onLoad();
-				if( scene ) scene.add( this );
+				if ( scene ) scene.add( this );
 
 			}
 
@@ -1096,6 +1096,13 @@ var toDeg = x => x * 180 / Math.PI,
  * The `uid` of a body is also index in the quaternion data texture.
  */
 var uid = 0;
+
+
+
+/**
+ * Instance pools management - an array of all pools
+ */
+var pools = { man: null, woman: null, child: null };
 
 
 
@@ -1429,13 +1436,6 @@ class Body extends Object3D {
 	}
 
 }
-
-
-
-/**
- * Instance pools management - an array of all pools
- */
-var pools = { man: null, woman: null, child: null };
 
 
 

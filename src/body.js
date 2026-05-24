@@ -89,6 +89,13 @@ var uid = 0;
 
 
 /**
+ * Instance pools management - an array of all pools
+ */
+var pools = { man: null, woman: null, child: null };
+
+
+
+/**
  * Shared temporary variables (to reduce GC pressure)
  */
 var _p = new Vector3(),
@@ -418,13 +425,6 @@ class Body extends Object3D {
 	}
 
 }
-
-
-
-/**
- * Instance pools management - an array of all pools
- */
-var pools = { man: null, woman: null, child: null };
 
 
 

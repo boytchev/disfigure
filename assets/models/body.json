@@ -66,9 +66,7 @@
 		
 		{"name": "r_pinky_tip", "signs": [0, 0, 1], "parent": "r_pinky_mid"},
 		{"name": "r_pinky_mid", "signs": [0, 0, 1], "parent": "r_pinky"},
-		{"name": "r_pinky", "signs": [0, -1, 1], "parent": "r_wrist"},
+		{"name": "r_pinky", "signs": [0, -1, 1], "parent": "r_wrist"}
 		
-		{"name": "pos", "signs": [1, 1, 1], "parent": ""},
-		{"name": "data", "signs": [1, 1, 1], "parent": ""}
 	]
 }

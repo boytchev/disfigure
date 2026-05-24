@@ -3,8 +3,9 @@
 
 
 
-import { array, float, Fn, If, int, Loop, mix, positionGeometry, select, step, uniform, vec3 } from 'three/tsl';
+import { float, Fn, If, int, Loop,  positionGeometry, select, step, uniform, vec3 } from 'three/tsl';
 import { gradientArm, gradientLeg, gradientX, gradientXT, gradientY, gradientYT } from '../tsl.js';
+import { extras, pivots, ranges } from '../assets.js';
 
 
 
@@ -17,36 +18,33 @@ var disfigureSelect = Fn( ([ mat, i, k ])=>{
 
 	var selection = select( int( i.round() ).equal( int( selectUniform.round() ) ), 1, 0 );
 
-	If( k.greaterThan( 0 ), () => {
+	newMat.addAssign( k.mul( selection ) );
 
-		newMat.addAssign( k.mul( selection ) );
-
-	} );
 	return newMat;
 
 }, { return: 'float', mat: 'float', selection: 'float', k: 'float' } );
 
 
 
-var disfigureBodySelect = Fn( ([ figureData ])=>{
+var disfigureBodySelect = Fn( ([ baseIndex ])=>{
 
 
 	// header
 	var p = positionGeometry.toVar( );
 	var m = float( 0 ).toVar();
 
-	var pivots = array( figureData.pivots ).toConst( 'pivots' ),
-		ranges = array( figureData.ranges ).toConst( 'ranges' ),
-		extras = array( figureData.extras ).toConst( 'extras' );
+	//	var pivots = array( figureData.pivots ).toConst( 'pivots' ),
+	//		ranges = array( figureData.ranges ).toConst( 'ranges' ),
+	//		extras = array( figureData.extras ).toConst( 'extras' );
 
 	var isLeft = step( p.x, 0 ).toVar( ),
-		isDown = p.y.lessThan( pivots.element( 2 ).y ), //chest
-		isHand = p.x.abs().greaterThan( pivots.element( 16 ).x ); // wrist
+		isDown = p.y.lessThan( pivots.element( baseIndex.add( 2 ) ).y ), //chest
+		isHand = p.x.abs().greaterThan( pivots.element( baseIndex.add( 16 ) ).x ); // wrist
 
 	var disP = ( i, gradient ) => m.assign( disfigureSelect( m, i, gradient ) ),
-		disY = ( i ) => m.assign( disfigureSelect( m, i, gradientY( p, ranges.element( i ) ) ) ),
-		disX = ( i ) => m.assign( disfigureSelect( m, i, gradientX( p, ranges.element( i ) ) ) ),
-		disT = ( i ) => m.assign( disfigureSelect( m, i, gradientXT( p, ranges.element( i ), 0 ) ) );
+		disY = ( i ) => m.assign( disfigureSelect( m, i, gradientY( p, ranges.element( i.add( baseIndex ) ) ) ) ),
+		disX = ( i ) => m.assign( disfigureSelect( m, i, gradientX( p, ranges.element( i.add( baseIndex ) ) ) ) ),
+		disT = ( i ) => m.assign( disfigureSelect( m, i, gradientXT( p, ranges.element( i.add( baseIndex ) ), 0 ) ) );
 
 	var pick = ( left, right )=>isLeft.mul( right-left ).add( left ).toVar();
 
@@ -104,50 +102,13 @@ var disfigureBodySelect = Fn( ([ figureData ])=>{
 
 	Loop( { end: int( 4 ) }, ( { i } ) => disY( i ) );
 
-
-
 	// recolor depending on selection level
-
-	//m.assign( m.fract() );
 
 	var col = vec3( 0, 0, 0 ).toVar();
 
-	/*
-	If( m.greaterThanEqual( 1 ), ()=>{
-
-		col.assign( vec3( 0.2, 0, 0 ) );
-
-	} )
-		.ElseIf( m.greaterThan( 0.98 ), ()=>{
-
-			col.assign( vec3( 1, -1, -1 ) );
-
-		} )
-		.ElseIf( m.greaterThan( 0.02 ), ()=>{
-
-			col.assign( vec3( 0.1, 0.1, -0.1 ) );
-
-		} )
-
-		.ElseIf( m.lessThanEqual( 0 ), ()=>{
-
-			col.assign( vec3( 0, 0, 0 ) );
-
-		} )
-
-		.Else( ()=>{
-
-			col.assign( vec3( -1, -0.5, 0.5 ) );
-
-		} );
-*/
-
-
-
-	//	if ( select.length != 0 ) {
 
 	const n = 5;
-	var k2 = m.mul( n*Math.PI*2 ).sub( Math.PI/2 ).sin().toVar();
+//	var k2 = m.mul( n*Math.PI*2 ).sub( Math.PI/2 ).sin().toVar();
 
 	var k = m.mul( n ).round().div( n ).toVar();
 
@@ -158,7 +119,7 @@ var disfigureBodySelect = Fn( ([ figureData ])=>{
 	} )
 		.ElseIf( k.greaterThan( 0 ), ()=>{
 
-			col.assign( mix( vec3( -1, -1, 1 ), vec3( 1, -1, -1 ), k ).div( 2 ) );
+			col.assign( vec3( 1, -1, -1 ) );
 
 		} )
 		.Else( ()=>{
@@ -167,11 +128,11 @@ var disfigureBodySelect = Fn( ([ figureData ])=>{
 
 		} );
 
-	If( k2.greaterThan( 0.95 ), ()=>{
+	// If( k2.greaterThan( 0.98 ), ()=>{
 
-		col.assign( vec3( -1 ) );
+	// col.assign( vec3( -1 ) );
 
-	} );
+	// } );
 
 	//}
 

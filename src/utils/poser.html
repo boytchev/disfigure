@@ -36,11 +36,12 @@
 			import * as THREE from 'three';
 			import * as lil from "three/addons/libs/lil-gui.module.min.js";
 			import * as Happy from '../disfigure.js';
-			import {JOINTS} from '../assets.js';
+			import {JOINTS,pivots, ranges, extras} from '../assets.js';
+			import {pools} from '../body.js';
 			
 			import {uniform} from 'three/tsl';
 			
-			import { disfigureBodySelect, selectUniform } from './select.js';
+			import { disfigureBodySelect, selectUniform } from './select-zone.js';
 
 			new Happy.World({ground:false, stats:!true, shadows:!false});
 			Happy.camera.position.set(0,1.6,1);
@@ -51,25 +52,33 @@ var Body = Happy.Man;
 //var Body = Happy.Woman;			
 //var Body = Happy.Child;			
 
+var baseIndex = 0;
+if( Body == Happy.Woman ) baseIndex = 52;
+if( Body == Happy.Child ) baseIndex = 2*52;
+
+/*
 			var frame = new Body();
 			frame.material.color = new THREE.Color('black');
 			frame.material.transparent = true;
-			frame.material.opacity = 0.25;
+			frame.material.opacity = 0.5;
 			frame.material.wireframe = true;
-
-			Body.pool = null;
+*/
+			pools.man = pools.woman = pools.child = null;
 
 			var figure = new Body();
-			figure.material.polygonOffset = true;
+			figure.material.metalness = 0.4;
+			figure.material.roughness = 0.4;
+			/*figure.material.polygonOffset = true;
 			figure.material.polygonOffsetUnits = 1;
 			figure.material.polygonOffsetFactor = 1;
+			*/
 			
 			var axis = new THREE.AxesHelper( );
 			Happy.scene.add( axis );
-	
+
 			function resetPose() {
 				for( var joint of JOINTS ) figure[joint.name].set(0,0,0);
-				for( var joint of JOINTS ) frame[joint.name].set(0,0,0);
+//				for( var joint of JOINTS ) frame[joint.name].set(0,0,0);
 			}
 			
 		var data = {
@@ -126,7 +135,7 @@ var Body = Happy.Man;
 				a.$slider.onclick = ()=>selectJoint( index );
 			}
 			
-			folder = gui.addFolder( 'TORSO' ).close();
+			folder = gui.addFolder( 'TORSO' )//.close();
 			subfolder = folder;
 
 			/*
@@ -282,15 +291,16 @@ var Body = Happy.Man;
 
 			data.joint = jointIndex;
 			selectUniform.value = jointIndex;
+			
 			console.log('>>',jointIndex);
 			
 			if( jointIndex<0 ) {
 				axis.visible = false;
 			} else {
-				data.pivot.copy( figure.pool.data.pivots[jointIndex].value );
-				data.range.copy( figure.pool.data.ranges[jointIndex].value );
+				data.pivot.copy( pivots.array[jointIndex+baseIndex] );
+				data.range.copy( ranges.array[jointIndex+baseIndex] );
 				axis.visible = true;
-				axis.position.copy( figure.pool.data.pivots[jointIndex].value );
+				axis.position.copy( pivots.array[jointIndex+baseIndex] );
 				Happy.controls.target = axis.position;
 				
 			}
@@ -299,23 +309,23 @@ var Body = Happy.Man;
 		}
 				
 		function updatePivot( ) {
-			figure.pool.data.pivots[data.joint].value.set( ...data.pivot );
+			pivots.array[data.joint+baseIndex].set( ...data.pivot );
 			axis.position.set( ...data.pivot );
 		}
 		
 		
 		function updateRange( ) {
-			figure.pool.data.ranges[data.joint].value.set( ...data.range );
+			ranges.array[data.joint+baseIndex].set( ...data.range );
 		}
 		
 		figure.pool.onLoad = ()=>{
 
-			for( var i = 0; i<52; i++ ) {
-				figure.pool.data.pivots[i] = uniform(figure.pool.data.pivots[i]);
-				figure.pool.data.ranges[i] = uniform(figure.pool.data.ranges[i]);
-			}
+//			for( var i = 0; i<52; i++ ) {
+//				figure.pool.data.pivots[i] = uniform(figure.pool.data.pivots[i]);
+//				figure.pool.data.ranges[i] = uniform(figure.pool.data.ranges[i]);
+//			}
 
-			figure.material.emissiveNode = disfigureBodySelect( figure.pool.data );
+			figure.material.emissiveNode = disfigureBodySelect( baseIndex );
 
 //			Happy.setAnimationLoop( (t)=>{
 //			console.log(figure.pool.data.pivots[0]);
