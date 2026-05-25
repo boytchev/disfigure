@@ -3,7 +3,7 @@
 
 
 
-import { float, Fn, If, int, Loop,  positionGeometry, select, step, uniform, vec3 } from 'three/tsl';
+import { float, Fn, If, int, Loop, positionGeometry, select, step, uniform, vec3 } from 'three/tsl';
 import { gradientArm, gradientLeg, gradientX, gradientXT, gradientY, gradientYT } from '../tsl.js';
 import { extras, pivots, ranges } from '../assets.js';
 
@@ -108,7 +108,7 @@ var disfigureBodySelect = Fn( ([ baseIndex ])=>{
 
 
 	const n = 5;
-//	var k2 = m.mul( n*Math.PI*2 ).sub( Math.PI/2 ).sin().toVar();
+	//	var k2 = m.mul( n*Math.PI*2 ).sub( Math.PI/2 ).sin().toVar();
 
 	var k = m.mul( n ).round().div( n ).toVar();
 

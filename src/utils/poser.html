@@ -48,9 +48,9 @@
 			Happy.controls.target.set(0,1.6,0);
 			Happy.controls.update();
 			
-var Body = Happy.Man;			
+//var Body = Happy.Man;			
 //var Body = Happy.Woman;			
-//var Body = Happy.Child;			
+var Body = Happy.Child;			
 
 var baseIndex = 0;
 if( Body == Happy.Woman ) baseIndex = 52;
@@ -66,12 +66,11 @@ if( Body == Happy.Child ) baseIndex = 2*52;
 			pools.man = pools.woman = pools.child = null;
 
 			var figure = new Body();
-			figure.material.metalness = 0.4;
-			figure.material.roughness = 0.4;
-			/*figure.material.polygonOffset = true;
+			//figure.material.metalness = 0.4;
+			//figure.material.roughness = 0.4;
+			figure.material.polygonOffset = true;
 			figure.material.polygonOffsetUnits = 1;
 			figure.material.polygonOffsetFactor = 1;
-			*/
 			
 			var axis = new THREE.AxesHelper( );
 			Happy.scene.add( axis );
@@ -79,6 +78,7 @@ if( Body == Happy.Child ) baseIndex = 2*52;
 			function resetPose() {
 				for( var joint of JOINTS ) figure[joint.name].set(0,0,0);
 //				for( var joint of JOINTS ) frame[joint.name].set(0,0,0);
+				figure.position.set( 0, 0, 0 );
 			}
 			
 		var data = {
@@ -135,7 +135,7 @@ if( Body == Happy.Child ) baseIndex = 2*52;
 				a.$slider.onclick = ()=>selectJoint( index );
 			}
 			
-			folder = gui.addFolder( 'TORSO' )//.close();
+			folder = gui.addFolder( 'TORSO' ).close();
 			subfolder = folder;
 
 			/*
@@ -222,7 +222,7 @@ if( Body == Happy.Child ) baseIndex = 2*52;
 
 			folder = gui.addFolder( 'LEFT HAND' )//.close();
 
-			subfolder = folder.addFolder( ':: THUMB' ).close();
+			subfolder = folder.addFolder( ':: THUMB' )//.close();
 			add( 'l_thumb.x', -180, 180, true );
 			add( 'l_thumb.y', -180, 180 );
 			add( 'l_thumb.z', -180, 180 );

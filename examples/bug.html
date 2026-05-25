@@ -28,7 +28,7 @@
 		// create 3 man for X, Y and Z rotations
 		var manZ = new Happy.Man( 1.5 );
 		manZ.position.x = 0.8;
-		manZ.head.attach( new Red.Label( 'Z', 1.3, [0, 0.12, 0.111], [-15,0,0] ) );
+		manZ.head.attach( new Red.Label( 'Z', 1.3, [0, 0.15, 0.111], [-15,0,0] ) );
 		
 		
 		Happy.Man.pool = null;
@@ -36,7 +36,7 @@
 		
 		var manX = new Happy.Man( 1.5 );
 		manX.position.x = -0.8;
-		manX.head.attach( new Red.Label( 'X', 1.3, [0, 0.12, 0.111], [-15,0,0] ) );
+		manX.head.attach( new Red.Label( 'X', 1.3, [0, 0.15, 0.111], [-15,0,0] ) );
 		
 setTimeout(()=>{	
 console.log(manX.pool.geometry.attributes.uids.array);

@@ -35,6 +35,7 @@ var disfigureBodySelect = Fn( ([ ])=>{
 	var figureIndex = attribute( 'uids', 'int' ).mul( QUATS_PER_BODY ).toVar();
 
 	var gender = q( figureIndex, QUAT_DATA_INDEX ).x.mul( PURE_QUATS_PER_BODY ).toVar(); // 52 pivots
+	var gender_ex = q( figureIndex, QUAT_DATA_INDEX ).x.mul( 4 ).toVar(); // 4 extras
 
 	// Helper functions for different deformation types
 
@@ -53,7 +54,6 @@ var disfigureBodySelect = Fn( ([ ])=>{
 
 	var pick = ( left, right )=>isLeft.mul( right-left ).add( left ).toVar();
 
-
 	If( isDown, ()=>{
 
 		// process legs
@@ -66,7 +66,7 @@ var disfigureBodySelect = Fn( ([ ])=>{
 		Loop( { start: start, end: end }, ( { i } ) => disY( i ) );
 
 		// leg
-		disP( end, gradientLeg( p, ranges.element( end ), extras.element( leg ).xy ) );
+		disP( end, gradientLeg( p, ranges.element( end.add( gender ) ), extras.element( leg.add( gender_ex ) ).xy ) );
 
 	} ).Else( ()=>{
 
@@ -76,9 +76,9 @@ var disfigureBodySelect = Fn( ([ ])=>{
 			let thumb = pick( 24, 26 );
 			let thumb2 = pick( 2, 3 );
 
-			disP( thumb, gradientXT( p, ranges.element( thumb ), extras.element( thumb2 ).x ) );
+			disP( thumb, gradientXT( p, ranges.element( thumb.add( gender ) ), extras.element( thumb2.add( gender_ex ) ).x ) );
 			thumb.addAssign( 1 );
-			disP( thumb, gradientYT( p, ranges.element( thumb ), extras.element( thumb2 ).y ) );
+			disP( thumb, gradientYT( p, ranges.element( thumb.add( gender ) ), extras.element( thumb2.add( gender_ex ) ).y ) );
 
 			let start = pick( 28, 40 ),
 				end = start.add( 12 );
@@ -87,7 +87,6 @@ var disfigureBodySelect = Fn( ([ ])=>{
 			Loop( { start: start, end: end }, ( { i } ) => disT( i ) );
 
 		} );
-
 		// process arms
 
 		let start = pick( 16, 20 ),
@@ -97,10 +96,9 @@ var disfigureBodySelect = Fn( ([ ])=>{
 		Loop( { start: start, end: end }, ( { i } ) => disX( i ) );
 
 		// arm
-		disP( end, gradientArm( p, pivots.element( end ), ranges.element( end ) ) );
+		disP( end, gradientArm( p, pivots.element( end.add( gender ) ), ranges.element( end.add( gender ) ) ) );
 
 	} );
-
 
 
 

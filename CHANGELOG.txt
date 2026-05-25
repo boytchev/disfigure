@@ -1,3 +1,7 @@
+v0.2.0
+  - refactored internals
+  - model metadata now has at most two non-zero and non-one quaternions
+
 v0.1.1
   - switch to automatic number of figures
 
