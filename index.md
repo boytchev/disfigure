@@ -14,7 +14,6 @@ You've been warned.
 
 
 <br>
-<br>
 
 Examples from the user guide. Sorted alphabetically to increase confusion.
 
@@ -42,7 +41,6 @@ Examples from the user guide. Sorted alphabetically to increase confusion.
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/world-custom.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/world-custom.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/world-default.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/world-default.html)
 
-<br>
 <br>
 
 Videos of earlier attempts at TSL rigging, used mainly as do-not-give-up pills.
