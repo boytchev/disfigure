@@ -17,15 +17,15 @@ calculate the transformation inside the subspace.
 
 * Disfigure avoids matrices and implements transformations via quaternions only.
 Instead of calculating rotations at pivot points, it calculates individual
-rotations for each vertex based on its position in the fuzzy suspaces.
+rotations for each vertex based on its position in the fuzzy subspaces.
 
 * Disfigure fuses standalone meshes with instanced meshes. In this hybrid approach
-one draw call renders bodies as instances, but each body has own properties like
+one draw call renders bodies as instances, but each body has its own properties like
 position and scale.
 
 
 ### Legacy notes
 
 Initially Disfigure was written as a TSL wrapper over traditional skeleton
-armature. This version of Disfigure is temporary available here:
+armature. This version of Disfigure is temporarily available here:
 [Old **Disfigure** Home](https://boytchev.github.io/disfigure/legacy/index.html)
