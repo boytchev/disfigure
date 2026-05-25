@@ -2,7 +2,7 @@
 
 A library to rig 3D models &mdash; visit [**Disfigure** Home](https://boytchev.github.io/disfigure/index.html) for less details, but more demos.
 
-[<img src="examples/snapshots/figure-parts.jpg" border="1">](examples/figure-parts.html)
+[<img src="examples/snapshots/figure-parts.jpg" border="1">](https://boytchev.github.io/disfigure/examples/figure-parts.html)
 
 
 
@@ -13,15 +13,15 @@ things that make Disfigure different from the traditional Three.js rigging.
 
 * Disfigure does not use skeletons, bones, joints, skinning or morphing.
 Instead, it defines **fuzzy subspaces** around 50+ pivot points and uses TSL to
-calculate the transformation inside the subspace.
+calculate the transformation inside the subspaces.
 
 * Disfigure avoids matrices and implements transformations via quaternions only.
 Instead of calculating rotations at pivot points, it calculates individual
-rotations for each vertex based on its position in the fuzzy subspaces.
+rotations for each vertex based on its position in a fuzzy subspace.
 
 * Disfigure fuses standalone meshes with instanced meshes. In this hybrid approach
 one draw call renders bodies as instances, but each body has its own properties like
-position and scale.
+`.position` and `.scale`.
 
 
 ### Legacy notes
