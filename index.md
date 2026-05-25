@@ -2,12 +2,14 @@
 
 # Disfigure
 
-**Disfigure.js** is a library to rig 3D models via quaternions and bent 3D spaces.
+**Disfigure.js** is a library for rigging boneless 3D models. It is highly
+experimental, proof-of-concept, and very much work-in-progress.
 
-It is also an experiment, a proof-of-concept and a work in progress.
+**You've been warned.**
 
-You've been warned.
-
+Under the skin it uses quaternions and bent 3D spaces, but you do not need to
+know them. It is called *Disfigure* because the very first attempt to bent space 
+turned the model into a horrifying mess of limbs. It still gives me nightmares.
 
 * [**Disfigure.js** user guide](https://boytchev.github.io/disfigure/docs/userguide.html)
 * [**Disfigure.js** API reference](https://boytchev.github.io/disfigure/docs/api.html)
@@ -15,7 +17,7 @@ You've been warned.
 
 <br>
 
-Examples from the user guide. Sorted alphabetically to increase confusion.
+Examples from the user guide. Sorted alphabetically to increase your confusion.
 
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-accessories.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-accessories.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-accessory.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-accessory.html)
@@ -43,7 +45,7 @@ Examples from the user guide. Sorted alphabetically to increase confusion.
 
 <br>
 
-Videos of earlier attempts at TSL rigging, used mainly as do-not-give-up pills.
+Videos of earlier attempts at TSL rigging, used mainly as my do-not-give-up pills.
 
 [<img width="18%" src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/quaternions-prototype.jpg">](https://x.com/PavelBoytchev/status/2032835719077433470)
 [<img width="18%" src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/rigging-scanned-model.jpg">](https://x.com/PavelBoytchev/status/1926542790655160595)
