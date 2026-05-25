@@ -1,6 +1,6 @@
 # disfigure
 
-A library to rig 3D models &mdash; visit [**Disfigure** Home](https://boytchev.github.io/disfigure/index.html) for more details and demos.
+A library to rig 3D models &mdash; visit [**Disfigure** Home](https://boytchev.github.io/disfigure/index.html) for less details, but more demos.
 
 [<img src="examples/snapshots/figure-parts.jpg" border="1">](examples/figure-parts.html)
 
