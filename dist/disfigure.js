@@ -1,4 +1,4 @@
-// disfigure v0.0.25
+// disfigure v0.2.0
 
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 import { Vector3, Vector4, TextureNode, DataTexture, RGBAFormat, FloatType, PlaneGeometry, Scene, InstancedMesh, MeshStandardNodeMaterial, InstancedBufferAttribute, Quaternion, Object3D, MathUtils, Euler, WebGPURenderer, PCFSoftShadowMap, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture } from 'three';
