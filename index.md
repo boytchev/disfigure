@@ -8,7 +8,7 @@ experimental, proof-of-concept, and very much work-in-progress.
 **You've been warned.**
 
 Under the skin it uses quaternions and bent 3D spaces, but you do not need to
-know them. It is called *Disfigure* because the very first attempt to bent space 
+know them. It is called *Disfigure* because the very first attempt at bending space 
 turned the model into a horrifying mess of limbs. It still gives me nightmares.
 
 * [**Disfigure.js** user guide](https://boytchev.github.io/disfigure/docs/userguide.html)
