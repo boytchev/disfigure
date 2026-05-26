@@ -1,0 +1,237 @@
+﻿<!DOCTYPE html>
+
+<html>
+	<head>
+		<script type="importmap">
+		{
+			"imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.webgpu.min.js",
+				"three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.webgpu.min.js",
+				"three/tsl": "https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.tsl.min.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.183.0/examples/jsm/",
+				"tsl-textures": "https://cdn.jsdelivr.net/gh/boytchev/tsl-textures/dist/tsl-textures.js"
+			}
+		}
+		</script>
+	</head>
+
+
+	<body>		
+
+		<script type="module">
+
+			import { vec3 } from 'three/tsl';
+			import * as THREE from 'three';
+			import { romanPaving as tslTexture } from 'tsl-textures';
+			import * as Happy from './world.js';
+			import { Man } from './body.js';
+
+			var tex = tslTexture( { scale: 2, seed: 3 } ).pow( 1/2 ).mul( 3.14*3 ).cos().smoothstep( 0, 0.2 ).toVar();
+
+			new Happy.World( { ground: false } );
+			
+			var figure = new Man();
+			
+
+			figure.material.emissiveIntensity = 1;
+			figure.material.metalness = 0.2;
+			figure.material.colorNode = vec3( 0, 1, 10 ).mul( tex ).add( tex.oneMinus() );
+			figure.material.roughnessNode = tex.oneMinus().mul( 2 ).add( 0.2 );
+			figure.material.metalnessNode = tex;
+			
+			Happy.scene.background = new THREE.Color( 'silver' );
+			Happy.scene.add( figure );
+			Happy.setAnimationLoop( animate );
+			Happy.controls.enabled = false;
+
+			var dist = 1.5;
+			var div = 2000;
+			var divk = 0.9993;
+
+			function animate( t ) {
+
+				dist = 1.2*( 1.2** ( 2+2*Math.sin( t/2000 ) ) );
+				t = t/3800;
+
+				t = t+Math.sin( 20*t )/div;
+				div = div*divk+20*( 1-divk );
+
+				var h = Happy.chaotic( t, 100, 0, 1 );
+
+
+				// torso
+				figure.eulers[ 0 ].x = Happy.chaotic( t/3, 50, -1/2, 1/2 );
+				figure.eulers[ 0 ].y = Happy.chaotic( t/3, 51, -2, 2 );
+				figure.eulers[ 0 ].z = Happy.chaotic( t/3, 52, -1/2, 1/2 );
+
+				// head
+				figure.eulers[ 1 ].x = Happy.chaotic( t, 0, -h, h );
+				figure.eulers[ 1 ].y = Happy.chaotic( t, 1, -1.3, 1.3 );
+				figure.eulers[ 1 ].z = Happy.chaotic( t, 2, -( 1-h ), 1-h );
+			
+				// chest
+				h = Happy.chaotic( t, 101, 0, 1.2 );
+				figure.eulers[ 2 ].x = Happy.chaotic( t, 10, -h, h );
+				figure.eulers[ 2 ].y = Happy.chaotic( t, 11, -1.1, 1.1 );
+				figure.eulers[ 2 ].z = Happy.chaotic( t, 12, -( 1-h ), 1-h );
+
+				// waist
+				h = Happy.chaotic( t, 102, 0, 0.5 );
+				figure.eulers[ 3 ].x = Happy.chaotic( t, 13, -h, h );
+				figure.eulers[ 3 ].y = figure.eulers[ 1 ].y;//Happy.chaotic(t,14,-1.3,1.3);
+				figure.eulers[ 3 ].z = Happy.chaotic( t, 15, -( 1-h ), 1-h );
+
+				// foot left
+				figure.eulers[ 4 ].x = Happy.chaotic( t, 16, -1, 1 );
+			
+				// ankle left
+				figure.eulers[ 6 ].x = Happy.chaotic( t, 16, -1, 1 );
+				figure.eulers[ 6 ].z = Happy.chaotic( t, 18, -0.5, 0.5 );
+			
+				// shin left
+				figure.eulers[ 8 ].y = Happy.chaotic( t, 22, -1, 1 );
+			
+				// knee left
+				figure.eulers[ 10 ].x = Happy.chaotic( t, 24, -0.2, 2.5 );
+				figure.eulers[ 10 ].z = Happy.chaotic( t, 24, -0.3, 0.3 );
+			
+				// thigh left
+				figure.eulers[ 12 ].y = Happy.chaotic( t, 28, -0.7, 0.7 );
+
+				// leg left
+				figure.eulers[ 14 ].x = Happy.chaotic( t, 29, -0.7, 0.3 );
+				figure.eulers[ 14 ].z = Happy.chaotic( t, 29, 0, 0.7 );
+
+				// wrist left
+				figure.eulers[ 16 ].y = Happy.chaotic( t, 30, -0.5, 0.4 );
+				figure.eulers[ 16 ].z = Happy.chaotic( t, 31, -1.5, 1.5 );
+
+				// forearm left
+				figure.eulers[ 18 ].x = Happy.chaotic( t, 35, -1, 0.5 );
+
+				// elbow left
+				figure.eulers[ 20 ].y = Happy.chaotic( t, 36, -2.8, 0 );
+
+				// arm left
+				figure.eulers[ 22 ].x = Happy.chaotic( t, 37, -0.7, 0.7 );
+				figure.eulers[ 22 ].y = Happy.chaotic( t, 39, -1, 0.25 );
+				figure.eulers[ 22 ].z = Happy.chaotic( t, 38, -1, 0.25 );
+
+				// foot right
+				h = Happy.chaotic( t, 103, 0, 1 );
+				figure.eulers[ 5 ].x = Happy.chaotic( t, 17, -1, 1 );
+			
+				// ankle right
+				figure.eulers[ 7 ].x = Happy.chaotic( t, 19, -1, 1 );
+				figure.eulers[ 7 ].z = Happy.chaotic( t, 21, -0.5, 0.5 );
+			
+				// shin right
+				figure.eulers[ 9 ].y = Happy.chaotic( t, 23, -1, 1 );
+			
+				// knee right
+				figure.eulers[ 11 ].x = Happy.chaotic( t, 26, -0.2, 2.5 );
+				figure.eulers[ 11 ].z = Happy.chaotic( t, 25, -0.3, 0.3 );
+			
+				// thigh right
+				figure.eulers[ 13 ].y = Happy.chaotic( t, 27, -0.7, 0.7 );
+			
+				// leg right
+				figure.eulers[ 15 ].x = Happy.chaotic( t, 130, -0.7, 0.3 );
+				figure.eulers[ 15 ].z = Happy.chaotic( t, 131, -0.7, 0 );
+
+				// wrist right
+				figure.eulers[ 17 ].y = Happy.chaotic( t, 132, -0.4, 0.5 );
+				figure.eulers[ 17 ].z = Happy.chaotic( t, 133, -1.5, 1.5 );
+
+				// forearm right
+				figure.eulers[ 19 ].x = Happy.chaotic( t, 135, -1, 0.5 );
+
+				// elbow right
+				figure.eulers[ 21 ].y = Happy.chaotic( t, 136, 0, 2.8 );
+
+				// arm right
+				figure.eulers[ 23 ].x = Happy.chaotic( t, 137, -0.7, 0.7 );
+				figure.eulers[ 23 ].y = Happy.chaotic( t, 139, -0.25, 1 );
+				figure.eulers[ 23 ].z = Happy.chaotic( t, 138, -0.25, 1 );
+
+				// finger23 left/right
+				figure.eulers[ 24 ].z = Happy.chaotic( t*2, 40, -1.4, 0.4 );
+				figure.eulers[ 25 ].z = Happy.chaotic( t*2, 140, -0.4, 1.4 );
+
+				// finger22 left/right
+				figure.eulers[ 26 ].z = figure.eulers[ 24 ].z;
+				figure.eulers[ 27 ].z = figure.eulers[ 25 ].z;
+
+				// finger21 left/right
+				figure.eulers[ 28 ].y = Happy.chaotic( t*3, 41, -0.2, 0.1 );
+				figure.eulers[ 29 ].y = Happy.chaotic( t*3, 141, -0.1, 0.2 );
+				figure.eulers[ 28 ].z = Happy.chaotic( t*2, 40, -1.4, 0 );
+				figure.eulers[ 29 ].z = Happy.chaotic( t*2, 140, 0, 1.4 );
+
+
+				// finger13 left/right
+				figure.eulers[ 30 ].z = figure.eulers[ 24 ].z;
+				figure.eulers[ 31 ].z = figure.eulers[ 25 ].z;
+
+				// finger12 left/right
+				figure.eulers[ 32 ].z = figure.eulers[ 26 ].z;
+				figure.eulers[ 33 ].z = figure.eulers[ 27 ].z;
+
+				// finger11 left/right
+				figure.eulers[ 34 ].y = Math.min( 0, 3*figure.eulers[ 28 ].y );
+				figure.eulers[ 35 ].y = Math.max( 0, 3*figure.eulers[ 29 ].y );
+				figure.eulers[ 34 ].z = figure.eulers[ 28 ].z;
+				figure.eulers[ 35 ].z = figure.eulers[ 29 ].z;
+
+
+				// finger33 left/right
+				figure.eulers[ 36 ].z = figure.eulers[ 24 ].z;
+				figure.eulers[ 37 ].z = figure.eulers[ 25 ].z;
+
+				// finger32 left/right
+				figure.eulers[ 38 ].z = figure.eulers[ 26 ].z;
+				figure.eulers[ 39 ].z = figure.eulers[ 27 ].z;
+
+				// finger31 left/right
+				figure.eulers[ 40 ].y = Math.max( 0, -figure.eulers[ 28 ].y );
+				figure.eulers[ 41 ].y = Math.min( 0, -figure.eulers[ 29 ].y );
+				figure.eulers[ 40 ].z = figure.eulers[ 28 ].z;
+				figure.eulers[ 41 ].z = figure.eulers[ 29 ].z;
+
+
+				// finger43 left/right
+				figure.eulers[ 42 ].z = figure.eulers[ 24 ].z;
+				figure.eulers[ 43 ].z = figure.eulers[ 25 ].z;
+
+				// finger42 left/right
+				figure.eulers[ 44 ].z = figure.eulers[ 26 ].z;
+				figure.eulers[ 45 ].z = figure.eulers[ 27 ].z;
+
+				// finger41 left/right
+				figure.eulers[ 46 ].y = Math.max( 0, -3*figure.eulers[ 28 ].y );
+				figure.eulers[ 47 ].y = Math.min( 0, -3*figure.eulers[ 29 ].y );
+				figure.eulers[ 46 ].z = figure.eulers[ 28 ].z;
+				figure.eulers[ 47 ].z = figure.eulers[ 29 ].z;
+
+				// finger02 left/right
+				figure.eulers[ 48 ].y = -figure.eulers[ 24 ].z;
+				figure.eulers[ 49 ].y = -figure.eulers[ 25 ].z;
+			
+				// finger01 left/right
+				figure.eulers[ 50 ].x = Happy.chaotic( t, 41, -1, 0 );
+				figure.eulers[ 51 ].x = Happy.chaotic( t, 141, -1, 0 );
+				figure.eulers[ 50 ].y = Happy.chaotic( t, 42, 0, 0.8 );
+				figure.eulers[ 51 ].y = Happy.chaotic( t, 142, -0.8, 0 );
+				figure.eulers[ 50 ].z = Happy.chaotic( t, 43, -0.8, -0.2 );
+				figure.eulers[ 51 ].z = Happy.chaotic( t, 143, 0.2, 0.8 );
+
+				figure.updateQuaternions();
+				figure.position.y = -0.5*1.5/dist;
+				
+				Happy.camera.position.set( 0, 1.2, dist );
+				
+			}
+
+		</script>
+	</body>
+</html>
