@@ -44,7 +44,6 @@ Examples from the user guide. Sorted alphabetically to increase your confusion.
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-torso.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/motion-torso.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/world-custom.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/world-custom.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/world-default.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/world-default.html)
-
 <br>
 
 Videos of earlier attempts at TSL rigging, used mainly as my do-not-give-up pills.
@@ -59,7 +58,6 @@ Videos of earlier attempts at TSL rigging, used mainly as my do-not-give-up pill
 [<img width="18%" src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/proof-of-concept-4.jpg">](https://x.com/PavelBoytchev/status/1908635265381655037)
 [<img width="18%" src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/proof-of-concept-5.jpg">](https://x.com/PavelBoytchev/status/1909507775899517103)
 [<img width="18%" src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/proof-of-concept-6.jpg">](https://x.com/PavelBoytchev/status/1910048442287862045)
-
 <br>
 
 <div class="footnote">

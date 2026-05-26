@@ -1,3 +1,6 @@
+v0.2.1
+  - QuatTextureNode isolated as independednt class
+
 v0.2.0
   - refactored internals
   - model metadata now has at most two non-zero and non-one quaternions

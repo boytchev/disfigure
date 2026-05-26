@@ -36,9 +36,8 @@
 
 
 
-import { attribute, Fn, If, int, ivec2, Loop, mat3, normalGeometry, positionGeometry, select, step, transformNormalToView, vec3, vec4 } from 'three/tsl';
-import { extras, pivots, ranges } from './assets.js';
-import { PURE_QUATS_PER_BODY, QUAT_DATA_INDEX, QUAT_TEXTURE_WIDTH, QUATS_PER_BODY, quatTextureNode } from './quats.js';
+import { attribute, Fn, If, int, Loop, mat3, normalGeometry, positionGeometry, select, step, transformNormalToView, vec3, vec4 } from 'three/tsl';
+import { extras, pivots, PURE_QUATS_PER_BODY, QUAT_DATA_INDEX,  quatTextureNode, ranges } from './assets.js';
 
 
 
@@ -214,33 +213,6 @@ var gradientXT = Fn( ([ pos, range, slope ])=>{
 
 
 
-// ======================== QUATERNION UTILITIES ========================
-
-
-
-/**
- * Computes texture coordinates for quaternion data lookup for figure and joint.
- */
-var getQuatAddr = Fn( ([ figureIndex, jointIndex ])=>{
-
-	var offset = figureIndex.add( jointIndex ).toVar();
-	return ivec2( offset.mod( QUAT_TEXTURE_WIDTH ), offset.div( QUAT_TEXTURE_WIDTH ) );
-
-}, { return: 'ivec2', figureIndex: 'int', jointIndex: 'int' } );
-
-
-
-/**
- * Helper to sample quaternion from texture for a given figure and joint
- */
-var q = ( figureIndex, jointIndex )=> {
-
-	return quatTextureNode.load( getQuatAddr( figureIndex, jointIndex ) );
-
-};
-
-
-
 // ======================== MAIN DISFIGURE FUNCTION ========================
 
 
@@ -262,19 +234,19 @@ var disfigureBody = Fn( ( )=>{
 	var p = positionGeometry,
 		m = mat3( p, normalGeometry.normalize(), vec3( 0 ) ).toVar( ); // container
 
-	var figureIndex = attribute( 'uids', 'int' ).mul( QUATS_PER_BODY ).toVar();
+	var figureIndex = attribute( 'uids', 'int' ).toVar();
 
 	// Figure type offset for pivots and ranges (52 pivots per gender, 4 extras)
 
-	var gender = q( figureIndex, QUAT_DATA_INDEX ).x.mul( PURE_QUATS_PER_BODY ).toVar(); // 52 pivots
-	var gender_ex = q( figureIndex, QUAT_DATA_INDEX ).x.mul( 4 ).toVar(); // 4 extras
+	var gender = quatTextureNode.get( figureIndex, QUAT_DATA_INDEX ).x.mul( PURE_QUATS_PER_BODY ).toVar(); // 52 pivots
+	var gender_ex = quatTextureNode.get( figureIndex, QUAT_DATA_INDEX ).x.mul( 4 ).toVar(); // 4 extras
 
 	// Helper functions for different deformation types
 
-	var disP = ( i, gradient ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradient ) ),
-		disY = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientY( p, ranges.element( i.add( gender ) ) ) ) ),
-		disX = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientX( p, ranges.element( i.add( gender ) ) ) ) ),
-		disT = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientXT( p, ranges.element( i.add( gender ) ), 0 ) ) );
+	var disP = ( i, gradient ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), quatTextureNode.get( figureIndex, i ), gradient ) ),
+		disY = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), quatTextureNode.get( figureIndex, i ), gradientY( p, ranges.element( i.add( gender ) ) ) ) ),
+		disX = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), quatTextureNode.get( figureIndex, i ), gradientX( p, ranges.element( i.add( gender ) ) ) ) ),
+		disT = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), quatTextureNode.get( figureIndex, i ), gradientXT( p, ranges.element( i.add( gender ) ), 0 ) ) );
 
 	// Side and region detection
 
@@ -361,7 +333,7 @@ var disfigureBody = Fn( ( )=>{
 	if ( disfigureVersion > 6 && Math.log2( disfigureVersion ) % 1 < 1E-10 )
 		console.warn( `TSL compiled ${disfigureVersion} times` );
 
-	return m;//.debug();
+	return m.debug();
 
 } )( );
 
@@ -375,4 +347,4 @@ var disfigureNormal = disfigureBody.element( 1 ); // normal node
 
 
 
-export { disfigureMatrix, disfigurePosition, disfigureNormal, disfigureBody, gradientX, gradientY, gradientYT, gradientXT, gradientLeg, gradientArm, q };
+export { disfigureMatrix, disfigurePosition, disfigureNormal, disfigureBody, gradientX, gradientY, gradientYT, gradientXT, gradientLeg, gradientArm };

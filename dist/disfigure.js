@@ -1,12 +1,226 @@
 // disfigure v0.2.0
 
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
-import { Vector3, Vector4, TextureNode, DataTexture, RGBAFormat, FloatType, PlaneGeometry, Scene, InstancedMesh, MeshStandardNodeMaterial, InstancedBufferAttribute, Quaternion, Object3D, MathUtils, Euler, WebGPURenderer, PCFSoftShadowMap, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture } from 'three';
-import { uniformArray, Fn, vec4, If, select, ivec2, mat3, positionGeometry, normalGeometry, vec3, attribute, int, step, Loop, transformNormalToView, vertexStage } from 'three/tsl';
+import { TextureNode, DataTexture, RGBAFormat, FloatType, Vector3, Vector4, PlaneGeometry, Scene, InstancedMesh, MeshStandardNodeMaterial, InstancedBufferAttribute, Quaternion, Object3D, MathUtils, Euler, WebGPURenderer, PCFSoftShadowMap, Color, PerspectiveCamera, DirectionalLight, Mesh, CircleGeometry, MeshLambertMaterial, CanvasTexture } from 'three';
+import { Fn, ivec2, uniformArray, vec4, If, select, mat3, positionGeometry, normalGeometry, vec3, attribute, int, step, Loop, transformNormalToView, vertexStage } from 'three/tsl';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
+
+/**
+ * Disfigure Quaterion Data Texture
+ *
+ * -----------------------------------------------------------------------------
+ *
+ * Module responsible for managing quaternion data for all figures using a data
+ * texture. Each RGBA pixel represents one quaternion. A figure uses QUATS_PER_BODY pixels.
+ * The texture grows dynamically in height keeping width fixed at QUAT_TEXTURE_WIDTH.
+ *
+ * A full 2048x2048 texture supports ~79k figures (38 per row).
+ *
+ * -----------------------------------------------------------------------------
+ *
+ * Public API:
+ *
+ *
+ * QuatTextureNode		- class for data texture node for quaternions or vec4
+ *   .set( )					- sets quaternion of a joint of a figure
+ *   .setQuaternionCapacity( )	- sets the capacity of the quaternion texture
+ *   .get( )					- gets quaternion from texture
+ *
+ * -----------------------------------------------------------------------------
+ *
+ * AI Disclosure:
+ *
+ * Grok 4.3 assistance was used for proper texture resizing logic,
+ * cloning behavior in TSL TextureNode, and fine-tuning code comments.
+ */
+
+
+
+
+/**
+ * Data texture width - 2048 is well supported across systems
+ */
+const QUAT_TEXTURE_WIDTH = 2048;
+
+
+
+/**
+ * Custom TextureNode optimized for storing and accessing quaternion data.
+ * Grows automatically. Extends TextureNode but disables all automatic UV
+ * transformations and flipY logic that Three.js/TSL normally applies.
+ *
+ *   .dataArray			- direct reference to the underlying raw data (Float32Array)
+ *   .quatTexture		- the active DataTexture object (DataTexture)
+ *   .count				- current maximum number of figures the texture can hold (number)
+ *   .isQuatTextureNode	- flag identifying this custom node (boolean)
+ */
+class QuatTextureNode extends TextureNode {
+
+	constructor( texture, quatsPerBody ) {
+
+		// Create an empty texture (and allock data array) if no texture provided
+
+		if ( !texture ) {
+
+			texture = new DataTexture( new Float32Array( 0 ), 0, 0, RGBAFormat, FloatType );
+
+		}
+
+		super( texture );
+
+		this.isQuatTextureNode = true;
+
+		this.dataArray = texture.image.data;
+		this.quatTexture = texture;
+
+		this.quatsPerBody = quatsPerBody;
+
+		this.count = 0;
+
+	}
+
+
+
+	/**
+	 * Disables TSL's automatic UV transformation (including flipY).
+	 */
+
+	getTransformedUV( uvNode ) {
+
+		return uvNode;
+
+	}
+
+
+
+	/**
+	 * Disables TSL's automatic UV setup (including flipY).
+	 */
+	setupUV( builder, uvNode ) {
+
+		return uvNode;
+
+	}
+
+
+
+	/**
+	 * Sets quaternion components of a joint of a figure (x, y, z, w).
+	 */
+	set( figure, joint, x, y, z, w ) {
+
+		var base = ( this.quatsPerBody*figure+joint )*4,
+			array = this.dataArray;
+
+		array[ base++ ] = x;
+		array[ base++ ] = y;
+		array[ base++ ] = z;
+		array[ base ] = w;
+
+		this.quatTexture.needsUpdate = true;
+
+	}
+
+
+	/**
+	 * Helper to sample quaternion from texture for a given figure and joint
+	 */
+	get( figureIndex, jointIndex ) {
+
+		var getQuatAddr = Fn( ([ offset ])=>{
+
+			return ivec2( offset.mod( QUAT_TEXTURE_WIDTH ), offset.div( QUAT_TEXTURE_WIDTH ) );
+
+		}, { return: 'ivec2', offset: 'int' } );
+
+		return this.load( getQuatAddr( figureIndex.mul( this.quatsPerBody ).add( jointIndex ) ) );
+
+	}
+
+
+
+	/**
+	 * Increases texture capacity when more figures are added. The new texture
+	 * should support the quaternions of at least `count` figures.
+	 */
+	setQuaternionCapacity( count ) {
+
+		if ( count <= this.count ) return; // already sufficient
+
+		// Calculate the new height of the data texture
+
+		var doubleHeight = Math.min( 2*this.quatTexture.image.height, QUAT_TEXTURE_WIDTH );
+		var preciseHeight = Math.ceil( count*this.quatsPerBody/QUAT_TEXTURE_WIDTH );
+		var newHeight = Math.max( doubleHeight, preciseHeight );
+
+		if ( newHeight > QUAT_TEXTURE_WIDTH )
+			throw new Error( 'Too many figures — DataTexture limit exceeded' );
+
+		// Create new larger array and copy existing data
+
+		var newDataArray = new Float32Array( 4*newHeight*QUAT_TEXTURE_WIDTH );
+		newDataArray.set( this.dataArray );
+
+		// Create new data texture
+
+		var newQuatTexture = new DataTexture(
+			newDataArray,
+			QUAT_TEXTURE_WIDTH,
+			newHeight,
+			RGBAFormat,
+			FloatType
+		);
+
+		// Dispose old texture
+
+		this.quatTexture.dispose();
+
+		// Update internal references
+
+		this.dataArray = newDataArray;
+		this.quatTexture = newQuatTexture;
+		this.value = newQuatTexture;
+
+		this.count = Math.floor( newHeight * QUAT_TEXTURE_WIDTH / this.quatsPerBody );
+
+		console.log( `Alloc ALL[${this.count}] ${Math.round( this.dataArray.length*4/1024 )} kB` );
+
+	}
+
+
+
+	/**
+	 * Critical: shares the same underlying texture for all figures [AI]
+	 * Commented because seеms to be not needed. [PB]
+	 */
+	//clone() {
+	//
+	//	var cloned = new this.constructor( this.value ); // same texture
+	//
+	//	cloned.uvNode = this.uvNode;
+	//	cloned.levelNode = this.levelNode;
+	//	cloned.sampler = this.sampler;
+	//
+	//	return cloned;
+	//
+	//}
+
+
+
+	/**
+	 * Custom uniform hash to help Three.js/TSL caching. [AI]
+	 * Commented because seеms to be not needed. [PB]
+	 */
+	//	getUniformHash( /* builder */ ) {
+	//
+	//		return `QuatTexture-${this.value?.uuid || 'default'}`;
+	//
+	//	}
+
+} // QuatTexNode
 
 /**
  * Disfigure Assets Loader
@@ -27,6 +241,13 @@ import Stats from 'three/addons/libs/stats.module.js';
  * pivots	 - uniform array of vec3 with coordinates of joint pivot points
  * ranges	 - uniform array of vec4 with joint selection ranges
  * extras	 - uniform array of vec4 with additional selection data
+ *
+ * QUATS_PER_BODY		- total number of quaternions (pixels) per figure (53)
+ * PURE_QUATS_PER_BODY	- number of pure/proper/joint quaternions (52)
+ * QUAT_DATA_INDEX		- index of the data quaternion (52)
+ *
+ * quatTextureNode - a single unique instance of QuatTextureNode for all figures
+ *
  * -----------------------------------------------------------------------------
  *
  * AI Disclosure:
@@ -48,6 +269,39 @@ var config = {
 	smooth: true,	// true = smooth shapes, false = rough shapes
 	lowpoly: 0,		// lowpoly reduction factor, 0=0%, 1=75% reduction
 };
+
+
+
+/**
+ * Number of vec4 per figure, 0..51 are quaternions, 52 is user data
+ */
+const QUATS_PER_BODY = 53;
+
+
+
+/**
+ * Number of quaternions per body that are used as quaternions
+ */
+const PURE_QUATS_PER_BODY = 52;
+
+
+
+/**
+ * Index of the data quaternion. It is not used as quaternion.
+ * Could be used a loop of pure quaternions: for (i=0; i<QUAT_DATA_INDEX; i++)...
+ *		x - the type of the figure (man=0, woman=1, child=2)
+ *		y - unused, set to 0
+ *		z - unused, set to 0
+ *		w - unused, set to 0
+ */
+const QUAT_DATA_INDEX = 52; // 52 is vec4 for user data
+
+
+
+/**
+ * Global shared instance used across the application
+ */
+var quatTextureNode = new QuatTextureNode( null, QUATS_PER_BODY );
 
 
 
@@ -190,252 +444,6 @@ await Promise.all([
 
 
 } );
-
-/**
- * Disfigure Quaterion Data Texture
- *
- * -----------------------------------------------------------------------------
- *
- * Module responsible for managing quaternion data for all figures using a data
- * texture. Each RGBA pixel represents one quaternion. A figure uses QUATS_PER_BODY pixels.
- * The texture grows dynamically in height keeping width fixed at QUAT_TEXTURE_WIDTH.
- *
- * A full 2048x2048 texture supports ~79k figures (38 per row).
- *
- * -----------------------------------------------------------------------------
- *
- * Public API:
- *
- * QUAT_TEXTURE_WIDTH	- data texture width (2048)
- * QUATS_PER_BODY		- total number of quaternions (pixels) per figure (53)
- * PURE_QUATS_PER_BODY	- number of pure/proper/joint quaternions (52)
- * QUAT_DATA_INDEX		- index of the data quaternion (52)
- *
- * setJointQuaternion	- sets quaternion of a joint of a figure
- * setQuaternionCapacity- sets the capacity of the quaternion texture
- *
- * quatTextureNode - a single unique instance of QuatTextureNode for all figures
- *
- * -----------------------------------------------------------------------------
- *
- * AI Disclosure:
- *
- * Grok 4.3 assistance was used for proper texture resizing logic,
- * cloning behavior in TSL TextureNode, and fine-tuning code comments.
- */
-
-
-
-
-/**
- * Data texture width - 2048 is well supported across systems
- */
-const QUAT_TEXTURE_WIDTH = 2048;
-
-
-
-/**
- * Number of vec4 per figure, 0..51 are quaternions, 52 is user data
- */
-const QUATS_PER_BODY = 53;
-
-
-
-/**
- * Number of quaternions per body that are used as quaternions
- */
-const PURE_QUATS_PER_BODY = 52;
-
-
-
-/**
- * Index of the data quaternion. It is not used as quaternion.
- * Could be used a loop of pure quaternions: for (i=0; i<QUAT_DATA_INDEX; i++)...
- *		x - the type of the figure (man=0, woman=1, child=2)
- *		y - unused, set to 0
- *		z - unused, set to 0
- *		w - unused, set to 0
- */
-const QUAT_DATA_INDEX = 52; // 52 is vec4 for user data
-
-
-
-
-/**
- * Custom TextureNode optimized for storing and accessing quaternion data.
- * Grows automatically. Extends TextureNode but disables all automatic UV
- * transformations and flipY logic that Three.js/TSL normally applies.
- *
- *   .dataArray			- direct reference to the underlying raw data (Float32Array)
- *   .quatTexture		- the active DataTexture object (DataTexture)
- *   .count				- current maximum number of figures the texture can hold (number)
- *   .isQuatTextureNode	- flag identifying this custom node (boolean)
- */
-class QuatTextureNode extends TextureNode {
-
-	constructor( texture = null ) {
-
-		// Create an empty texture if not provided
-
-		if ( !texture ) {
-
-			var dataArray = new Float32Array( 0 );
-			texture = new DataTexture( dataArray, 0, 0, RGBAFormat, FloatType );
-
-		}
-
-		super( texture );
-
-		this.isQuatTextureNode = true;
-
-		this.dataArray = texture.image.data;
-		this.quatTexture = texture;
-
-		this.count = 0;
-
-	}
-
-
-
-	/**
-	 * Critical: shares the same underlying texture for all figures [AI]
-	 */
-	clone() {
-
-		var cloned = new this.constructor( this.value ); // same texture
-
-		cloned.uvNode = this.uvNode;
-		cloned.levelNode = this.levelNode;
-		cloned.sampler = this.sampler;
-
-		return cloned;
-
-	}
-
-
-
-	/**
-	 * Custom uniform hash to help Three.js/TSL caching. [AI]
-	 * Commented because seams to be not needed. [PB]
-	 */
-	//	getUniformHash( /* builder */ ) {
-	//
-	//		return `QuatTexture-${this.value?.uuid || 'default'}`;
-	//
-	//	}
-
-
-
-	/**
-	 * Disables TSL's automatic UV transformation (including flipY).
-	 */
-
-	getTransformedUV( uvNode ) {
-
-		return uvNode;
-
-	}
-
-
-
-	/**
-	 * Disables TSL's automatic UV setup (including flipY).
-	 */
-	setupUV( builder, uvNode ) {
-
-		return uvNode;
-
-	}
-
-} // QuatTexNode
-
-
-
-/**
- * Global shared instance used across the application
- */
-var quatTextureNode = new QuatTextureNode( );
-
-
-
-/**
- * Sets quaternion components of a joint of a figure (x, y, z, w).
- */
-function setJointQuaternion( figure, joint, x, y, z, w ) {
-
-	var base = ( QUATS_PER_BODY*figure+joint )*4,
-		array = quatTextureNode.dataArray;
-
-	array[ base++ ] = x;
-	array[ base++ ] = y;
-	array[ base++ ] = z;
-	array[ base ] = w;
-
-	quatTextureNode.quatTexture.needsUpdate = true;
-
-}
-
-
-
-/**
- * Increases texture capacity when more figures are added. The new texture
- * should support the quaternions of at least `count` figures.
- */
-function setQuaternionCapacity( count ) {
-
-	if ( count <= quatTextureNode.count ) return; // already sufficient
-
-	// Calculate the new height of the data texture
-
-	var doubleHeight = Math.min( 2*quatTextureNode.quatTexture.image.height, QUAT_TEXTURE_WIDTH );
-	var preciseHeight = Math.ceil( count*QUATS_PER_BODY/QUAT_TEXTURE_WIDTH );
-	var newHeight = Math.max( doubleHeight, preciseHeight );
-
-	if ( newHeight > QUAT_TEXTURE_WIDTH )
-		throw new Error( 'Too many figures — DataTexture limit exceeded' );
-
-	// Create new larger array and copy existing data
-
-	var newDataArray = new Float32Array( 4*newHeight*QUAT_TEXTURE_WIDTH );
-	newDataArray.set( quatTextureNode.dataArray );
-
-	// Create new data texture
-
-	var newQuatTexture = new DataTexture(
-		newDataArray,
-		QUAT_TEXTURE_WIDTH,
-		newHeight,
-		RGBAFormat,
-		FloatType
-	);
-
-	// Dispose old texture
-
-	quatTextureNode.quatTexture.dispose();
-
-	// Update internal references
-
-	quatTextureNode.dataArray = newDataArray;
-	quatTextureNode.quatTexture = newQuatTexture;
-	quatTextureNode.value = newQuatTexture;
-
-	quatTextureNode.count = Math.floor( newHeight * QUAT_TEXTURE_WIDTH / QUATS_PER_BODY );
-
-	// Commented because seams to be not needed. [PB]
-
-	/**
-	// Increment version [AI]
-
-	this.version = ( this.version || 0 ) + 1;
-
-	// Force material update if we have a reference to it [AI]
-
-	if ( this._material ) this._material.needsUpdate = true;
-	*/
-
-	console.log( `Alloc ALL[${quatTextureNode.count}] ${Math.round( quatTextureNode.dataArray.length*4/1024 )} kB` );
-
-}
 
 /**
  * Disfigure TSL Rigging
@@ -648,33 +656,6 @@ var gradientXT = Fn( ([ pos, range, slope ])=>{
 
 
 
-// ======================== QUATERNION UTILITIES ========================
-
-
-
-/**
- * Computes texture coordinates for quaternion data lookup for figure and joint.
- */
-var getQuatAddr = Fn( ([ figureIndex, jointIndex ])=>{
-
-	var offset = figureIndex.add( jointIndex ).toVar();
-	return ivec2( offset.mod( QUAT_TEXTURE_WIDTH ), offset.div( QUAT_TEXTURE_WIDTH ) );
-
-}, { return: 'ivec2', figureIndex: 'int', jointIndex: 'int' } );
-
-
-
-/**
- * Helper to sample quaternion from texture for a given figure and joint
- */
-var q = ( figureIndex, jointIndex )=> {
-
-	return quatTextureNode.load( getQuatAddr( figureIndex, jointIndex ) );
-
-};
-
-
-
 // ======================== MAIN DISFIGURE FUNCTION ========================
 
 
@@ -696,19 +677,19 @@ var disfigureBody = Fn( ( )=>{
 	var p = positionGeometry,
 		m = mat3( p, normalGeometry.normalize(), vec3( 0 ) ).toVar( ); // container
 
-	var figureIndex = attribute( 'uids', 'int' ).mul( QUATS_PER_BODY ).toVar();
+	var figureIndex = attribute( 'uids', 'int' ).toVar();
 
 	// Figure type offset for pivots and ranges (52 pivots per gender, 4 extras)
 
-	var gender = q( figureIndex, QUAT_DATA_INDEX ).x.mul( PURE_QUATS_PER_BODY ).toVar(); // 52 pivots
-	var gender_ex = q( figureIndex, QUAT_DATA_INDEX ).x.mul( 4 ).toVar(); // 4 extras
+	var gender = quatTextureNode.get( figureIndex, QUAT_DATA_INDEX ).x.mul( PURE_QUATS_PER_BODY ).toVar(); // 52 pivots
+	var gender_ex = quatTextureNode.get( figureIndex, QUAT_DATA_INDEX ).x.mul( 4 ).toVar(); // 4 extras
 
 	// Helper functions for different deformation types
 
-	var disP = ( i, gradient ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradient ) ),
-		disY = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientY( p, ranges.element( i.add( gender ) ) ) ) ),
-		disX = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientX( p, ranges.element( i.add( gender ) ) ) ) ),
-		disT = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), q( figureIndex, i ), gradientXT( p, ranges.element( i.add( gender ) ), 0 ) ) );
+	var disP = ( i, gradient ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), quatTextureNode.get( figureIndex, i ), gradient ) ),
+		disY = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), quatTextureNode.get( figureIndex, i ), gradientY( p, ranges.element( i.add( gender ) ) ) ) ),
+		disX = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), quatTextureNode.get( figureIndex, i ), gradientX( p, ranges.element( i.add( gender ) ) ) ) ),
+		disT = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), quatTextureNode.get( figureIndex, i ), gradientXT( p, ranges.element( i.add( gender ) ), 0 ) ) );
 
 	// Side and region detection
 
@@ -1265,8 +1246,8 @@ class Body extends Object3D {
 
 		// Register this body in the global quaternion data array
 
-		setQuaternionCapacity( Math.max( uid+1, config.men+config.women+config.children, config.population ) );
-		setJointQuaternion( this.uid, QUAT_DATA_INDEX, bodyTypeIndex, 0, 0, 0 );
+		quatTextureNode.setQuaternionCapacity( Math.max( uid+1, config.men+config.women+config.children, config.population ), QUATS_PER_BODY );
+		quatTextureNode.set( this.uid, QUAT_DATA_INDEX, bodyTypeIndex, 0, 0, 0 );
 
 		this.quaternionOffset = bodyTypeIndex*PURE_QUATS_PER_BODY;
 
@@ -1304,7 +1285,7 @@ class Body extends Object3D {
 
 		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
-			setJointQuaternion( this.uid, i, ...this.eulers[ i ].q );
+			quatTextureNode.set( this.uid, i, ...this.eulers[ i ].q );
 
 		}
 
@@ -1985,4 +1966,4 @@ function random( min, max ) {
 
 }
 
-export { Child, Man, Woman, World, camera, cameraLight, chaotic, controls, disfigureBody, disfigureMatrix, disfigureNormal, disfigurePosition, everybody, gradientArm, gradientLeg, gradientX, gradientXT, gradientY, gradientYT, ground, light, pools, q, random, regular, renderer, scene, setAnimationLoop };
+export { Child, Man, Woman, World, camera, cameraLight, chaotic, controls, disfigureBody, disfigureMatrix, disfigureNormal, disfigurePosition, everybody, gradientArm, gradientLeg, gradientX, gradientXT, gradientY, gradientYT, ground, light, pools, random, regular, renderer, scene, setAnimationLoop };

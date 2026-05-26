@@ -66,9 +66,8 @@
 
 
 import { Euler, MathUtils, Object3D, Quaternion, Vector3 } from 'three';
-import { config, everybody, JOINTS, pivots } from './assets.js';
+import { config, everybody, JOINTS, pivots, PURE_QUATS_PER_BODY, QUAT_DATA_INDEX, QUATS_PER_BODY, quatTextureNode } from './assets.js';
 import { Pool } from './pool.js';
-import { PURE_QUATS_PER_BODY, QUAT_DATA_INDEX, setJointQuaternion, setQuaternionCapacity } from './quats.js';
 
 
 
@@ -254,8 +253,8 @@ class Body extends Object3D {
 
 		// Register this body in the global quaternion data array
 
-		setQuaternionCapacity( Math.max( uid+1, config.men+config.women+config.children, config.population ) );
-		setJointQuaternion( this.uid, QUAT_DATA_INDEX, bodyTypeIndex, 0, 0, 0 );
+		quatTextureNode.setQuaternionCapacity( Math.max( uid+1, config.men+config.women+config.children, config.population ), QUATS_PER_BODY );
+		quatTextureNode.set( this.uid, QUAT_DATA_INDEX, bodyTypeIndex, 0, 0, 0 );
 
 		this.quaternionOffset = bodyTypeIndex*PURE_QUATS_PER_BODY;
 
@@ -293,7 +292,7 @@ class Body extends Object3D {
 
 		for ( var i=0; i<PURE_QUATS_PER_BODY; i++ ) {
 
-			setJointQuaternion( this.uid, i, ...this.eulers[ i ].q );
+			quatTextureNode.set( this.uid, i, ...this.eulers[ i ].q );
 
 		}
 

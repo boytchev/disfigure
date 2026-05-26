@@ -17,6 +17,13 @@
  * pivots	 - uniform array of vec3 with coordinates of joint pivot points
  * ranges	 - uniform array of vec4 with joint selection ranges
  * extras	 - uniform array of vec4 with additional selection data
+ *
+ * QUATS_PER_BODY		- total number of quaternions (pixels) per figure (53)
+ * PURE_QUATS_PER_BODY	- number of pure/proper/joint quaternions (52)
+ * QUAT_DATA_INDEX		- index of the data quaternion (52)
+ *
+ * quatTextureNode - a single unique instance of QuatTextureNode for all figures
+ *
  * -----------------------------------------------------------------------------
  *
  * AI Disclosure:
@@ -31,6 +38,8 @@ import { uniformArray } from 'three/tsl';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
 
+import { QuatTextureNode } from './quats.js';
+
 
 
 /**
@@ -44,6 +53,39 @@ var config = {
 	smooth: true,	// true = smooth shapes, false = rough shapes
 	lowpoly: 0,		// lowpoly reduction factor, 0=0%, 1=75% reduction
 };
+
+
+
+/**
+ * Number of vec4 per figure, 0..51 are quaternions, 52 is user data
+ */
+const QUATS_PER_BODY = 53;
+
+
+
+/**
+ * Number of quaternions per body that are used as quaternions
+ */
+const PURE_QUATS_PER_BODY = 52;
+
+
+
+/**
+ * Index of the data quaternion. It is not used as quaternion.
+ * Could be used a loop of pure quaternions: for (i=0; i<QUAT_DATA_INDEX; i++)...
+ *		x - the type of the figure (man=0, woman=1, child=2)
+ *		y - unused, set to 0
+ *		z - unused, set to 0
+ *		w - unused, set to 0
+ */
+const QUAT_DATA_INDEX = 52; // 52 is vec4 for user data
+
+
+
+/**
+ * Global shared instance used across the application
+ */
+var quatTextureNode = new QuatTextureNode( null, QUATS_PER_BODY );
 
 
 
@@ -189,4 +231,4 @@ await Promise.all([
 
 
 
-export { JOINTS, loadGLTF, pivots, ranges, extras, config, everybody };
+export { JOINTS, loadGLTF, pivots, ranges, extras, config, everybody, QUATS_PER_BODY, QUAT_DATA_INDEX, PURE_QUATS_PER_BODY, quatTextureNode };
