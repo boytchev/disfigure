@@ -50,7 +50,9 @@ Other examples from the user guide. Sorted by link length to increase your confu
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/clothes-slice-wave.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/clothes-slice-wave.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-accessories.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-accessories.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/clothes-bands-polar.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/clothes-bands-polar.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/clothes-tsl-texture.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/clothes-tsl-texture.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/clothes-slice-angle.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/clothes-slice-angle.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/clothes-tsl-textures.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/clothes-tsl-textures.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/clothes-slice-and-or.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/clothes-slice-and-or.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-generators-graphs.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/motion-generators-graphs.html)
 <br>

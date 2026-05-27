@@ -1,5 +1,6 @@
 v0.2.2
   - recovered dressing methods and dressing examples
+  - added examples with TSL textures
   - added body part's `.pointAt` and `.lockTo`
 
 v0.2.1

@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Applying different TSL textures</h3></br>
+	</header>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		
+		import { Color, DoubleSide, Vector3 } from "three";
+		import { uniform, vec3,vertexIndex } from "three/tsl";
+		import { isolayers, processedWood, turbulentSmoke } from "https://cdn.jsdelivr.net/npm/tsl-textures@3.0.1/dist/tsl-textures.min.js";
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+		// create three persons
+
+		var man = new Happy.Man(),
+			woman = new Happy.Woman(),
+			child = new Happy.Child();
+
+		man.position.x = 0.75;
+		man.l_leg.z = man.r_leg.z = -2;
+		
+		woman.position.x = -0.75;
+
+		child.l_leg.z = child.r_leg.z = -2;
+		
+
+		// put isolayers texture on the man
+		
+		man.material.metalness = 0.3;
+		man.material.roughness = 0;
+		man.material.colorNode = isolayers({scale: 3, seed:1}).mul(2);
+
+
+		// put wooden texture on the woman
+		
+		woman.material.colorNode = processedWood( {
+			scale: 3,
+			length: 10,
+			strength: 0.48,
+			angle: 0,
+			color: new Color( 'black' ),
+			background: new Color( 'chocolate' ),
+		} );
+
+
+		// put turbulent smoke on the child
+		
+		child.material.colorNode = turbulentSmoke({scale:2.5, seed:10});
+
+
+		// animate the figures
+		
+		function animate( event ) {
+
+			var someone = event.target;
+			var t = event.time/2000 + 10*someone.uid;
+
+			// arms
+		
+			someone.l_arm.z = Happy.chaotic( t, 5, -20, -70 );
+			someone.r_arm.z = Happy.chaotic( t, -5, -20, -70 );
+
+			someone.l_elbow.y = Happy.chaotic( t, 9, 0, 140 );
+			someone.r_elbow.y = Happy.chaotic( t, 7, 0, 140 );
+
+			someone.l_forearm.x = Happy.chaotic( t, 11, -45, 45 );
+			someone.r_forearm.x = Happy.chaotic( t, -8, -45, 45 );
+
+			someone.l_wrist.z = Happy.chaotic( t, -2, -90, 90 );
+			someone.l_wrist.y = Happy.chaotic( t, -2, -20, 20 );
+
+			someone.r_wrist.z = Happy.chaotic( t, -1, -90, 90 );
+			someone.r_wrist.y = Happy.chaotic( t, -1, -20, 20 );
+
+			// body
+		
+			someone.head.x = Happy.chaotic( t/5, 3, -10, 10 );
+			someone.head.y = Happy.chaotic( t/2, 2, -40, 40 );
+			someone.head.z = Happy.chaotic( t/2, 1, -20, 20 );
+
+			someone.waist.x = Happy.chaotic( t/5, 4, 0, 20 );
+			someone.waist.y = Happy.chaotic( t/2, 5, -30, 30 );
+			someone.waist.z = Happy.chaotic( t/2, 6, -10, 10 );
+
+			someone.chest.y = Happy.chaotic( t/2, 5, -30, 30 );
+
+			var m = Happy.regular( 3*t+Happy.chaotic( t/3, someone.uid, 0, 10 ), -60, 60 );
+			var n = Math.max( Math.min( m, 60 ), 0 );
+			someone.l_leg.x = n;
+			someone.l_knee.x = 2*n;
+		
+			n = Math.max( Math.min( -m, 60 ), 0 );
+			someone.r_leg.x = n;
+			someone.r_knee.x = 2*n;
+		
+			someone.torso.y = m/2;
+			if ( m>0 )
+				someone.l_shin.y = m/2;
+			else
+				someone.r_shin.y = -m/2;
+		
+		}
+
+		man.addEventListener( 'animate', animate );
+		woman.addEventListener( 'animate', animate );
+		child.addEventListener( 'animate', animate );
+
+	</script>
+</body>
+</html>

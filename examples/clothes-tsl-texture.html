@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Applying a TSL texture</h3></br>
+	</header>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		
+		import * as Three from "three";
+		import * as TSLTexture from "https://cdn.jsdelivr.net/npm/tsl-textures@3.0.1/dist/tsl-textures.min.js";
+
+
+		// create a default world
+
+		new Happy.World( );
+		Happy.camera.position.set( 2, 1, 2 );
+		Happy.controls.target.set( 0, 0.6, 0 );
+
+
+		// create a person
+
+		var man = new Happy.Man();
+		man.l_leg.x = 105;
+		man.r_leg.x = 10;
+		man.l_leg.z = 30;
+		man.l_thigh.y = -10;
+		man.l_knee.x = 110;
+		man.l_ankle.z = 5;
+		man.r_knee.x = 107;
+		man.r_ankle.x = 55;
+		man.position.y = -0.5;
+		man.torso.x = -5;
+		
+		// put a camouflage TSL texture
+		
+		man.material.colorNode = TSLTexture.camouflage( {
+			scale: 3,
+			colorA: new Three.Color( 12762792 ),
+			colorB: new Three.Color( 10258782 ),
+			colorC: new Three.Color( 9610101 ),
+			colorD: new Three.Color( 7435617 ),
+		} );
+
+
+		// animate the man
+		
+		function animate( event ) {
+
+			var someone = event.target;
+			var t = event.time/2000 + 10*someone.uid;
+
+			// arms
+		
+			someone.l_arm.z = Happy.chaotic( t, 5, -20, -50 );
+			someone.r_arm.z = Happy.chaotic( t, -5, -20, -70 );
+
+			someone.l_elbow.y = Happy.chaotic( t, 9, 0, 140 );
+			someone.r_elbow.y = Happy.chaotic( t, 7, 0, 140 );
+
+			someone.l_forearm.x = Happy.chaotic( t, 11, -45, 45 );
+			someone.r_forearm.x = Happy.chaotic( t, -8, -45, 45 );
+
+			someone.l_wrist.z = Happy.chaotic( t, -2, -90, 90 );
+			someone.l_wrist.y = Happy.chaotic( t, -2, -20, 20 );
+
+			someone.r_wrist.z = Happy.chaotic( t, -1, -90, 90 );
+			someone.r_wrist.y = Happy.chaotic( t, -1, -20, 20 );
+
+			// body
+		
+			someone.head.x = Happy.chaotic( t/5, 3, -10, 10 );
+			someone.head.y = Happy.chaotic( t/2, 2, -40, 40 );
+			someone.head.z = Happy.chaotic( t/2, 1, -20, 20 );
+
+			someone.waist.x = Happy.chaotic( t/5, 4, 0, 20 );
+			someone.waist.y = Happy.chaotic( t/2, 5, -30, 30 );
+			someone.waist.z = Happy.chaotic( t/2, 6, -10, 10 );
+
+			someone.chest.y = Happy.chaotic( t/2, 5, -30, 30 );
+
+			// fingers
+
+			var c = someone.l_wrist.z+90/2;
+			man.l_thumb.y = c/10-20;
+			man.l_thumb_tip.y = c/2;
+			man.l_index.z = man.l_index_mid.z = man.l_index_tip.z = c;
+			man.l_middle.z = man.l_middle_mid.z = man.l_middle_tip.z = c;
+			man.l_ring.z = man.l_ring_mid.z = man.l_ring_tip.z = c;
+			man.l_pinky.z = man.l_pinky_mid.z = man.l_pinky_tip.z = c;
+			
+			c = someone.r_wrist.z+90/2;
+			man.r_thumb.y = c/10-20;
+			man.r_thumb_tip.y = c/2;
+			man.r_index.z = man.r_index_mid.z = man.r_index_tip.z = c;
+			man.r_middle.z = man.r_middle_mid.z = man.r_middle_tip.z = c;
+			man.r_ring.z = man.r_ring_mid.z = man.r_ring_tip.z = c;
+			man.r_pinky.z = man.r_pinky_mid.z = man.r_pinky_tip.z = c;
+
+		}
+
+		man.addEventListener( 'animate', animate );
+
+	</script>
+</body>
+</html>
