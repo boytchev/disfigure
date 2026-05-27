@@ -1,3 +1,7 @@
+v0.2.2
+  - recovered dressing methods and dressing examples
+  - added body part's `.pointAt` and `.lockTo`
+
 v0.2.1
   - QuatTextureNode isolated as independednt class
 

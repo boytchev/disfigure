@@ -21,6 +21,8 @@
  *	 .q				- read-only property to get the quaternion
  *
  *   .attach( )		- attach an object to the joint
+ *   .pointAt( )	- calculate global poistion of joint
+ *   .lockTo( )		- locks body joint to global position
  *
  * Body - base class for general human figure.
  *
@@ -30,6 +32,7 @@
  *   .posture		- property to get and set the posture
  *   .postureString - read-only property to get the posture as a string
  *   .blend( )		- blends two postures
+ *	 .dress( )		- added realtime coloring for dress imitation
  *
  * -----------------------------------------------------------------------------
  *
@@ -68,7 +71,7 @@
 import { Euler, MathUtils, Object3D, Quaternion, Vector3 } from 'three';
 import { config, everybody, JOINTS, pivots, PURE_QUATS_PER_BODY, QUAT_DATA_INDEX, QUATS_PER_BODY, quatTextureNode } from './assets.js';
 import { Pool } from './pool.js';
-
+import { compileClothing } from './clothes.js';
 
 
 /**
@@ -224,6 +227,63 @@ class EulerDegrees extends Euler {
 
 		this.body.pool.add( object );
 
+	}
+
+
+
+	/**
+	 * Calculate world coordinates of local joint point.
+	 */
+	pointAt( localX=0, localY=0, localZ=0 ) {
+
+		var euler = this;
+
+		// Apply this joint transformation
+
+		pivot.set( ...pivots.array[ euler.index+this.body.quaternionOffset ]);
+
+		_p.set( localX, localY, localZ );
+		_p.add( pivot );
+
+
+		// Scan all parents and apply their transformation too
+
+		scan: while ( euler ) {
+
+			pivot.set( ...pivots.array[ euler.index+this.body.quaternionOffset ]);
+
+			_p.sub( pivot ).applyQuaternion( euler.quaternion ).add( pivot );
+
+			if ( euler.parentIndex<0 ) break scan;
+
+			euler = this.body.eulers[ euler.parentIndex ];
+
+		}
+
+		// Apply position and scale
+
+		_p.multiply( this.body.scale );
+		_p.add( this.body.position );
+
+		return _p;
+
+	}
+
+
+
+	/**
+	 * Moves the body so that a givel local position in respect to this joint
+	 * is at specific global position.
+	 */
+	lockTo( globalX, globalY, globalZ, localX=0, localY=0, localZ=0 ) {
+
+		this.body.position.set( 0, 0, 0 );
+
+		_p = this.pointAt( localX, localY, localZ ); // local
+		this.body.position.sub( _p );
+
+		_p.set( globalX, globalY, globalZ ); // global
+		this.body.position.add( _p );
 
 	}
 
@@ -422,6 +482,22 @@ class Body extends Object3D {
 		};
 
 	}
+
+
+
+	/**
+     * Compile and apply coloring instructions for the model
+     */
+	dress( clothingData ) {
+
+		var clothes = compileClothing( clothingData ).toVar();
+
+		this.material.colorNode = clothes[ 0 ].xyz.clamp( 0, 1 );
+		this.material.roughnessNode = clothes[ 1 ].x;
+		this.material.metalnessNode = clothes[ 1 ].y;
+
+	} // Disfigure.dress
+
 
 }
 

@@ -120,4 +120,38 @@ function randomPosture( figure, t=Math.random()*100, k=Math.random()*100 ) {
 }
 
 
-export { randomPosture };
+function standingPosture( figure, t ) {
+
+		t += 10*figure.uid;
+
+		// arms
+
+		figure.l_arm.z = Happy.chaotic( t, figure.uid+5, -70, -80 );
+		figure.l_arm.y = Happy.chaotic( t, figure.uid+6, -10, 70 );
+
+		figure.r_arm.z = Happy.chaotic( t, figure.uid-5, -70, -80 );
+		figure.r_arm.y = Happy.chaotic( t, figure.uid-6, -10, 70 );
+
+		figure.l_elbow.y = Happy.chaotic( t, figure.uid+9, 0, 40 );
+		figure.r_elbow.y = Happy.chaotic( t, figure.uid+7, 0, 40 );
+
+		figure.l_forearm.x = Happy.chaotic( t, figure.uid+11, -15, 15 );
+		figure.r_forearm.x = Happy.chaotic( t, figure.uid-8, -15, 15 );
+
+		figure.l_wrist.y = Happy.chaotic( t, figure.uid-5, -20, 20 );
+		figure.l_wrist.z = Happy.chaotic( t, figure.uid-2, -20, 20 );
+
+		figure.r_wrist.y = Happy.chaotic( t, figure.uid-4, -20, 20 );
+		figure.r_wrist.z = Happy.chaotic( t, figure.uid-1, -20, 20 );
+
+		// body
+	
+		figure.head.x = Happy.chaotic( t/5, figure.uid+3, -10, 10 );
+		figure.head.y = Happy.chaotic( t/2, figure.uid+2, -40, 40 );
+		figure.head.z = Happy.chaotic( t/2, figure.uid+1, -20, 20 );
+		figure.waist.y = -figure.head.y;
+		
+}
+
+
+export { randomPosture, standingPosture };

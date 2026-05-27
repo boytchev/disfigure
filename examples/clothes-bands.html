@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Bands of two alternating materials</h3></br>
+	</header>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		import { standingPosture } from './random-posture.js';
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+		// create three persons
+
+		var man = new Happy.Man(),
+			woman = new Happy.Woman(),
+			child = new Happy.Child();
+
+		man.position.x = 0.75;
+		woman.position.x = -0.75;
+
+
+		// define clothing
+		man.dress([
+			Happy.bands(
+				Happy.velour( 'royalblue' ),
+				Happy.velour( 'white' ),
+				0.12, { blur: 0.05, angle: 45 }
+			) ]);
+		
+		woman.dress([
+			Happy.bands(
+				Happy.latex( 'crimson' ),
+				Happy.velour( 'azure' ),
+				0.015, { balance: 0.9, blur: 0.2, angle: 90 }
+			) ]);
+		
+		child.dress([
+			Happy.bands(
+				Happy.velour( 'lightgreen' ),
+				Happy.velour( 'black' ),
+				1.5, { blur: 0.5 }
+			) ]);
+		
+		
+		// animate the arms
+		
+		Happy.setAnimationLoop( (t) => {
+
+			for( var somebody of Happy.everybody )
+				standingPosture( somebody, t/2000 );
+
+		} );
+
+	</script>
+</body>
+</html>

@@ -92,3 +92,4 @@ export { chaotic, regular, random };
 export * from './body.js';
 export * from './world.js';
 export * from './tsl.js';
+export * from './clothes.js';

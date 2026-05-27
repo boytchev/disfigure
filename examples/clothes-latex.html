@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Shiny latex materials for clothing</h3></br>
+	</header>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		import { standingPosture } from './random-posture.js';
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+		// create three persons
+
+		var man = new Happy.Man(),
+			woman = new Happy.Woman(),
+			child = new Happy.Child();
+
+		man.position.x = 0.75;
+		woman.position.x = -0.75;
+
+
+		// define clothing
+		man.dress([ Happy.latex( 'royalblue' ) ]);
+		woman.dress([ Happy.latex( 'crimson' ) ]);
+		child.dress([ Happy.latex( 'green' ) ]);
+		
+		// animate the arms
+		
+		Happy.setAnimationLoop( (t) => {
+
+			for( var somebody of Happy.everybody )
+				standingPosture( somebody, t/2000 );
+
+		} );
+
+	</script>
+</body>
+</html>

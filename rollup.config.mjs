@@ -10,7 +10,7 @@ export default [
 	{
 		input: './src/disfigure.js',
 		output: {
-			file: './dist/disfigure.js',
+			file: './dist/disfigure.max.js',
 			format: 'es',
 			banner: `// disfigure v${pkg.version}\n`,
 		},
@@ -29,7 +29,7 @@ export default [
 	{
 		input: './src/disfigure.js',
 		output: {
-			file: './dist/disfigure.min.js',
+			file: './dist/disfigure.js',
 			format: 'es',
 			banner: `/*! disfigure v${pkg.version} */\n`,
 		},

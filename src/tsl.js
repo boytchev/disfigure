@@ -37,7 +37,7 @@
 
 
 import { attribute, Fn, If, int, Loop, mat3, normalGeometry, positionGeometry, select, step, transformNormalToView, vec3, vec4 } from 'three/tsl';
-import { extras, pivots, PURE_QUATS_PER_BODY, QUAT_DATA_INDEX,  quatTextureNode, ranges } from './assets.js';
+import { extras, pivots, PURE_QUATS_PER_BODY, QUAT_DATA_INDEX, quatTextureNode, ranges } from './assets.js';
 
 
 
@@ -333,7 +333,7 @@ var disfigureBody = Fn( ( )=>{
 	if ( disfigureVersion > 6 && Math.log2( disfigureVersion ) % 1 < 1E-10 )
 		console.warn( `TSL compiled ${disfigureVersion} times` );
 
-	return m.debug();
+	return m;//.debug();
 
 } )( );
 

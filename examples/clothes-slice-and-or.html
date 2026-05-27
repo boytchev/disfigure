@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Combining slices into more complex slices</h3></br>
+	</header>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Happy from 'disfigure';
+		import { standingPosture } from './random-posture.js';
+
+
+		// create a default world
+
+		new Happy.World( );
+
+
+		// create three persons
+
+		var man = new Happy.Man(),
+			woman = new Happy.Woman(),
+			child = new Happy.Child();
+
+		man.position.x = 0.75;
+		woman.position.x = -0.75;
+
+
+		// define clothing
+		man.dress([
+			Happy.velour( 'WhiteSMoke' ),
+		
+			Happy.slice( 1-0.1, 1+0.3, { angle: 45, wave: 0.3, width: 0.02 } )
+				.and( Happy.slice( 1-0.1+0.2, 1+0.3+0.2, { angle: -45, wave: 0.3, width: 0.02 } ) ),
+			Happy.latex( 'black' ),
+		
+			Happy.slice( -0.1, 0.8+0.3, { angle: 45, wave: 0.3, width: 0.02 } )
+				.and( Happy.slice( -0.1-0.2, 0.8+0.3-0.2, { angle: -45, wave: 0.3, width: 0.02 } ) )
+				.or( Happy.slice( -0.2, 0.2 ) ),
+			Happy.latex( 'black' ),
+		
+		]);
+		
+		woman.dress([
+			Happy.velour( 'WhiteSMoke' ),
+
+			Happy.slice( 1-0.1, 1+0.3, { angle: 30, wave: 0.2, width: 0.1 } )
+				.or( Happy.slice( 1-0.1, 1+0.3, { angle: -30, wave: 0.2, width: 0.1 } ) ),
+			Happy.latex( 'black' ),
+		]);
+		
+		var left = Happy.slice( 0.2, 0.3, { angle: 45 } )
+			.or( Happy.slice( 0.4, 0.5, { angle: 45 } ) )
+			.or( Happy.slice( 0.6, 0.7, { angle: 45 } ) )
+			.or( Happy.slice( 0.8, 0.9, { angle: 45 } ) )
+			.or( Happy.slice( 1.0, 1.1, { angle: 45 } ) );
+		
+		var right = Happy.slice( 0.2, 0.3, { angle: -45 } )
+			.or( Happy.slice( 0.4, 0.5, { angle: -45 } ) )
+			.or( Happy.slice( 0.6, 0.7, { angle: -45 } ) )
+			.or( Happy.slice( 0.8, 0.9, { angle: -45 } ) )
+			.or( Happy.slice( 1.0, 1.1, { angle: -45 } ) );
+
+		
+		child.dress([
+			Happy.velour( 'WhiteSMoke' ),
+
+			Happy.slice( 0.74, 0.76, { angle: 45 } )
+				.or( Happy.slice( 0.74, 0.76, { angle: -45 } ) )
+				.and( Happy.slice( 0.5, 1.0 ) ),
+			Happy.velour( 'crimson' ),
+		
+		
+			left.and( right ),
+			Happy.velour( 'black' ),
+		]);
+		
+		
+		// animate the arms
+		
+		Happy.setAnimationLoop( (t) => {
+
+			for( var somebody of Happy.everybody )
+				standingPosture( somebody, t/2000 );
+
+		} );
+
+	</script>
+</body>
+</html>
