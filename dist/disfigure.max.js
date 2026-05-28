@@ -571,38 +571,13 @@ var disfigureMatrix = Fn( ([ mat, pivot, quat, k ])=>{
 
 
 /**
- * Horizontal gradient with vertical influence.
- * result = smoothstep( range.x, range.y, x + y * range.z )
+ * A gradient with slope.
  */
-var gradientX = Fn( ([ pos, range ]) => {
+var gradient = Fn( ([ pos, range ]) => {
 
 	return pos.x.add( pos.y.mul( range.z ) ).smoothstep( range.x, range.y );
 
 }, { pos: 'vec3', range: 'vec4', return: 'float' } );
-
-
-
-/**
- * Vertical gradient with depth influence.
- * result = smoothstep( range.x, range.y, y + z * range.z )
- */
-var gradientY = Fn( ([ pos, range ]) => {
-
-	return pos.y.add( pos.z.mul( range.z ) ).smoothstep( range.x, range.y );
-
-}, { pos: 'vec3', range: 'vec4', return: 'float' } );
-
-
-
-/**
- * Tilted gradient used for thumb and specific joint transitions
- * result = smoothstep(range.z, range.w, z + x * slope)
- */
-var gradientYT = Fn( ([ pos, range, slope ])=>{
-
-	return pos.z.add( pos.x.mul( slope ) ).smoothstep( range.z, range.w );
-
-}, { pos: 'vec3', range: 'vec4', slope: 'float', return: 'float' } );
 
 
 
@@ -646,9 +621,7 @@ var gradientXT = Fn( ([ pos, range, slope ])=>{
 	return pos.x.add( pos.z.mul( slope ) )
 		.smoothstep( range.x, range.y )
 		.mul(
-			//pos.z.smoothstep( range.z.sub( 0.0001 ), range.z.add( 0.0001 ) ),
 			pos.z.step( range.z ),
-			//pos.z.smoothstep( range.w.add( 0.0001 ), range.w.sub( 0.0001 ) )
 			pos.z.step( range.w ).oneMinus(),
 		);
 
@@ -687,8 +660,7 @@ var disfigureBody = Fn( ( )=>{
 	// Helper functions for different deformation types
 
 	var disP = ( i, gradient ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), quatTextureNode.get( figureIndex, i ), gradient ) ),
-		disY = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), quatTextureNode.get( figureIndex, i ), gradientY( p, ranges.element( i.add( gender ) ) ) ) ),
-		disX = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), quatTextureNode.get( figureIndex, i ), gradientX( p, ranges.element( i.add( gender ) ) ) ) ),
+		disX = ( p, i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), quatTextureNode.get( figureIndex, i ), gradient( p, ranges.element( i.add( gender ) ) ) ) ),
 		disT = ( i ) => m.assign( disfigureMatrix( m, pivots.element( i.add( gender ) ), quatTextureNode.get( figureIndex, i ), gradientXT( p, ranges.element( i.add( gender ) ), 0 ) ) );
 
 	// Side and region detection
@@ -712,7 +684,7 @@ var disfigureBody = Fn( ( )=>{
 
 		// foot ankle shin knee thigh
 
-		Loop( { start: start, end: end }, ( { i } ) => disY( i ) );
+		Loop( { start: start, end: end }, ( { i } ) => disX( p.yzx, i ) );
 
 		// leg
 
@@ -731,7 +703,7 @@ var disfigureBody = Fn( ( )=>{
 
 			disP( thumb, gradientXT( p, ranges.element( thumb.add( gender ) ), extras.element( thumb2.add( gender_ex ) ).x ) );
 			thumb.addAssign( 1 );
-			disP( thumb, gradientYT( p, ranges.element( thumb.add( gender ) ), extras.element( thumb2.add( gender_ex ) ).y ) );
+			disP( thumb, gradient( p.zxy, ranges.element( thumb.add( gender ) ).zwxy ) );
 
 			let start = pick( 28, 40 ),
 				end = start.add( 12 );
@@ -749,7 +721,7 @@ var disfigureBody = Fn( ( )=>{
 
 		// wrist forearm elbow
 
-		Loop( { start: start, end: end }, ( { i } ) => disX( i ) );
+		Loop( { start: start, end: end }, ( { i } ) => disX( p, i ) );
 
 		// arm
 
@@ -763,7 +735,7 @@ var disfigureBody = Fn( ( )=>{
 
 	// head chest waist torso
 
-	Loop( { end: int( 4 ) }, ( { i } ) => disY( i ) );
+	Loop( { end: int( 4 ) }, ( { i } ) => disX( p.yzx, i ) );
 
 	// Final normal transformation to view space + normalization
 
@@ -2196,4 +2168,4 @@ function random( min, max ) {
 
 }
 
-export { Child, Man, Woman, World, bands, camera, cameraLight, chaotic, compileClothing, controls, disfigureBody, disfigureMatrix, disfigureNormal, disfigurePosition, everybody, gradientArm, gradientLeg, gradientX, gradientXT, gradientY, gradientYT, ground, latex, light, pools, random, regular, renderer, scene, setAnimationLoop, slice, velour };
+export { Child, Man, Woman, World, bands, camera, cameraLight, chaotic, compileClothing, controls, disfigureBody, disfigureMatrix, disfigureNormal, disfigurePosition, everybody, gradient, gradientArm, gradientLeg, gradientXT, ground, latex, light, pools, random, regular, renderer, scene, setAnimationLoop, slice, velour };
