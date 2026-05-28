@@ -4,9 +4,8 @@
 
 
 import { attribute, float, Fn, If, int, Loop, positionGeometry, step, time, uniform, vec3 } from 'three/tsl';
-import { gradientArm, gradientLeg, gradientX, gradientXT, gradientY, gradientYT, q } from '../tsl.js';
-import { extras, pivots, ranges } from '../assets.js';
-import { PURE_QUATS_PER_BODY, QUAT_DATA_INDEX, QUATS_PER_BODY } from '../quats.js';
+import { gradientArm, gradientLeg, gradient, gradientXT } from '../tsl.js';
+import { PURE_QUATS_PER_BODY, QUAT_DATA_INDEX, QUATS_PER_BODY, extras, pivots, ranges, quatTextureNode } from '../assets.js';
 
 
 var selectUniform = uniform( 1 );
@@ -34,14 +33,13 @@ var disfigureBodySelect = Fn( ([ ])=>{
 
 	var figureIndex = attribute( 'uids', 'int' ).mul( QUATS_PER_BODY ).toVar();
 
-	var gender = q( figureIndex, QUAT_DATA_INDEX ).x.mul( PURE_QUATS_PER_BODY ).toVar(); // 52 pivots
-	var gender_ex = q( figureIndex, QUAT_DATA_INDEX ).x.mul( 4 ).toVar(); // 4 extras
+	var gender = quatTextureNode.get( figureIndex, QUAT_DATA_INDEX ).x.mul( PURE_QUATS_PER_BODY ).toVar(); // 52 pivots
+	var gender_ex = quatTextureNode.get( figureIndex, QUAT_DATA_INDEX ).x.mul( 4 ).toVar(); // 4 extras
 
 	// Helper functions for different deformation types
 
 	var disP = ( i, gradient ) => m.assign( disfigureMatrix( m, gradient ) ),
-		disY = ( i ) => m.assign( disfigureMatrix( m, gradientY( p, ranges.element( i.add( gender ) ) ) ) ),
-		disX = ( i ) => m.assign( disfigureMatrix( m, gradientX( p, ranges.element( i.add( gender ) ) ) ) ),
+		disX = ( p, i ) => m.assign( disfigureMatrix( m, gradient( p, ranges.element( i.add( gender ) ) ) ) ),
 		disT = ( i ) => m.assign( disfigureMatrix( m, gradientXT( p, ranges.element( i.add( gender ) ), 0 ) ) );
 
 	// Side and region detection
@@ -63,7 +61,7 @@ var disfigureBodySelect = Fn( ([ ])=>{
 		let leg = pick( 0, 1 );
 
 		// foot ankle shin knee thigh
-		Loop( { start: start, end: end }, ( { i } ) => disY( i ) );
+		Loop( { start: start, end: end }, ( { i } ) => disX( p.yzx, i ) );
 
 		// leg
 		disP( end, gradientLeg( p, ranges.element( end.add( gender ) ), extras.element( leg.add( gender_ex ) ).xy ) );
@@ -78,7 +76,7 @@ var disfigureBodySelect = Fn( ([ ])=>{
 
 			disP( thumb, gradientXT( p, ranges.element( thumb.add( gender ) ), extras.element( thumb2.add( gender_ex ) ).x ) );
 			thumb.addAssign( 1 );
-			disP( thumb, gradientYT( p, ranges.element( thumb.add( gender ) ), extras.element( thumb2.add( gender_ex ) ).y ) );
+			disP( thumb, gradient( p.zxy, ranges.element( thumb.add( gender ) ).zwxy ) );
 
 			let start = pick( 28, 40 ),
 				end = start.add( 12 );
@@ -93,7 +91,7 @@ var disfigureBodySelect = Fn( ([ ])=>{
 			end = start.add( 3 );
 
 		// wrist forearm elbow
-		Loop( { start: start, end: end }, ( { i } ) => disX( i ) );
+		Loop( { start: start, end: end }, ( { i } ) => disX( p, i ) );
 
 		// arm
 		disP( end, gradientArm( p, pivots.element( end.add( gender ) ), ranges.element( end.add( gender ) ) ) );
@@ -104,8 +102,8 @@ var disfigureBodySelect = Fn( ([ ])=>{
 
 	//	process torso
 
-	//Loop( { end: int( 4 ) }, ( { i } ) => disY( i ) );
-	Loop( { end: int( 3 ) }, ( { i } ) => disY( i ) );
+	//Loop( { end: int( 4 ) }, ( { i } ) => disX( p.yzx, i ) );
+	Loop( { end: int( 3 ) }, ( { i } ) => disX( p.yzx, i ) );
 
 
 
