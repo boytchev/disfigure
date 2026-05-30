@@ -23,6 +23,9 @@ turned the model into a horrifying mess of limbs. It still gives me nightmares.
 
 Other examples from the user guide. Sorted by link length to increase your confusion.
 
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-pointat.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-pointat.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-lockto.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-lockto.html)
+
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/minimal-cdn.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/minimal-cdn.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-type.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-type.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-arms.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/motion-arms.html)

@@ -102,6 +102,7 @@ var pools = { man: null, woman: null, child: null };
  */
 var _p = new Vector3(),
 	_q = new Quaternion(),
+	_e = new Euler(),
 	pivot = new Vector3();
 
 
@@ -277,6 +278,7 @@ class EulerDegrees extends Euler {
 	 */
 	lockTo( globalX, globalY, globalZ, localX=0, localY=0, localZ=0 ) {
 
+		this.body.update( );
 		this.body.position.set( 0, 0, 0 );
 
 		_p = this.pointAt( localX, localY, localZ ); // local
@@ -284,7 +286,7 @@ class EulerDegrees extends Euler {
 
 		_p.set( globalX, globalY, globalZ ); // global
 		this.body.position.add( _p );
-
+		
 	}
 
 }

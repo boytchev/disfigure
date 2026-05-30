@@ -9,7 +9,13 @@
 
 
 
-[**Figures**](#figures) <small>([creating](#creating-a-figure) &middot; [anatomy](#anatomy-of-a-figure) &middot; [posture](#figure-posture) &middot; [accessories](#figure-accessories))</small> [**Motions**](#motions) <small>([figure](#figure-motion) &middot; [animation](#figure-animation)  &middot; [generators](#number-generators) )</small> [**Using**](#using-disfigure) <small>([world](#provisional-world) &middot; [CDN](#using-with-cdn) &middot; [local](#using-with-local-web-server) &middot; [nodes](#using-with-nodejs))</small>
+[**Figures**](#figures) <small>([creating](#creating-a-figure) &middot; [anatomy](#anatomy-of-a-figure) &middot; [posture](#figure-posture))</small>
+
+[**Motions**](#motions) <small>([figure](#figure-motion) &middot; [animation](#figure-animation)  &middot; [generators](#number-generators) )</small>
+
+[**Customization**](#figure-customization) <small>([accessories](#accessories) &middot; [textures](#tsl-textures))</small>
+
+[**Using**](#using-disfigure) <small>([world](#provisional-world) &middot; [positions](#local-positions) &middot; [CDN](#using-with-cdn) &middot; [local web server](#using-with-local-web-server) &middot; [nodes](#using-with-nodejs))</small>
 
 
 
@@ -92,23 +98,6 @@ Live examples: [posture data](../examples/figure-posture.html) and [posture blen
 
 [<img src="../examples/snapshots/figure-posture.jpg" width="48%" border="1">](../examples/figure-posture.html) 
 [<img src="../examples/snapshots/figure-blend.jpg" width="48%" border="1">](../examples/figure-blend.html) 
-
-
-
-## Figure accessories
-
-Accessories are Three.js objects attached to a specific body part. They do not
-deform, but move as if attached to the body. The accessory own *position* and
-*rotation* properties are in respect to the origin of the hosting body part.
-
-``` javascript
-figure.l_arm.attach(object);
-```
-
-Live examples: [attach one accessory](../examples/figure-accessory.html) and [many acccessories](../examples/figure-accessor.html):
-
-[<img src="../examples/snapshots/figure-accessory.jpg" width="48%" border="1">](../examples/figure-accessory.html) 
-[<img src="../examples/snapshots/figure-accessories.jpg" width="48%" border="1">](../examples/figure-accessories.html) 
 
 
 
@@ -287,6 +276,54 @@ Live examples: [generators graphs](../examples/motion-generators-graphs.html) an
 
 
 
+# Figure customization
+
+## Accessories
+
+Accessories are Three.js objects attached to a specific body part. They do not
+deform, but move as if attached to the body. The accessory own *position* and
+*rotation* properties are in respect to the origin of the hosting body part.
+
+``` javascript
+figure.l_arm.attach(object);
+```
+
+Live examples: [attach one accessory](../examples/figure-accessory.html) and [many acccessories](../examples/figure-accessor.html):
+
+[<img src="../examples/snapshots/figure-accessory.jpg" width="48%" border="1">](../examples/figure-accessory.html) 
+[<img src="../examples/snapshots/figure-accessories.jpg" width="48%" border="1">](../examples/figure-accessories.html) 
+
+
+
+## TSL textures
+
+Disfigure is compatible with most [TSL Textures](https://boytchev.github.io/tsl-textures/)
+&ndash; real-time textures generated via TSL. To use a TSL Texture it must be
+imported as well as all Three.js classex that are used. Textures are provided as
+functions. The result of these functions are to be assigned to material nodes,
+usually `.colorNode`.
+
+```javascript
+import * as Three from "three";
+import { camouflage } from "https://cdn.jsdelivr.net/npm/tsl-textures@3.0.1/dist/tsl-textures.min.js";
+:
+figure.material.colorNode = camouflage ( {
+	scale: 3,
+	colorA: new Three.Color(12762792),
+	colorB: new Three.Color(10258782),
+	colorC: new Three.Color(9610101),
+	colorD: new Three.Color(7435617),
+} );
+```
+
+Live examples: [single texture](../examples/clothes-tsl-texture.html) and [multiple textures](../examples/clothes-tsl-textures.html):
+
+[<img src="../examples/snapshots/clothes-tsl-texture.jpg" width="48%">](../examples/clothes-tsl-texture.html)
+[<img src="../examples/snapshots/clothes-tsl-textures.jpg" width="48%">](../examples/clothes-tsl-textures.html)
+
+
+
+
 # Using Disfigure
 
 ## Provisional world
@@ -353,6 +390,32 @@ Live examples: [variation of default world](../examples/world-custom.html) and [
 
 [<img src="../examples/snapshots/world-default.jpg" width="48%">](../examples/world-default.html)
 [<img src="../examples/snapshots/world-custom.jpg" width="48%">](../examples/world-custom.html)
+
+
+
+## Local positions
+
+Disfigure provides additional methods for querying and managing positions
+besides the traditional `.position` property.
+
+The `pointAt` method extracts the global coordinates of a point related to
+a body part. Each body part has own coordinate system and the point is defined
+in this local coordinate system. 
+
+The `lockTo` moves the whole figure so that the local point of a body part is
+mapped to the global point. This can be used to keep a figure standing on the
+ground (by locking its feet to level 0).
+
+
+``` javascript
+pos = figure.l_arm.pointAt(0,0.1,0);
+
+figure.l_wrist.lockTo(0,1.5,0,0.2, -0.01,0.01);
+```
+
+[<img src="../examples/snapshots/???pointat.jpg" width="48%">](../examples/???pointat.html)
+[<img src="../examples/snapshots/???lockto.jpg" width="48%">](../examples/???lockto.html)
+
 
 
 ## Using with CDN

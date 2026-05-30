@@ -1,0 +1,87 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Locking a body part global position</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Three from 'three';
+		import * as Happy from 'disfigure';
+		import {randomPosture} from './random-posture.js';
+
+
+		// create a default world
+
+		new Happy.World();
+		Happy.camera.position.y = 1;
+		Happy.camera.position.z = 5;
+
+
+		// create a man
+
+		var manA = new Happy.Man( );
+		manA.flip = 0;
+		
+		var manB = new Happy.Man( );
+		manB.flip = 1;
+		
+var ox = new Three.AxesHelper();
+manA.l_index_tip.attach( ox );
+
+var bx = new Three.Mesh(new Three.BoxGeometry(0.1,0.1,0.1));
+var ax = new Three.AxesHelper();
+bx.position.y = 1;
+bx.position.x = 1;
+bx.add( ax );
+Happy.scene.add( bx );
+
+
+		// animate the scene
+		
+		Happy.setAnimationLoop( ( t )=>{
+
+			t = t/4000;
+		
+		bx.rotation.copy( ox.rotation );
+		
+		var e = new Three.Euler(-ox.rotation.x,-ox.rotation.y,-ox.rotation.z, 'ZYX');
+		e.reorder('XYZ');
+		ax.rotation.copy( e );
+		
+			// animating the man
+			for( var man of Happy.everybody ) {
+
+				randomPosture( man, t, man.flip );
+				
+				man.l_wrist.z /= 2;
+				
+				man.l_index.z = man.l_index_mid.z = man.l_index_tip.z = 0;
+				man.l_middle.z = man.l_middle_mid.z = man.l_middle_tip.z = 90;
+				man.l_ring.z = man.l_ring_mid.z = man.l_ring_tip.z = 90;
+				man.l_pinky.z = man.l_pinky_mid.z = man.l_pinky_tip.z = 90;
+				
+				man.l_thumb.x = 50;
+				man.l_thumb.z = 20;
+				man.l_thumb_tip.y = 60;
+
+				man.l_elbow.y = 0;
+				man.l_arm.x = 0;
+				man.l_arm.y = 90;
+				
+				man.torso.y = 180*man.flip+90;
+//				man.l_index_tip.lockTo( 0, 1.5, 0, 0.02, 0, 0 );
+			}
+			
+		} );
+		
+	</script>
+</body>
+</html>

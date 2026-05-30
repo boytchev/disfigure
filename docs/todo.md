@@ -1,44 +1,4 @@
 
-
-
-
-
-# Figure customizations
-
-Apart for moving body parts, Disfigure provides basic functionality
-for additional modification of a figure &ndash; adding accessories
-or changing colors.
-
-### figure.bodypart.**point**( *x*, *y*, *z* )
-
-When just the final coordinates are needed it is faster to use `point`,
-which calculates the position and ignores the orientation &ndash;
-[see it](../examples/extras-point.html).
-
-``` javascript
-v = figure.l_arm.point(0,0.1,0);
-```
-
-[<img src="../examples/snapshots/extras-attach.jpg" width="48%">](../examples/extras-attach.html)
-[<img src="../examples/snapshots/extras-point.jpg" width="48%">](../examples/extras-point.html)
-
-
-### figure.bodypart.**lockTo**( *localX*, *localY*, *localZ*, *globalX*, *globalY*, *globalZ* )
-
-The function `lockTo` moves the whole figure so that the local point
-(*localX*, *localY*, *localZ*) of *bodypart* is mapped to the global
-point (*globalX*, *globalY*, *globalZ*). This can be used to keep a
-figure standing on the ground (by locking its feet to level 0). The
-following examples shows two floating figures touching the same spot
-with their fingers &ndash; [see it](../examples/extras-lockto.html).
-
-``` javascript
-figure.l_wrist.lockTo(0.2,-0.01,0.01, 0, 1.5, 0 );
-```
-
-[<img src="../examples/snapshots/extras-lockto.jpg" width="48%">](../examples/extras-lockto.html)
-
-
 ## Custom colors
 
 Disfigure supports a painting interface to draw simple shapes
@@ -184,34 +144,3 @@ Happy.slice( -0.1, 1.1, {angle:45, wave: 0.3, width:0.02} )
 ```
 
 [<img src="../examples/snapshots/extras-clothes-slice-and-or.jpg" width="48%">](../examples/extras-clothes-slice-and-or.html)
-
-
-
-## TSL textures
-
-Disfigure is compatible with most [TSL Textures](https://boytchev.github.io/tsl-textures/)
-&ndash; real-time textures generated via TSL. However, textures are currently
-not compatible with figure dressing. To use a TSL Texture it must be imported.
-As textures use Three.js color objects, Three.js should also be imported.
-
-Each texture is activated with a function, assigned to the figure's
-`material.colorNode` property &ndash;
-[see it](../examples/extras-tsl-texture-simple.html). Different figures may
-have individual TSL textures &ndash;
-[see it](../examples/extras-tsl-texture.html).
-
-```javascript
-import * as Three from "three";
-import * as TSLTexture from "https://cdn.jsdelivr.net/npm/tsl-textures@2.1.2/dist/tsl-textures.min.js";
-:
-figure.material.colorNode = TSLTexture.camouflage ( {
-	scale: 3,
-	colorA: new Three.Color(12762792),
-	colorB: new Three.Color(10258782),
-	colorC: new Three.Color(9610101),
-	colorD: new Three.Color(7435617),
-} );
-```
-
-[<img src="../examples/snapshots/extras-tsl-texture-simple.jpg" width="48%">](../examples/extras-tsl-texture-simple.html)
-[<img src="../examples/snapshots/extras-tsl-texture.jpg" width="48%">](../examples/extras-tsl-texture.html)

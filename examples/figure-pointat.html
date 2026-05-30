@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<body>
+	<header>
+		<h1><b>Disfigure</b></h1>
+		<h3>Positions relative to body part</h3></br>
+	</header>
+
+	<div id="spinner"></div>
+
+	<script src="importmap.js"></script>
+	<script type="module">
+
+		import * as Three from 'three';
+		import * as Happy from 'disfigure';
+		import {randomPosture} from './random-posture.js';
+
+
+		// create a default world
+
+		new Happy.World();
+
+
+		// create a man
+
+		var man = new Happy.Man( );
+
+
+		var geometry = new Three.BufferGeometry();
+		geometry.setAttribute( 'position', new Three.BufferAttribute( new Float32Array( 18 ), 3 ) );
+		var material = new Three.LineBasicMaterial( { color: 'crimson' } );
+		var positions = geometry.getAttribute( 'position' );
+
+		function setLoopVertex( index, vertex ) {
+
+			positions.setXYZ( index, vertex.x, vertex.y, vertex.z );
+			positions.needsUpdate = true;
+
+		}
+
+		var loop = new Three.Line( geometry, material );
+		loop.castShadow = true;
+		Happy.scene.add( loop );
+
+		// attach balls
+		var ball = new Three.Mesh(
+			new Three.IcosahedronGeometry( 0.01, 5 ),
+			new Three.MeshBasicMaterial( {color: 'crimson'} )
+		);
+		ball.position.set( 0, 0.08, 0.15 );
+		man.head.attach( ball );
+		
+		ball = ball.clone();
+		ball.position.set( 0.02, 0, 0 );
+		man.l_index_tip.attach( ball );
+		
+		ball = ball.clone();
+		ball.position.set( -0.02, 0, 0 );
+		man.r_index_tip.attach( ball );
+		
+		ball = ball.clone();
+		ball.position.set( 0.06, 0.007, 0.1 );
+		man.l_foot.attach( ball );
+		
+		ball = ball.clone();
+		ball.position.set( -0.06, 0.007, 0.1 );
+		man.r_foot.attach( ball );
+	
+		// animate the scene
+		
+		Happy.setAnimationLoop( ( t )=>{
+
+			t = t/4000;
+		
+			// animating the man
+
+			randomPosture( man, t, 0 );
+			man.r_middle.z = 90;
+		
+			man.r_index.z = man.r_index_mid.z = man.r_index_tip.z = man.r_index.z/2;
+			man.r_middle.z = man.r_middle_mid.z = man.r_middle_tip.z = 90;
+			man.r_ring.z = man.r_ring_mid.z = man.r_ring_tip.z = 90;
+			man.r_pinky.z = man.r_pinky_mid.z = man.r_pinky_tip.z = 90;
+			
+			man.r_thumb.x = 50;
+			man.r_thumb.z = 20;
+			man.r_thumb_tip.y = 60;
+
+			man.l_index.z = man.l_index_mid.z = man.l_index_tip.z = man.l_index.z/2;
+			man.l_middle.z = man.l_middle_mid.z = man.l_middle_tip.z = 90;
+			man.l_ring.z = man.l_ring_mid.z = man.l_ring_tip.z = 90;
+			man.l_pinky.z = man.l_pinky_mid.z = man.l_pinky_tip.z = 90;
+			
+			man.l_thumb.x = 50;
+			man.l_thumb.z = 20;
+			man.l_thumb_tip.y = 60;
+
+			// attach a string to five points relative to body parts
+		
+			setLoopVertex( 0, man.head.pointAt( 0, 0.08, 0.15 ) );
+			setLoopVertex( 1, man.l_index_tip.pointAt( 0.02, 0, 0 ) );
+			setLoopVertex( 4, man.r_index_tip.pointAt( -0.02, 0, 0 ) );
+			setLoopVertex( 2, man.l_foot.pointAt( 0.06, 0.007, 0.1 ) );
+			setLoopVertex( 3, man.r_foot.pointAt( -0.06, 0.007, 0.1 ) );
+			setLoopVertex( 5, man.head.pointAt( 0, 0.08, 0.15 ) );
+
+		} );
+		
+	</script>
+</body>
+</html>

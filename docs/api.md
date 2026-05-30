@@ -5,6 +5,58 @@
 
 
 
+**A:**&nbsp;[addEventListener](#windowaddeventlisteneranimatecallback)
+[and](#slice_1and-slice_2-)
+[animate](#windowaddeventlisteneranimatecallback)
+[ankle](#figurebodypart)
+[arm](#figurebodypart)
+[attach](#figurebodypartattachobject)
+**B:**&nbsp;[bands](#bands-material_1-material_2-width-options-)
+[blend](#figureblend--posturea-postureb-k-)
+**C:**&nbsp;[chaotic](#chaotic-time-chaotic-time-offset-chaotic-time-offset-min-max-)
+[chest](#figurebodypart)
+[Child](#new-child-new-child-height-)
+**D:**&nbsp;[dress](#figuredress-clothing-)
+**E:**&nbsp;[elbow](#figurebodypart)
+[everybody](#everybody)
+**F:**&nbsp;[foot](#figurebodypart)
+[forearm](#figurebodypart)
+**H:**&nbsp;[head](#figurebodypart)
+**I:**&nbsp;[index](#figurebodypart)
+**K:**&nbsp;[knee](#figurebodypart)
+**L:**&nbsp;[latex](#latex-color-)
+[leg](#figurebodypart)
+[lockTo](#figurebodypartlockto-globalx-globaly-globalz-localx-localy-localz-)
+**M:**&nbsp;[Man](#new-man-new-man-height-)
+[middle](#figurebodypart)
+**O:**&nbsp;[or](#slice_1or-slice_2-)
+**P:**&nbsp;[pinky](#figurebodypart)
+[pointAt](#figurebodypartpointat-localx-localy-localz-)
+[position](#figureposition)
+[postureString](#figureposturestring)
+[posture](#figureposture)
+**R:**&nbsp;[random](#random-random-min-max-)
+[regular](#regular-time-regular-time-offset-regular-time-offset-min-max-)
+[ring](#figurebodypart)
+**S:**&nbsp;[setAnimationLoop](#setanimationloopcallbackcallbacktime)
+[shin](#figurebodypart)
+[slice](#slice-from-to-options-)
+**T:**&nbsp;[target](#eventtarget)
+[thigh](#figurebodypart)
+[thumb](#figurebodypart)
+[time](#eventtime)
+[torso](#figurebodypart)
+**V:**&nbsp;[velour](#velour-color-)
+**W:**&nbsp;[waist](#figurebodypart)
+[Woman](#new-woman-new-woman-height-)
+[wrist](#figurebodypart)
+**X:**&nbsp;[x](#figurebodypartx)
+**Y:**&nbsp;[y](#figurebodyparty)
+**Z:**&nbsp;[z](#figurebodypartz)
+
+
+
+
 ## Classes
 
 Disfigure classes are used to define figures.
@@ -51,6 +103,14 @@ String read-only property. Gets the posture of a figure as string.
 Method. Sets the posture of a *figure* to be a lerp blend of *postureA* and
 *postureB* based on coefficient *k*&isin;[0,1].
 
+### figure.**dress**( *clothing* )
+
+Method. Defines the dressing of a figure. The description of the *clothing* is
+an array of range and material functions:
+*[ defaultMaterial, slice_1, material_1, ... slice_N, material_N]*. Slices are
+function that select  portion of the figure and materials are clothing materials.
+
+
 ### figure.***bodypart***
 
 Body part properties. The *bodypart* is the name of a body part, one of these:
@@ -92,6 +152,17 @@ Numeric property. Gets or sets the rotation angle in degrees around the Z
 
 Method. Attaches 3D *object* to a body part. Object's position and
 orientation are relative to the body part.
+
+### figure.bodypart.**pointAt**( *localX*, *localY*, *localZ* )
+
+Method. Calculates the global coordinate of point with local point
+*( localX, localY, localZ )* on a body part.
+
+### figure.bodypart.**lockTo**( *globalX*, *globalY*, *globalZ*, *localX*, *localY*, *localZ* )
+
+Method. Moves a figure so that local point *(localX, localY, localZ)* on
+a body part is at global point *(globalX, globalY, globalZ)*. If the local point
+is not provided, then the body part origin *(0,0,0)* is used instead.
 
 
 
@@ -150,6 +221,65 @@ Animate event property. Figure for which a local animate event is triggered.
 
 Global array. Contains all created figures. Usually used to traverse them and do
 some operation on all figures.
+
+
+
+
+## Clothing
+
+### **velour**( *color* )
+
+Clothing function. Defines velour (matte) clothing material using Three.js *color*.
+
+### **latex**( *color* )
+
+Clothing function. Defines latex (shiny) clothing material using Three.js *color*.
+
+### **bands**( *material_1*, *material_2*, *width*, *options* )
+
+Clothing function. Makes a composite material of alternating horizontal bands of
+*material_1* and *material_2*. The *width* of each band is defined in meters. 
+The optional *options* parameter provides additional properties for the band.
+
+* **balance** &ndash; the relative weight of the two materials from -1 to 1; 0 means they are equally balanced
+* **blur** &ndash; the blurrness of the bands' edges from 0 to 1; 0 is no blur, 1 is maximal blur
+* **angle** &ndash; the rotation of bands in degrees, from -360 to 360; 0 is horizontal bands, 90 is vertical bands
+* **polar** &ndash; bands are around a central vertical axis, *angle* is not used and *width* represents portions of a full circle of one band, i.e. 1/10 is 10 bands
+* **x** &ndash; the x-coordinate of a central vertical axis, used only for polar bands
+* **z** &ndash; the z-coordinate of a central vertical axis, used only for polar bands
+
+### **slice**( *from*, *to*, *options* )
+
+Clothing function. Defines a slice of a figure to be dressed in given material.
+Parameters *from* and *to* define the start and the end of the slice, measured
+in meters. The optional *options* parameter provides additional properties
+for the slice.
+
+* **side** &ndash; if true, the slice is vertical across the front-back of a figure
+* **front** &ndash; if true, the slice is vertical across the left-right of a figure 
+* **angle** &ndash; the rotation of the slice in degrees around one axis, from -360 to 360
+* **sideAngle** &ndash; the rotation of the slice in degrees around another axis, from -360 to 360
+* **symmetry** &ndash; if true, the slice is symmetrical, i.e. [-to,-from] and [from,to]
+
+Additionally, slices could be curved as a wave when a non-zero *wave* option is provided.
+
+* **wave** &ndash; height of the weight in meters
+* **width** &ndash; width of a single wave in meters, this defines how sparse or dense is the wave
+* **sharpness** &ndash; defines how sharp are the edges of the wave, 0 is for sharp, 1 is for sinusoidal, intermediate values, as well as less than 0 or greater than 1 are also accepted
+
+
+### slice_1.**and**( *slice_2* )
+
+Clothing chained method. Combines slices into more complex shapes by
+intersecting them. The result slice contains points common for both *slide_1*
+and *slide_2*.
+
+
+
+### slice_1(...).**or**( *slice_2* )
+
+Clothing chained method. Combines slices into more complex shapes by
+uniting them. The result slice contains points from any of the slides.
 
 
 
