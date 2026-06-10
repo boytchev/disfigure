@@ -66,16 +66,16 @@ Other examples from the user guide. Sorted by link length to increase your confu
 Videos of earlier attempts at TSL rigging, used mainly as my do-not-give-up pills.
 
 <p style="text-align:left">
-	<a href="https://x.com/PavelBoytchev/status/2032835719077433470"><img src="https://boytchev.github.io/disfigure/examples/snapshots/quaternions-prototype.jpg" width="18%"></a>
-	<a href="https://x.com/PavelBoytchev/status/1926542790655160595"><img src="https://boytchev.github.io/disfigure/examples/snapshots/rigging-scanned-model.jpg" width="18%"></a>
-	<a href="https://x.com/PavelBoytchev/status/1926331170486096017"><img src="https://boytchev.github.io/disfigure/examples/snapshots/example-rigged-skeleton.jpg" width="18%"></a>
-	<a href="https://x.com/PavelBoytchev/status/1921696049770447185"><img src="https://boytchev.github.io/disfigure/examples/snapshots/example-liquid-metal.jpg" width="18%"></a>
-	<a href="https://x.com/PavelBoytchev/status/1826864700673417265"><img src="https://boytchev.github.io/disfigure/examples/snapshots/proof-of-concept-1.jpg" width="18%"></a>
-	<a href="https://x.com/PavelBoytchev/status/1829064887701577986"><img src="https://boytchev.github.io/disfigure/examples/snapshots/proof-of-concept-2.jpg" width="18%"></a>
-	<a href="https://x.com/PavelBoytchev/status/1907372989005320407"><img src="https://boytchev.github.io/disfigure/examples/snapshots/proof-of-concept-3.jpg" width="18%"></a>
-	<a href="https://x.com/PavelBoytchev/status/1908635265381655037"><img src="https://boytchev.github.io/disfigure/examples/snapshots/proof-of-concept-4.jpg" width="18%"></a>
-	<a href="https://x.com/PavelBoytchev/status/1909507775899517103"><img src="https://boytchev.github.io/disfigure/examples/snapshots/proof-of-concept-5.jpg" width="18%"></a>
-	<a href="https://x.com/PavelBoytchev/status/1910048442287862045"><img src="https://boytchev.github.io/disfigure/examples/snapshots/proof-of-concept-6.jpg" width="18%"></a>
+	<a href="https://x.com/PavelBoytchev/status/2032835719077433470"><img src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/quaternions-prototype.jpg" width="18%"></a>
+	<a href="https://x.com/PavelBoytchev/status/1926542790655160595"><img src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/rigging-scanned-model.jpg" width="18%"></a>
+	<a href="https://x.com/PavelBoytchev/status/1926331170486096017"><img src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/example-rigged-skeleton.jpg" width="18%"></a>
+	<a href="https://x.com/PavelBoytchev/status/1921696049770447185"><img src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/example-liquid-metal.jpg" width="18%"></a>
+	<a href="https://x.com/PavelBoytchev/status/1826864700673417265"><img src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/proof-of-concept-1.jpg" width="18%"></a>
+	<a href="https://x.com/PavelBoytchev/status/1829064887701577986"><img src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/proof-of-concept-2.jpg" width="18%"></a>
+	<a href="https://x.com/PavelBoytchev/status/1907372989005320407"><img src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/proof-of-concept-3.jpg" width="18%"></a>
+	<a href="https://x.com/PavelBoytchev/status/1908635265381655037"><img src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/proof-of-concept-4.jpg" width="18%"></a>
+	<a href="https://x.com/PavelBoytchev/status/1909507775899517103"><img src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/proof-of-concept-5.jpg" width="18%"></a>
+	<a href="https://x.com/PavelBoytchev/status/1910048442287862045"><img src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/proof-of-concept-6.jpg" width="18%"></a>
 </p>
 
 <br>
