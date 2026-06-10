@@ -23,7 +23,18 @@ turned the model into a horrifying mess of limbs. It still gives me nightmares.
 
 Other examples from the user guide. Sorted by link length to increase your confusion.
 
-<div style="text-align:left">
+<p style="text-align:left">
+	<a href="https://boytchev.github.io/disfigure/examples/minimal-cdn.html"><img src="https://boytchev.github.io/disfigure/examples/snapshots/minimal-cdn.jpg" width="18%"></a>
+	<a href="https://boytchev.github.io/disfigure/examples/figure-type.html"><img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-type.jpg" width="18%"></a>
+	<a href="https://boytchev.github.io/disfigure/examples/motion-arms.html"><img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-arms.jpg" width="18%"></a>
+	<a href="https://boytchev.github.io/disfigure/examples/motion-axes.html"><img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-axes.jpg" width="18%"></a>
+	<a href="https://boytchev.github.io/disfigure/examples/motion-legs.html"><img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-legs.jpg" width="18%"></a>
+	<a href="https://boytchev.github.io/disfigure/examples/motion-loop.html"><img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-loop.jpg" width="18%"></a>
+	<a href="https://boytchev.github.io/disfigure/examples/figure-blend.html"><img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-blend.jpg" width="18%"></a>
+	<a href="https://boytchev.github.io/disfigure/examples/motion-event.html"><img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-event.jpg" width="18%"></a>
+	<a href="https://boytchev.github.io/disfigure/examples/motion-torso.html"><img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-torso.jpg" width="18%"></a>
+</p>
+
 
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/minimal-cdn.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/minimal-cdn.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-type.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-type.html)
@@ -61,11 +72,8 @@ Other examples from the user guide. Sorted by link length to increase your confu
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-generators-graphs.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/motion-generators-graphs.html)
 <br>
 
-</div>
 
 Videos of earlier attempts at TSL rigging, used mainly as my do-not-give-up pills.
-
-<div style="text-align:left">
 
 [<img width="18%" src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/quaternions-prototype.jpg">](https://x.com/PavelBoytchev/status/2032835719077433470)
 [<img width="18%" src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/rigging-scanned-model.jpg">](https://x.com/PavelBoytchev/status/1926542790655160595)
@@ -79,7 +87,6 @@ Videos of earlier attempts at TSL rigging, used mainly as my do-not-give-up pill
 [<img width="18%" src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/proof-of-concept-6.jpg">](https://x.com/PavelBoytchev/status/1910048442287862045)
 <br>
 
-</div>
 
 <div class="footnote">
 	<a href="docs/cookies.html">Cookies</a> &middot;
