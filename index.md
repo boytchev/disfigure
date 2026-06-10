@@ -24,6 +24,7 @@ turned the model into a horrifying mess of limbs. It still gives me nightmares.
 Other examples from the user guide. Sorted by link length to increase your confusion.
 
 <div style="text-align:left">
+
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/minimal-cdn.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/minimal-cdn.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-type.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-type.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-arms.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/motion-arms.html)
@@ -58,12 +59,14 @@ Other examples from the user guide. Sorted by link length to increase your confu
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/clothes-tsl-textures.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/clothes-tsl-textures.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/clothes-slice-and-or.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/clothes-slice-and-or.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-generators-graphs.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/motion-generators-graphs.html)
-</div>
 <br>
+
+</div>
 
 Videos of earlier attempts at TSL rigging, used mainly as my do-not-give-up pills.
 
 <div style="text-align:left">
+
 [<img width="18%" src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/quaternions-prototype.jpg">](https://x.com/PavelBoytchev/status/2032835719077433470)
 [<img width="18%" src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/rigging-scanned-model.jpg">](https://x.com/PavelBoytchev/status/1926542790655160595)
 [<img width="18%" src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/example-rigged-skeleton.jpg">](https://x.com/PavelBoytchev/status/1926331170486096017)
@@ -74,8 +77,9 @@ Videos of earlier attempts at TSL rigging, used mainly as my do-not-give-up pill
 [<img width="18%" src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/proof-of-concept-4.jpg">](https://x.com/PavelBoytchev/status/1908635265381655037)
 [<img width="18%" src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/proof-of-concept-5.jpg">](https://x.com/PavelBoytchev/status/1909507775899517103)
 [<img width="18%" src="https://boytchev.github.io/disfigure/legacy/examples/snapshots/proof-of-concept-6.jpg">](https://x.com/PavelBoytchev/status/1910048442287862045)
-</div>
 <br>
+
+</div>
 
 <div class="footnote">
 	<a href="docs/cookies.html">Cookies</a> &middot;
