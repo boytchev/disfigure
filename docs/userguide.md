@@ -13,7 +13,7 @@
 
 [**Motions**](#motions) <small>([figure](#figure-motion) &middot; [animation](#figure-animation)  &middot; [generators](#number-generators) )</small>
 
-[**Customization**](#figure-customization) <small>([accessories](#accessories) &middot; [textures](#tsl-textures))</small>
+[**Customization**](#figure-customization) <small>([accessories](#accessories) &middot; [textures](#tsl-textures) &middot; [dressing](#figure-dressing))</small>
 
 [**Using**](#using-disfigure) <small>([world](#provisional-world) &middot; [positions](#local-positions) &middot; [CDN](#using-with-cdn) &middot; [local web server](#using-with-local-web-server) &middot; [nodes](#using-with-nodejs))</small>
 
@@ -320,6 +320,135 @@ Live examples: [single texture](../examples/clothes-tsl-texture.html) and [multi
 
 [<img src="../examples/snapshots/clothes-tsl-texture.jpg" width="48%">](../examples/clothes-tsl-texture.html)
 [<img src="../examples/snapshots/clothes-tsl-textures.jpg" width="48%">](../examples/clothes-tsl-textures.html)
+
+
+
+## Figure dressing
+
+Disfigure supports a painting interface to draw simple shapes directly onto the
+surface of a figure. The `dress` method of a figure sets its clothing - an array
+of range and material functions. The range function selects a portion of the
+figure surface, called *slice*, and the material function applies a clothing
+material to it. The structure of the clothing is:
+
+```javascript
+[
+   material,            // default clothing material
+   
+   slice_1, material_1, // optional clothing materials
+   slice_2, material_2,
+   ...
+   slice_N, material_N
+]
+```
+
+The *material* is the mandatory default clothing material for the whole figure.
+The next optional *slice-material* pairs define slices and materials for each slice.
+
+``` javascript
+figure.dress([
+
+   velour( 'black' ),
+
+   slice( 1.1, 2, {angle: -20} ),
+   velour( 'red' ),
+
+   slice( 1.15, 2, {angle: 35} ),
+   velour( 'red' ),
+   ...
+];
+```
+
+
+Live example: [uniform](../examples/clothes-uniform.html):
+
+[<img src="../examples/snapshots/clothes-uniform.jpg" width="48%">](../examples/clothes-uniform.html)
+
+
+The clothing materials *velour* and *latex* define matte and shiny material.
+They both accept a *color* parameter is either a [Three.js color](https://threejs.org/docs/#Color)
+or a [HTML/CSS color name](https://www.w3schools.com/colors/colors_names.asp).
+
+``` javascript
+velour( 'green' )
+latex( 'red' )
+```
+
+Live examples: [velour clothing](../examples/clothes-velour.html) and [latex clothing](../examples/clothes-latex.html):
+
+[<img src="../examples/snapshots/clothes-velour.jpg" width="48%">](../examples/clothes-velour.html)
+[<img src="../examples/snapshots/clothes-latex.jpg" width="48%">](../examples/clothes-latex.html)
+
+
+Two clothing materials could be combined by *bands* of given *width*, alternating
+them horizontally, vertically or diagonally. Optional parameters provides
+additional properties for the bands. Adequate blurring of the bands may improve
+their visual appearance, especially when they are too close or too far.
+
+Polar bands revolve around a vertical axis. They are more suitable for bands
+that go around a body part.
+
+```javascript
+bands(
+   latex( 'crimson' ),
+   velour( 'azure' ),
+   0.015,
+   { balance: 0.9, blur: 0.2, angle: 90 }
+)
+```
+
+Live examples: [bands](../examples/clothes-bands.html) and [polar bands](../examples/clothes-bands-polar.html):
+
+[<img src="../examples/snapshots/clothes-bands.jpg" width="48%">](../examples/clothes-bands.html)
+[<img src="../examples/snapshots/clothes-bands-polar.jpg" width="48%">](../examples/clothes-bands-polar.html)
+
+
+
+The *slice* function defines a slice of a figure &ndash; this is a part
+of the figure that is dressed in given material. Parameters *from* and *to*
+define the start and the end of the slice, measured in meters. By default,
+a slice is horizontal, thus *from* and *to* denote distance from the ground.
+The optional *options* parameter provides additional properties for the slice
+like their orientation and symmetry.
+
+```javascript
+slice( -0.07, 0.03, {front: true} )
+slice( 0.70, 1.40, {angle:55} )
+```
+
+Live examples: [slice](../examples/clothes-slice.html) and [angled slice](../examples/clothes-slice-angle.html):
+
+[<img src="../examples/snapshots/clothes-slice.jpg" width="48%">](../examples/clothes-slice.html)
+[<img src="../examples/snapshots/clothes-slice-angle.jpg" width="48%">](../examples/clothes-slice-angle.html)
+
+
+Additionally, slices could be curved as a wave when a non-zero *wave* option is provided.
+
+```javascript
+slice( 1.3, 2, {wave:0.15, width:0.1, sharpness:1} )
+```
+
+Live example: [slice wave](../examples/clothes-slice-wave.html):
+
+[<img src="../examples/snapshots/clothes-slice-wave.jpg" width="48%">](../examples/clothes-slice-wave.html)
+
+
+Slices can be combined into more complex shapes by intersecting or uniting them.
+The function `and` intersects two slices, e.g. *slice_1.and(slice_2)* generates
+a slice containing all points both in *slide_1* **and** in *slide_2*, while `or`
+unites two slices, e.g. *slice_1.or(slice_2)* generates a slice containing all
+points either in *slide_1* **or** in *slide_2*.
+
+```javascript
+slice( -0.1, 1.1, {angle:45, wave: 0.3, width:0.02} )
+   .and( slice( -0.3, 0.9, {angle:-45, wave: 0.3, width:0.02} ) )
+   .or( slice( -0.2, 0.2 ) )
+```
+
+Live example: [combining slices](../examples/clothes-slice-and-or.html):
+
+[<img src="../examples/snapshots/clothes-slice-and-or.jpg" width="48%">](../examples/clothes-slice-and-or.html)
+
 
 
 

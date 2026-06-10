@@ -23,8 +23,6 @@ turned the model into a horrifying mess of limbs. It still gives me nightmares.
 
 Other examples from the user guide. Sorted by link length to increase your confusion.
 
-[<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-pointat.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-pointat.html)
-[<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-lockto.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-lockto.html)
 
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/minimal-cdn.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/minimal-cdn.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-type.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-type.html)
@@ -37,6 +35,7 @@ Other examples from the user guide. Sorted by link length to increase your confu
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-torso.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/motion-torso.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/world-custom.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/world-custom.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-height.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-height.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-lockto.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-lockto.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/clothes-latex.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/clothes-latex.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/clothes-slice.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/clothes-slice.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-motion.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-motion.html)
@@ -45,6 +44,7 @@ Other examples from the user guide. Sorted by link length to increase your confu
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-posture.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-posture.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/clothes-velour.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/clothes-velour.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-fingers.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-fingers.html)
+[<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-pointat.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-pointat.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-fingers.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/motion-fingers.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/figure-position.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/figure-position.html)
 [<img src="https://boytchev.github.io/disfigure/examples/snapshots/motion-phalanges.jpg" width="18%">](https://boytchev.github.io/disfigure/examples/motion-phalanges.html)
