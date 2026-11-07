@@ -50,7 +50,7 @@ var simplex = new SimplexNoise( );
  * The noise represents an imaginary terrain. This function gets the altitude
  * at position [`x`,`y`]. The result is in [`min`,`max`].
  */
-function chaotic( x, y, min, max ) {
+function chaotic( x, y=0, min=-1, max=1 ) {
 
 	return min + ( max-min )*( simplex.noise( x, y )+1 )/2;
 
@@ -65,7 +65,7 @@ function chaotic( x, y, min, max ) {
  * The sine represents an imaginary wave. This function gets the altitude
  * at position [`x`]. The result is in [`min`,`max`].
  */
-function regular( x, min, max ) {
+function regular( x, min=-1, max=1 ) {
 
 	return min + ( max-min )*( Math.sin( x )+1 )/2;
 
@@ -79,7 +79,7 @@ function regular( x, min, max ) {
  *
  * The result is in [`min`,`max`].
  */
-function random( min, max ) {
+function random( min=0, max=1 ) {
 
 	return min + ( max-min )*Math.random( );
 
