@@ -67,6 +67,7 @@ var renderer, camera, light, cameraLight, controls, ground, userAnimationLoop, s
  *  - controls	- Enable OrbitControls (default is true)
  *  - ground	- Add a circular ground plane (default is true)
  *  - stats		- Show performance stats  (default is false)
+ *  - webgl		- Switch to WebGL fallback  (default is false)
  *
  * The `options` parameter also defines figure parameters:
  *
@@ -83,7 +84,10 @@ class World {
 
 		// Renderer setup
 
-		renderer = new WebGPURenderer( { antialias: options?.antialias ?? true } );
+		renderer = new WebGPURenderer( {
+			antialias: options?.antialias ?? true,
+			forceWebGL: options?.webgl ?? false,
+		} );
 		renderer.setSize( innerWidth, innerHeight );
 		renderer.shadowMap.enabled = options?.shadows ?? true;
 		renderer.shadowMap.type = PCFSoftShadowMap;
