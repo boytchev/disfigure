@@ -86,7 +86,7 @@ class World {
 
 		renderer = new WebGPURenderer( {
 			antialias: options?.antialias ?? true,
-			forceWebGL: options?.webgl ?? false,
+			forceWebGL: options?.forceWebGL ?? false,
 		} );
 		renderer.setSize( innerWidth, innerHeight );
 		renderer.shadowMap.enabled = options?.shadows ?? true;
