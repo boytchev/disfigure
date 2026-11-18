@@ -73,7 +73,7 @@ if( Body == Happy.Child ) baseIndex = 2*52;
 			figure.material.polygonOffsetFactor = 1;
 			
 			var axis = new THREE.AxesHelper( );
-			Happy.scene.add( axis );
+/***			Happy.scene.add( axis ); ***/
 
 			function resetPose() {
 				for( var joint of JOINTS ) figure[joint.name].set(0,0,0);
@@ -95,7 +95,7 @@ if( Body == Happy.Child ) baseIndex = 2*52;
 		function installGui() {
 			gui = new lil.GUI();
 			
-
+/***
 			var jointList = {'nothing':-1,};
 			for( var i in JOINTS ) {
 				jointList[ JOINTS[i].name ] = Number(i);
@@ -115,7 +115,7 @@ if( Body == Happy.Child ) baseIndex = 2*52;
 
 
 			gui.add( data, 'reset' );
-
+***/
 			var folder, subfolder;
 			
 
@@ -220,9 +220,9 @@ if( Body == Happy.Child ) baseIndex = 2*52;
 			add( 'r_wrist.y', -180, 180, true );
 			add( 'r_wrist.z', -180, 180 );
 
-			folder = gui.addFolder( 'LEFT HAND' )//.close();
+			folder = gui.addFolder( 'LEFT HAND' ).close();
 
-			subfolder = folder.addFolder( ':: THUMB' )//.close();
+			subfolder = folder.addFolder( ':: THUMB' ).close();
 			add( 'l_thumb.x', -180, 180, true );
 			add( 'l_thumb.y', -180, 180 );
 			add( 'l_thumb.z', -180, 180 );
@@ -246,7 +246,7 @@ if( Body == Happy.Child ) baseIndex = 2*52;
 			add( 'l_ring_mid.z', -180, 180, true );
 			add( 'l_ring_tip.z', -180, 180, true );
 
-			subfolder = folder.addFolder( ':: PINKY' )//.close();
+			subfolder = folder.addFolder( ':: PINKY' ).close();
 			add( 'l_pinky.y', -180, 180, true );
 			add( 'l_pinky.z', -180, 180 );
 			add( 'l_pinky_mid.z', -180, 180, true );
@@ -288,7 +288,7 @@ if( Body == Happy.Child ) baseIndex = 2*52;
 
 
 		function selectJoint( jointIndex ) {
-
+return;/*** ***/
 			data.joint = jointIndex;
 			selectUniform.value = jointIndex;
 			
@@ -325,7 +325,7 @@ if( Body == Happy.Child ) baseIndex = 2*52;
 //				figure.pool.data.ranges[i] = uniform(figure.pool.data.ranges[i]);
 //			}
 
-			figure.material.emissiveNode = disfigureBodySelect( baseIndex );
+//			figure.material.emissiveNode = disfigureBodySelect( baseIndex );
 
 //			Happy.setAnimationLoop( (t)=>{
 //			console.log(figure.pool.data.pivots[0]);
